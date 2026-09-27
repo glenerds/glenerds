@@ -295,6 +295,10 @@ footer.site a { color: var(--muted); }
   body { background: #fff !important; color: #111 !important; }
   .wrap { max-width: none; }
   form, button { display: none !important; }
+  /* Content-carrying buttons are real content: keep them visible in print. */
+  button.overlap-item { display: flex !important; }
+  button.av-bar { display: block !important; }
+  .zs-legend button { display: inline-block !important; }
   thead th { position: static !important; }
   section.card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; }
   a { color: #111; text-decoration: none; }
@@ -1257,7 +1261,7 @@ fileInput.addEventListener('change', function () {
   }
   var reader = new FileReader();
   reader.onload = function () {
-    var ok = 0, bad = 0;
+    var ok = 0, bad = 0, dup = 0;
     try {
       var data = JSON.parse(reader.result);
       var list = data && Array.isArray(data.members) ? data.members : null;
@@ -1285,7 +1289,8 @@ fileInput.addEventListener('change', function () {
           if (s && k !== null && !seen[k]) {
             seen[k] = true; room--;
             state.members.push(s); ok++;
-          } else { bad++; }
+          } else if (s) { dup++; } /* valid entry, name already on the team */
+          else { bad++; }
         }
       }
       if (tzOk) {
@@ -1298,6 +1303,7 @@ fileInput.addEventListener('change', function () {
       var msg = list ?
         ('Imported ' + ok + ' member(s)' +
           (bad ? ', skipped ' + bad + ' invalid ' + (bad === 1 ? 'entry' : 'entries') : '') +
+          (dup ? ', skipped ' + dup + ' duplicate' + (dup === 1 ? '' : 's') : '') +
           (notImported ? ', ' + notImported + ' not imported (team is full, ' + MAX_MEMBERS + ' max)' : '') + '.') :
         'No members in file.';
       if (tzOk) msg += ' Viewer time zone set to ' + data.viewerTz + '.';
@@ -1505,12 +1511,14 @@ function availChart() {
     wrap.appendChild(el('p', 'Add team members to see hourly availability.', 'status'));
     return wrap;
   }
-  wrap.appendChild(el('p', 'Hours shown in ' + state.viewerTz + '. Click a bar to see who is free.', 'status'));
+  wrap.appendChild(el('p', 'Hours shown in ' + state.viewerTz + '. Click a bar to see who is working.', 'status'));
   var today = viewerToday();
   var counts = hourCounts(today);
   var row = el('div', null, 'av-row');
   row.setAttribute('role', 'group');
-  row.setAttribute('aria-label', 'Bar chart: members working each hour. Best hour: ' + counts.indexOf(Math.max.apply(null, counts)) + ':00 with ' + Math.max.apply(null, counts) + ' free.');
+  var bestN = Math.max.apply(null, counts), bestH = counts.indexOf(bestN);
+  row.setAttribute('aria-label', 'Bar chart: members working each hour. ' +
+    (bestN > 0 ? 'Best hour: ' + bestH + ':00 with ' + bestN + ' working.' : 'No members working today.'));
   var detail = el('div', null, 'zs-detail');
   detail.setAttribute('aria-live', 'polite');
   function selectBar(btn, hh) {
@@ -1526,7 +1534,7 @@ function availChart() {
       btn.setAttribute('aria-pressed', 'true');
       var names = [];
       state.members.forEach(function (m) { if (workingAt(m, hh, today)) names.push(m.name); });
-      detail.appendChild(el('strong', fmtHour(hh) + ': ' + counts[hh] + ' of ' + n + ' free'));
+      detail.appendChild(el('strong', fmtHour(hh) + ': ' + counts[hh] + ' of ' + n + ' working'));
       detail.appendChild(document.createTextNode(' \u2014 ' + (names.length ? names.join(', ') : 'no one') + '.'));
       Sound.select();
     } else {
@@ -1540,8 +1548,8 @@ function availChart() {
       b.style.height = Math.max(4, Math.round(counts[h2] / n * 112) + 4) + 'px';
       b.setAttribute('aria-pressed', 'false');
       b.setAttribute('aria-label', fmtHour(h2) + ': ' + counts[h2] + ' of ' + n +
-        ' free. Activate to see who.');
-      b.title = fmtHour(h2) + ': ' + counts[h2] + ' of ' + n + ' free';
+        ' working. Activate to see who.');
+      b.title = fmtHour(h2) + ': ' + counts[h2] + ' of ' + n + ' working';
       b.addEventListener('click', function () { selectBar(b, h2); });
       row.appendChild(b);
     })(hh);
@@ -1596,7 +1604,7 @@ renderAll();
     var els = document.querySelectorAll('input, select, textarea');
     for (var i = 0; i < els.length; i++) {
       var e = els[i];
-      if (!e.id) continue;
+      if (!e.id || e.type === 'file') continue; /* file inputs throw on value assignment; nothing to restore */
       out.push({
         id: e.id, v: e.value, c: !!e.checked,
         s: (e.tagName === 'SELECT' ? e.selectedIndex : -1), d: !!e.disabled
@@ -1659,6 +1667,9 @@ renderAll();
     state = snap || { viewerTz: defaultViewerZone(), members: [] };
     editingIndex = snapEditing;
     planGenerated = snapPlan;
+    /* If no plan existed before sample mode, drop any sample-mode plan
+       table: renderAll() only re-renders the planner when planGenerated. */
+    if (!planGenerated) clear(planResults);
     lsRestore(snapLS || {});
     /* Theme and sound have live in-memory/UI state beyond localStorage —
        reapply them now so a theme/sound change made in sample mode does
