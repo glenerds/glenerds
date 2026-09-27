@@ -419,7 +419,7 @@ footer.site a { color: var(--muted); }
       <div class="tl-row" aria-hidden="true"><div class="tl-name"></div><div class="overlap-scale" id="timeline-scale" style="flex:1 1 auto;"></div></div>
       <div class="tl-legend" aria-hidden="true">
         <span><i class="sw work"></i>Working</span>
-        <span><i class="sw gold"></i>Everyone free</span>
+        <span><i class="sw gold"></i>Everyone working</span>
         <span><i class="sw now"></i>Right now</span>
       </div>
     </section>
@@ -905,7 +905,7 @@ function renderOverlap() {
   }
   var today = viewerToday();
   var counts = hourCounts(today);
-  overlapNote.textContent = 'All times are in ' + state.viewerTz + ', ranked by how many members are free.';
+  overlapNote.textContent = 'All times are in ' + state.viewerTz + ', ranked by how many members are working.';
   var wins = [];
   /* Split windows when the free-member SET changes, not just the count:
      "1 of 2 free, 9 AM - 11 AM" must not merge A's 9-10 with B's 10-11,
@@ -932,12 +932,12 @@ function renderOverlap() {
   shown.forEach(function (w) {
     var li = el('li');
     var endLabel = (w.end === 24) ? '12 AM (midnight)' : fmtHour(w.end);
-    var countLabel = (w.count === n && n > 1) ? 'Everyone free' : w.count + ' of ' + n + ' free';
+    var countLabel = (w.count === n && n > 1) ? 'Everyone working' : w.count + ' of ' + n + ' working';
     var btn = el('button', null, 'overlap-item' + ((w.count === n && n > 1) ? ' all' : ''));
     btn.type = 'button';
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-label', fmtHour(w.start) + ' to ' + endLabel + ': ' +
-      countLabel + '. Activate to see who is free.');
+      countLabel + '. Activate to see who is working.');
     btn.appendChild(el('span', fmtHour(w.start) + ' \u2013 ' + endLabel, 'overlap-time'));
     btn.appendChild(el('span', countLabel, 'overlap-count' + ((w.count === n && n > 1) ? ' gold' : '')));
     var detail = el('div', null, 'overlap-detail');
@@ -957,7 +957,7 @@ function renderOverlap() {
           if (workingAt(m, w.start, today)) names.push(m.name);
         });
         detail.textContent = '';
-        detail.appendChild(el('strong', 'Free: '));
+        detail.appendChild(el('strong', 'Working: '));
         detail.appendChild(document.createTextNode(
           (names.length ? names.join(', ') : 'No one') +
           ' \u2014 ' + fmtHour(w.start) + ' to ' + endLabel + ' ' + state.viewerTz));
@@ -980,7 +980,7 @@ function renderOverlap() {
     overlapList.appendChild(el('li', '+' + (wins.length - shown.length) + ' more windows.', 'status'));
   }
   if (!wins.some(function (w) { return w.count === n; })) {
-    overlapList.appendChild(el('li', 'Tip: shift someone\u2019s work hours to open a window when everyone is free.', 'status'));
+    overlapList.appendChild(el('li', 'Tip: shift someone\u2019s work hours to open a window when everyone is working.', 'status'));
   }
   overlapStripWrap.hidden = false;
   var base = accentBase();
@@ -989,12 +989,12 @@ function renderOverlap() {
     var seg = el('div', null, 'overlap-seg' + ((counts[h3] === n && n > 1) ? ' full' : ''));
     seg.setAttribute('aria-hidden', 'true');
     if (counts[h3] > 0) seg.style.backgroundColor = 'rgba(' + base + ', ' + (0.25 + 0.65 * (counts[h3] / n)).toFixed(2) + ')';
-    seg.title = fmtHour(h3) + ': ' + ((counts[h3] === n && n > 1) ? 'everyone' : counts[h3] + ' of ' + n) + ' free';
+    seg.title = fmtHour(h3) + ': ' + ((counts[h3] === n && n > 1) ? 'everyone' : counts[h3] + ' of ' + n) + ' working';
     overlapStrip.appendChild(seg);
     if (counts[h3] > bestC) { bestC = counts[h3]; bestH = h3; }
   }
   for (var h4 = 0; h4 < 24; h4 += 3) overlapScale.appendChild(el('span', fmtHour(h4)));
-  overlapStrip.setAttribute('aria-label', '24-hour overlap strip. ' + (bestC > 0 ? 'Most members free at ' + fmtHour(bestH) + ' (' + bestC + ' of ' + n + ').' : 'No overlap today.'));
+  overlapStrip.setAttribute('aria-label', '24-hour overlap strip. ' + (bestC > 0 ? 'Most members working at ' + fmtHour(bestH) + ' (' + bestC + ' of ' + n + ').' : 'No overlap today.'));
 }
 
 /* ---------------- team day timeline ---------------- */
@@ -1047,7 +1047,7 @@ function buildMemberStrip(m, day, counts, n, markerH, nowH) {
     var seg = el('div', null, cls);
     seg.title = m.name + ' \u2014 ' + fmtHour(h) + ' ' + state.viewerTz +
       ': ' + (work ? 'working' : 'off') +
-      (counts[h] === n && n > 1 ? ' (everyone free)' : '');
+      (counts[h] === n && n > 1 ? ' (everyone working)' : '');
     strip.appendChild(seg);
   }
   strip.setAttribute('role', 'button');
@@ -1072,7 +1072,7 @@ function renderTimeline() {
   }
   var today = viewerToday();
   timelineNote.textContent = 'Each row is one member\u2019s working hours, shown in ' +
-    state.viewerTz + '. Gold rings mark hours when the whole team is free.';
+    state.viewerTz + '. Gold rings mark hours when the whole team is working.';
   var counts = hourCounts(today);
   var nowH = tzParts(new Date(), state.viewerTz).hour;
   state.members.forEach(function (m) {
@@ -1164,6 +1164,15 @@ function renderPlan() {
     return;
   }
   var utc = zonedToUtc(+dm[1], +dm[2], +dm[3], +tm[1], +tm[2], state.viewerTz);
+  /* Invalid calendar dates (2026-02-30) fail the round-trip below too —
+     call them out specifically instead of blaming daylight-saving time. */
+  var probe = new Date(+dm[1], +dm[2] - 1, +dm[3]);
+  if (probe.getFullYear() !== +dm[1] || probe.getMonth() !== +dm[2] - 1 ||
+      probe.getDate() !== +dm[3]) {
+    planResults.appendChild(el('p', 'That date is not a real calendar date (' +
+      dm[1] + '-' + dm[2] + '-' + dm[3] + '). Pick a valid date.', 'status err'));
+    return;
+  }
   /* Spring-forward gap: the wall time never occurred. Round-trip check. */
   var rt = tzParts(new Date(utc), state.viewerTz);
   if (rt.year !== +dm[1] || rt.month !== +dm[2] || rt.day !== +dm[3] ||
@@ -1260,6 +1269,11 @@ fileInput.addEventListener('change', function () {
     return;
   }
   var reader = new FileReader();
+  reader.onerror = function () {
+    setDataStatus('Could not read the import file. Try again.', 'err');
+    Sound.error();
+    fileInput.value = '';
+  };
   reader.onload = function () {
     var ok = 0, bad = 0, dup = 0;
     try {
@@ -1345,7 +1359,7 @@ document.getElementById('btn-clear').addEventListener('click', function () {
    1. Donut — team spread by region (click a segment to spotlight it and see who
       is in it; click again to release back to the total).
    2. Working-members-by-hour bars — 24 clickable bars in viewer time (click a
-      bar to see exactly who is free that hour).
+      bar to see exactly who is working that hour).
    Keyboard (Enter/Space) works everywhere; SVG focus uses drop-shadow, never
    a rectangular outline. */
 var SVGNS = 'http://www.w3.org/2000/svg';
@@ -1650,6 +1664,21 @@ renderAll();
     snapStatus = st ? { t: st.textContent, c: st.className } : null;
     snapLS = lsSnapshot();
   }
+  /* Data-mutating buttons stay disabled while sample data is active: any
+     import or member added during sample mode would be silently dropped by
+     restore(), which replaces state from the pre-sample snapshot. Buttons
+     are not part of domFieldState()'s input/select/textarea capture, so
+     they are re-enabled explicitly in restore(). */
+  var SAMPLE_GUARD_IDS = ['btn-import', 'btn-export', 'btn-clear', 'member-submit'];
+  function setSampleGuard(off) {
+    SAMPLE_GUARD_IDS.forEach(function (id) {
+      var b = document.getElementById(id);
+      if (!b) return;
+      b.disabled = off;
+      if (off) b.title = 'Unavailable while sample data is active — exit sample data first.';
+      else b.removeAttribute('title');
+    });
+  }
   function applySample() {
     /* realistic 3-person team across time zones; keeps the user's viewer time zone */
     state = {
@@ -1695,6 +1724,7 @@ renderAll();
     applyDomFieldState(snapFields);
     var st = document.getElementById('data-status');
     if (st && snapStatus) { st.textContent = snapStatus.t; st.className = snapStatus.c; }
+    setSampleGuard(false); /* re-enable data buttons disabled on sample entry */
     renderAll();
     snap = null; snapFields = null; snapEditing = -1;
     snapPlan = false; snapStatus = null; snapLS = null;
@@ -1705,6 +1735,7 @@ renderAll();
       window.__gSampleOn = true;
       sampleOn = true;
       applySample();
+      setSampleGuard(true); /* imports/members added now would be dropped on restore */
     } else {
       window.__gSampleOn = false;
       sampleOn = false;
