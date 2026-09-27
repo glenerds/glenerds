@@ -1166,7 +1166,8 @@ function renderPlan() {
   var utc = zonedToUtc(+dm[1], +dm[2], +dm[3], +tm[1], +tm[2], state.viewerTz);
   /* Invalid calendar dates (2026-02-30) fail the round-trip below too —
      call them out specifically instead of blaming daylight-saving time. */
-  var probe = new Date(+dm[1], +dm[2] - 1, +dm[3]);
+  var probe = new Date(0);
+  probe.setFullYear(+dm[1], +dm[2] - 1, +dm[3]); /* setFullYear keeps years 0-99 literal; new Date(y,m,d) would map them to 19xx */
   if (probe.getFullYear() !== +dm[1] || probe.getMonth() !== +dm[2] - 1 ||
       probe.getDate() !== +dm[3]) {
     planResults.appendChild(el('p', 'That date is not a real calendar date (' +
@@ -1275,6 +1276,15 @@ fileInput.addEventListener('change', function () {
     fileInput.value = '';
   };
   reader.onload = function () {
+    if (window.__gSampleOn) {
+      /* An import started before sample mode can finish inside it: applying
+         it now would mutate the sample state and be silently dropped by
+         restore(). Refuse loudly so the user re-imports after exiting. */
+      setDataStatus('Import finished while sample data was active — not applied. Exit sample data and import again.', 'err');
+      Sound.error();
+      fileInput.value = '';
+      return;
+    }
     var ok = 0, bad = 0, dup = 0;
     try {
       var data = JSON.parse(reader.result);
