@@ -614,7 +614,10 @@ function bindSoundToggle() {
 function toHourInt(v) {
   if (v === '' || v === null || v === undefined) return null;
   if (typeof v !== 'string' && typeof v !== 'number') return null; /* reject arrays/bools/objects from imports */
-  var n = Number(typeof v === 'string' ? v.trim() : v);
+  var t = typeof v === 'string' ? v.trim() : v;
+  /* Strings must be plain decimal digits: rejects blank, hex ("0x10"), scientific ("1e1"). */
+  if (typeof t === 'string' && (t === '' || !/^\d+$/.test(t))) return null;
+  var n = Number(t);
   if (!Number.isInteger(n) || n < 0 || n > 23) return null;
   return n;
 }
@@ -634,6 +637,7 @@ function loadState() {
   try {
     var raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return fallback;
+    if (raw.length > 2000000) return fallback; /* absurd payload: refuse to block on parse */
     var data = JSON.parse(raw);
     var out = { viewerTz: fallback.viewerTz, members: [] };
     if (data && validZone(data.viewerTz)) out.viewerTz = data.viewerTz;
@@ -657,7 +661,7 @@ var editingIndex = -1;
 /* ---------------- DST-safe time math ----------------
    All conversions go through Intl.DateTimeFormat with an explicit timeZone
    on real Date instants. No hand-rolled UTC offsets anywhere. */
-var fmtCache = {};
+var fmtCache = Object.create(null); /* null-proto cache: keys are validated IANA zones */
 function tzFormatter(tz) {
   if (!fmtCache[tz]) {
     fmtCache[tz] = new Intl.DateTimeFormat('en-US', {
@@ -698,7 +702,27 @@ function viewerToday() {
   var p = tzParts(new Date(), state.viewerTz);
   return { y: p.year, m: p.month, d: p.day };
 }
+/* Spring-forward gap: hour h may not exist on `today` in the viewer zone
+   (zonedToUtc converges a nonexistent wall time onto a neighboring real
+   hour, which would duplicate that hour's data). Validity depends only on
+   (today, h, viewerTz), so compute the 24 flags once per day and cache. */
+var _hourValidKey = '';
+var _hourValid = [];
+function viewerHourValid(h, today) {
+  var key = today.y + '-' + today.m + '-' + today.d + '|' + state.viewerTz;
+  if (_hourValidKey !== key) {
+    _hourValidKey = key;
+    _hourValid = [];
+    for (var hh = 0; hh < 24; hh++) {
+      var utc = zonedToUtc(today.y, today.m, today.d, hh, 0, state.viewerTz);
+      var rt = tzParts(new Date(utc), state.viewerTz);
+      _hourValid.push(rt.year === today.y && rt.month === today.m && rt.day === today.d && rt.hour === hh);
+    }
+  }
+  return _hourValid[h];
+}
 function memberHourAtViewerHour(member, h, today) {
+  if (!viewerHourValid(h, today)) return -1; /* nonexistent hour: nobody works it */
   var utc = zonedToUtc(today.y, today.m, today.d, h, 0, state.viewerTz);
   return tzParts(new Date(utc), member.tz).hour;
 }
@@ -709,7 +733,9 @@ function inWorkHours(h, start, end) {
   return h >= start || h < end;
 }
 function workingAt(member, h, today) {
-  return inWorkHours(memberHourAtViewerHour(member, h, today), member.start, member.end);
+  var mh = memberHourAtViewerHour(member, h, today);
+  if (mh < 0) return false; /* nonexistent hour (spring-forward gap) */
+  return inWorkHours(mh, member.start, member.end);
 }
 function pad2(n) { return (n < 10 ? '0' : '') + n; }
 
@@ -869,11 +895,20 @@ function renderOverlap() {
   var counts = hourCounts(today);
   overlapNote.textContent = 'All times are in ' + state.viewerTz + ', ranked by how many members are free.';
   var wins = [];
+  /* Split windows when the free-member SET changes, not just the count:
+     "1 of 2 free, 9 AM - 11 AM" must not merge A's 9-10 with B's 10-11,
+     or the detail would name only whoever is free at the window start. */
+  var sigs = [];
+  for (var hs = 0; hs < 24; hs++) {
+    var who = [];
+    for (var mi = 0; mi < n; mi++) if (workingAt(state.members[mi], hs, today)) who.push(mi);
+    sigs.push(who.join(','));
+  }
   var st = -1;
   for (var h2 = 0; h2 <= 24; h2++) {
     var c = h2 < 24 ? counts[h2] : 0;
     if (c > 0 && st === -1) st = h2;
-    if (st !== -1 && (h2 === 24 || counts[h2] !== counts[st])) {
+    if (st !== -1 && (h2 === 24 || counts[h2] !== counts[st] || (h2 < 24 && sigs[h2] !== sigs[st]))) {
       wins.push({ start: st, end: h2, count: counts[st] });
       st = (h2 < 24 && counts[h2] > 0) ? h2 : -1;
     }
@@ -1058,18 +1093,21 @@ function cancelEdit() {
 cancelBtn.addEventListener('click', function () { cancelEdit(); Sound.click(); });
 form.addEventListener('submit', function (ev) {
   ev.preventDefault();
+  /* Zero-hour check comes first: sanitizeMember() also rejects start===end
+     (needed for the import path), so this specific message must precede it. */
+  var rs = toHourInt(startInput.value), re = toHourInt(endInput.value);
+  if (rs !== null && re !== null && rs === re) {
+    setDataStatus('Work start and end are both ' + pad2(rs) + ':00 \u2014 that would be a zero-hour shift. ' +
+      'Pick different hours (overnight shifts like 22 to 6 are fine).', 'err');
+    Sound.error();
+    return;
+  }
   var m = sanitizeMember({
     name: nameInput.value, tz: tzInput.value,
     start: startInput.value, end: endInput.value
   });
   if (!m) {
     setDataStatus('Could not save: check the name, time zone, and hours (0\u201323).', 'err');
-    Sound.error();
-    return;
-  }
-  if (m.start === m.end) {
-    setDataStatus('Work start and end are both ' + pad2(m.start) + ':00 \u2014 that would be a zero-hour shift. ' +
-      'Pick different hours (overnight shifts like 22 to 6 are fine).', 'err');
     Sound.error();
     return;
   }
@@ -1229,14 +1267,19 @@ fileInput.addEventListener('change', function () {
       var seen = Object.create(null);
       state.members.forEach(function (m) { seen[m.name.toLowerCase()] = true; });
       var room = MAX_MEMBERS - state.members.length;
-      if (list) list.forEach(function (m) {
-        var s = sanitizeMember(m);
-        var k = s ? s.name.toLowerCase() : null;
-        if (s && k !== null && !seen[k] && room > 0) {
-          seen[k] = true; room--;
-          state.members.push(s); ok++;
-        } else { bad++; }
-      });
+      var notImported = 0;
+      if (list) {
+        for (var li = 0; li < list.length; li++) {
+          if (room <= 0) { notImported = list.length - li; break; } /* team full: the rest are fine, just unimported */
+          var m = list[li];
+          var s = sanitizeMember(m);
+          var k = s ? s.name.toLowerCase() : null;
+          if (s && k !== null && !seen[k]) {
+            seen[k] = true; room--;
+            state.members.push(s); ok++;
+          } else { bad++; }
+        }
+      }
       if (tzOk) {
         state.viewerTz = data.viewerTz;
         viewerSel.value = state.viewerTz;
@@ -1246,7 +1289,8 @@ fileInput.addEventListener('change', function () {
       renderAll();
       var msg = list ?
         ('Imported ' + ok + ' member(s)' +
-          (bad ? ', skipped ' + bad + ' invalid ' + (bad === 1 ? 'entry' : 'entries') + '.' : '.')) :
+          (bad ? ', skipped ' + bad + ' invalid ' + (bad === 1 ? 'entry' : 'entries') : '') +
+          (notImported ? ', ' + notImported + ' not imported (team is full, ' + MAX_MEMBERS + ' max)' : '') + '.') :
         'No members in file.';
       if (tzOk) msg += ' Viewer time zone set to ' + data.viewerTz + '.';
       setDataStatus(msg, bad ? 'err' : 'ok');
@@ -1306,7 +1350,7 @@ function spotMemberFromTable(i) {
   if (!row) return;
   var strip = row.querySelector('.tl-strip');
   if (!strip) return;
-  if (strip.getAttribute('aria-pressed') !== 'true') Sound.select(); else Sound.click();
+  /* Sound is played by toggleSpot() via the dispatched click — no manual call here. */
   strip.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
   row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
