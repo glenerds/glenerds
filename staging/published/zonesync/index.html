@@ -687,8 +687,11 @@ function tzParts(date, tz) {
    Fall-back ambiguity: a wall time that occurs twice converges on one of
    the two occurrences, which the planner then treats as a single instant. */
 /* Wall-clock to UTC instant. Ambiguous fall-back wall times resolve
-   deterministically to the FIRST occurrence (documented limitation: the
-   24-hourly-bucket day model cannot represent the second occurrence).
+   deterministically to ONE of the two occurrences (verified: the first
+   occurrence for negative-offset zones like America/New_York, the second
+   for positive-offset zones like Europe/Berlin — zone-dependent, so no
+   "first occurrence" promise). Documented limitation: the 24-hourly-bucket
+   day model cannot represent the second occurrence.
    Nonexistent spring-forward wall times converge onto a neighboring real
    hour — every caller round-trip-validates before use. */
 function zonedToUtc(y, mo, d, h, mi, tz) {
@@ -979,10 +982,10 @@ function renderOverlap() {
   var base = accentBase();
   var bestH = -1, bestC = 0;
   for (var h3 = 0; h3 < 24; h3++) {
-    var seg = el('div', null, 'overlap-seg' + (counts[h3] === n ? ' full' : ''));
+    var seg = el('div', null, 'overlap-seg' + ((counts[h3] === n && n > 1) ? ' full' : ''));
     seg.setAttribute('aria-hidden', 'true');
     if (counts[h3] > 0) seg.style.backgroundColor = 'rgba(' + base + ', ' + (0.25 + 0.65 * (counts[h3] / n)).toFixed(2) + ')';
-    seg.title = fmtHour(h3) + ': ' + (counts[h3] === n ? 'everyone' : counts[h3] + ' of ' + n) + ' free';
+    seg.title = fmtHour(h3) + ': ' + ((counts[h3] === n && n > 1) ? 'everyone' : counts[h3] + ' of ' + n) + ' free';
     overlapStrip.appendChild(seg);
     if (counts[h3] > bestC) { bestC = counts[h3]; bestH = h3; }
   }
@@ -1613,7 +1616,7 @@ renderAll();
     });
   }
   function lsSnapshot() {
-    var o = {};
+    var o = Object.create(null); /* null-proto: a literal "__proto__" key becomes a real own property */
     try {
       for (var i = 0; i < localStorage.length; i++) {
         var k = localStorage.key(i);
@@ -1677,6 +1680,7 @@ renderAll();
        uncommitted field values BEFORE rendering, so renderPlan() reads the
        restored planner date/time instead of the sample-mode values. */
     if (editingIndex >= 0) startEdit(editingIndex);
+    else cancelEdit(); /* reset Save-member/Cancel button state left over from sample-mode edits */
     applyDomFieldState(snapFields);
     var st = document.getElementById('data-status');
     if (st && snapStatus) { st.textContent = snapStatus.t; st.className = snapStatus.c; }
