@@ -698,12 +698,20 @@ function tzParts(date, tz) {
    day model cannot represent the second occurrence.
    Nonexistent spring-forward wall times converge onto a neighboring real
    hour — every caller round-trip-validates before use. */
+/* utcMs: like Date.UTC, but keeps years 0-99 literal (Date.UTC maps them to
+   19xx — the same trap the planner date probe avoids with setFullYear). */
+function utcMs(y, mo0, d, h, mi) {
+  var t = new Date(0);
+  t.setUTCFullYear(y, mo0, d);
+  t.setUTCHours(h, mi || 0, 0, 0);
+  return t.getTime();
+}
 function zonedToUtc(y, mo, d, h, mi, tz) {
-  var W = Date.UTC(y, mo - 1, d, h, mi || 0, 0);
+  var W = utcMs(y, mo - 1, d, h, mi);
   var u = W;
   for (var i = 0; i < 3; i++) {
     var p = tzParts(new Date(u), tz);
-    var off = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, 0) - u;
+    var off = utcMs(p.year, p.month - 1, p.day, p.hour, p.minute) - u;
     var next = W - off;
     if (next === u) return u;
     u = next;
