@@ -471,8 +471,10 @@ function loadStore(){
         Object.keys(store.years).forEach(function(y){
           var yr = store.years[y];
           if(!yr || !Array.isArray(yr.contractors)) return;
+          var cbefore = yr.contractors.length;
+          yr.contractors = yr.contractors.filter(function(c){ return c && typeof c === "object"; });
+          if(yr.contractors.length !== cbefore) store._dirty = true;
           yr.contractors.forEach(function(c){
-            if(!c || typeof c !== "object") return;
             if(!Array.isArray(c.payments)) c.payments = [];
             var before = c.payments.length;
             c.payments = c.payments.filter(function(p){
@@ -489,7 +491,7 @@ function loadStore(){
               store._dirty = true;
             }
             if(c.w9 !== true){ if(c.w9 !== false || c.w9Date) store._dirty = true; c.w9 = false; c.w9Date = ""; }
-            else if(typeof c.w9Date !== "string" || !validDate(c.w9Date)){ if(c.w9Date) store._dirty = true; c.w9Date = ""; }
+            else if(typeof c.w9Date !== "string" || !validDate(c.w9Date) || !validYear(c.w9Date.slice(0,4))){ if(c.w9Date) store._dirty = true; c.w9Date = ""; }
           });
         });
       }
@@ -560,6 +562,9 @@ function ytd(c, yr){
     return t + p.amount;
   }, 0);
 }
+/* Integer-cent comparisons: ytd() sums IEEE-754 doubles, so a decimal-exact
+   total can land an ulp below its threshold and miss a flag. Compare cents. */
+function cents(n){ return Math.round(n * 100); }
 function uid(){ return "c" + Date.now().toString(36) + Math.floor(Math.random()*1e6).toString(36); }
 
 /* ================= Sanitization (shared by import) ================= */
@@ -570,7 +575,7 @@ function capText(v, max){
 }
 function sanitizePayment(p){
   if(!p || typeof p !== "object") return null;
-  if(typeof p.date !== "string" || !validDate(p.date)) return null;
+  if(typeof p.date !== "string" || !validDate(p.date) || !validYear(p.date.slice(0,4))) return null;
   var amt = Number(p.amount);
   if(!isFinite(amt) || amt < 0) return null;
   amt = Math.round(amt * 100) / 100;
@@ -582,7 +587,7 @@ function sanitizeContractor(c){
   if(!name) return null;
   var entity = ENTITIES.indexOf(c.entity) >= 0 ? c.entity : "individual";
   var w9 = c.w9 === true;
-  var w9Date = (typeof c.w9Date === "string" && validDate(c.w9Date)) ? c.w9Date : "";
+  var w9Date = (typeof c.w9Date === "string" && validDate(c.w9Date) && validYear(c.w9Date.slice(0,4))) ? c.w9Date : "";
   if(!w9) w9Date = "";
   var payments = [];
   if(Array.isArray(c.payments)){
@@ -592,7 +597,7 @@ function sanitizeContractor(c){
     }
   }
   return {
-    id: (typeof c.id === "string" && /^[A-Za-z0-9_-]{1,32}$/.test(c.id)) ? c.id : uid(),
+    id: (typeof c.id === "string" && /^[A-Za-z0-9_-]{1,32}$/.test(c.id) && c.id !== "__proto__" && c.id !== "constructor" && c.id !== "prototype") ? c.id : uid(),
     name: name,
     business: capText(c.business, 80),
     contact: capText(c.contact, 120),
@@ -681,7 +686,8 @@ function bindSoundToggle(){
 /* ================= Theme ================= */
 var themeToggle = document.getElementById("themeToggle");
 function currentTheme(){
-  var t = localStorage.getItem(THEME_KEY);
+  var t = "auto";
+  try{ t = localStorage.getItem(THEME_KEY) || "auto"; }catch(e){ /* storage blocked -> follow OS theme */ }
   if(t === "dark" || t === "light") return t;
   return "auto";
 }
@@ -700,7 +706,7 @@ function applyTheme(){
 themeToggle.addEventListener("click", function(){
   var now = document.documentElement.getAttribute("data-theme");
   var dark = (now === "dark") || (now === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  localStorage.setItem(THEME_KEY, dark ? "light" : "dark");
+  try{ localStorage.setItem(THEME_KEY, dark ? "light" : "dark"); }catch(e){}
   applyTheme();
   Sound.toggleTheme();
 });
@@ -773,7 +779,7 @@ function renderDashboard(){
   while(flagList.firstChild) flagList.removeChild(flagList.firstChild);
   var lim = limitsFor(currentYear);
   var flagged = contractors.filter(function(c){
-    return !c.w9 && c.entity !== "corp" && ytd(c) >= lim.amber;
+    return !c.w9 && c.entity !== "corp" && cents(ytd(c)) >= cents(lim.amber);
   }).sort(function(a,b){ return ytd(b) - ytd(a); });
 
   if(!flagged.length){
@@ -781,7 +787,7 @@ function renderDashboard(){
   } else {
     flagged.forEach(function(c){
       var t = ytd(c);
-      var red = t >= lim.red;
+      var red = cents(t) >= cents(lim.red);
       var f = el("div", null, "flag " + (red ? "red" : "amber"));
       f.setAttribute("role", "button");
       f.setAttribute("tabindex", "0");
@@ -1124,9 +1130,9 @@ function funnelChart(contractors){
   wrap.appendChild(chartTitle("W-9 collection funnel"));
   var lim = limitsFor(currentYear);
   var pop = contractors.filter(function(c){ return c.entity !== "corp" && ytd(c) > 0; });
-  var atRisk = pop.filter(function(c){ return ytd(c) >= lim.amber; });
+  var atRisk = pop.filter(function(c){ return cents(ytd(c)) >= cents(lim.amber); });
   var missing = atRisk.filter(function(c){ return !c.w9; });
-  var filing = missing.filter(function(c){ return ytd(c) >= lim.red; });
+  var filing = missing.filter(function(c){ return cents(ytd(c)) >= cents(lim.red); });
   var stages = [
     {label:"Contractors paid", list:pop, desc:"Non-exempt contractors with payments this year."},
     {label:"\u2265 " + wholeDollars(lim.amber) + " at risk", list:atRisk, desc:"At or above the amber watch amount."},
@@ -1294,7 +1300,7 @@ function renderCharts(){
 }
 
 /* ================= Contractor list ================= */
-var openPanels = {}; // contractor id -> true
+var openPanels = Object.create(null); // contractor id -> true (null-prototype: magic ids like "__proto__" can't break the toggle)
 
 function w9Pill(c){
   var cls, txt;
@@ -1313,8 +1319,8 @@ function flagPill(c){
   // Filing-requirement signal, independent of W-9 status: the pill must not
   // vanish once the W-9 arrives (ChatGPT QA 2026-09-20). W-9 collection is
   // tracked separately by w9Pill and the dashboard flags section.
-  if(t < lim.amber || c.entity === "corp") return null;
-  var isRed = t >= lim.red;
+  if(cents(t) < cents(lim.amber) || c.entity === "corp") return null;
+  var isRed = cents(t) >= cents(lim.red);
   return el("span", isRed ? "Needs 1099" : "Approaching " + wholeDollars(lim.red), "pill " + (isRed ? "bad" : "missing"));
 }
 
@@ -1351,7 +1357,7 @@ function renderContractors(){
       var ct = ytd(c);
       var clim = limitsFor(currentYear);
       var pct = clim.red > 0 ? Math.min(100, ct / clim.red * 100) : 0;
-      var th = el("div", null, "thresh" + (ct >= clim.red ? " red" : ct >= clim.amber ? " amber" : ""));
+      var th = el("div", null, "thresh" + (cents(ct) >= cents(clim.red) ? " red" : cents(ct) >= cents(clim.amber) ? " amber" : ""));
       th.setAttribute("role", "button");
       th.setAttribute("tabindex", "0");
       th.setAttribute("aria-pressed", "false");
@@ -1529,7 +1535,7 @@ function openEdit(card, c, opts){
     c.entity = eSel.value;
     c.w9 = (wSel.value === "1");
     var dval = dInp.value;
-    if(c.w9 && !validDate(dval)){ window.alert("Enter the date the W-9 was received (or set W-9 to No)."); Sound.error(); return; }
+    if(c.w9 && (!validDate(dval) || !validYear(dval.slice(0,4)))){ window.alert("Enter the date the W-9 was received, with a year between 2000 and 2099 (or set W-9 to No)."); Sound.error(); return; }
     c.w9Date = c.w9 ? dval : "";
     c.notes = nTa.value.trim().slice(0,500);
     syncProfile(c);
@@ -1836,7 +1842,7 @@ document.getElementById("demoBtn").addEventListener("click", function(){
 document.getElementById("clearBtn").addEventListener("click", function(){
   if(window.confirm("Delete ALL contractors and payments for ALL years? This cannot be undone.")){
     store.years = {};
-    saveStore(); openPanels = {};
+    saveStore(); openPanels = Object.create(null);
     years = [];
     ["2025","2026","2027"].forEach(function(y){ if(years.indexOf(y)<0) years.push(y); });
     var cy = String(new Date().getFullYear());
