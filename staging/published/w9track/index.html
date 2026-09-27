@@ -1719,6 +1719,7 @@ function mergeContractor(yearKey, sc){
 document.getElementById("importFile").addEventListener("change", function(ev){
   var file = ev.target.files[0];
   if(!file) return;
+  if(file.size > 5 * 1024 * 1024){ setDataMsg("That file is too large to import (over 5 MB). Nothing was changed.", true); ev.target.value = ""; return; }
   var reader = new FileReader();
   reader.onload = function(){
     var ok = 0, skipped = 0, dupes = 0, merged = 0;
