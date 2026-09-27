@@ -1608,6 +1608,7 @@ function paymentsPanel(c){
     ev.preventDefault();
     var dateStr = dInp.value;
     if(!validDate(dateStr)){ window.alert("Enter a valid date."); Sound.error(); return; }
+    if(!validYear(dateStr.slice(0,4))){ window.alert("Enter a date with a year between 2000 and 2099."); Sound.error(); return; }
     var amt = Number(aInp.value);
     if(!isFinite(amt) || amt <= 0){ window.alert("Enter an amount greater than $0."); Sound.error(); return; }
     var pay = {
