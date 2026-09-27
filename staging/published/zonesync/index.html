@@ -626,6 +626,7 @@ function sanitizeMember(m) {
   var start = toHourInt(m.start);
   var end = toHourInt(m.end);
   if (start === null || end === null) return null;
+  if (start === end) return null; /* zero-hour shift: form rejects these too */
   return { name: name, tz: m.tz, start: start, end: end };
 }
 function loadState() {
