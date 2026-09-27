@@ -686,6 +686,11 @@ function tzParts(date, tz) {
    real tz database. W (the wall time read as UTC) stays fixed.
    Fall-back ambiguity: a wall time that occurs twice converges on one of
    the two occurrences, which the planner then treats as a single instant. */
+/* Wall-clock to UTC instant. Ambiguous fall-back wall times resolve
+   deterministically to the FIRST occurrence (documented limitation: the
+   24-hourly-bucket day model cannot represent the second occurrence).
+   Nonexistent spring-forward wall times converge onto a neighboring real
+   hour — every caller round-trip-validates before use. */
 function zonedToUtc(y, mo, d, h, mi, tz) {
   var W = Date.UTC(y, mo - 1, d, h, mi || 0, 0);
   var u = W;
@@ -920,14 +925,14 @@ function renderOverlap() {
   shown.forEach(function (w) {
     var li = el('li');
     var endLabel = (w.end === 24) ? '12 AM (midnight)' : fmtHour(w.end);
-    var countLabel = w.count === n ? 'Everyone free' : w.count + ' of ' + n + ' free';
-    var btn = el('button', null, 'overlap-item' + (w.count === n ? ' all' : ''));
+    var countLabel = (w.count === n && n > 1) ? 'Everyone free' : w.count + ' of ' + n + ' free';
+    var btn = el('button', null, 'overlap-item' + ((w.count === n && n > 1) ? ' all' : ''));
     btn.type = 'button';
     btn.setAttribute('aria-expanded', 'false');
     btn.setAttribute('aria-label', fmtHour(w.start) + ' to ' + endLabel + ': ' +
       countLabel + '. Activate to see who is free.');
     btn.appendChild(el('span', fmtHour(w.start) + ' \u2013 ' + endLabel, 'overlap-time'));
-    btn.appendChild(el('span', countLabel, 'overlap-count' + (w.count === n ? ' gold' : '')));
+    btn.appendChild(el('span', countLabel, 'overlap-count' + ((w.count === n && n > 1) ? ' gold' : '')));
     var detail = el('div', null, 'overlap-detail');
     detail.hidden = true;
     btn.addEventListener('click', function () {
@@ -965,7 +970,7 @@ function renderOverlap() {
   if (!shown.length) {
     overlapList.appendChild(el('li', 'No overlapping work hours today \u2014 try shifting someone\u2019s hours.', 'status'));
   } else if (wins.length > shown.length) {
-    overlapList.appendChild(el('li', '+' + (wins.length - shown.length) + ' more windows with fewer members free.', 'status'));
+    overlapList.appendChild(el('li', '+' + (wins.length - shown.length) + ' more windows.', 'status'));
   }
   if (!wins.some(function (w) { return w.count === n; })) {
     overlapList.appendChild(el('li', 'Tip: shift someone\u2019s work hours to open a window when everyone is free.', 'status'));
@@ -1652,15 +1657,30 @@ renderAll();
     editingIndex = snapEditing;
     planGenerated = snapPlan;
     lsRestore(snapLS || {});
+    /* Theme and sound have live in-memory/UI state beyond localStorage —
+       reapply them now so a theme/sound change made in sample mode does
+       not leak into the restored session. */
+    try {
+      var rt = localStorage.getItem(THEME_KEY);
+      /* Mirror the boot-time default: stored value, else OS preference, else light. */
+      var theme = (rt === 'dark' || rt === 'light') ? rt :
+        ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+      paintThemeButton();
+      var wantOn = localStorage.getItem('zonesync.sound') !== 'off';
+      if (Sound.isOn() !== wantOn) Sound.toggle();
+      if (typeof paintSoundBtn === 'function' && paintSoundBtn) paintSoundBtn();
+    } catch (e) {}
     fillZoneSelect(viewerSel, state.viewerTz);
     fillZoneSelect(tzInput, state.viewerTz);
-    renderAll();
-    /* re-enter any in-progress member edit, then restore all
-       typed-but-uncommitted field values */
+    /* Re-enter any in-progress member edit and restore all typed-but-
+       uncommitted field values BEFORE rendering, so renderPlan() reads the
+       restored planner date/time instead of the sample-mode values. */
     if (editingIndex >= 0) startEdit(editingIndex);
     applyDomFieldState(snapFields);
     var st = document.getElementById('data-status');
     if (st && snapStatus) { st.textContent = snapStatus.t; st.className = snapStatus.c; }
+    renderAll();
     snap = null; snapFields = null; snapEditing = -1;
     snapPlan = false; snapStatus = null; snapLS = null;
   }
