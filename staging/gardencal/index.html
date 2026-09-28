@@ -1075,7 +1075,7 @@ var state = { zone: '6', customLast: null, customFirst: null, crops: {}, view: '
 function load() {
   try {
     var raw = localStorage.getItem(STORE_KEY);
-    if (raw) { var d = JSON.parse(raw); if (d && d.zone && ZONES[d.zone]) { state = d; sanitizeCustomDates(); } }
+    if (raw) { var d = JSON.parse(raw); if (d && d.zone && Object.prototype.hasOwnProperty.call(ZONES, String(d.zone))) { state = d; sanitizeCustomDates(); } }
   } catch (e) {}
   normalizeCrops();
 }
@@ -1087,11 +1087,23 @@ function normalizeCrops() {
 }
 function frostDates() {
   var z = ZONES[state.zone] || ZONES['6'];
+  var lastMD = state.customLast || z.last;
+  var firstMD = state.customFirst || z.first;
   return {
-    last: state.customLast ? frostDate(state.customLast) : frostDate(z.last),
-    first: state.customFirst ? frostDate(state.customFirst) : frostDate(z.first),
+    last: frostDate(lastMD),
+    first: frostDate(firstMD),
+    lastMD: lastMD,
+    firstMD: firstMD,
+    customLast: !!state.customLast,
+    customFirst: !!state.customFirst,
     custom: !!(state.customLast || state.customFirst)
   };
+}
+function effInverted() {
+  // Check if effective frost dates (custom or zone) are inverted: first must be after last
+  var fd = frostDates();
+  var l = fd.lastMD, f = fd.firstMD;
+  return (f[0] < l[0] || (f[0] === l[0] && f[1] <= l[1]));
 }
 
 /* ---------- schedule computation ---------- */
@@ -1125,7 +1137,7 @@ function fillZoneSelect() {
 }
 function setZone(z) { state.zone = z; save(); renderAll(); Sound.click(); }
 function sanitizeCustomDates() {
-  // Validate custom frost dates loaded from storage/import: must be valid MM/DD and not inverted
+  // Validate custom frost dates loaded from storage/import: must be valid MM/DD
   ['customLast', 'customFirst'].forEach(function (k) {
     var v = state[k];
     if (v) {
@@ -1133,9 +1145,11 @@ function sanitizeCustomDates() {
       if (!ok) state[k] = null;
     }
   });
-  if (state.customLast && state.customFirst) {
-    var l = state.customLast, f = state.customFirst;
-    if (f[0] < l[0] || (f[0] === l[0] && f[1] <= l[1])) state.customFirst = null;
+  // If effective dates (custom-or-zone) are inverted, clear BOTH custom dates
+  // to guarantee a valid season. Clearing only one could leave custom-vs-zone inversion.
+  if (effInverted()) {
+    state.customLast = null;
+    state.customFirst = null;
   }
 }
 function setCustom(input) {
@@ -1144,13 +1158,14 @@ function setCustom(input) {
   var oldLast = state.customLast, oldFirst = state.customFirst;
   if (input.id === 'gc-last') state.customLast = v;
   else state.customFirst = v;
-  // Reject inverted frost dates: first fall frost must be after last spring frost
-  if (state.customLast && state.customFirst) {
-    var l = state.customLast, f = state.customFirst;
-    if (f[0] < l[0] || (f[0] === l[0] && f[1] <= l[1])) {
-      state.customLast = oldLast; state.customFirst = oldFirst;
-      gcErr('First fall frost must be after last spring frost.'); Sound.error(); return;
-    }
+  // Reject inverted frost dates: effective first fall frost must be after effective last spring frost
+  // (compares custom-or-zone effective dates, not just when both custom are set)
+  if (effInverted()) {
+    state.customLast = oldLast; state.customFirst = oldFirst;
+    // Restore input to the previous committed value (don't leave rejected text in the field)
+    var restore = (input.id === 'gc-last' ? oldLast : oldFirst);
+    input.value = restore ? restore.join('/') : '';
+    gcErr('First fall frost must be after last spring frost.'); Sound.error(); return;
   }
   gcErr(''); save(); renderAll(); Sound.click();
 }
@@ -1243,8 +1258,8 @@ function renderMonth() {
   /* keep keyboard focus on the same bar/card across the rebuild so Enter/Space can toggle back */
   var rfa = document.activeElement, rfk = rfa && rfa.getAttribute ? rfa.getAttribute('data-fk') : null;
   document.getElementById('gc-frost').innerHTML =
-    '<div class="kpi"><div class="k">Last spring frost' + (ce.custom ? ' (custom)' : ' (zone avg)') + '</div><div class="v">' + fmtD(L) + '</div></div>' +
-    '<div class="kpi"><div class="k">First fall frost' + (ce.custom ? ' (custom)' : ' (zone avg)') + '</div><div class="v">' + fmtD(F) + '</div></div>';
+    '<div class="kpi"><div class="k">Last spring frost' + (ce.customLast ? ' (custom)' : ' (zone avg)') + '</div><div class="v">' + fmtD(L) + '</div></div>' +
+    '<div class="kpi"><div class="k">First fall frost' + (ce.customFirst ? ' (custom)' : ' (zone avg)') + '</div><div class="v">' + fmtD(F) + '</div></div>';
   var nowM = new Date().getMonth();
   var showM = (focusMonth == null) ? nowM : focusMonth;
   var typeAll = (focusMonth == null && focusType != null);
@@ -1489,14 +1504,18 @@ function download(name, text) {
   document.body.appendChild(a); a.click();
   setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
-function exportData() { download('gardencal-backup.json', JSON.stringify(state, null, 2)); Sound.success(); }
+function exportData() {
+  if (sampleOn) { gcErr('Turn off sample data before exporting a backup.'); Sound.error(); return; }
+  download('gardencal-backup.json', JSON.stringify(state, null, 2)); Sound.success();
+}
 function importData(input) {
+  if (sampleOn) { gcErr('Turn off sample data before importing a backup.'); Sound.error(); input.value=''; return; }
   var f = input.files && input.files[0]; if (!f) return;
   var rd = new FileReader();
   rd.onload = function () {
     try {
       var d = JSON.parse(rd.result);
-      if (!d || !d.zone || !ZONES[d.zone]) throw new Error('bad file');
+      if (!d || !d.zone || !Object.prototype.hasOwnProperty.call(ZONES, String(d.zone))) throw new Error('bad file');
       state = d; sanitizeCustomDates(); normalizeCrops(); save();
       document.getElementById('gc-zone').value = state.zone;
       document.getElementById('gc-last').value = state.customLast ? state.customLast.join('/') : '';
@@ -1536,7 +1555,7 @@ function setSample(on) {
     showTab('crop'); renderAll();
   } else if (!on && sampleOn) {
     sampleOn = false; focusMonth = null; focusType = null;
-    try { var s = JSON.parse(sampleSnap); if (s && s.zone && ZONES[s.zone]) state = s; } catch (e) {}
+    try { var s = JSON.parse(sampleSnap); if (s && s.zone && Object.prototype.hasOwnProperty.call(ZONES, String(s.zone))) state = s; } catch (e) {}
     sampleSnap = null;
     /* restore the exact transient input values, not just the committed state */
     if (sampleDom) {
