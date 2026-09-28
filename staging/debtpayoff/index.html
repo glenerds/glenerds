@@ -942,7 +942,7 @@ function renderDonut(){
     det.innerHTML="Total balance <strong>"+money(total)+"</strong> across "+debts.length+
       " debt"+(debts.length>1?"s":"")+" — click a slice or legend item for details.";
   }
-  if(fk){ var fkq=String(fk).replace(/"/g,'\\"'); var ne=svg.querySelector('circle.donut-seg[data-did="'+fkq+'"]')||leg.querySelector('button.dl-item[data-did="'+fkq+'"]'); if(ne)ne.focus({preventScroll:true}); }
+  if(fk){ var fkq=CSS.escape(String(fk)); var ne=svg.querySelector('circle.donut-seg[data-did="'+fkq+'"]')||leg.querySelector('button.dl-item[data-did="'+fkq+'"]'); if(ne)ne.focus({preventScroll:true}); }
 }
 function renderTimeline(results){
   var tl=$("payoffTl"), note=$("tlNote"), lab=$("tlStrat");
@@ -986,7 +986,7 @@ function renderTimeline(results){
   }else{
     note.textContent="Click a step to see that debt's payoff details.";
   }
-  if(rfk){ var rfkq=String(rfk).replace(/"/g,'\\"'); var rne=tl.querySelector('[data-fk="'+rfkq+'"]'); if(rne) rne.focus({preventScroll:true}); }
+  if(rfk){ var rfkq=CSS.escape(String(rfk)); var rne=tl.querySelector('[data-fk="'+rfkq+'"]'); if(rne) rne.focus({preventScroll:true}); }
 }
 
 function renderSchedule(){
