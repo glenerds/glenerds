@@ -966,7 +966,7 @@ $("catDonut").addEventListener("keydown",function(e){
 var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function mLabel(k){var m=parseInt(k.slice(5),10);return (MONTHS[m-1]||k.slice(5))+" "+k.slice(0,4);}
 function shortMoney(v){var a=Math.abs(v);
-  var s=a>=1000000?(v/1000000).toFixed(1)+"M":a>=1000?(v/1000).toFixed(1).replace(/\.0$/,"")+"k":Math.round(v).toString();
+  var s=a>=1000000?(a/1000000).toFixed(1)+"M":a>=1000?(a/1000).toFixed(1).replace(/\.0$/,"")+"k":Math.round(a).toString();
   return (v<0?"-$":"$")+s;}
 function trendData(){
   var m=Object.create(null),nodate=0;
