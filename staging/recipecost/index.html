@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c2570b'/%3E%3Ctext x='32' y='44' font-size='30' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3E$%3C/text%3E%3C/svg%3E">
-<meta name="description" content="RecipeCost — free offline recipe cost calculator for home bakers. Cost every ingredient, get per-serving cost, and price with your target profit margin. No signup, works offline.">
-<title>Recipe Cost Calculator for Home Bakers — Ingredient Costing & Pricing | RecipeCost</title>
+<meta name="description" content="Price your baked goods with confidence. Offline recipe cost calculator for home bakers: ingredient costs, batch & serving pricing, profit margins. No signup.">
+<title>Recipe Cost & Pricing Calculator for Home Bakers</title>
 <style>
 /* ===== GLENERDS DESIGN SYSTEM (inlined) ===== */
 /* ==========================================================================
@@ -637,6 +637,7 @@ a:focus-visible {
   .g-brand { flex: 1 1 auto; min-width: 0; }
   .g-brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* safety: never overlap, truncate instead */
   .g-header-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: 1 1 auto; }
+  #rec-select { flex: 1 1 100% !important; } /* recipe dropdown takes full width on mobile; New/Delete wrap below instead of squeezing it (overrides inline flex:1) */
 }
 .g-store-btn {
   display: inline-flex; align-items: center;
@@ -912,7 +913,7 @@ h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catc
     <span class="g-appicon g-appicon-sm" style="--g-ai1:#22c55e;--g-ai2:#84cc16">
       <svg class="g-icon" aria-hidden="true"><use href="#g-i-calc"/></svg>
     </span>
-    <h1 class="g-brand-name">RecipeCost</h1>
+    <h1 class="g-brand-name">Recipe Cost Calculator</h1>
   </div>
   <div class="g-header-actions">
   <a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
@@ -921,7 +922,7 @@ h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catc
 <button class="round-btn sound-toggle" id="soundToggle" type="button" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)" onclick="toggleSound(this)">&#128266;</button>
 </div>
 </header>
-<p class="g-tagline">Recipe cost calculator for home bakers — know exactly what each batch costs and price it with confidence.</p>
+<p class="g-tagline">Calculate ingredient costs, batch expenses, and profit margins so you can price every recipe with confidence.</p>
 
 <div class="g-tabs no-print" role="tablist" aria-label="Sections">
   <button class="g-tab" role="tab" id="tab-ing" aria-selected="true" onclick="showTab('ing')">Ingredients</button>
@@ -932,7 +933,7 @@ h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catc
 <section id="panel-ing" role="tabpanel" aria-labelledby="tab-ing">
   <div class="g-card">
     <p class="g-title">Ingredient library</p>
-    <p class="g-desc">Enter what you paid per package. RecipeCost works out the cost per gram, ml, or piece automatically.</p>
+    <p class="g-desc">Enter your ingredient prices once. Automatically calculate cost per gram, ml, or piece for every recipe.</p>
     <div class="g-grid-2">
       <div class="g-field">
         <label class="g-label" for="ing-name">Ingredient name</label>
@@ -1105,7 +1106,7 @@ h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catc
 </a>
 
 <footer class="g-footer">
-  Free offline tool <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this device.
+  RecipeCost <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this device.
 </footer>
 </div>
 <script>
