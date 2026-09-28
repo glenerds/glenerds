@@ -398,6 +398,9 @@ function demoState(){return {
     {id:"i-mixer",roomId:"r-kitchen",name:"Stand mixer",category:"Appliances",value:329.95,serial:"MX-7712",purchaseDate:"2023-03-08",photo:"",note:""},
     {id:"i-coffee",roomId:"r-kitchen",name:"Coffee maker",category:"Appliances",value:149.00,serial:"",purchaseDate:"2024-09-02",photo:"",note:""}
   ]};}
+/* Import/localStorage caps: must be defined BEFORE loadState() runs at startup —
+   sanitizeState() references them and loadState() calls sanitizeState(). */
+var MAX_IMPORT_ROOMS=200,MAX_IMPORT_ITEMS=5000;
 function loadState(){
   try{var raw=localStorage.getItem(LS_STATE);
     /* B5: run localStorage through the same sanitizer as imports — a
@@ -1034,9 +1037,7 @@ $("exportBtn").addEventListener("click",function(){
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
   notice("dataNotice","Backup exported.","ok");Sound.success();
 });
-/* Import/localStorage caps: a hostile file with ~100k items would synchronously
-   build ~100k DOM cards and hang the tab. Truncation is surfaced on import. */
-var MAX_IMPORT_ROOMS=200,MAX_IMPORT_ITEMS=5000;
+/* Import/localStorage caps defined near top (before loadState). Truncation is surfaced on import. */
 function sanitizeState(s){
   if(!s||typeof s!=="object"||!Array.isArray(s.rooms)||!Array.isArray(s.items))return null;
   /* Null-prototype dictionaries: user-controlled ids are used as lookup keys, so a
