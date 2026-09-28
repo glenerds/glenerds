@@ -1135,7 +1135,22 @@ function fillZoneSelect() {
     sel.appendChild(o);
   });
 }
-function setZone(z) { state.zone = z; save(); renderAll(); Sound.click(); }
+function setZone(z) {
+  var oldZone = state.zone;
+  state.zone = z;
+  // If changing zone creates an inverted effective season with existing custom dates,
+  // clear the custom dates (with notice) rather than silently producing nonsense
+  if (effInverted()) {
+    state.customLast = null;
+    state.customFirst = null;
+    document.getElementById('gc-last').value = '';
+    document.getElementById('gc-first').value = '';
+    gcErr('Custom frost dates cleared — they conflict with the new zone\'s season.');
+  } else {
+    gcErr('');
+  }
+  save(); renderAll(); Sound.click();
+}
 function sanitizeCustomDates() {
   // Validate custom frost dates loaded from storage/import: must be valid MM/DD
   ['customLast', 'customFirst'].forEach(function (k) {
@@ -1229,7 +1244,7 @@ function computeMonthEvents() {
     if (s.fallSow) addEv(s.fallSow, 'fall', fmtD(s.fallSow) + (c.fallOnly ? ' (for next year)' : ''), c.n);
   });
   months.forEach(function (evs) { evs.sort(function (a, b) { return a.d - b.d; }); });
-  return { months: months, L: L, F: F, custom: fr.custom };
+  return { months: months, L: L, F: F, custom: fr.custom, customLast: fr.customLast, customFirst: fr.customFirst };
 }
 function spotMonth(m) {
   focusMonth = (focusMonth === m) ? null : m;
