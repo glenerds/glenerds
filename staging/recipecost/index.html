@@ -1189,8 +1189,11 @@ function sanitizeState() {
     if (i.pkgQty < 0) i.pkgQty = 0; if (i.pkgPrice < 0) i.pkgPrice = 0;
     i.pkgUnit = goodUnit(i.pkgUnit);
   });
+  var seenRecipeIds = {};
   state.recipes.forEach(function (r) {
     if (typeof r.id !== 'string' || !ID_OK.test(r.id)) r.id = uid();
+    while (seenRecipeIds[r.id]) r.id = uid(); /* duplicate recipe ids: first record keeps it, the rest get fresh ids (no zombie recipes) */
+    seenRecipeIds[r.id] = true;
     if (!Array.isArray(r.lines)) r.lines = [];
     NUMS.forEach(function (f) { r[f] = Math.max(0, num(r[f])); });
     if (r.targetMarginPct > 95) r.targetMarginPct = 95; /* import path honors the 95% ceiling too */
