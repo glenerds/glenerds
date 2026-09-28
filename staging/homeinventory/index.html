@@ -404,15 +404,26 @@ var MAX_IMPORT_ROOMS=200,MAX_IMPORT_ITEMS=5000;
 function loadState(){
   try{var raw=localStorage.getItem(LS_STATE);
     /* B5: run localStorage through the same sanitizer as imports — a
-       hand-tampered entry used to flow unsanitized into render paths. */
-    if(raw){var s=sanitizeState(JSON.parse(raw));
+       hand-tampered entry used to flow unsanitized into render paths.
+       MAJOR FIX 2026-09-28: pass skipCaps=true — import caps (200 rooms /
+       5000 items) must not silently truncate the user's own saved data. */
+    if(raw){var s=sanitizeState(JSON.parse(raw),true);
       if(s)return s;}}catch(e){}
   return null;
 }
 var state=loadState();
 var sampleOn=false, sampleSnap=null;
 /* First run starts EMPTY — sample data is transient and lives only behind the flask toggle. */
-if(!state){state={rooms:[],items:[]};save();}
+/* MAJOR FIX 2026-09-28: if loadState() returned null due to corrupt JSON, do NOT
+   immediately save() an empty state over the user's raw entry — that destroys any
+   chance of manual recovery. Start empty but leave the corrupt entry untouched
+   until the user saves something (or imports a backup). */
+if(!state){
+  state={rooms:[],items:[]};
+  try{if(localStorage.getItem(LS_STATE)){
+    setTimeout(function(){notice("dataNotice","Saved data was corrupted and could not be loaded — starting fresh. Import a backup if you have one.","err");},500);
+  }}catch(e){}
+}
 function save(){/* Suppressed for the whole sample cycle: __gSampleOn is set true
   before demo state is swapped in and back to false only after the user state
   is restored, so user data can never be overwritten by sample-mode edits. */
@@ -1047,22 +1058,27 @@ $("exportBtn").addEventListener("click",function(){
   notice("dataNotice","Backup exported.","ok");Sound.success();
 });
 /* Import/localStorage caps defined near top (before loadState). Truncation is surfaced on import. */
-function sanitizeState(s){
+function sanitizeState(s,skipCaps){
   if(!s||typeof s!=="object"||!Array.isArray(s.rooms)||!Array.isArray(s.items))return null;
   /* Null-prototype dictionaries: user-controlled ids are used as lookup keys, so a
      plain {} would let "__proto__"/"constructor" pass the membership check through
      the prototype chain (prototype pollution — fixed 2026-09-20). hasOwnProperty
      guards make the check explicit. */
   var rooms=[],ids=Object.create(null),truncated=false;
-  for(var i=0;i<s.rooms.length&&rooms.length<MAX_IMPORT_ROOMS;i++){var r=s.rooms[i];
+  /* MAJOR FIX 2026-09-28: import caps must NOT apply to localStorage load.
+     The UI add handlers enforce no limits, so a user can legitimately create
+     >200 rooms / >5000 items; save() persists all, but the next load would
+     silently drop everything past the cap. skipCaps=true for loadState(). */
+  var maxR=skipCaps?Infinity:MAX_IMPORT_ROOMS, maxI=skipCaps?Infinity:MAX_IMPORT_ITEMS;
+  for(var i=0;i<s.rooms.length&&rooms.length<maxR;i++){var r=s.rooms[i];
     if(!r||typeof r.name!=="string")continue;
     var name=r.name.trim().slice(0,60);if(!name)continue;
     var id=typeof r.id==="string"?r.id.slice(0,80):uid("r");
     if(Object.prototype.hasOwnProperty.call(ids,id))id=uid("r");ids[id]=1;rooms.push({id:id,name:name});}
-  if(s.rooms.length>MAX_IMPORT_ROOMS)truncated=true;
+  if(!skipCaps&&s.rooms.length>MAX_IMPORT_ROOMS)truncated=true;
   if(!rooms.length)return null;
   var items=[],itemIds=Object.create(null);
-  for(var j=0;j<s.items.length&&items.length<MAX_IMPORT_ITEMS;j++){var it=s.items[j];
+  for(var j=0;j<s.items.length&&items.length<maxI;j++){var it=s.items[j];
     if(!it||typeof it.name!=="string"||!Object.prototype.hasOwnProperty.call(ids,it.roomId))continue;
     var nm=it.name.trim().slice(0,120);if(!nm)continue;
     var vv=validValue(it.value);if(!vv.ok)continue;
@@ -1077,11 +1093,19 @@ function sanitizeState(s){
       purchaseDate:(typeof it.purchaseDate==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(it.purchaseDate))?it.purchaseDate:"",
       photo:photo,
       note:typeof it.note==="string"?it.note.slice(0,200):""});}
-  if(s.items.length>MAX_IMPORT_ITEMS)truncated=true;
+  if(!skipCaps&&s.items.length>MAX_IMPORT_ITEMS)truncated=true;
   return {rooms:rooms,items:items,truncated:truncated};
 }
 $("importFile").addEventListener("change",function(){
-  var f=this.files&&this.files[0];if(!f)return;
+  var f=this.files&&this.files[0];if(!f){this.value="";return;}
+  /* MAJOR FIX 2026-09-28: block import during sample mode — save() is suppressed
+     in sample mode, so the import would be silently discarded when the flask
+     toggles off, despite the "Imported N item(s)" success message. */
+  if(window.__gSampleOn||sampleOn){notice("dataNotice","Turn off sample data first — import is disabled while the demo is showing.","err");this.value="";return;}
+  /* MAJOR FIX 2026-09-28: import replaces the entire inventory with no undo.
+     Require confirmation when the current inventory is non-empty. */
+  var self=this;
+  var doImport=function(){
   var rd=new FileReader();
   rd.onload=function(){
     try{var s=sanitizeState(JSON.parse(rd.result));
@@ -1093,9 +1117,17 @@ $("importFile").addEventListener("change",function(){
     }catch(e){Sound.error();notice("dataNotice","Could not read that file — it is not valid JSON.");}
   };
   rd.onerror=function(){notice("dataNotice","Could not read that file.");};
-  rd.readAsText(f);this.value="";
+  rd.readAsText(f);};
+  if(state.rooms.length||state.items.length){
+    if(!confirm("Import will REPLACE your current inventory ("+state.items.length+" items). Continue?")){self.value="";return;}
+  }
+  doImport();this.value="";
 });
 $("clearBtn").addEventListener("click",function(){
+  /* MAJOR FIX 2026-09-28: block clear during sample mode — save() is suppressed
+     in sample mode, so the clear would be silently undone when the flask toggles
+     off, despite the "All data cleared" message. */
+  if(window.__gSampleOn||sampleOn){notice("dataNotice","Turn off sample data first — clear is disabled while the demo is showing.","err");return;}
   var lbl=$("clearLabel");
   if(this.classList.contains("confirm")){
     state={rooms:[],items:[]};clearItemForm();save();renderAll();
