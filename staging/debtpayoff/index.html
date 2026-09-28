@@ -712,7 +712,7 @@ function renderStrategy(){
   $("stratDesc").textContent=STRAT_DESC[state.strategy];
   var co=$("customOrder"); co.hidden=(state.strategy!=="custom");
   if(state.strategy==="custom") renderOrder();
-  $("extraRange").value=state.extraMonthly;
+  var er=$("extraRange"); er.max=Math.max(2000,Math.ceil(state.extraMonthly/10)*10); er.value=state.extraMonthly;
   $("extraVal").textContent=money(state.extraMonthly);
 }
 function renderOrder(){
