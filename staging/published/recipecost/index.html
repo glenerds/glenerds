@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23c2570b'/%3E%3Ctext x='32' y='44' font-size='30' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='bold'%3E$%3C/text%3E%3C/svg%3E">
+<meta name="description" content="Price your baked goods with confidence. Offline recipe cost calculator for home bakers: ingredient costs, batch & serving pricing, profit margins. No signup.">
+<title>Recipe Cost & Pricing Calculator for Home Bakers</title>
+<style>
+/* ===== GLENERDS DESIGN SYSTEM (inlined) ===== */
+/* ==========================================================================
+   GLENERDS DESIGN SYSTEM v1.0
+   --------------------------------------------------------------------------
+   One shared visual language for every Glenerds microtool.
+   Designed to be INLINED into each app's <style> block — keeps the
+   single-file property: zero network requests, file:// safe, no webfonts,
+   no CDNs, no frameworks, no build step.
+
+   Usage: paste this whole file inside a STYLE element in <head>, then use
+   the g- classes below. See INTEGRATION.md for the theme-toggle wiring.
+
+   Conventions:
+   - Every class is prefixed `g-` to avoid collisions.
+   - Theming is driven by `data-theme="light|dark"` on <html>.
+   - First load with no saved choice honors prefers-color-scheme.
+   ========================================================================== */
+
+/* ---------- 1. TOKENS ---------- */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --g-bg:            #f8fafc;   /* page background: soft cool white */
+  --g-surface:       #ffffff;   /* cards, panels */
+  --g-surface-2:     #f1f5f9;   /* recessed / inset areas, tab track */
+  --g-border:        #e2e8f0;   /* hairlines */
+  --g-border-strong: #cbd5e1;
+
+  /* Text */
+  --g-text:          #0f172a;   /* slate-900 */
+  --g-text-soft:     #334155;   /* slate-700 — secondary text */
+  --g-muted:         #64748b;   /* slate-500 — captions, hints */
+
+  /* Accent: refined indigo */
+  --g-accent:        #4f46e5;   /* indigo-600 */
+  --g-accent-hover:  #4338ca;   /* indigo-700 */
+  --g-accent-ink:    #ffffff;   /* text on accent */
+  --g-accent-soft:   #eef2ff;   /* indigo-50 — tinted fills */
+  --g-accent-ring:   rgba(79, 70, 229, 0.22);
+
+  /* Status */
+  --g-good:          #047857;   /* emerald-700 */
+  --g-good-soft:     #ecfdf5;
+  --g-bad:           #b42318;
+  --g-bad-soft:      #fef3f2;
+  --g-warn:          #b45309;
+  --g-warn-soft:     #fffbeb;
+
+  /* Inputs */
+  --g-input-bg:      #ffffff;
+  --g-input-border:  #cbd5e1;
+  --g-code-bg:       #f1f5f9;
+
+  /* Shape + motion */
+  --g-radius-sm: 8px;
+  --g-radius-md: 12px;
+  --g-radius-lg: 16px;
+  --g-radius-pill: 999px;
+  --g-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --g-shadow-md: 0 1px 3px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06);
+  --g-shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.10);
+  --g-ease: 160ms ease;
+
+  /* Type */
+  --g-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            "Helvetica Neue", Arial, system-ui, sans-serif;
+  --g-mono: ui-monospace, SFMono-Regular, SFMono-Regular, Menlo, Consolas,
+            "Liberation Mono", monospace;
+}
+
+/* Dark theme: genuinely designed — deep blue-black, lifted surfaces,
+   brightened indigo. Not an inversion of light. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --g-bg:            #0b0e14;
+  --g-surface:       #141926;
+  --g-surface-2:     #0f1420;
+  --g-border:        #232c40;
+  --g-border-strong: #33405c;
+
+  --g-text:          #f1f5f9;
+  --g-text-soft:     #cbd5e1;
+  --g-muted:         #94a3b8;
+
+  --g-accent:        #818cf8;   /* indigo-400 — readable on dark */
+  --g-accent-hover:  #a5b4fc;   /* indigo-300 */
+  --g-accent-ink:    #ffffff;
+  --g-accent-soft:   rgba(129, 140, 248, 0.14);
+  --g-accent-ring:   rgba(129, 140, 248, 0.35);
+
+  --g-good:          #34d399;
+  --g-good-soft:     rgba(52, 211, 153, 0.12);
+  --g-bad:           #f87171;
+  --g-bad-soft:      rgba(248, 113, 113, 0.12);
+  --g-warn:          #fbbf24;
+  --g-warn-soft:     rgba(251, 191, 36, 0.12);
+
+  --g-input-bg:      #0f1420;
+  --g-input-border:  #33405c;
+  --g-code-bg:       #0f1420;
+
+  --g-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --g-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.45), 0 4px 14px rgba(0, 0, 0, 0.35);
+  --g-shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------- 2. BASE ---------- */
+* { box-sizing: border-box; }
+
+.g-app {
+  font-family: var(--g-font);
+  background: var(--g-bg);
+  color: var(--g-text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Page container */
+.g-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+/* ---------- 3. TYPOGRAPHY ---------- */
+.g-display  { font-size: 1.9rem;  font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;  margin: 0 0 8px; }
+.g-title    { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3;  margin: 0 0 6px; }
+.g-body     { font-size: 1rem;    color: var(--g-text-soft); margin: 0 0 12px; }
+.g-caption  { font-size: 0.85rem; color: var(--g-muted);    margin: 0; }
+.g-mono     { font-family: var(--g-mono); font-size: 0.9em; }
+
+/* ---------- 4. HEADER ---------- */
+.g-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 4px;
+}
+.g-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.g-brand-mark {
+  flex: 0 0 auto;
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  background: var(--g-accent);
+  color: var(--g-accent-ink);
+  font-weight: 800; font-size: 1.25rem;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--g-shadow-sm);
+  user-select: none;
+}
+.g-brand-name { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; margin: 0; line-height: 1.15; }
+.g-tagline { color: var(--g-muted); font-size: 0.92rem; margin: 6px 0 14px; max-width: 56ch; }
+
+/* Theme toggle */
+.g-theme-toggle {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--g-surface);
+  border: 1px solid var(--g-border);
+  color: var(--g-text-soft);
+  border-radius: var(--g-radius-pill);
+  padding: 8px 14px;
+  font-size: 0.88rem; font-weight: 600; font-family: var(--g-font);
+  cursor: pointer;
+  transition: border-color var(--g-ease), color var(--g-ease), transform var(--g-ease);
+  white-space: nowrap;
+}
+.g-theme-toggle:hover { border-color: var(--g-accent); color: var(--g-text); }
+.g-theme-toggle:active { transform: scale(0.97); }
+
+/* ---------- 5. TABS (segmented control) ---------- */
+.g-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+  background: var(--g-surface-2);
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius-md);
+  padding: 4px;
+  margin: 14px 0;
+}
+.g-tab {
+  flex: 1 1 auto;
+  appearance: none;
+  border: 0; background: transparent;
+  color: var(--g-muted);
+  font-family: var(--g-font);
+  font-size: 0.93rem; font-weight: 600;
+  border-radius: 9px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background var(--g-ease), color var(--g-ease), box-shadow var(--g-ease);
+  white-space: nowrap;
+}
+.g-tab:hover { color: var(--g-text); }
+.g-tab[aria-selected="true"] {
+  background: var(--g-surface);
+  color: var(--g-text);
+  box-shadow: var(--g-shadow-sm);
+}
+.g-tab:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 2px; }
+
+/* ---------- 6. CARDS ---------- */
+.g-card {
+  background: var(--g-surface);
+  border: 1px solid var(--g-border);
+  border-radius: var(--g-radius-lg);
+  padding: 22px;
+  margin: 16px 0;
+  box-shadow: var(--g-shadow-sm);
+}
+.g-card > .g-title { margin-bottom: 4px; }
+.g-card .g-desc { color: var(--g-muted); font-size: 0.92rem; margin: 0 0 14px; }
+.g-card-flat { box-shadow: none; }
+
+/* ---------- 7. BUTTONS ---------- */
+.g-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--g-font);
+  font-size: 0.95rem; font-weight: 650;
+  border-radius: 10px;
+  padding: 11px 18px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background var(--g-ease), border-color var(--g-ease),
+              color var(--g-ease), transform var(--g-ease), box-shadow var(--g-ease);
+  text-decoration: none;
+  line-height: 1.2;
+}
+.g-btn:active { transform: translateY(1px) scale(0.99); }
+.g-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.g-btn-primary {
+  background: var(--g-accent);
+  border-color: var(--g-accent);
+  color: var(--g-accent-ink);
+  box-shadow: var(--g-shadow-sm);
+}
+.g-btn-primary:hover:not(:disabled) { background: var(--g-accent-hover); border-color: var(--g-accent-hover); }
+
+.g-btn-secondary {
+  background: var(--g-surface);
+  border-color: var(--g-border-strong);
+  color: var(--g-text);
+}
+.g-btn-secondary:hover:not(:disabled) { border-color: var(--g-accent); color: var(--g-accent); }
+
+.g-btn-danger {
+  background: var(--g-bad-soft);
+  border-color: transparent;
+  color: var(--g-bad);
+}
+.g-btn-danger:hover:not(:disabled) { background: var(--g-bad); color: #fff; }
+
+.g-btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--g-text-soft);
+}
+.g-btn-ghost:hover:not(:disabled) { background: var(--g-surface-2); color: var(--g-text); }
+
+.g-btn-sm { font-size: 0.85rem; padding: 8px 13px; border-radius: 8px; }
+.g-btn-block { display: flex; width: 100%; }
+.g-btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 4px; }
+
+/* ---------- 8. FORMS ---------- */
+.g-field { margin: 12px 0; }
+.g-label { display: block; font-weight: 650; font-size: 0.92rem; margin-bottom: 6px; color: var(--g-text); }
+.g-hint { font-size: 0.82rem; color: var(--g-muted); margin-top: 6px; }
+
+.g-input, .g-select, .g-textarea {
+  width: 100%;
+  font-family: var(--g-font);
+  font-size: 1rem;
+  color: var(--g-text);
+  background: var(--g-input-bg);
+  border: 1px solid var(--g-input-border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  transition: border-color var(--g-ease), box-shadow var(--g-ease);
+}
+.g-input::placeholder, .g-textarea::placeholder { color: var(--g-muted); opacity: 0.75; }
+.g-input:hover, .g-select:hover, .g-textarea:hover { border-color: var(--g-border-strong); }
+.g-input:focus, .g-select:focus, .g-textarea:focus {
+  outline: none;
+  border-color: var(--g-accent);
+  box-shadow: 0 0 0 3px var(--g-accent-ring);
+}
+.g-textarea { min-height: 96px; resize: vertical; }
+.g-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+[data-theme="dark"] .g-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.g-input:disabled, .g-select:disabled, .g-textarea:disabled {
+  opacity: 0.55; cursor: not-allowed; background: var(--g-surface-2);
+}
+
+/* Validation */
+.g-input.is-invalid, .g-select.is-invalid {
+  border-color: var(--g-bad);
+}
+.g-input.is-invalid:focus, .g-select.is-invalid:focus {
+  box-shadow: 0 0 0 3px var(--g-bad-soft);
+}
+.g-error { display: none; color: var(--g-bad); font-size: 0.86rem; font-weight: 600; margin-top: 6px; }
+.g-error.show { display: block; }
+
+/* Checkbox / radio rows */
+.g-check {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 0.95rem; color: var(--g-text-soft);
+  cursor: pointer; margin: 10px 0;
+}
+.g-check input {
+  appearance: none;
+  flex: 0 0 auto;
+  width: 20px; height: 20px;
+  margin: 1px 0 0;
+  border: 1.5px solid var(--g-input-border);
+  border-radius: 6px;
+  background: var(--g-input-bg);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--g-ease), border-color var(--g-ease);
+}
+.g-check input[type="radio"] { border-radius: 50%; }
+.g-check input:checked { background: var(--g-accent); border-color: var(--g-accent); }
+.g-check input:checked::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: no-repeat center / 12px
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5 6.8 11.8 12.5 4.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.g-check input[type="radio"]:checked::after {
+  background: none;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--g-accent-ink);
+}
+.g-check input:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--g-accent-ring); }
+
+/* ---------- 9. RESULT PANELS ---------- */
+.g-result {
+  margin-top: 16px;
+  padding: 18px;
+  border-radius: var(--g-radius-md);
+  border: 1px solid var(--g-border);
+  background: var(--g-surface-2);
+}
+.g-big-number {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 2px 0 6px;
+}
+.g-verdict { font-size: 1.05rem; font-weight: 700; margin: 0 0 4px; }
+.g-verdict-good { color: var(--g-good); }
+.g-verdict-bad  { color: var(--g-bad); }
+.g-verdict-warn { color: var(--g-warn); }
+.g-result-note { color: var(--g-text-soft); font-size: 0.95rem; margin: 0; }
+
+/* Show-your-work math block */
+.g-math {
+  font-family: var(--g-mono);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  background: var(--g-code-bg);
+  border: 1px solid var(--g-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin: 12px 0 0;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  color: var(--g-text-soft);
+}
+
+/* ---------- 10. STAT ROWS ---------- */
+.g-stats { margin: 12px 0 0; border-top: 1px solid var(--g-border); }
+.g-stat {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--g-border);
+  font-size: 0.95rem;
+}
+.g-stat:last-child { border-bottom: 0; }
+.g-stat .g-stat-label { color: var(--g-muted); }
+.g-stat .g-stat-value { font-weight: 700; font-variant-numeric: tabular-nums; }
+.g-stat .g-stat-value.good { color: var(--g-good); }
+.g-stat .g-stat-value.bad  { color: var(--g-bad); }
+
+/* ---------- 11. TABLES ---------- */
+.g-table-wrap { overflow-x: auto; margin: 12px -4px 0; padding: 0 4px; }
+.g-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+.g-table th {
+  text-align: left;
+  font-size: 0.76rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--g-muted);
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--g-border-strong);
+  white-space: nowrap;
+}
+.g-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--g-border);
+  color: var(--g-text-soft);
+  font-variant-numeric: tabular-nums;
+}
+.g-table tr:last-child td { border-bottom: 0; }
+.g-table tbody tr { transition: background var(--g-ease); }
+.g-table tbody tr:hover { background: var(--g-surface-2); }
+
+/* ---------- 12. BADGES / PILLS ---------- */
+.g-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.78rem; font-weight: 700;
+  border-radius: var(--g-radius-pill);
+  padding: 4px 11px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.g-badge-accent { background: var(--g-accent-soft); color: var(--g-accent); }
+.g-badge-good   { background: var(--g-good-soft);   color: var(--g-good); }
+.g-badge-bad    { background: var(--g-bad-soft);    color: var(--g-bad); }
+.g-badge-warn   { background: var(--g-warn-soft);   color: var(--g-warn); }
+.g-badge-neutral{ background: var(--g-surface-2);    color: var(--g-muted); border: 1px solid var(--g-border); }
+.g-badge-dot::before {
+  content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+}
+
+/* ---------- 13. EMPTY STATES ---------- */
+.g-empty {
+  text-align: center;
+  border: 1.5px dashed var(--g-border-strong);
+  border-radius: var(--g-radius-lg);
+  padding: 36px 20px;
+  margin: 16px 0;
+  color: var(--g-muted);
+}
+.g-empty-icon { font-size: 2rem; margin-bottom: 8px; }
+.g-empty .g-title { font-size: 1.05rem; color: var(--g-text-soft); }
+.g-empty p { font-size: 0.9rem; margin: 4px 0 14px; }
+
+/* ---------- 14. FOOTER ---------- */
+.g-footer {
+  text-align: center;
+  margin: 32px 0 8px;
+  font-size: 0.85rem;
+  color: var(--g-muted);
+}
+.g-footer a { color: var(--g-accent); text-decoration: none; font-weight: 600; }
+.g-footer a:hover { text-decoration: underline; }
+.g-footer .g-fine { display: block; margin-top: 8px; font-size: 0.78rem; }
+
+/* ---------- 15. LAYOUT HELPERS ---------- */
+.g-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.g-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.g-stack > * + * { margin-top: 12px; }
+.g-divider { border: 0; border-top: 1px solid var(--g-border); margin: 20px 0; }
+
+/* ---------- 16. FOCUS (accessibility) ---------- */
+.g-btn:focus-visible,
+.g-theme-toggle:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--g-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 17. RESPONSIVE ---------- */
+@media (max-width: 560px) {
+  .g-wrap { padding: 14px 12px 40px; }
+  .g-display { font-size: 1.6rem; }
+  .g-card { padding: 18px 16px; border-radius: 14px; }
+  .g-big-number { font-size: 2rem; }
+  .g-grid-2, .g-grid-3 { grid-template-columns: 1fr; }
+  .g-brand-mark { width: 34px; height: 34px; font-size: 1.05rem; border-radius: 10px; }
+  .g-brand-name { font-size: 1.2rem; }
+  .g-tab { padding: 9px 10px; font-size: 0.88rem; }
+}
+
+/* ---------- 18. MOTION PREFERENCE ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; }
+}
+
+/* ---------- 19. ICONS ----------
+   Requires the glenerds-icons.svg sprite inlined in the page (see
+   INTEGRATION.md). <use> inherits stroke from the wrapper, so the two
+   variants are just classes on the <svg> element. */
+.g-icon {
+  width: 24px; height: 24px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  fill: none;
+  vertical-align: -4px;
+}
+.g-icon-sm { width: 18px; height: 18px; }
+.g-icon-lg { width: 32px; height: 32px; }
+/* Flash variant: brand indigo gradient stroke instead of text color. */
+.g-icon-flash { stroke: url(#g-grad-indigo); }
+.g-btn .g-icon { width: 20px; height: 20px; vertical-align: -3px; }
+.g-tab .g-icon { width: 18px; height: 18px; vertical-align: -3px; margin-right: 2px; }
+
+/* ---------- 20. APP ICONS ----------
+   iOS-style rounded-square gradient tile + one white glyph.
+   Each app picks its own gradient via --g-ai1 / --g-ai2. */
+.g-appicon {
+  --g-ai1: #6366f1;
+  --g-ai2: #8b5cf6;
+  width: 60px; height: 60px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--g-ai1), var(--g-ai2));
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: var(--g-shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  flex: 0 0 auto;
+}
+.g-appicon .g-icon { width: 32px; height: 32px; color: #ffffff; }
+.g-appicon-sm { width: 44px; height: 44px; border-radius: 13px; }
+.g-appicon-sm .g-icon { width: 24px; height: 24px; }
+.g-appicon-row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; margin: 12px 0; }
+.g-appicon-item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+
+/* ===== APP OVERRIDES (tokens only, no g- restyle) ===== */
+.g-table-wrap { overflow-x: auto; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.g-result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: .75rem; margin-top: 1rem; }
+.kpi { background: var(--g-surface-2); border: 1px solid var(--g-border); border-radius: 10px; padding: .7rem .9rem; }
+.kpi .k { font-size: .75rem; color: var(--g-muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi .v { font-size: 1.25rem; font-weight: 700; margin-top: .15rem; font-variant-numeric: tabular-nums; }
+.kpi .v.good { color: #16a34a; } [data-theme="dark"] .kpi .v.good { color: #7de0a3; }
+.kpi .v.warn { color: #d97706; } [data-theme="dark"] .kpi .v.warn { color: #e3c76b; }
+.line-row { display: grid; grid-template-columns: 1fr 90px 110px auto auto; gap: .5rem; align-items: end; margin-bottom: .5rem; }
+@media (max-width: 640px) { .line-row { grid-template-columns: 1fr 72px 96px auto; } .line-row .hide-sm { display: none; } }
+.approx-flag { color: #d97706; font-size: .78rem; } [data-theme="dark"] .approx-flag { color: #e3c76b; }
+@media print { .no-print { display: none !important; } body { background: #fff; } }
+/* Glenerds cross-promo: More Apps button + bottom CTA (shared) */
+.g-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+/* Glenerds standard cluster buttons: flask, dark-mode, sound — circular 44x44 icon-only */
+.round-btn {
+  flex: 0 0 auto;
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--g-surface);
+  border: 1px solid var(--g-border);
+  color: var(--g-text);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10);
+  font-size: 1.1rem;
+}
+.round-btn svg { width: 30px; height: 30px; flex: none; }
+/* Glen FINAL rev 4: all three icons fill their 44px button — flask 26px, theme+sound emoji 1.65rem */
+.round-btn.theme-toggle, .round-btn.sound-toggle { font-size: 1.65rem; line-height: 1; }
+.round-btn:hover { border-color: var(--g-accent); }
+.round-btn:active { transform: scale(.92); border-color: var(--g-accent); }
+.round-btn:focus { outline: none; }
+.round-btn:focus-visible { outline: 2px solid var(--g-accent); outline-offset: 2px; }
+/* header spec 2026-09-21: sample ON = accent-soft tint + accent border/icon (NOT a solid
+   accent fill); sound button stays white in all states */
+.round-btn.sample-toggle[aria-pressed="true"] {
+  color: var(--g-accent); border-color: var(--g-accent);
+  background: var(--g-accent-soft);
+}
+/* Cost visuals: breakdown donut, ingredient cost bars, food-cost gauge */
+.viz-row { display: flex; gap: 28px; align-items: center; flex-wrap: wrap; margin: 14px 0 4px; }
+.cost-chart { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.cost-donut-box { position: relative; width: min(230px, 68vw); flex: 0 0 auto; }
+.cost-donut { display: block; width: 100%; height: auto; }
+.cc-seg { transition: transform 300ms ease, opacity 300ms ease; cursor: pointer; }
+.cc-seg:focus { outline: none; }
+.cc-seg:focus-visible { filter: drop-shadow(0 0 6px #4f46e5); }
+.cc-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; padding: 0 52px; }
+.cc-center .v { font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.cc-center .l { color: var(--g-muted); font-size: 0.78rem; margin-top: 2px; }
+.cc-legend { display: grid; gap: 8px; align-content: center; }
+.cc-chip { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid var(--g-border); border-radius: 999px; background: var(--g-surface); cursor: pointer; font-size: 0.85rem; color: inherit; font-family: inherit; }
+.cc-chip .dot { width: 12px; height: 12px; border-radius: 4px; flex: none; }
+.cc-chip .amt { font-weight: 700; font-variant-numeric: tabular-nums; }
+.cc-chip .pct { color: var(--g-muted); }
+.cc-chip:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+.cc-chip.spot { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79,70,229,.22); }
+.gauge-wrap { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.gauge-svg { width: min(210px, 60vw); height: auto; flex: 0 0 auto; }
+.gauge-svg text { font-family: inherit; }
+.gauge-cap { color: var(--g-muted); font-size: 0.82rem; max-width: 220px; }
+.drivers { display: grid; gap: 6px; margin: 8px 0 4px; }
+.driver-row.dim { opacity: .45; }
+.driver-row.spot { border-color: #4f46e5; box-shadow: 0 0 0 2px rgba(79,70,229,.22); }
+/* ---- unified chart detail panel (spotlight breakdown) ---- */
+.chart-detail{margin:10px 0 6px;border:1px solid var(--g-border);border-radius:12px;padding:14px 16px;background:var(--g-surface)}
+.cd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.cd-title{font-weight:800;font-size:1.02rem}
+.cd-sub{color:var(--g-muted);font-size:.85rem;margin-top:2px}
+.cd-x{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--g-border);background:var(--g-surface);color:var(--g-text);font-size:1.25rem;line-height:1;cursor:pointer}
+.cd-rows{display:grid;gap:6px;max-height:260px;overflow:auto}
+.cd-row{display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-radius:8px;background:var(--g-surface-2,#f1f5f9)}
+.cd-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.88rem}
+.cd-meta{color:var(--g-muted);font-size:.8rem;white-space:nowrap}
+.cd-val{font-weight:700;font-size:.88rem;white-space:nowrap;color:#4f46e5}
+.cd-foot{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap}
+.driver-row { display: grid; grid-template-columns: minmax(90px, 190px) 1fr auto; gap: 10px; align-items: center; padding: 7px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; background: none; color: inherit; font-family: inherit; font-size: inherit; text-align: left; width: 100%; }
+.driver-row:hover { border-color: var(--g-border); }
+.driver-row .d-name { font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.driver-row .d-track { height: 12px; border-radius: 999px; background: var(--g-surface-2, #f1f5f9); overflow: hidden; }
+.driver-row .d-fill { height: 100%; border-radius: 999px; background: #4f46e5; width: 0; transition: width 300ms ease; }
+.driver-row .d-val { font-weight: 700; font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+.driver-row:focus { outline: none; }
+.driver-row:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+.line-row.flash { outline: 2px solid #4f46e5; outline-offset: 2px; border-radius: 8px; }
+.kpi[role="button"] { cursor: pointer; }
+.kpi[role="button"]:focus { outline: none; }
+.kpi[role="button"]:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+@media (max-width: 480px) {
+  .g-header { flex-wrap: wrap; } /* narrow screens: actions drop to their own row instead of colliding with the brand */
+  .g-brand { flex: 1 1 auto; min-width: 0; }
+  .g-brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* safety: never overlap, truncate instead */
+  .g-header-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: 1 1 auto; }
+  #rec-select { flex: 1 1 100% !important; } /* recipe dropdown takes full width on mobile; New/Delete wrap below instead of squeezing it (overrides inline flex:1) */
+}
+.g-store-btn {
+  display: inline-flex; align-items: center;
+  background: var(--g-accent, #4f46e5);
+  color: #ffffff; /* header spec + legibility rule: white text on accent in BOTH modes */
+  border-radius: var(--g-radius-pill, 999px);
+  padding: 8px 15px;
+  font-size: 0.88rem; font-weight: 700; line-height: 1.2;
+  text-decoration: none; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,.12);
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.g-store-btn:hover { background: var(--g-accent-hover, #4338ca); color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,.16); }
+.g-store-btn:active { transform: scale(0.97); }
+.g-store-btn:focus-visible { outline: 2px solid var(--g-accent, #4f46e5); outline-offset: 2px; }
+.g-cta-strip {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 28px 0 0; padding: 16px 20px;
+  border-radius: 14px;
+  background: rgba(79,70,229,.08);
+  border: 1px solid rgba(79,70,229,.28);
+  color: inherit;
+  font-size: 0.95rem; font-weight: 600;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.g-cta-strip:hover { background: rgba(79,70,229,.14); border-color: rgba(79,70,229,.45); }
+.g-cta-strip:active { transform: scale(0.99); }
+.g-cta-strip:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+.g-cta-strip .g-cta-arrow { color: #4f46e5; font-weight: 700; font-size: 1.4em; line-height: 1; transform: translateY(-0.04em); }
+[data-theme="dark"] .g-cta-strip .g-cta-arrow { color: #a5b4fc; }
+@media (max-width: 440px) {
+  .g-store-btn { padding: 8px 12px; }
+  .g-header-actions { gap: 6px; }
+}
+@media print {
+  .g-store-btn, .g-header-actions, .g-cta-strip { display: none !important; }
+}
+</style>
+<script>
+/* Pre-paint theme init — shared glenerds-theme key */
+(function(){var t=null;try{t=localStorage.getItem('glenerds-theme')}catch(e){}
+if(t!=='dark'&&t!=='light'){t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}
+document.documentElement.setAttribute('data-theme',t);})();
+function gToggleTheme(){var h=document.documentElement;
+var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catch(e){}}
+</script>
+</head>
+<body class="g-app">
+<!-- ==========================================================================
+     GLENERDS ICON SET v1.0 — inline SVG <symbol> sprite
+     --------------------------------------------------------------------------
+     Inline this whole file right after <body> in each app (or paste the
+     <svg> block). Zero external requests. See INTEGRATION.md for usage.
+
+     - 24x24 grid, stroke-based line icons, stroke-width 2, round caps/joins.
+     - Clean variant inherits text color (currentColor).
+     - Flash variant: add class "g-icon-flash" to the <svg> wrapper and the
+       stroke renders in the brand indigo gradient instead.
+     - All geometry inherits from the symbol; do not set stroke/fill on <use>.
+     ========================================================================== -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-grad-indigo" gradientUnits="userSpaceOnUse" x1="6" y1="4" x2="18" y2="20">
+      <stop offset="0" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="g-grad-sunset" gradientUnits="userSpaceOnUse" x1="6" y1="4" x2="18" y2="20">
+      <stop offset="0" stop-color="#fb7185"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="g-grad-ocean" gradientUnits="userSpaceOnUse" x1="6" y1="4" x2="18" y2="20">
+      <stop offset="0" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="g-grad-royal" gradientUnits="userSpaceOnUse" x1="6" y1="4" x2="18" y2="20">
+      <stop offset="0" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- calculator -->
+  <symbol id="g-i-calc" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="6.5" y="3" width="11" height="18" rx="2"/>
+    <path d="M9.5 7.5h5"/>
+    <path d="M9.5 12h.02M12 12h.02M14.5 12h.02M9.5 15.5h.02M12 15.5h.02M14.5 15.5h.02"/>
+  </symbol>
+
+  <!-- chart / graph (bars) -->
+  <symbol id="g-i-chart" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20h16"/>
+    <path d="M7.5 20v-6.5M12 20V6.5M16.5 20v-9.5"/>
+  </symbol>
+
+  <!-- calendar -->
+  <symbol id="g-i-cal" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/>
+    <path d="M8 3v3.5M16 3v3.5M3.5 10h17"/>
+  </symbol>
+
+  <!-- checkmark -->
+  <symbol id="g-i-check" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.8 12.6l4.7 4.7L19.2 7.2"/>
+  </symbol>
+
+  <!-- streak flame -->
+  <symbol id="g-i-flame" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.2c.9 2.8-.5 4.3-1.7 5.6C8.7 10.5 7 12.4 7 15.2a5 5 0 0010 0c0-2-1-3.5-2-4.9-.4 1.1-1.1 1.9-2.1 2.3.4-3-.4-6.7-.9-9.4z"/>
+  </symbol>
+
+  <!-- star -->
+  <symbol id="g-i-star" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.4l-5.8 3.1 1.1-6.5L2.6 9.4l6.5-.9z"/>
+  </symbol>
+
+  <!-- moon -->
+  <symbol id="g-i-moon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.2 14.8A8.3 8.3 0 019.2 3.8a8.3 8.3 0 1011 11z"/>
+  </symbol>
+
+  <!-- sun -->
+  <symbol id="g-i-sun" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="4.2"/>
+    <path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7"/>
+  </symbol>
+
+  <!-- plus -->
+  <symbol id="g-i-plus" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 5.5v13M5.5 12h13"/>
+  </symbol>
+
+  <!-- trash -->
+  <symbol id="g-i-trash" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 6.8h15"/>
+    <path d="M9.5 6.2V4.8a1.3 1.3 0 011.3-1.3h2.4a1.3 1.3 0 011.3 1.3v1.4"/>
+    <path d="M6.8 6.8l.9 12.4a1.6 1.6 0 001.6 1.5h5.4a1.6 1.6 0 001.6-1.5l.9-12.4"/>
+    <path d="M10 10.8v5.5M14 10.8v5.5"/>
+  </symbol>
+
+  <!-- download -->
+  <symbol id="g-i-download" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 4v10.5"/>
+    <path d="M7.6 11L12 15.4 16.4 11"/>
+    <path d="M4.5 19.5h15"/>
+  </symbol>
+
+  <!-- upload -->
+  <symbol id="g-i-upload" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 15.5V5"/>
+    <path d="M7.6 9.4L12 5l4.4 4.4"/>
+    <path d="M4.5 19.5h15"/>
+  </symbol>
+
+  <!-- settings gear -->
+  <symbol id="g-i-gear" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3.4"/>
+    <path d="M12 5v2.2M12 16.8V19M5 12h2.2M16.8 12H19M7.1 7.1l1.5 1.5M15.4 15.4l1.5 1.5M16.9 7.1l-1.5 1.5M8.6 15.4l-1.5 1.5"/>
+  </symbol>
+
+  <!-- heart -->
+  <symbol id="g-i-heart" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 20.5c-5-3.4-8.5-6.8-8.5-10.6C3.5 7.1 5.7 5 8.4 5c1.5 0 2.8.8 3.6 2 .8-1.2 2.1-2 3.6-2 2.7 0 4.9 2.1 4.9 4.9 0 3.8-3.5 7.2-8.5 10.6z"/>
+  </symbol>
+
+  <!-- clock -->
+  <symbol id="g-i-clock" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8.3"/>
+    <path d="M12 7.3V12l3.2 2"/>
+  </symbol>
+
+  <!-- target -->
+  <symbol id="g-i-target" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8.3"/>
+    <circle cx="12" cy="12" r="4.8"/>
+    <circle cx="12" cy="12" r="1.4"/>
+  </symbol>
+
+  <!-- trophy -->
+  <symbol id="g-i-trophy" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7.5 4h9v4.5a4.5 4.5 0 01-9 0V4z"/>
+    <path d="M7.5 5.5H4.5a3.5 3.5 0 003.8 3.8M16.5 5.5h3a3.5 3.5 0 01-3.8 3.8"/>
+    <path d="M12 13v4M8.5 20.5h7"/>
+  </symbol>
+
+  <!-- tag -->
+  <symbol id="g-i-tag" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20.6 13.4L11 3.8a2 2 0 00-1.4-.6H5a1.8 1.8 0 00-1.8 1.8v4.6c0 .5.2 1 .6 1.4l9.6 9.6a1.9 1.9 0 002.7 0l4.5-4.5a1.9 1.9 0 000-2.7z"/>
+    <circle cx="8" cy="8" r="1.4"/>
+  </symbol>
+
+  <!-- search -->
+  <symbol id="g-i-search" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="6.5"/>
+    <path d="M15.8 15.8l4.7 4.7"/>
+  </symbol>
+
+  <!-- edit pencil -->
+  <symbol id="g-i-edit" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 20l1.2-4.2L16.7 4.3a2 2 0 012.9 2.9L8.1 18.7 4 20z"/>
+    <path d="M14.8 6.2l2.9 2.9"/>
+  </symbol>
+
+  <!-- share -->
+  <symbol id="g-i-share" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="6.5" cy="12" r="2.5"/>
+    <circle cx="17" cy="5.8" r="2.5"/>
+    <circle cx="17" cy="18.2" r="2.5"/>
+    <path d="M8.7 10.9l6.1-3.5M8.7 13.1l6.1 3.5"/>
+  </symbol>
+
+  <!-- lock -->
+  <symbol id="g-i-lock" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="5.5" y="10.5" width="13" height="9.5" rx="2.5"/>
+    <path d="M8.5 10.5V8a3.5 3.5 0 017 0v2.5"/>
+    <path d="M12 14.5v2"/>
+  </symbol>
+
+  <!-- sparkles -->
+  <symbol id="g-i-sparkles" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 3.5l1.7 4.8 4.8 1.7-4.8 1.7L12 16.5l-1.7-4.8-4.8-1.7 4.8-1.7L12 3.5z"/>
+    <path d="M18.5 14.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8.8-2.2z"/>
+  </symbol>
+
+  <!-- home -->
+  <symbol id="g-i-home" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 11.2L12 4l8 7.2"/>
+    <path d="M6.2 9.8V20h11.6V9.8"/>
+    <path d="M10 20v-4.8h4V20"/>
+  </symbol>
+
+  <!-- back arrow -->
+  <symbol id="g-i-back" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14.8 5.5L8.3 12l6.5 6.5"/>
+  </symbol>
+
+  <!-- close X -->
+  <symbol id="g-i-x" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 6l12 12M18 6L6 18"/>
+  </symbol>
+
+  <!-- info -->
+  <symbol id="g-i-info" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="8.3"/>
+    <path d="M12 11v5"/>
+    <path d="M12 7.6v.2"/>
+  </symbol>
+
+  <!-- wallet -->
+  <symbol id="g-i-wallet" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="6.5" width="18" height="13" rx="3"/>
+    <path d="M3 9.8c4 0 5 1.6 9 1.6s5-1.6 9-1.6"/>
+    <circle cx="17.5" cy="14.8" r="1.1"/>
+  </symbol>
+
+  <!-- list -->
+  <symbol id="g-i-list" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 6.5h11M9 12h11M9 17.5h11"/>
+    <path d="M4.5 6.5h.02M4.5 12h.02M4.5 17.5h.02"/>
+  </symbol>
+
+  <!-- bell -->
+  <symbol id="g-i-bell" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6.2 16v-4.8a5.8 5.8 0 0111.6 0V16l1.7 2.8H4.5L6.2 16z"/>
+    <path d="M10 20.5a2.2 2.2 0 004 0"/>
+  </symbol>
+</svg>
+
+<div class="g-wrap">
+
+<header class="g-header">
+  <div class="g-brand">
+    <span class="g-appicon g-appicon-sm" style="--g-ai1:#22c55e;--g-ai2:#84cc16">
+      <svg class="g-icon" aria-hidden="true"><use href="#g-i-calc"/></svg>
+    </span>
+    <h1 class="g-brand-name">Recipe Cost Calculator</h1>
+  </div>
+  <div class="g-header-actions">
+  <a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+<button class="round-btn sample-toggle" id="sampleToggle" type="button" aria-pressed="false" aria-label="Try sample data" title="Try sample data" onclick="setSample(!sampleOn);Sound.click();"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+<button class="round-btn theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode" onclick="gToggleTheme();paintTheme();Sound.toggleTheme();Sound.click();">🌙</button>
+<button class="round-btn sound-toggle" id="soundToggle" type="button" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)" onclick="toggleSound(this)">&#128266;</button>
+</div>
+</header>
+<p class="g-tagline">Calculate ingredient costs, batch expenses, and profit margins so you can price every recipe with confidence.</p>
+
+<div class="g-tabs no-print" role="tablist" aria-label="Sections">
+  <button class="g-tab" role="tab" id="tab-ing" aria-selected="true" onclick="showTab('ing')">Ingredients</button>
+  <button class="g-tab" role="tab" id="tab-rec" aria-selected="false" onclick="showTab('rec')">Recipes</button>
+</div>
+
+<!-- ================= INGREDIENTS ================= -->
+<section id="panel-ing" role="tabpanel" aria-labelledby="tab-ing">
+  <div class="g-card">
+    <p class="g-title">Ingredient library</p>
+    <p class="g-desc">Enter your ingredient prices once. Automatically calculate cost per gram, ml, or piece for every recipe.</p>
+    <div class="g-grid-2">
+      <div class="g-field">
+        <label class="g-label" for="ing-name">Ingredient name</label>
+        <input class="g-input" id="ing-name" type="text" placeholder="All-purpose flour" autocomplete="off">
+      </div>
+      <div class="g-field">
+        <label class="g-label" for="ing-price">Package price ($)</label>
+        <input class="g-input" id="ing-price" type="number" min="0" step="0.01" placeholder="4.99">
+      </div>
+      <div class="g-field">
+        <label class="g-label" for="ing-qty">Package size</label>
+        <input class="g-input" id="ing-qty" type="number" min="0" step="any" placeholder="5000">
+      </div>
+      <div class="g-field">
+        <label class="g-label" for="ing-unit">Package unit</label>
+        <select class="g-input" id="ing-unit"></select>
+      </div>
+      <div class="g-field">
+        <label class="g-label" for="ing-gpc">Grams per cup <span class="g-hint" style="display:inline">(optional — for cup↔gram conversion)</span></label>
+        <input class="g-input" id="ing-gpc" type="number" min="0" step="any" placeholder="e.g. 120 for flour">
+      </div>
+      <div class="g-field">
+        <label class="g-label" for="ing-gpe">Grams per piece <span class="g-hint" style="display:inline">(optional — for count items like eggs)</span></label>
+        <input class="g-input" id="ing-gpe" type="number" min="0" step="any" placeholder="e.g. 50 for an egg">
+      </div>
+      <div class="g-field" style="align-self:end">
+        <div class="g-btn-row">
+          <button class="g-btn g-btn-primary" id="ing-add" onclick="addIngredient()">Add ingredient</button>
+          <button class="g-btn g-btn-secondary" onclick="clearIngForm()">Clear</button>
+        </div>
+      </div>
+    </div>
+    <p class="g-error" id="ing-err"></p>
+  </div>
+
+  <div class="g-card">
+    <p class="g-title">Your ingredients <span class="g-badge g-badge-neutral" id="ing-count">0</span></p>
+    <div class="g-table-wrap"><table class="g-table" id="ing-table">
+      <thead><tr><th>Ingredient</th><th class="num">Package</th><th class="num">Unit cost</th><th class="no-print"></th></tr></thead>
+      <tbody id="ing-tbody"></tbody>
+    </table></div>
+    <div class="g-empty" id="ing-empty">
+      <p class="g-title">No ingredients yet</p>
+      <p class="g-desc">Add the ingredients you buy — with package size and price — and costing takes care of itself.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RECIPES ================= -->
+<section id="panel-rec" role="tabpanel" aria-labelledby="tab-rec" hidden>
+  <div class="g-card no-print">
+    <div class="g-field">
+      <label class="g-label" for="rec-select">Recipe</label>
+      <div class="g-btn-row">
+        <select class="g-input" id="rec-select" onchange="selectRecipe(this.value)" style="flex:1"></select>
+        <button class="g-btn g-btn-primary" onclick="newRecipe()">New</button>
+        <button class="g-btn g-btn-danger" onclick="deleteRecipe()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rec-editor">
+    <div class="g-card">
+      <p class="g-title">Recipe details</p>
+      <div class="g-grid-3">
+        <div class="g-field">
+          <label class="g-label" for="rec-name">Recipe name</label>
+          <input class="g-input" id="rec-name" type="text" placeholder="Chocolate chip cookies" oninput="recField('name', this.value)">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-yield">Batch yield (pieces / servings)</label>
+          <input class="g-input" id="rec-yield" type="number" min="0" step="any" placeholder="24" oninput="recField('yieldQty', num(this.value))">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-yieldunit">Yield unit</label>
+          <input class="g-input" id="rec-yieldunit" type="text" placeholder="cookies" value="pieces" oninput="recField('yieldUnit', this.value)">
+        </div>
+      </div>
+    </div>
+
+    <div class="g-card">
+      <p class="g-title">Ingredients in this recipe</p>
+      <div id="lines"></div>
+      <div class="g-btn-row no-print">
+        <button class="g-btn g-btn-secondary" onclick="addLine()"><svg class="g-icon g-icon-sm" aria-hidden="true"><use href="#g-i-plus"/></svg> Add ingredient line</button>
+      </div>
+      <p class="g-error" id="line-err"></p>
+    </div>
+
+    <div class="g-card">
+      <p class="g-title">Labor, packaging &amp; overhead</p>
+      <div class="g-grid-2">
+        <div class="g-field">
+          <label class="g-label" for="rec-hours">Your hours on this batch</label>
+          <input class="g-input" id="rec-hours" type="number" min="0" step="any" placeholder="1.5" oninput="recField('laborHours', num(this.value))">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-rate">Hourly rate ($)</label>
+          <input class="g-input" id="rec-rate" type="number" min="0" step="any" placeholder="20" oninput="recField('laborRate', num(this.value))">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-pack">Packaging cost per piece ($)</label>
+          <input class="g-input" id="rec-pack" type="number" min="0" step="any" placeholder="0.25" oninput="recField('packagingPerUnit', num(this.value))">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-oh">Overhead % <span class="g-hint" style="display:inline">(electricity, wear, fees)</span></label>
+          <input class="g-input" id="rec-oh" type="number" min="0" step="any" placeholder="10" oninput="recField('overheadPct', num(this.value))">
+        </div>
+        <div class="g-field">
+          <label class="g-label" for="rec-margin">Target profit margin %</label>
+          <input class="g-input" id="rec-margin" type="number" min="0" max="95" step="any" placeholder="50" oninput="recField('targetMarginPct', num(this.value))">
+          <p class="g-hint">Margin = profit ÷ selling price. 50% margin means half the price is profit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="g-card" id="summary-card">
+      <p class="g-title">Cost &amp; pricing summary</p>
+      <div class="g-result-grid" id="summary-grid"></div>
+      <div class="viz-row">
+        <div class="cost-chart">
+          <div class="cost-donut-box">
+            <svg class="cost-donut" viewBox="0 0 248 248" role="img" aria-labelledby="cc-t">
+              <title id="cc-t">Batch cost breakdown donut chart</title>
+              <circle cx="124" cy="124" r="95" fill="none" stroke="var(--g-surface-2, #f1f5f9)" stroke-width="34"/>
+              <path id="cc-ing" class="cc-seg" d="" fill="none" stroke="#4f46e5" stroke-width="34"/>
+              <path id="cc-lab" class="cc-seg" d="" fill="none" stroke="#10b981" stroke-width="34"/>
+              <path id="cc-pac" class="cc-seg" d="" fill="none" stroke="#f59e0b" stroke-width="34"/>
+              <path id="cc-ovh" class="cc-seg" d="" fill="none" stroke="#8b5cf6" stroke-width="34"/>
+            </svg>
+            <div class="cc-center"><div class="v" id="cc-total">–</div><div class="l" id="cc-sub">batch cost</div></div>
+          </div>
+          <div class="cc-legend" id="cc-legend"></div>
+        </div>
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 300 185" role="img" aria-labelledby="fc-t">
+            <title id="fc-t">Food cost percent gauge, target at or under 35 percent</title>
+            <path d="M45 150 A105 105 0 0 1 255 150" fill="none" stroke="var(--g-border, #e2e8f0)" stroke-width="22" stroke-linecap="round"/>
+            <path id="fc-arc" d="" fill="none" stroke="#10b981" stroke-width="22" stroke-linecap="round"/>
+            <line id="fc-needle" x1="150" y1="150" x2="45" y2="150" stroke="var(--g-text, #0f172a)" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="10" fill="var(--g-text, #0f172a)"/>
+            <text id="fc-num" x="150" y="110" text-anchor="middle" style="fill:var(--g-text, #0f172a);font-size:30px;font-weight:800">–</text>
+            <text x="150" y="142" text-anchor="middle" style="fill:var(--g-muted, #64748b);font-size:12px;letter-spacing:.08em">FOOD COST %</text>
+          </svg>
+          <div class="gauge-cap" id="fc-cap">Healthy food cost is ≤ 35%.</div>
+        </div>
+      </div>
+      <p class="g-title" style="margin-top:1rem">Top ingredient costs</p>
+      <div class="drivers" id="drivers"></div>
+      <div class="chart-detail" id="chartDetail" aria-live="polite" hidden></div>
+      <div class="g-math" id="summary-math" style="margin-top:1rem"></div>
+      <div class="g-btn-row no-print" style="margin-top:1rem">
+        <button class="g-btn g-btn-secondary" onclick="window.print()"><svg class="g-icon g-icon-sm" aria-hidden="true"><use href="#g-i-download"/></svg> Print / save PDF</button>
+        <button class="g-btn g-btn-ghost" onclick="exportData()"><svg class="g-icon g-icon-sm" aria-hidden="true"><use href="#g-i-share"/></svg> Export data</button>
+        <button class="g-btn g-btn-ghost" onclick="document.getElementById('import-file').click()"><svg class="g-icon g-icon-sm" aria-hidden="true"><use href="#g-i-upload"/></svg> Import data</button>
+        <input type="file" id="import-file" accept="application/json" hidden onchange="importData(this)">
+      </div>
+      <p class="g-error" id="rec-err"></p>
+    </div>
+  </div>
+  <div class="g-empty" id="rec-empty" hidden>
+    <p class="g-title">No recipes yet</p>
+    <p class="g-desc">Create your first recipe, add ingredient lines from your library, and see the true cost per piece.</p>
+    <div class="g-btn-row"><button class="g-btn g-btn-primary" onclick="newRecipe()">New recipe</button></div>
+  </div>
+</section>
+
+<a class="g-cta-strip" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" aria-label="Like this tool? Check out our other apps on Gumroad">
+  <span>Like this tool? Check out our other apps</span><span class="g-cta-arrow" aria-hidden="true">➔</span>
+</a>
+
+<footer class="g-footer">
+  RecipeCost <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this device.
+</footer>
+</div>
+<script>
+"use strict";
+/* ================= RecipeCost — offline recipe costing for home bakers ================= */
+var STORE_KEY = 'recipecost.v1';
+
+/* ---------- units ---------- */
+var MASS = { g: 1, kg: 1000, oz: 28.349523125, lb: 453.59237 };
+var VOL  = { ml: 1, l: 1000, tsp: 4.92892159375, tbsp: 14.78676478125, cup: 236.5882365 };
+var EACH = { each: 1, pc: 1, pcs: 1, piece: 1, pieces: 1 };
+var UNIT_GROUPS = [
+  { label: 'Weight', units: ['g', 'kg', 'oz', 'lb'] },
+  { label: 'Volume', units: ['ml', 'l', 'tsp', 'tbsp', 'cup'] },
+  { label: 'Count',  units: ['each'] }
+];
+function unitDim(u) {
+  u = String(u).toLowerCase();
+  if (Object.prototype.hasOwnProperty.call(MASS, u)) return 'mass';
+  if (Object.prototype.hasOwnProperty.call(VOL, u)) return 'vol';
+  return 'each';
+}
+function toBase(qty, unit) { /* grams | ml | count */
+  var u = String(unit).toLowerCase(), d = unitDim(u);
+  if (d === 'mass') return qty * MASS[u];
+  if (d === 'vol') return qty * VOL[u];
+  return qty;
+}
+function fmtMoney(n) {
+  if (!isFinite(n)) return '—';
+  return (n < 0 ? '-$' : '$') + Math.abs(n).toFixed(2);
+}
+function num(v) { var n = parseFloat(v); return isFinite(n) ? n : 0; }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+function uid() { return 'x' + Math.random().toString(36).slice(2, 10); }
+
+/* ---------- state ---------- */
+var state = { ingredients: [], recipes: [] };
+var sampleOn = false, sampleSnap = null;
+function load() {
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      var d = JSON.parse(raw);
+      if (d && Array.isArray(d.ingredients) && Array.isArray(d.recipes)) state = d;
+    }
+  } catch (e) { /* corrupted storage -> start fresh */ state = { ingredients: [], recipes: [] }; }
+  sanitizeState();
+  /* First run starts EMPTY — the flask toggle shows transient sample data instead of persisted demo. */
+}
+function save() {
+  if (sampleOn) return; /* sample data is transient — never persisted */
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+/* Harden against hand-edited / corrupted data (import file or localStorage):
+   guarantees the shapes recipeTotals/renderLines/renderIngredients assume. */
+function sanitizeState() {
+  if (!Array.isArray(state.ingredients)) state.ingredients = [];
+  if (!Array.isArray(state.recipes)) state.recipes = [];
+  state.ingredients = state.ingredients.filter(function (i) { return i && typeof i === 'object'; });
+  state.recipes = state.recipes.filter(function (r) { return r && typeof r === 'object'; });
+  var NUMS = ['yieldQty', 'laborHours', 'laborRate', 'packagingPerUnit', 'overheadPct', 'targetMarginPct'];
+  /* Imported ids are interpolated into HTML/attribute sinks on render, so only
+     uid()-safe ids survive: anything else is regenerated and references remapped.
+     Units are whitelisted so crafted strings can't slip into the cost math. */
+  var ID_OK = /^[A-Za-z0-9_-]+$/;
+  var UNIT_OK = Object.keys(MASS).concat(Object.keys(VOL)).concat(Object.keys(EACH));
+  function goodUnit(u) { u = String(u).toLowerCase(); return UNIT_OK.indexOf(u) !== -1 ? u : 'each'; }
+  var idMap = {};
+  var seenIngIds = {};
+  state.ingredients.forEach(function (i) {
+    if (typeof i.id !== 'string' || !ID_OK.test(i.id)) {
+      var old = i.id; i.id = uid(); if (old != null && !(String(old) in idMap)) idMap[String(old)] = i.id; /* first duplicate wins, matching the legal-id policy */
+    }
+    var preDupeId = i.id;
+    while (seenIngIds[i.id]) i.id = uid(); /* duplicate legal ids: first record keeps it, lines stay with first */
+    if (i.id !== preDupeId && !(preDupeId in idMap)) idMap[preDupeId] = i.id; /* keep idMap complete so remapped lines never dangle */
+    seenIngIds[i.id] = true;
+    i.pkgQty = num(i.pkgQty); i.pkgPrice = num(i.pkgPrice);
+    if (i.pkgQty < 0) i.pkgQty = 0; if (i.pkgPrice < 0) i.pkgPrice = 0;
+    i.pkgUnit = goodUnit(i.pkgUnit);
+  });
+  var seenRecipeIds = {};
+  state.recipes.forEach(function (r) {
+    if (typeof r.id !== 'string' || !ID_OK.test(r.id)) r.id = uid();
+    while (seenRecipeIds[r.id]) r.id = uid(); /* duplicate recipe ids: first record keeps it, the rest get fresh ids (no zombie recipes) */
+    seenRecipeIds[r.id] = true;
+    if (!Array.isArray(r.lines)) r.lines = [];
+    NUMS.forEach(function (f) { r[f] = Math.max(0, num(r[f])); });
+    if (r.targetMarginPct > 95) r.targetMarginPct = 95; /* import path honors the 95% ceiling too */
+    r.lines = r.lines.filter(function (ln) { return ln && typeof ln === 'object'; });
+    r.lines.forEach(function (ln) {
+      ln.qty = Math.max(0, num(ln.qty));
+      if (typeof ln.ingId === 'string' && idMap[ln.ingId]) ln.ingId = idMap[ln.ingId];
+      ln.unit = goodUnit(ln.unit);
+    });
+  });
+}
+/* ---------- sample data toggle (transient: snapshot user data, never persisted) ---------- */
+function paintSample() {
+  var b = document.getElementById('sampleToggle'); if (!b) return;
+  var l = sampleOn ? 'Clear sample data' : 'Try sample data';
+  b.setAttribute('aria-pressed', sampleOn ? 'true' : 'false');
+  b.setAttribute('aria-label', l); b.title = l;
+}
+function fillSample() {
+  var flour = uid(), sugar = uid(), butter = uid(), egg = uid(), choc = uid(), salt = uid();
+  state.ingredients = [
+    { id: flour, name: 'All-purpose flour', pkgQty: 5000, pkgUnit: 'g', pkgPrice: 4.99, gPerCup: 120 },
+    { id: sugar, name: 'Granulated sugar', pkgQty: 4000, pkgUnit: 'g', pkgPrice: 3.89, gPerCup: 200 },
+    { id: butter, name: 'Unsalted butter', pkgQty: 16, pkgUnit: 'oz', pkgPrice: 4.49, gPerCup: 227 },
+    { id: egg, name: 'Large eggs', pkgQty: 12, pkgUnit: 'each', pkgPrice: 3.29, gPerCup: 0, gPerEach: 50 },
+    { id: choc, name: 'Chocolate chips', pkgQty: 2000, pkgUnit: 'g', pkgPrice: 6.49, gPerCup: 170 },
+    { id: salt, name: 'Fine sea salt', pkgQty: 737, pkgUnit: 'g', pkgPrice: 2.79, gPerCup: 288 }
+  ];
+  var r = blankRecipe();
+  r.name = 'Chocolate Chip Cookies'; r.yieldQty = 24; r.yieldUnit = 'cookies';
+  r.laborHours = 0.75; r.laborRate = 18; r.packagingPerUnit = 0.25;
+  r.overheadPct = 15; r.targetMarginPct = 60;
+  r.lines = [
+    { ingId: flour, qty: 360, unit: 'g' },
+    { ingId: sugar, qty: 200, unit: 'g' },
+    { ingId: butter, qty: 226, unit: 'g' },
+    { ingId: egg, qty: 2, unit: 'each' },
+    { ingId: choc, qty: 340, unit: 'g' },
+    { ingId: salt, qty: 5, unit: 'g' }
+  ];
+  state.recipes = [r];
+  currentRecipeId = r.id;
+  renderIngredients(); renderRecipeSelect(); renderRecipe();
+  showTab('rec');
+}
+/* transient (uncommitted) form values live only in the DOM — snapshot by id so
+   sample-off restores the exact pre-sample form state even across re-renders */
+function snapForm() {
+  var o = {}, els = document.querySelectorAll('input[id],select[id],textarea[id]');
+  for (var i = 0; i < els.length; i++) { var e = els[i];
+    o[e.id] = (e.type === 'checkbox' || e.type === 'radio') ? (e.checked ? '1' : '0') : e.value; }
+  return o;
+}
+function restoreForm(snap) {
+  if (!snap) return;
+  for (var id in snap) { if (!Object.prototype.hasOwnProperty.call(snap, id)) continue;
+    var e = document.getElementById(id); if (!e) continue; var v = snap[id];
+    if (e.type === 'checkbox' || e.type === 'radio') e.checked = (v === '1'); else e.value = v; }
+}
+function setSample(on) {
+  if (on && !sampleOn) {
+    sampleSnap = JSON.stringify({ state: state, currentRecipeId: currentRecipeId,
+      tab: document.getElementById('tab-ing').getAttribute('aria-selected') === 'true' ? 'ing' : 'rec',
+      form: snapForm() });
+    sampleOn = true;
+    fillSample();
+  } else if (!on && sampleOn) {
+    sampleOn = false;
+    try { var s = JSON.parse(sampleSnap);
+      if (s && s.state) { state = s.state; currentRecipeId = s.currentRecipeId; } } catch (e) {}
+    sampleSnap = null;
+    renderIngredients(); renderRecipeSelect(); renderRecipe();
+    try { restoreForm(s.form); showTab(s.tab === 'rec' ? 'rec' : 'ing'); } catch (e) {}
+  }
+  paintSample();
+}
+
+/* ---------- subtle sounds (Web Audio oscillator, no files, offline) ---------- */
+var Sound = (function () {
+  var K = 'recipecost.sound', on = true, ctx = null;
+  try { if (window.localStorage.getItem(K) === 'off') on = false; } catch (e) {}
+  function ac() { try {
+    if (!ctx) { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ctx = new AC(); }
+    return ctx; } catch (e) { return null; } }
+  function tone(freq, dur, type, vol, delay) {
+    var c = ac(); if (!c) return;
+    function play() { try {
+      var t = c.currentTime + (delay || 0), o = c.createOscillator(), g = c.createGain();
+      o.type = type || 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.06, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + dur + 0.05); } catch (e) {} }
+    if (c.state === 'suspended') { c.resume().then(play, play); } else { play(); }
+  }
+  return {
+    isOn: function () { return on; },
+    toggle: function () { on = !on; try { window.localStorage.setItem(K, on ? 'on' : 'off'); } catch (e) {} return on; },
+    click: function () { if (on) tone(520, 0.06, 'sine', 0.045); },
+    select: function () { if (on) { tone(660, 0.07, 'sine', 0.055); tone(880, 0.09, 'sine', 0.045, 0.06); } },
+    success: function () { if (on) { tone(660, 0.09, 'sine', 0.06); tone(990, 0.12, 'sine', 0.05, 0.08); } },
+    error: function () { if (on) tone(170, 0.16, 'sawtooth', 0.045); },
+    toggleTheme: function () { if (on) tone(440, 0.06, 'triangle', 0.05); }
+  };
+})();
+function paintSoundBtn(btn) {
+  var on = Sound.isOn();
+  btn.innerHTML = on ? '&#128266;' : '&#128263;';
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  btn.setAttribute('aria-label', 'Sound: ' + (on ? 'on' : 'off'));
+  btn.title = 'Toggle sounds (' + (on ? 'on' : 'off') + ')';
+  btn.setAttribute('data-sound', on ? 'on' : 'muted');
+}
+function toggleSound(btn) {
+  Sound.toggle();
+  paintSoundBtn(btn);
+  Sound.click();
+}
+
+/* ---------- theme icon paint ---------- */
+function paintTheme() {
+  var t = document.documentElement.getAttribute('data-theme') || 'light', dark = t === 'dark';
+  var b = document.getElementById('themeToggle'); if (!b) return;
+  var l = dark ? 'Switch to light mode' : 'Switch to dark mode';
+  b.innerHTML = (dark) ? `<svg viewBox="0 0 48 48" width="32" height="32" aria-hidden="true"><g fill="#F59E0B"><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(0 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(45 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(90 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(135 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(180 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(225 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(270 24 24)"/><path d="M24 3.5 L27.2 13.5 L20.8 13.5 Z" transform="rotate(315 24 24)"/></g><circle cx="24" cy="24" r="10.5" fill="#FFC421"/><ellipse cx="19.5" cy="17.5" rx="2.2" ry="3" fill="#FFDF6B" transform="rotate(-25 19.5 17.5)"/></svg>` : "\uD83C\uDF19"; /* header spec: emoji shows the mode you GET */
+  b.setAttribute('aria-pressed', dark ? 'true' : 'false');
+  b.setAttribute('aria-label', l); b.title = l;
+  b.setAttribute('data-mode', dark ? 'dark' : 'light');
+}
+
+/* ---------- ingredient costing ---------- */
+function pkgBaseQty(ing) { return toBase(ing.pkgQty, ing.pkgUnit); }
+function unitCost(ing) { /* cost per gram / ml / each */
+  var b = pkgBaseQty(ing);
+  if (!(b > 0)) return 0;
+  return ing.pkgPrice / b;
+}
+function unitCostLabel(ing) {
+  var d = unitDim(ing.pkgUnit);
+  return d === 'mass' ? 'per gram' : d === 'vol' ? 'per ml' : 'each';
+}
+/* cost of qty+unit of ingredient ing. Returns {cost, approx} */
+function lineCost(ing, qty, unit) {
+  if (!(qty > 0)) return { cost: 0, approx: false };
+  var pd = unitDim(ing.pkgUnit), ld = unitDim(unit);
+  var uc = unitCost(ing);
+  if (pd === ld) return { cost: toBase(qty, unit) * uc, approx: false };
+  var gpc = num(ing.gPerCup), gpe = num(ing.gPerEach);
+  /* count <-> weight via grams-per-piece */
+  if (pd === 'each' && ld === 'mass') {
+    if (!(gpe > 0)) return { cost: 0, approx: false, err: 'needs grams-per-piece' };
+    var pq = ing.pkgQty * gpe;
+    if (!(pq > 0)) return { cost: 0, approx: false };
+    return { cost: toBase(qty, unit) * (ing.pkgPrice / pq), approx: false };
+  }
+  if (pd === 'mass' && ld === 'each') {
+    if (!(gpe > 0)) return { cost: 0, approx: false, err: 'needs grams-per-piece' };
+    return { cost: qty * gpe * uc, approx: false };
+  }
+  if (pd === 'each' || ld === 'each') return { cost: 0, approx: false, err: 'cannot convert' };
+  /* mass <-> volume via grams-per-cup */
+  var cups;
+  if (ld === 'vol') cups = toBase(qty, unit) / VOL.cup;
+  else {
+    if (!(gpc > 0)) return { cost: 0, approx: false, err: 'needs grams-per-cup' };
+    cups = toBase(qty, unit) / gpc;
+  }
+  var approx = !(gpc > 0);
+  if (pd === 'mass') return { cost: cups * (gpc > 0 ? gpc : VOL.cup) * uc, approx: approx };
+  return { cost: cups * VOL.cup * uc, approx: approx };
+}
+function lineCostHTML(ing, ln) {
+  var lc = ing ? lineCost(ing, num(ln.qty), ln.unit) : { cost: 0 };
+  if (lc.err) return '<span class="approx-flag" title="' + esc(lc.err) + ' — add it on the Ingredients tab">needs conversion</span>';
+  return fmtMoney(lc.cost) + (lc.approx ? ' <span class="approx-flag" title="Used water-density fallback — add grams-per-cup for accuracy">≈</span>' : '');
+}
+
+/* ---------- tabs ---------- */
+function showTab(which) {
+  var ing = which === 'ing';
+  document.getElementById('panel-ing').hidden = !ing;
+  document.getElementById('panel-rec').hidden = ing;
+  document.getElementById('tab-ing').setAttribute('aria-selected', ing ? 'true' : 'false');
+  document.getElementById('tab-rec').setAttribute('aria-selected', ing ? 'false' : 'true');
+  Sound.click();
+}
+
+/* ---------- ingredients UI ---------- */
+function fillUnitSelect() {
+  var sel = document.getElementById('ing-unit');
+  sel.innerHTML = '';
+  UNIT_GROUPS.forEach(function (g) {
+    var og = document.createElement('optgroup'); og.label = g.label;
+    g.units.forEach(function (u) {
+      var o = document.createElement('option'); o.value = u; o.textContent = u; og.appendChild(o);
+    });
+    sel.appendChild(og);
+  });
+}
+var editingIngId = null;
+function ingErr(msg) {
+  var el = document.getElementById('ing-err');
+  el.textContent = msg || ''; el.classList.toggle('show', !!msg);
+}
+function addIngredient() {
+  var name = document.getElementById('ing-name').value.trim();
+  var price = num(document.getElementById('ing-price').value);
+  var qty = num(document.getElementById('ing-qty').value);
+  var unit = document.getElementById('ing-unit').value;
+  var gpc = num(document.getElementById('ing-gpc').value);
+  var gpe = num(document.getElementById('ing-gpe').value);
+  if (!name) { Sound.error(); return ingErr('Give the ingredient a name.'); }
+  if (!(price >= 0) || !(qty > 0)) { Sound.error(); return ingErr('Enter a package price and a package size greater than zero.'); }
+  ingErr('');
+  if (editingIngId) {
+    var ing = state.ingredients.find(function (i) { return i.id === editingIngId; });
+    if (ing) { ing.name = name; ing.pkgPrice = price; ing.pkgQty = qty; ing.pkgUnit = unit; ing.gPerCup = gpc; ing.gPerEach = gpe; }
+    editingIngId = null;
+    document.getElementById('ing-add').textContent = 'Add ingredient';
+  } else {
+    state.ingredients.push({ id: uid(), name: name, pkgPrice: price, pkgQty: qty, pkgUnit: unit, gPerCup: gpc, gPerEach: gpe });
+  }
+  save(); clearIngForm(); renderIngredients(); renderRecipe(); Sound.success();
+}
+function clearIngForm() {
+  ['ing-name', 'ing-price', 'ing-qty', 'ing-gpc', 'ing-gpe'].forEach(function (id) { document.getElementById(id).value = ''; });
+  editingIngId = null; document.getElementById('ing-add').textContent = 'Add ingredient'; ingErr('');
+}
+function editIngredient(id) {
+  var ing = state.ingredients.find(function (i) { return i.id === id; });
+  if (!ing) return;
+  document.getElementById('ing-name').value = ing.name;
+  document.getElementById('ing-price').value = ing.pkgPrice;
+  document.getElementById('ing-qty').value = ing.pkgQty;
+  document.getElementById('ing-unit').value = ing.pkgUnit;
+  document.getElementById('ing-gpc').value = ing.gPerCup || '';
+  document.getElementById('ing-gpe').value = ing.gPerEach || '';
+  editingIngId = id;
+  document.getElementById('ing-add').textContent = 'Save changes';
+  document.getElementById('ing-name').focus();
+}
+function deleteIngredient(id) {
+  var used = state.recipes.some(function (r) { return r.lines.some(function (l) { return l.ingId === id; }); });
+  if (used && !confirm('This ingredient is used in a recipe. Delete it anyway?')) return;
+  state.ingredients = state.ingredients.filter(function (i) { return i.id !== id; });
+  state.recipes.forEach(function (r) { r.lines = r.lines.filter(function (l) { return l.ingId !== id; }); });
+  save(); renderIngredients(); renderRecipe(); Sound.click();
+}
+function renderIngredients() {
+  var tb = document.getElementById('ing-tbody');
+  tb.innerHTML = '';
+  document.getElementById('ing-count').textContent = state.ingredients.length;
+  document.getElementById('ing-empty').style.display = state.ingredients.length ? 'none' : '';
+  state.ingredients.forEach(function (ing) {
+    var tr = document.createElement('tr');
+    var uc = unitCost(ing);
+    var ucTxt = uc < 0.01 ? '$' + uc.toFixed(4) : fmtMoney(uc);
+    tr.innerHTML =
+      '<td>' + esc(ing.name) + '</td>' +
+      '<td class="num">' + esc(String(ing.pkgQty)) + ' ' + esc(ing.pkgUnit) + ' @ ' + fmtMoney(ing.pkgPrice) + '</td>' +
+      '<td class="num">' + ucTxt + ' ' + unitCostLabel(ing) + '</td>' +
+      '<td class="num no-print"><button class="g-btn g-btn-ghost g-btn-sm" onclick="editIngredient(\'' + ing.id + '\')">Edit</button> ' +
+      '<button class="g-btn g-btn-ghost g-btn-sm" onclick="deleteIngredient(\'' + ing.id + '\')">Delete</button></td>';
+    tb.appendChild(tr);
+  });
+}
+
+/* ---------- recipes ---------- */
+var currentRecipeId = null;
+function blankRecipe() {
+  return { id: uid(), name: '', yieldQty: 0, yieldUnit: 'pieces', lines: [],
+           laborHours: 0, laborRate: 0, packagingPerUnit: 0, overheadPct: 10, targetMarginPct: 50 };
+}
+function cur() { return state.recipes.find(function (r) { return r.id === currentRecipeId; }); }
+function renderRecipeSelect() {
+  var sel = document.getElementById('rec-select');
+  sel.innerHTML = '';
+  state.recipes.forEach(function (r) {
+    var o = document.createElement('option');
+    o.value = r.id; o.textContent = r.name || '(unnamed recipe)';
+    if (r.id === currentRecipeId) o.selected = true;
+    sel.appendChild(o);
+  });
+  var has = state.recipes.length > 0;
+  document.getElementById('rec-editor').hidden = !has;
+  document.getElementById('rec-empty').hidden = has;
+}
+function newRecipe() {
+  var r = blankRecipe();
+  state.recipes.push(r); currentRecipeId = r.id;
+  save(); renderRecipeSelect(); renderRecipe(); Sound.success();
+  document.getElementById('rec-name').focus();
+}
+function selectRecipe(id) { currentRecipeId = id; renderRecipe(); Sound.select(); }
+function deleteRecipe() {
+  var r = cur(); if (!r) return;
+  if (!confirm('Delete "' + (r.name || 'this recipe') + '"?')) return;
+  state.recipes = state.recipes.filter(function (x) { return x.id !== r.id; });
+  currentRecipeId = state.recipes.length ? state.recipes[0].id : null;
+  save(); renderRecipeSelect(); renderRecipe(); Sound.click();
+}
+function recField(field, val) {
+  var r = cur(); if (!r) return;
+  if (field !== 'name' && field !== 'yieldUnit') val = Math.max(0, val); /* typed negatives bypass min="0" */
+  if (field === 'targetMarginPct') { val = Math.min(95, val); document.getElementById('rec-margin').value = val; } /* enforce the <input max="95"> ceiling in code */
+  r[field] = val; save();
+  if (field === 'name') renderRecipeSelect(); /* keep the dropdown label in sync while typing */
+  renderSummary();
+}
+function lineField(idx, field, val) {
+  var r = cur(); if (!r || !r.lines[idx]) return;
+  if (field === 'qty') val = Math.max(0, val); /* typed negatives bypass min="0" */
+  r.lines[idx][field] = val; save();
+  /* update this line's cost in place — never rebuild the row while typing */
+  var cell = document.getElementById('linecost-' + idx);
+  if (cell) {
+    var ing = state.ingredients.find(function (i) { return i.id === r.lines[idx].ingId; });
+    cell.innerHTML = lineCostHTML(ing, r.lines[idx]);
+  }
+  renderSummary();
+}
+function addLine() {
+  var r = cur(); if (!r) return;
+  if (!state.ingredients.length) {
+    var e = document.getElementById('line-err');
+    e.textContent = 'Add ingredients to your library first (Ingredients tab).';
+    e.classList.add('show'); return;
+  }
+  r.lines.push({ ingId: state.ingredients[0].id, qty: 0, unit: state.ingredients[0].pkgUnit });
+  save(); renderLines(); renderSummary(); Sound.click();
+}
+function removeLine(idx) {
+  var r = cur(); if (!r) return;
+  r.lines.splice(idx, 1); save(); renderLines(); renderSummary(); Sound.click();
+}
+function lineUnitOptions(selected) {
+  var html = '';
+  UNIT_GROUPS.forEach(function (g) {
+    html += '<optgroup label="' + g.label + '">';
+    g.units.forEach(function (u) {
+      html += '<option value="' + u + '"' + (u === selected ? ' selected' : '') + '>' + u + '</option>';
+    });
+    html += '</optgroup>';
+  });
+  return html;
+}
+function renderLines() {
+  var r = cur(), host = document.getElementById('lines');
+  host.innerHTML = '';
+  document.getElementById('line-err').classList.remove('show');
+  if (!r) return;
+  r.lines.forEach(function (ln, idx) {
+    var ing = state.ingredients.find(function (i) { return i.id === ln.ingId; });
+    var row = document.createElement('div');
+    row.className = 'line-row';
+    var opts = state.ingredients.map(function (i) {
+      return '<option value="' + i.id + '"' + (i.id === ln.ingId ? ' selected' : '') + '>' + esc(i.name) + '</option>';
+    }).join('');
+    var lc = ing ? lineCost(ing, num(ln.qty), ln.unit) : { cost: 0 };
+    var costTxt = lineCostHTML(ing, ln);
+    row.innerHTML =
+      '<div class="g-field" style="margin:0"><select class="g-input" onchange="lineField(' + idx + ',\'ingId\',this.value)">' + opts + '</select></div>' +
+      '<div class="g-field" style="margin:0"><input class="g-input" type="number" min="0" step="any" placeholder="Qty" value="' + esc(String(ln.qty || '')) + '" oninput="lineField(' + idx + ',\'qty\',num(this.value))"></div>' +
+      '<div class="g-field" style="margin:0"><select class="g-input" onchange="lineField(' + idx + ',\'unit\',this.value)">' + lineUnitOptions(ln.unit) + '</select></div>' +
+      '<div class="num hide-sm" id="linecost-' + idx + '" style="font-variant-numeric:tabular-nums">' + costTxt + '</div>' +
+      '<div class="no-print"><button class="g-btn g-btn-ghost g-btn-sm" onclick="removeLine(' + idx + ')" aria-label="Remove line">✕</button></div>';
+    host.appendChild(row);
+  });
+}
+
+/* ---------- summary ---------- */
+function recipeTotals(r) {
+  var ingTotal = 0, approx = false, missing = 0, errGpc = 0, errGpe = 0, errConv = 0;
+  r.lines.forEach(function (ln) {
+    var ing = state.ingredients.find(function (i) { return i.id === ln.ingId; });
+    if (!ing) { missing++; return; }
+    var lc = lineCost(ing, num(ln.qty), ln.unit);
+    if (lc.err === 'needs grams-per-cup') errGpc++;
+    else if (lc.err === 'needs grams-per-piece') errGpe++;
+    else if (lc.err) errConv++;
+    ingTotal += lc.cost;
+    if (lc.approx) approx = true;
+  });
+  var labor = num(r.laborHours) * num(r.laborRate);
+  var pack = num(r.packagingPerUnit) * num(r.yieldQty);
+  var subtotal = ingTotal + labor + pack;
+  var overhead = subtotal * num(r.overheadPct) / 100;
+  var total = subtotal + overhead;
+  var y = num(r.yieldQty);
+  var perUnit = y > 0 ? total / y : 0;
+  var margin = num(r.targetMarginPct);
+  var price = (margin < 100 && margin >= 0 && y > 0) ? perUnit / (1 - margin / 100) : 0;
+  return { ingTotal: ingTotal, labor: labor, pack: pack, overhead: overhead, total: total,
+           perUnit: perUnit, price: price, profitUnit: price - perUnit,
+           profitBatch: (price - perUnit) * y, approx: approx, missing: missing,
+           errGpc: errGpc, errGpe: errGpe, errConv: errConv };
+}
+/* ---------- cost visuals: breakdown donut, ingredient bars, food-cost gauge ---------- */
+var CC_R = 95, CC_CX = 124, CC_CY = 124;
+var ccSel = null; /* 'ing' | 'lab' | 'pac' | 'ovh' | null */
+var ccLast = null; /* last recipeTotals, for spotlight repaints */
+var chartSpotKind = null; /* 'cost' | 'driver' | null — which visual owns #chartDetail */
+var driverSpotIdx = null; /* recipe line index spotlighted via the driver bars, or null */
+var CC_PARTS = [
+  ['ing', 'Ingredients', '#4f46e5'],
+  ['lab', 'Labor', '#10b981'],
+  ['pac', 'Packaging', '#f59e0b'],
+  ['ovh', 'Overhead', '#8b5cf6']
+];
+function ccPolar(deg) {
+  var rad = deg * Math.PI / 180;
+  return [CC_CX + CC_R * Math.cos(rad), CC_CY + CC_R * Math.sin(rad)];
+}
+function ccSegPath(frac, startDeg, gapDeg) {
+  if (!(frac > 0)) return '';
+  var a0 = startDeg + gapDeg / 2, a1 = startDeg + frac * 360 - gapDeg / 2;
+  if (frac >= 0.9999) { /* full ring: two arcs */
+    var p1 = ccPolar(-90), p2 = ccPolar(90);
+    return 'M ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2) +
+      ' A ' + CC_R + ' ' + CC_R + ' 0 1 1 ' + p2[0].toFixed(2) + ' ' + p2[1].toFixed(2) +
+      ' A ' + CC_R + ' ' + CC_R + ' 0 1 1 ' + p1[0].toFixed(2) + ' ' + p1[1].toFixed(2);
+  }
+  var s = ccPolar(a0), e = ccPolar(a1);
+  return 'M ' + s[0].toFixed(2) + ' ' + s[1].toFixed(2) +
+    ' A ' + CC_R + ' ' + CC_R + ' 0 ' + ((a1 - a0) > 180 ? 1 : 0) + ' 1 ' +
+    e[0].toFixed(2) + ' ' + e[1].toFixed(2);
+}
+function ccFlip(key) {
+  ccSel = (ccSel === key) ? null : key;
+  chartSpotKind = ccSel ? 'cost' : (driverSpotIdx !== null ? 'driver' : null);
+  if (ccLast) paintCostChart(ccLast);
+  renderChartDetail();
+  Sound.select();
+}
+/* Real breakdown behind the spotlighted cost slice or driver bar: every line behind
+   the number. Activating again (or the panel's close button) releases to totals. */
+function renderChartDetail() {
+  var box = document.getElementById('chartDetail');
+  if (!box) return;
+  var kind = chartSpotKind;
+  if (kind === 'cost' && !ccSel) kind = driverSpotIdx !== null ? 'driver' : null;
+  if (kind === 'driver' && driverSpotIdx === null) kind = ccSel ? 'cost' : null;
+  if (!kind) { box.hidden = true; box.innerHTML = ''; return; }
+  var t = ccLast, r = cur();
+  if (!t || !(t.total > 0) || !r) { box.hidden = true; box.innerHTML = ''; return; }
+  var title = '', sub = '', rows = [], foot = '';
+  if (kind === 'cost') {
+    var ci = CC_PARTS.filter(function (p) { return p[0] === ccSel; })[0];
+    var v = { ing: t.ingTotal, lab: t.labor, pac: t.pack, ovh: t.overhead }[ccSel];
+    title = ci[1] + ' — breakdown';
+    sub = fmtMoney(v) + ' · ' + (v / t.total * 100).toFixed(1) + '% of ' + fmtMoney(t.total) + ' batch';
+    if (ccSel === 'ing') {
+      rows = r.lines.map(function (ln) {
+        var ing = state.ingredients.find(function (i) { return i.id === ln.ingId; });
+        var lc = ing ? lineCost(ing, num(ln.qty), ln.unit) : { cost: 0 };
+        return { name: ing ? ing.name : '(missing ingredient)',
+          meta: num(ln.qty) + ' ' + (ln.unit || '') + ' · ' + (t.ingTotal > 0 ? (lc.cost / t.ingTotal * 100).toFixed(1) : '0') + '% of ingredients',
+          val: fmtMoney(lc.cost), cost: lc.cost };
+      }).filter(function (x) { return x.cost > 0; })
+        .sort(function (a, b) { return b.cost - a.cost; })
+        .map(function (x) { return { name: x.name, meta: x.meta, val: x.val }; });
+    } else if (ccSel === 'lab') {
+      rows = [{ name: num(r.laborHours) + ' hrs × ' + fmtMoney(num(r.laborRate)) + '/hr', meta: 'labor', val: fmtMoney(t.labor) }];
+      if (num(r.yieldQty) > 0) rows.push({ name: 'Per ' + String(r.yieldUnit || 'unit'), meta: 'labor share', val: fmtMoney(t.labor / num(r.yieldQty)) });
+    } else if (ccSel === 'pac') {
+      rows = [{ name: fmtMoney(num(r.packagingPerUnit)) + ' × ' + num(r.yieldQty) + ' ' + String(r.yieldUnit || 'units'), meta: 'packaging', val: fmtMoney(t.pack) }];
+    } else {
+      var sub2 = t.ingTotal + t.labor + t.pack;
+      rows = [{ name: num(r.overheadPct) + '% of ' + fmtMoney(sub2), meta: 'ingredients + labor + packaging', val: fmtMoney(t.overhead) }];
+    }
+  } else {
+    var ln = r.lines[driverSpotIdx];
+    var ing = ln ? state.ingredients.find(function (i) { return i.id === ln.ingId; }) : null;
+    if (!ln || !ing) { box.hidden = true; box.innerHTML = ''; return; }
+    var lc = lineCost(ing, num(ln.qty), ln.unit);
+    title = ing.name + ' — cost detail';
+    sub = fmtMoney(lc.cost) + ' · ' + (t.ingTotal > 0 ? (lc.cost / t.ingTotal * 100).toFixed(1) : '0') + '% of ingredient costs';
+    rows = [
+      { name: 'Quantity used', meta: 'recipe line', val: num(ln.qty) + ' ' + (ln.unit || '') },
+      { name: 'Line cost', meta: 'this recipe', val: fmtMoney(lc.cost) },
+      { name: 'Share of ingredients', meta: fmtMoney(t.ingTotal) + ' total', val: (t.ingTotal > 0 ? (lc.cost / t.ingTotal * 100).toFixed(1) : '0') + '%' }
+    ];
+    foot = '<div class="cd-foot"><button type="button" class="g-btn g-btn-secondary" id="chartDetailFind">Find in recipe →</button></div>';
+  }
+  var html = '<div class="cd-head"><div><div class="cd-title">' + esc(title) + '</div>' +
+    '<div class="cd-sub">' + esc(sub) + '</div></div>' +
+    '<button type="button" class="cd-x" id="chartDetailX" aria-label="Clear selection and show totals">×</button></div>';
+  if (rows.length) {
+    html += '<div class="cd-rows">' + rows.map(function (x) {
+      return '<div class="cd-row"><span class="cd-name">' + esc(x.name) + '</span>' +
+        '<span class="cd-meta">' + esc(x.meta) + '</span>' +
+        '<span class="cd-val">' + esc(x.val) + '</span></div>';
+    }).join('') + '</div>';
+  } else html += '<p class="empty">No lines behind this number.</p>';
+  box.innerHTML = html + foot; box.hidden = false;
+  var x = document.getElementById('chartDetailX');
+  if (x) x.addEventListener('click', function () {
+    if (kind === 'cost' && ccSel) ccFlip(ccSel);
+    else if (driverSpotIdx !== null) driverSpot(driverSpotIdx);
+  });
+  var fb = document.getElementById('chartDetailFind');
+  if (fb) fb.addEventListener('click', function () { driverFind(driverSpotIdx); });
+}
+function paintCostChart(t) {
+  var vals = { ing: t.ingTotal, lab: t.labor, pac: t.pack, ovh: t.overhead };
+  var total = t.total, ok = total > 0;
+  if (ccSel && !(vals[ccSel] > 0)) ccSel = null;
+  var off = -90, gapDeg = 360 * 0.012;
+  CC_PARTS.forEach(function (p) {
+    var el = document.getElementById('cc-' + p[0]);
+    if (!el) return;
+    var frac = ok ? vals[p[0]] / total : 0;
+    el.setAttribute('d', ccSegPath(frac, off, gapDeg));
+    var mid = off + frac * 180;
+    if (ccSel === p[0] && frac > 0) {
+      var rad = mid * Math.PI / 180;
+      el.style.transform = 'translate(' + (Math.cos(rad) * 10).toFixed(1) + 'px,' + (Math.sin(rad) * 10).toFixed(1) + 'px)';
+      el.style.opacity = '1';
+    } else {
+      el.style.transform = '';
+      el.style.opacity = ccSel ? '0.4' : '1';
+    }
+    off += frac * 360;
+  });
+  var leg = document.getElementById('cc-legend');
+  leg.innerHTML = '';
+  CC_PARTS.forEach(function (p) {
+    var v = vals[p[0]], pct = ok ? v / total * 100 : 0;
+    var chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'cc-chip' + (ccSel === p[0] ? ' spot' : '');
+    chip.setAttribute('aria-pressed', ccSel === p[0] ? 'true' : 'false');
+    chip.setAttribute('aria-label', p[1] + ' ' + fmtMoney(v) + ' — activate to spotlight');
+    chip.innerHTML = '<span class="dot" style="background:' + p[2] + '"></span>' +
+      '<span>' + esc(p[1]) + '</span> <span class="amt">' + fmtMoney(v) + '</span>' +
+      '<span class="pct">' + (ok ? pct.toFixed(1) + '%' : '') + '</span>';
+    (function (key, hasVal) {
+      chip.addEventListener('click', function () { if (hasVal) ccFlip(key); });
+    })(p[0], ok && v > 0);
+    leg.appendChild(chip);
+  });
+  var tot = document.getElementById('cc-total'), sub = document.getElementById('cc-sub');
+  if (ok && ccSel) {
+    var ci = CC_PARTS.filter(function (p) { return p[0] === ccSel; })[0];
+    tot.textContent = fmtMoney(vals[ccSel]);
+    sub.textContent = ci[1] + ' · ' + (vals[ccSel] / total * 100).toFixed(1) + '% of batch';
+  } else {
+    tot.textContent = ok ? fmtMoney(total) : '–';
+    sub.textContent = ok ? 'batch cost' : 'add ingredient lines';
+  }
+}
+function wireCostChart() {
+  CC_PARTS.forEach(function (p) {
+    var el = document.getElementById('cc-' + p[0]);
+    if (!el) return;
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', p[1] + ' slice — activate to spotlight');
+    (function (key) {
+      function go() {
+        if (!ccLast || !(ccLast.total > 0)) return;
+        var v = { ing: ccLast.ingTotal, lab: ccLast.labor, pac: ccLast.pack, ovh: ccLast.overhead }[key];
+        if (v > 0) ccFlip(key);
+      }
+      el.addEventListener('click', go);
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+      });
+    })(p[0]);
+  });
+}
+/* top ingredient cost bars — click a bar to find that line in the recipe */
+function paintDrivers(r, t) {
+  var host = document.getElementById('drivers');
+  host.innerHTML = '';
+  if (!r || !r.lines.length) return;
+  var rows = [];
+  r.lines.forEach(function (ln, idx) {
+    var ing = state.ingredients.find(function (i) { return i.id === ln.ingId; });
+    var lc = ing ? lineCost(ing, num(ln.qty), ln.unit) : { cost: 0 };
+    if (lc.cost > 0) rows.push({ idx: idx, name: ing ? ing.name : '(missing ingredient)', cost: lc.cost });
+  });
+  rows.sort(function (a, b) { return b.cost - a.cost; });
+  rows = rows.slice(0, 6);
+  if (!rows.length) return;
+  var max = rows[0].cost;
+  rows.forEach(function (dr) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'driver-row';
+    b.setAttribute('data-idx', dr.idx);
+    b.setAttribute('aria-label', dr.name + ' costs ' + fmtMoney(dr.cost) + ' — activate to spotlight');
+    b.innerHTML = '<span class="d-name">' + esc(dr.name) + '</span>' +
+      '<span class="d-track"><span class="d-fill" style="display:block;width:' + (dr.cost / max * 100).toFixed(1) + '%"></span></span>' +
+      '<span class="d-val">' + fmtMoney(dr.cost) + '</span>';
+    (function (idx) { b.addEventListener('click', function () { driverSpot(idx); }); })(dr.idx);
+    host.appendChild(b);
+  });
+  /* spotlight survives re-renders; stale index clears */
+  if (driverSpotIdx !== null && !(r.lines[driverSpotIdx])) {
+    driverSpotIdx = null; chartSpotKind = ccSel ? 'cost' : null;
+  }
+  paintDriverSpot();
+  renderChartDetail();
+}
+/* top ingredient bars use the unified spotlight: dim the rest, show the cost detail
+   (the find-in-recipe jump now lives on a button inside the detail panel) */
+function driverSpot(idx) {
+  driverSpotIdx = (driverSpotIdx === idx) ? null : idx;
+  chartSpotKind = driverSpotIdx !== null ? 'driver' : (ccSel ? 'cost' : null);
+  paintDriverSpot();
+  renderChartDetail();
+  if (driverSpotIdx !== null) Sound.select(); else Sound.click();
+}
+function paintDriverSpot() {
+  Array.prototype.forEach.call(document.querySelectorAll('#drivers .driver-row'), function (b) {
+    var on = driverSpotIdx !== null && parseInt(b.getAttribute('data-idx'), 10) === driverSpotIdx;
+    b.classList.toggle('spot', on);
+    b.classList.toggle('dim', driverSpotIdx !== null && !on);
+  });
+}
+/* Esc clears any chart spotlight (cost donut slice / chip / driver bar) */
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape') return;
+  if (!ccSel && driverSpotIdx === null) return;
+  ccSel = null; driverSpotIdx = null; chartSpotKind = null;
+  if (ccLast) paintCostChart(ccLast);
+  paintDriverSpot(); renderChartDetail(); Sound.click();
+});
+function driverFind(idx) {
+  var rows = document.getElementById('lines').children;
+  Array.prototype.forEach.call(rows, function (x) { x.classList.remove('flash'); });
+  var row = rows[idx];
+  if (!row) return;
+  row.classList.add('flash');
+  try { row.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) {}
+  Sound.select();
+  setTimeout(function () { row.classList.remove('flash'); }, 1600);
+}
+/* food-cost gauge: needle over 0–60%, healthy at or under 35% */
+function paintFoodGauge(t, pct, ok) {
+  var arc = document.getElementById('fc-arc');
+  if (!arc) return;
+  var f = ok ? pct / 60 : 0;
+  if (f > 1) f = 1;
+  var th = (180 - f * 180) * Math.PI / 180;
+  arc.setAttribute('d', ok ? 'M45 150 A105 105 0 0 1 ' + (150 + 105 * Math.cos(th)).toFixed(1) + ' ' + (150 - 105 * Math.sin(th)).toFixed(1) : '');
+  arc.setAttribute('stroke', !ok ? '#94a3b8' : (pct <= 35 ? '#10b981' : (pct <= 45 ? '#f59e0b' : '#ef4444')));
+  var nd = document.getElementById('fc-needle');
+  nd.setAttribute('x2', (150 + 78 * Math.cos(th)).toFixed(1));
+  nd.setAttribute('y2', (150 - 78 * Math.sin(th)).toFixed(1));
+  document.getElementById('fc-num').textContent = ok ? pct.toFixed(1) + '%' : '–';
+  document.getElementById('fc-cap').textContent = !ok ? 'Set a yield and target margin to price this recipe.' :
+    (pct <= 35 ? 'Healthy — at or under the 35% target.' :
+    (pct <= 45 ? 'High — consider raising the price or trimming costs.' : 'Too high — this recipe loses margin fast.'));
+}
+/* KPI cards copy their value on click */
+function copyKpiText(txt, el) {
+  function flash() {
+    var v = el.querySelector('.v'); if (!v) return;
+    var orig = v.textContent;
+    v.textContent = 'Copied';
+    Sound.select();
+    setTimeout(function () { v.textContent = orig; }, 900);
+  }
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(flash, flash);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      ta.remove(); flash();
+    }
+  } catch (e) { flash(); }
+}
+function wireKpis() {
+  var grid = document.getElementById('summary-grid');
+  if (!grid) return;
+  function act(target) {
+    var k = target.closest ? target.closest('.kpi') : null;
+    if (!k) return;
+    var v = k.querySelector('.v');
+    if (v) copyKpiText(v.textContent.trim(), k);
+  }
+  grid.addEventListener('click', function (e) { act(e.target); });
+  grid.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(e.target); }
+  });
+}
+function renderSummary() {
+  var r = cur(); if (!r) return;
+  var t = recipeTotals(r);
+  var y = num(r.yieldQty);
+  var foodPct = (t.price > 0 && y > 0) ? (t.ingTotal / (t.price * y) * 100) : 0;
+  function kpi(label, val, cls) {
+    var l = esc(label);
+    return '<div class="kpi" tabindex="0" role="button" title="Click to copy" aria-label="Copy ' + l + ': ' + esc(val) + '"><div class="k">' + l + '</div><div class="v' + (cls ? ' ' + cls : '') + '">' + val + '</div></div>';
+  }
+  /* singular-ish unit word for "Cost per cookie" style labels ("cookies" -> "cookie") */
+  function perUnitWord() {
+    var w = String(r.yieldUnit || 'piece');
+    return (/s$/i.test(w) && w.length > 2) ? w.slice(0, -1) : w;
+  }
+  var priceCls = t.price > 0 ? 'good' : '';
+  document.getElementById('summary-grid').innerHTML =
+    kpi('Total batch cost', fmtMoney(t.total)) +
+    kpi('Cost per ' + perUnitWord(), fmtMoney(t.perUnit)) +
+    kpi('Suggested price', t.price > 0 ? fmtMoney(t.price) : '—', priceCls) +
+    kpi('Profit per ' + perUnitWord(), t.price > 0 ? fmtMoney(t.profitUnit) : '—') +
+    kpi('Profit per batch', t.price > 0 ? fmtMoney(t.profitBatch) : '—') +
+    kpi('Food cost %', t.price > 0 ? foodPct.toFixed(1) + '%' : '—', foodPct > 35 ? 'warn' : '');
+  ccLast = t;
+  paintCostChart(t);
+  paintDrivers(r, t);
+  paintFoodGauge(t, foodPct, t.price > 0 && y > 0);
+  var math =
+    'Ingredients ' + fmtMoney(t.ingTotal) + ' + labor ' + fmtMoney(t.labor) +
+    ' + packaging ' + fmtMoney(t.pack) + ' + overhead ' + fmtMoney(t.overhead) +
+    ' = ' + fmtMoney(t.total) + ' total' +
+    (y > 0 ? ' ÷ ' + y + ' = ' + fmtMoney(t.perUnit) + ' per ' + esc(perUnitWord()) : '') +
+    (t.price > 0 ? ' → price at ' + num(r.targetMarginPct) + '% margin: ' +
+      fmtMoney(t.perUnit) + ' ÷ (1 − ' + (num(r.targetMarginPct) / 100).toFixed(2) + ') = ' + fmtMoney(t.price) : '');
+  if (t.approx) math += ' · <span class="approx-flag">≈ some lines used water-density fallback — add grams-per-cup on the Ingredients tab for exact costs</span>';
+  if (t.errGpc) math += ' · <span class="approx-flag">' + t.errGpc + ' line(s) need a grams-per-cup value to cost</span>';
+  if (t.errGpe) math += ' · <span class="approx-flag">' + t.errGpe + ' line(s) need a grams-per-piece value to cost</span>';
+  if (t.errConv) math += ' · <span class="approx-flag">' + t.errConv + ' line(s) cannot convert between count and weight/volume</span>';
+  if (t.missing) math += ' · <span class="approx-flag">' + t.missing + ' line(s) reference a missing ingredient — re-link them above</span>';
+  document.getElementById('summary-math').innerHTML = math;
+}
+function renderRecipe() {
+  var r = cur();
+  renderRecipeSelect();
+  if (!r) { renderSummary && null; return; }
+  document.getElementById('rec-name').value = r.name || '';
+  document.getElementById('rec-yield').value = r.yieldQty || '';
+  document.getElementById('rec-yieldunit').value = r.yieldUnit || 'pieces';
+  document.getElementById('rec-hours').value = r.laborHours || '';
+  document.getElementById('rec-rate').value = r.laborRate || '';
+  document.getElementById('rec-pack').value = r.packagingPerUnit || '';
+  document.getElementById('rec-oh').value = r.overheadPct;
+  document.getElementById('rec-margin').value = r.targetMarginPct;
+  renderLines(); renderSummary();
+}
+
+/* ---------- export / import ---------- */
+function download(name, text, type) {
+  var blob = new Blob([text], { type: type || 'application/json' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function exportData() { download('recipecost-backup.json', JSON.stringify(state, null, 2)); Sound.success(); }
+function importData(input) {
+  var f = input.files && input.files[0]; if (!f) return;
+  if (sampleOn) setSample(false); /* exit sample mode first: save() is a no-op while it's on, and turning it off later would wipe the import */
+  var rd = new FileReader();
+  rd.onload = function () {
+    try {
+      var d = JSON.parse(rd.result);
+      if (!d || !Array.isArray(d.ingredients) || !Array.isArray(d.recipes)) throw new Error('bad file');
+      state = d; sanitizeState();
+      currentRecipeId = state.recipes.length ? state.recipes[0].id : null;
+      save(); renderIngredients(); renderRecipe(); Sound.success();
+    } catch (e) {
+      var el = document.getElementById('rec-err');
+      el.textContent = 'Could not import that file — it is not a RecipeCost backup.';
+      el.classList.add('show'); Sound.error();
+    }
+    input.value = '';
+  };
+  rd.readAsText(f);
+}
+
+/* ---------- init ---------- */
+document.addEventListener('DOMContentLoaded', function () {
+  load();
+  fillUnitSelect();
+  renderIngredients();
+  currentRecipeId = state.recipes.length ? state.recipes[0].id : null;
+  renderRecipe();
+  paintTheme(); paintSample();
+  wireCostChart(); wireKpis();
+  var sb = document.getElementById('soundToggle');
+  if (sb) paintSoundBtn(sb);
+});
+</script>
+</body>
+</html>
