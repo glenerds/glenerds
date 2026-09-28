@@ -1060,9 +1060,13 @@ function renderDonut(svg,wrap,data,prefix,title,defNote,setSpot,getSpot){
   const hTitle=$(prefix+'-donut-title'),hNote=$(prefix+'-donut-note');
   data.forEach((d,i)=>{
     const frac=Math.max(0,d.v)/tot,a1=a0+frac*360;
-    const p=svgEl('path',{d:donutPath(cx,cy,r,ir,a0,Math.max(a0+0.5,a1)),
-      fill:DONUT_COLORS[i%DONUT_COLORS.length],class:'g-seg',tabindex:'0',role:'button',
-      'aria-label':d.n+': '+d.detail});
+    const segColor=DONUT_COLORS[i%DONUT_COLORS.length];
+    const p=frac>=1
+      ?svgEl('circle',{cx:cx,cy:cy,r:(r+ir)/2,fill:'none',stroke:segColor,'stroke-width':r-ir,
+        class:'g-seg',tabindex:'0',role:'button','aria-label':d.n+': '+d.detail})
+      :svgEl('path',{d:donutPath(cx,cy,r,ir,a0,Math.max(a0+0.5,a1)),
+        fill:segColor,class:'g-seg',tabindex:'0',role:'button',
+        'aria-label':d.n+': '+d.detail});
     if(getSpot()===i)p.classList.add('spot');
     const toggleIdx=(idx)=>{setSpot(getSpot()===idx?-1:idx);
       const cur=getSpot();
