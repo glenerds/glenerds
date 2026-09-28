@@ -450,6 +450,8 @@ function load(){
     var raw=localStorage.getItem(LS_STATE); if(!raw) return false;
     var s=JSON.parse(raw); if(!s||typeof s!=="object") return false;
     var debts=(Array.isArray(s.debts)?s.debts:[]).map(sanitizeDebt).filter(Boolean);
+    var seenL=Object.create(null); /* corrupt localStorage can hold duplicate ids — regenerate like the import path does */
+    debts.forEach(function(d){ if(seenL[d.id]) d.id=uid(); seenL[d.id]=1; });
     state.debts=debts;
     var ids=debts.map(function(d){return d.id;});
     state.order=(Array.isArray(s.order)?s.order:[]).filter(function(id,ix,arr){return ids.indexOf(id)>=0&&arr.indexOf(id)===ix;});
@@ -617,7 +619,11 @@ function simulate(strategy, extraMonthly){
     prevBal=bal;
     if(streak>=6) return {never:true,reason:"growing"};
   }
-  if(month>=MAX_MONTHS) return {never:true,reason:"toolong"};
+  if(month>=MAX_MONTHS){ /* a payoff landing exactly on month 600 is real — only report toolong if a balance actually remains */
+    var left=false;
+    for(var i=0;i<debts.length;i++){ if(debts[i].bal>0.004){left=true;break;} }
+    if(left) return {never:true,reason:"toolong"};
+  }
   var payoff=new Date(startY,startM+month-1,1);
   return {never:false,months:month,totalInterest:totalInterest,totalPaid:totalPaid,
     startBal:startBal,schedule:schedule,paidOff:paidOff,
@@ -754,7 +760,7 @@ function paintChartCap(){
     ["snowball","avalanche","custom"].forEach(function(s){
       var r=res[s]; if(r.never||!r.schedule.length) return;
       var pt=null; for(var i=0;i<r.schedule.length;i++){ if(r.schedule[i].month<=m) pt=r.schedule[i]; else break; }
-      parts.push(STRAT_NAMES[s]+" "+money(pt?pt.balance:0).replace(".00",""));
+      parts.push(STRAT_NAMES[s]+" "+money(pt?pt.balance:r.startBal).replace(".00",""));
     });
     cap.textContent="Month "+m+" — remaining balance: "+parts.join(" · ")+" — click the chart again to clear.";
     return;
@@ -862,7 +868,7 @@ function drawChart(){
     ctx.stroke(); ctx.globalAlpha=1;
   });
   if(window._chartSpot!=null){
-    var sx=padL+iw*window._chartSpot/maxM;
+    var sx=padL+iw*Math.min(window._chartSpot,maxM)/maxM;
     ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle=dark?"#a5b4fc":"#4f46e5"; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.moveTo(sx,padT); ctx.lineTo(sx,padT+ih); ctx.stroke(); ctx.restore();
   }
@@ -936,7 +942,7 @@ function renderDonut(){
     det.innerHTML="Total balance <strong>"+money(total)+"</strong> across "+debts.length+
       " debt"+(debts.length>1?"s":"")+" — click a slice or legend item for details.";
   }
-  if(fk){ var ne=svg.querySelector('circle.donut-seg[data-did="'+fk+'"]')||leg.querySelector('button.dl-item[data-did="'+fk+'"]'); if(ne)ne.focus({preventScroll:true}); }
+  if(fk){ var fkq=String(fk).replace(/"/g,'\\"'); var ne=svg.querySelector('circle.donut-seg[data-did="'+fkq+'"]')||leg.querySelector('button.dl-item[data-did="'+fkq+'"]'); if(ne)ne.focus({preventScroll:true}); }
 }
 function renderTimeline(results){
   var tl=$("payoffTl"), note=$("tlNote"), lab=$("tlStrat");
@@ -980,7 +986,7 @@ function renderTimeline(results){
   }else{
     note.textContent="Click a step to see that debt's payoff details.";
   }
-  if(rfk){ var rne=tl.querySelector('[data-fk="'+rfk+'"]'); if(rne) rne.focus({preventScroll:true}); }
+  if(rfk){ var rfkq=String(rfk).replace(/"/g,'\\"'); var rne=tl.querySelector('[data-fk="'+rfkq+'"]'); if(rne) rne.focus({preventScroll:true}); }
 }
 
 function renderSchedule(){
