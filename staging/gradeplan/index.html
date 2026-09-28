@@ -1266,7 +1266,7 @@ function calcCourse(){
     if(isNaN(w)||isNaN(s)){if(ins[0].value.trim()!==''||ins[1].value!==''||ins[2].value!=='')skipped++;continue;}
     if(w<0||w>100)return showErr('c-err','Weights must be between 0 and 100.'),$ ('c-res').classList.remove('show');
     if(s<0||s>100)return showErr('c-err','Scores must be between 0 and 100.'),$ ('c-res').classList.remove('show');
-    ok=true;tw+=w;ts+=w*s;lines.push('  '+name+': '+w+'% × '+s+'% = '+r2(w*s));barData.push({n:name,s:s,w:w});
+    ok=true;tw+=w;ts+=w*s;lines.push('  '+name+': '+w+' × '+s+' = '+r2(w*s));barData.push({n:name,s:s,w:w});
   }
   if(!ok)return $('c-res').classList.remove('show');
   if(tw===0)return showErr('c-err','Total weight is 0 — add weights to your categories.'),$ ('c-res').classList.remove('show');
@@ -1279,7 +1279,7 @@ function calcCourse(){
   for(const [bi,b] of barData.entries()){const pct=Math.max(0,Math.min(100,b.s));cbars+='<div class="g-bar-row" data-bi="'+bi+'" tabindex="0" role="button" aria-pressed="false" aria-label="'+esc(b.n)+' — click to spotlight its donut slice"><span class="g-bar-name">'+esc(b.n)+'</span><span class="g-bar-track"><span class="g-bar-fill '+barCls(pct)+'" style="width:'+r2(pct)+'%"></span></span><span class="g-bar-val">'+r2(b.s)+'%</span></div>';}
   $('c-bars').innerHTML=cbars;
   renderDonut($('c-donut'),$('c-donut-wrap'),barData.map(b=>({n:b.n,v:b.w,
-    detail:b.n+': '+r2(b.w)+'% weight × '+r2(b.s)+'% score = '+r2(b.w*b.s)+' weighted points'})),
+    detail:b.n+': '+r2(b.w)+' × '+r2(b.s)+' = '+r2(b.w*b.s)+' weighted points'})),
     'c','Weight share','Each slice is a category\'s share of total weight. Click a slice for details.',
     v=>cSpot=v,()=>cSpot);
   $('c-res').classList.add('show');
@@ -1321,7 +1321,7 @@ function calcGpa(){
     if(cr<0||cr>12)return showErr('g-err','Credits must be between 0 and 12.'),$ ('g-res').classList.remove('show');
     const pts=POINTS[gr]+(weighted&&hon&&gr!=='F'?1.0:0);
     ok=true;tc+=cr;tqp+=pts*cr;
-    lines.push('  '+t+': '+gr+' → '+r2(POINTS[gr])+(weighted&&hon&&gr!=='F'?' +1.0 (H/AP)':'')+' × '+cr+' cr = '+r2(pts*cr)+' pts');
+    lines.push('  '+t+': '+gr+' → '+(weighted&&hon&&gr!=='F'?'('+r2(POINTS[gr])+' + 1.0 H/AP)':r2(POINTS[gr]))+' × '+cr+' cr = '+r2(pts*cr)+' pts');
     gBarData.push({t:t,pts:pts,gr:gr,qp:r2(pts*cr),cr:cr});
   }
   if(!ok)return $('g-res').classList.remove('show');
