@@ -179,11 +179,11 @@ footer.site a{color:var(--primary)}
 .trend-point{fill:var(--card);stroke:var(--primary);stroke-width:2.5;cursor:pointer}
 .trend-point.spot{fill:var(--primary)}
 .trend-point:focus{outline:none;filter:drop-shadow(0 0 3px var(--primary2))}
-.chart-detail{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface)}
+.chart-detail{margin-top:22px;border:1px solid var(--border);border-radius:12px;padding:14px 16px;background:var(--card)}
 .cd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
 .cd-title{font-weight:800;font-size:1.02rem}
 .cd-sub{color:var(--muted);font-size:.85rem;margin-top:2px}
-.cd-x{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:1.25rem;line-height:1;cursor:pointer}
+.cd-x{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:1.25rem;line-height:1;cursor:pointer}
 .cd-rows{display:grid;gap:6px;max-height:260px;overflow:auto}
 .cd-row{display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-radius:8px;background:var(--card)}
 .cd-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.88rem}
@@ -450,6 +450,8 @@ function snapTransient(){
   s.misc.renameId=renameId;s.misc.editingId=editingId;s.misc.pendingPhoto=pendingPhoto;
   s.misc.addItemLabel=$("addItemLabel").textContent;
   s.misc.cancelHidden=$("cancelEditBtn").hidden;
+  s.misc.roomFilterSpot=roomFilterSpot;
+  s.misc.chartSpot=(typeof chartSpot!=="undefined"?chartSpot:null);
   ["roomNotice","itemNotice","dataNotice"].forEach(function(id){
     var n=$(id);s.notices[id]={t:n.textContent,c:n.className};});
   return s;}
@@ -466,6 +468,8 @@ function restoreTransient(s){
   renameId=s.misc.renameId;editingId=s.misc.editingId;pendingPhoto=s.misc.pendingPhoto;
   $("addItemLabel").textContent=s.misc.addItemLabel||"Add item";
   $("cancelEditBtn").hidden=!!s.misc.cancelHidden;
+  if(s.misc.hasOwnProperty("roomFilterSpot"))roomFilterSpot=s.misc.roomFilterSpot;
+  if(s.misc.hasOwnProperty("chartSpot")&&typeof chartSpot!=="undefined")chartSpot=s.misc.chartSpot;
   for(var id in s.notices){var n=$(id);
     if(n){n.textContent=s.notices[id].t;n.className=s.notices[id].c;}}}
 function setSample(on){
@@ -493,6 +497,11 @@ function setSample(on){
       pendingPhoto=trans.misc.pendingPhoto;$("itemPhoto").value="";}
     renderAll();
     restoreTransient(trans);
+    /* Re-sync after transient restore: restoreTransient now restores roomFilterSpot
+       and chartSpot, but renderAll() ran before the restore, so re-render rooms
+       (.spot highlight), items (filter), and charts (bar highlight) to reflect
+       the restored spotlight state. */
+    try{renderRooms();renderItems();renderCharts();}catch(e){}
     try{$("demoBar").style.display="none";}catch(e){}
   }
   paintSample();}
@@ -593,8 +602,8 @@ function renderRooms(){
      is left with no valid selection (blank dropdown). */
   if(cur&&f.indexOf('value="'+esc(cur)+'"')>=0)$("filterRoom").value=cur;
   /* re-apply the room-row spotlight after re-renders (rename/delete) */
-  if(roomFilterSpot){var _sp=$("roomList").querySelector('.room-row[data-room="'+roomFilterSpot+'"]');
-    if(_sp)_sp.classList.add("spot");else roomFilterSpot=null;}
+  if(roomFilterSpot){try{var _sp=$("roomList").querySelector('.room-row[data-room="'+CSS.escape(String(roomFilterSpot))+'"]');
+    if(_sp)_sp.classList.add("spot");else roomFilterSpot=null;}catch(e){roomFilterSpot=null;}}
 }
 $("roomList").addEventListener("click",function(e){
   var b=e.target.closest("button");if(!b)return;
