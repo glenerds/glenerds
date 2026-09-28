@@ -633,7 +633,10 @@ a:focus-visible {
 .kpi[role="button"]:focus { outline: none; }
 .kpi[role="button"]:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
 @media (max-width: 480px) {
-  .g-header-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .g-header { flex-wrap: wrap; } /* narrow screens: actions drop to their own row instead of colliding with the brand */
+  .g-brand { flex: 1 1 auto; min-width: 0; }
+  .g-brand-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } /* safety: never overlap, truncate instead */
+  .g-header-actions { gap: 6px; flex-wrap: wrap; justify-content: flex-end; flex: 1 1 auto; }
 }
 .g-store-btn {
   display: inline-flex; align-items: center;
