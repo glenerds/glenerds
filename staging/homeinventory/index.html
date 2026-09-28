@@ -494,7 +494,9 @@ function setSample(on){
   }else if(!on&&sampleOn){
     var trans=null;
     try{var raw=JSON.parse(sampleSnap);
-      if(raw&&raw.state){var s=sanitizeState(raw.state);
+      /* MAJOR FIX 2026-09-28: pass skipCaps=true — this is the user's own
+         pre-sample snapshot, not an import; caps must not truncate it. */
+      if(raw&&raw.state){var s=sanitizeState(raw.state,true);
         if(s)state=s;
         /* sanitizeState rejects a roomless snapshot (returns null) — but the snapshot
            is our own pre-sample state, so restore its shape directly in that case */
@@ -1051,6 +1053,10 @@ $("trendChart").addEventListener("keydown",function(e){
 
 /* ---------- data ---------- */
 $("exportBtn").addEventListener("click",function(){
+  /* MINOR FIX 2026-09-28: block export during sample mode — it would export the
+     DEMO data labeled "Backup exported", a UX trap where the user files away
+     demo data believing they backed up their real inventory. */
+  if(window.__gSampleOn||sampleOn){notice("dataNotice","Turn off sample data first — export is disabled while the demo is showing.","err");return;}
   var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download="home-inventory-backup.json";document.body.appendChild(a);a.click();
@@ -1076,7 +1082,10 @@ function sanitizeState(s,skipCaps){
     var id=typeof r.id==="string"?r.id.slice(0,80):uid("r");
     if(Object.prototype.hasOwnProperty.call(ids,id))id=uid("r");ids[id]=1;rooms.push({id:id,name:name});}
   if(!skipCaps&&s.rooms.length>MAX_IMPORT_ROOMS)truncated=true;
-  if(!rooms.length)return null;
+  /* MINOR FIX 2026-09-28: only reject roomless states for imports. A valid empty
+     state (after Clear All) must survive reload — otherwise the startup code
+     falsely reports "corrupted data". */
+  if(!rooms.length&&!skipCaps)return null;
   var items=[],itemIds=Object.create(null);
   for(var j=0;j<s.items.length&&items.length<maxI;j++){var it=s.items[j];
     if(!it||typeof it.name!=="string"||!Object.prototype.hasOwnProperty.call(ids,it.roomId))continue;
