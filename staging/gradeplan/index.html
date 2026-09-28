@@ -1071,7 +1071,7 @@ function renderDonut(svg,wrap,data,prefix,title,defNote,setSpot,getSpot){
       document.querySelectorAll('#'+prefix+'-bars .g-bar-row[data-bi]').forEach((r,j)=>{
         r.classList.toggle('active',j===cur);r.setAttribute('aria-pressed',j===cur?'true':'false');});
       tTitle.textContent=cur<0?title:data[cur].n;
-      tNote.textContent=cur<0?defNote:data[cur].detail;
+      tNote.textContent='';
       hTitle.textContent=cur<0?title:data[cur].n;
       hNote.textContent=cur<0?defNote:data[cur].detail;
       Sound.select();};
@@ -1084,7 +1084,7 @@ function renderDonut(svg,wrap,data,prefix,title,defNote,setSpot,getSpot){
   const tTitle=svgEl('text',{x:cx,y:cy-2,'text-anchor':'middle',class:'g-donut-ct',fill:'currentColor'}),
         tNote=svgEl('text',{x:cx,y:cy+16,'text-anchor':'middle',class:'g-donut-cv',fill:'currentColor'});
   tTitle.textContent=getSpot()<0?title:data[getSpot()].n;
-  tNote.textContent=getSpot()<0?defNote:data[getSpot()].detail;
+  tNote.textContent='';
   svg.appendChild(tTitle);svg.appendChild(tNote);
   $(''+prefix+'-donut-title').textContent=getSpot()<0?title:data[getSpot()].n;
   $(''+prefix+'-donut-note').textContent=getSpot()<0?defNote:data[getSpot()].detail;
@@ -1230,7 +1230,7 @@ function calcFinal(){
     '<span class="g-bar-track"><span class="g-bar-marker '+mCls+'" style="left:calc('+r2(needPct)+'% - 1px)"></span></span>'+
     '<span class="g-bar-val">'+r2(need)+'%</span></div>'+
     (fWhatIf?fWhatIfHTML(c,wf,d):'');
-  renderGauge(need);
+  if(need<=100)renderGauge(need);
   $('f-res').classList.add('show');
   save();
 }
