@@ -1179,7 +1179,7 @@ function sanitizeState() {
   var seenIngIds = {};
   state.ingredients.forEach(function (i) {
     if (typeof i.id !== 'string' || !ID_OK.test(i.id)) {
-      var old = i.id; i.id = uid(); if (old != null) idMap[String(old)] = i.id;
+      var old = i.id; i.id = uid(); if (old != null && !(String(old) in idMap)) idMap[String(old)] = i.id; /* first duplicate wins, matching the legal-id policy */
     }
     while (seenIngIds[i.id]) i.id = uid(); /* duplicate legal ids: first record keeps it, lines stay with first */
     seenIngIds[i.id] = true;
@@ -1191,6 +1191,7 @@ function sanitizeState() {
     if (typeof r.id !== 'string' || !ID_OK.test(r.id)) r.id = uid();
     if (!Array.isArray(r.lines)) r.lines = [];
     NUMS.forEach(function (f) { r[f] = Math.max(0, num(r[f])); });
+    if (r.targetMarginPct > 95) r.targetMarginPct = 95; /* import path honors the 95% ceiling too */
     r.lines = r.lines.filter(function (ln) { return ln && typeof ln === 'object'; });
     r.lines.forEach(function (ln) {
       ln.qty = Math.max(0, num(ln.qty));
@@ -1943,6 +1944,7 @@ function download(name, text, type) {
 function exportData() { download('recipecost-backup.json', JSON.stringify(state, null, 2)); Sound.success(); }
 function importData(input) {
   var f = input.files && input.files[0]; if (!f) return;
+  if (sampleOn) setSample(false); /* exit sample mode first: save() is a no-op while it's on, and turning it off later would wipe the import */
   var rd = new FileReader();
   rd.onload = function () {
     try {
