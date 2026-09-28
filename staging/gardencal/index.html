@@ -1075,7 +1075,7 @@ var state = { zone: '6', customLast: null, customFirst: null, crops: {}, view: '
 function load() {
   try {
     var raw = localStorage.getItem(STORE_KEY);
-    if (raw) { var d = JSON.parse(raw); if (d && d.zone && ZONES[d.zone]) state = d; }
+    if (raw) { var d = JSON.parse(raw); if (d && d.zone && ZONES[d.zone]) { state = d; sanitizeCustomDates(); } }
   } catch (e) {}
   normalizeCrops();
 }
@@ -1124,11 +1124,34 @@ function fillZoneSelect() {
   });
 }
 function setZone(z) { state.zone = z; save(); renderAll(); Sound.click(); }
+function sanitizeCustomDates() {
+  // Validate custom frost dates loaded from storage/import: must be valid MM/DD and not inverted
+  ['customLast', 'customFirst'].forEach(function (k) {
+    var v = state[k];
+    if (v) {
+      var ok = Array.isArray(v) && v.length === 2 && parseMD(v[0] + '/' + v[1]);
+      if (!ok) state[k] = null;
+    }
+  });
+  if (state.customLast && state.customFirst) {
+    var l = state.customLast, f = state.customFirst;
+    if (f[0] < l[0] || (f[0] === l[0] && f[1] <= l[1])) state.customFirst = null;
+  }
+}
 function setCustom(input) {
   var v = parseMD(input.value);
   if (input.value && !v) { gcErr('Use MM/DD format, e.g. 04/20.'); Sound.error(); return; }
+  var oldLast = state.customLast, oldFirst = state.customFirst;
   if (input.id === 'gc-last') state.customLast = v;
   else state.customFirst = v;
+  // Reject inverted frost dates: first fall frost must be after last spring frost
+  if (state.customLast && state.customFirst) {
+    var l = state.customLast, f = state.customFirst;
+    if (f[0] < l[0] || (f[0] === l[0] && f[1] <= l[1])) {
+      state.customLast = oldLast; state.customFirst = oldFirst;
+      gcErr('First fall frost must be after last spring frost.'); Sound.error(); return;
+    }
+  }
   gcErr(''); save(); renderAll(); Sound.click();
 }
 function gcErr(msg) { document.getElementById('gc-err').textContent = msg || ''; }
@@ -1474,7 +1497,7 @@ function importData(input) {
     try {
       var d = JSON.parse(rd.result);
       if (!d || !d.zone || !ZONES[d.zone]) throw new Error('bad file');
-      state = d; normalizeCrops(); save();
+      state = d; sanitizeCustomDates(); normalizeCrops(); save();
       document.getElementById('gc-zone').value = state.zone;
       document.getElementById('gc-last').value = state.customLast ? state.customLast.join('/') : '';
       document.getElementById('gc-first').value = state.customFirst ? state.customFirst.join('/') : '';
