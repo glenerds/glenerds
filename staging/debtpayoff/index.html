@@ -1047,7 +1047,7 @@ document.addEventListener("keydown",function(e){
 $("addDebtBtn").addEventListener("click",submitDebt);
 $("cancelEditBtn").addEventListener("click",cancelEdit);
 document.querySelectorAll(".tab").forEach(function(t){
-  t.addEventListener("click",function(){ state.strategy=t.dataset.strat; save(); renderStrategy(); Sound.click(); });
+  t.addEventListener("click",function(){ state.strategy=t.dataset.strat; save(); renderStrategy(); renderCompare(); renderSchedule(); Sound.click(); });
 });
 $("extraRange").addEventListener("input",function(){
   state.extraMonthly=Number($("extraRange").value);
