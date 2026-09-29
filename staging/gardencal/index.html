@@ -1466,17 +1466,17 @@ function renderGauge(L, F) {
   var pctS = Math.round(pct * 100) + '%';
   if (phase === 'in') {
     if (gaugeMode === 'elapsed') {
-      tx(64, 24, 800, 'Day ' + el + ' of ' + total);
+      tx(85, 24, 800, 'Day ' + el + ' of ' + total);
       lab.innerHTML = '<strong>' + pctS + '</strong> through the growing season — click the gauge to see days remaining.';
     } else {
-      tx(64, 24, 800, (total - el) + ' days left');
+      tx(85, 24, 800, (total - el) + ' days left');
       lab.innerHTML = '<strong>' + (total - el) + ' days</strong> of growing season remaining — click the gauge to see days elapsed.';
     }
   } else if (phase === 'pre') {
-    tx(64, 24, 800, (-el) + ' days');
+    tx(85, 24, 800, (-el) + ' days');
     lab.innerHTML = 'Growing season starts in <strong>' + (-el) + ' days</strong> (' + fmtD(L) + ' – ' + fmtD(F) + ').';
   } else {
-    tx(64, 24, 800, 'Done');
+    tx(85, 24, 800, 'Done');
     lab.innerHTML = 'Growing season ended <strong>' + (el - total) + ' days</strong> ago (' + fmtD(L) + ' – ' + fmtD(F) + ').';
   }
   svg.setAttribute('aria-label', 'Growing season progress: ' + lab.textContent + ' — click to switch between elapsed and remaining');
