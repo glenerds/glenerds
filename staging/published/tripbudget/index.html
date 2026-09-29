@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Offline trip budget planner: set a travel budget, track expenses in any currency with exact exchange-rate conversion, and see daily spend at a glance. No account, no signup — your data never leaves this device.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e7490'/%3E%3Ctext x='32' y='44' font-size='28' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9C%88%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%230e7490'/%3E%3Ctext%20x='32'%20y='44'%20font-size='28'%20text-anchor='middle'%20fill='white'%20font-family='sans-serif'%3E%E2%9C%88%3C/text%3E%3C/svg%3E">
 <title>Offline Trip Budget Planner &amp; Travel Expense Tracker</title>
 <meta property="og:title" content="Offline Trip Budget Planner & Travel Expense Tracker">
 <meta property="og:description" content="Offline trip budget planner and travel expense tracker. Set budgets, convert currencies without internet, track daily spending, and avoid post-trip credit shock.">
@@ -219,20 +219,20 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
 </header>
 <main id="app">
   <nav class="tabs" role="tablist">
-    <button role="tab" data-tab="dashboard" aria-selected="true">Dashboard</button>
-    <button role="tab" data-tab="planner" aria-selected="false">Planner</button>
-    <button role="tab" data-tab="expenses" aria-selected="false">Expenses</button>
-    <button role="tab" data-tab="daily" aria-selected="false">Daily view</button>
+    <button role="tab" id="tabbtn-dashboard" data-tab="dashboard" aria-selected="true" aria-controls="tab-dashboard">Dashboard</button>
+    <button role="tab" id="tabbtn-planner" data-tab="planner" aria-selected="false" aria-controls="tab-planner">Planner</button>
+    <button role="tab" id="tabbtn-expenses" data-tab="expenses" aria-selected="false" aria-controls="tab-expenses">Expenses</button>
+    <button role="tab" id="tabbtn-daily" data-tab="daily" aria-selected="false" aria-controls="tab-daily">Daily view</button>
   </nav>
   <div id="emptyState" class="card empty" style="display:none">
     <h2>No trips yet</h2>
     <p>Create your first trip to start planning a budget, tracking savings, and logging expenses.</p>
     <button class="primary" id="emptyNewBtn">+ Create my first trip</button>
   </div>
-  <section id="tab-dashboard" class="tabpane"></section>
-  <section id="tab-planner" class="tabpane" style="display:none"></section>
-  <section id="tab-expenses" class="tabpane" style="display:none"></section>
-  <section id="tab-daily" class="tabpane" style="display:none"></section>
+  <section id="tab-dashboard" class="tabpane" role="tabpanel" aria-labelledby="tabbtn-dashboard"></section>
+  <section id="tab-planner" class="tabpane" role="tabpanel" aria-labelledby="tabbtn-planner" style="display:none"></section>
+  <section id="tab-expenses" class="tabpane" role="tabpanel" aria-labelledby="tabbtn-expenses" style="display:none"></section>
+  <section id="tab-daily" class="tabpane" role="tabpanel" aria-labelledby="tabbtn-daily" style="display:none"></section>
 </main>
 <a class="g-cta-strip" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" aria-label="Like this tool? Check out our other apps on Gumroad">
   <span>Like this tool? Check out our other apps</span><span class="g-cta-arrow" aria-hidden="true">➔</span>
@@ -602,6 +602,7 @@ function openTripModal(editing){
   updateRateHint();
   document.getElementById("tripModal").style.display = "flex";
   editingTrip = editing ? t.id : null;
+  const firstTripInput = document.getElementById("fDest"); if(firstTripInput) firstTripInput.focus();
 }
 let editingTrip = null;
 function updateRateHint(){
@@ -618,7 +619,6 @@ document.getElementById("tripSave").addEventListener("click", ()=>{
   if(!start || !end){ alert("Please pick start and end dates."); Sound.error(); return; }
   if(daysBetween(start,end) < 0){ alert("End date must be on or after the start date."); Sound.error(); return; }
   if(!(rate > 0) || !isFinite(rate)){ alert("Please enter a valid exchange rate greater than 0."); Sound.error(); return; }
-  if(sampleOn || window.__gSampleOn){ alert("Turn off sample data first — changes made now would be discarded when sample mode is turned off."); Sound.error(); return; }
   if(editingTrip){
     const t = tripById(editingTrip); if(!t) return;
     const rateChanged = (t.rate !== rate || t.homeCur !== homeCur || t.tripCur !== tripCur);
@@ -632,6 +632,7 @@ document.getElementById("tripSave").addEventListener("click", ()=>{
         }else if(e.tripAmount != null){
           e.homeCents = tripToHomeCents(e.tripAmount, rate);
         }
+        e.rateUsed = rate;
       });
     }
     Object.assign(t,{destination:dest,start,end,homeCur,tripCur,rate,totalBudgetCents:budgetCents});
@@ -879,7 +880,7 @@ function wireToggles(scope){
   scope.querySelectorAll('tr.exp-tr[role="button"]').forEach(tr=>{
     const open=()=>openExpenseModal(tr.dataset.id);
     tr.addEventListener("click",e=>{ if(e.target&&e.target.closest&&e.target.closest("button"))return; open(); });
-    tr.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} });
+    tr.addEventListener("keydown",e=>{ if(e.target&&e.target.closest&&e.target.closest("button"))return; if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} });
   });
 }
 
@@ -1042,11 +1043,11 @@ function openExpenseModal(editId){
   document.getElementById("eHomeCur").checked = false;
   editingExpense = editId || null;
   document.getElementById("expenseModal").style.display = "flex";
+  const firstInput = document.getElementById("eDate"); if(firstInput) firstInput.focus();
 }
 let editingExpense = null;
 document.getElementById("expenseSave").addEventListener("click", ()=>{
   const t = activeTrip(); if(!t) return;
-  if(sampleOn || window.__gSampleOn){ alert("Turn off sample data first — expenses logged now would be discarded when sample mode is turned off."); Sound.error(); return; }
   const date = document.getElementById("eDate").value;
   const cat = document.getElementById("eCat").value;
   const amt = document.getElementById("eAmount").value;
@@ -1062,7 +1063,7 @@ document.getElementById("expenseSave").addEventListener("click", ()=>{
   const tripAmount = inHome ? homeCentsToTrip(toCents(num), t.rate) : toCents(num)/100;
   const homeCents = inHome ? toCents(num) : tripToHomeCents(tripAmount, t.rate);
   const rec = {id: editingExpense || uid(), date, cat,
-    tripAmount: toCents(tripAmount)/100, homeCents, note, inHome: !!inHome};
+    tripAmount: toCents(tripAmount)/100, homeCents, note, inHome: !!inHome, rateUsed: t.rate};
   if(editingExpense){
     const i = t.expenses.findIndex(e=>e.id===editingExpense);
     if(i>=0) t.expenses[i] = rec;
@@ -1095,7 +1096,7 @@ function renderExpenses(t){
         const tSym = CURR_SYMBOLS[t.tripCur]!==undefined?CURR_SYMBOLS[t.tripCur]:t.tripCur+" ";
         return '<tr class="exp-tr" data-id="'+x.id+'" role="button" tabindex="0" aria-label="Expense '+esc(fmtDate(x.date))+' '+esc(c.name)+' — activate to edit"><td>'+esc(fmtDate(x.date))+'</td><td>'+esc(c.name)+'</td><td>'+esc(x.note||"—")+'</td>'+
           '<td class="num">'+esc(tSym+Number(x.tripAmount).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))+'</td>'+
-          '<td class="num">'+esc(fmtCents(x.homeCents,t.homeCur))+'</td>'+
+          '<td class="num" title="Converted at 1 '+esc(t.tripCur)+' = '+esc(String(x.rateUsed!=null?x.rateUsed:t.rate))+' '+esc(t.homeCur)+'">'+esc(fmtCents(x.homeCents,t.homeCur))+'</td>'+
           '<td class="num no-print"><button data-edit="'+x.id+'">Edit</button> <button data-del="'+x.id+'" class="danger">✕</button></td></tr>';
       }).join("")+'</tbody></table></div>'
     : '<p class="empty">No expenses yet — log your first one above.</p>')+'</div>';
@@ -1257,9 +1258,35 @@ load();
 renderAll();
 paintSample();
 paintSoundBtn(document.getElementById("soundToggle"));
-/* Escape releases every tap-detail readout back to the default view */
+/* Focus trap: while a modal is open, Tab cycles only within it */
+document.addEventListener("keydown", e=>{
+  if(e.key !== "Tab") return;
+  const openId = ["tripModal","expenseModal"].find(id=>{
+    const m = document.getElementById(id);
+    return m && m.style.display!=="none" && m.style.display!=="";
+  });
+  if(!openId) return;
+  const modal = document.getElementById(openId);
+  const focusable = Array.from(modal.querySelectorAll(
+    'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  )).filter(el=>el.getClientRects().length>0);
+  if(focusable.length===0) return;
+  const first = focusable[0], last = focusable[focusable.length-1];
+  const active = document.activeElement;
+  if(!modal.contains(active)){ e.preventDefault(); first.focus(); }
+  else if(e.shiftKey && active===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && active===last){ e.preventDefault(); first.focus(); }
+});
+/* Escape closes open modals first, then releases every tap-detail readout back to the default view */
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape"&&releaseToggles()) Sound.click();
+  if(e.key!=="Escape") return;
+  let closedModal = false;
+  ["tripModal","expenseModal"].forEach(id=>{
+    const m = document.getElementById(id);
+    if(m && m.style.display!=="none" && m.style.display!==""){ m.style.display="none"; closedModal=true; }
+  });
+  if(closedModal){ Sound.click(); return; }
+  if(releaseToggles()) Sound.click();
 });
 /* expose for automated QA */
 window.__tripbudget = {state:()=>state, tripTotals, tripToHomeCents, homeCentsToTrip, isValidDateStr, toCents, fmtCents, save, renderAll, load};
