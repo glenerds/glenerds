@@ -3,9 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Free offline home renovation budget tracker: set category budgets, log expenses, compare contractor quotes, and manage change orders with a contingency buffer. No account, no subscription — your data never leaves this device.">
+<meta name="description" content="Plan renovation costs, compare contractor quotes, track invoices and payments, and stay on budget with a private tool that works offline without an account.">
+<meta property="og:title" content="Renovation Budget Tracker & Remodel Cost Calculator">
+<meta property="og:description" content="Plan renovation costs, compare contractor quotes, track invoices and payments, and stay on budget with a private tool that works offline without an account.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b45309'/%3E%3Ctext x='32' y='44' font-size='28' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9A%92%3C/text%3E%3C/svg%3E">
-<title>Free Home Renovation Budget Tracker: Remodel Cost Planner & Quote Comparison (RenoTrack)</title>
+<title>Renovation Budget Tracker & Remodel Cost Calculator</title>
 <style>
 :root{
   --bg:#f4f6f9; --bg2:#eef1f5; --card:#ffffff; --ink:#1c2430; --ink2:#5b6b7d;
@@ -22,6 +26,7 @@ html[data-theme="dark"]{
   --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 14px rgba(0,0,0,.3);
 }
 *{box-sizing:border-box}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 body{margin:0;background:var(--bg);color:var(--ink);
   font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   font-size:15px;line-height:1.45;-webkit-text-size-adjust:100%}
@@ -291,6 +296,7 @@ html[data-theme="dark"] .g-store-btn, html[data-theme="dark"] .g-store-btn:hover
     <div class="logo">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="14" width="28" height="14" rx="2" fill="#0f7b6c"/><rect x="2" y="14" width="28" height="5" rx="2" fill="#2dd4a7"/><path d="M7 8l4-4 4 4M9 4v6" stroke="#0f7b6c" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="18" y="4" width="9" height="6" rx="1" fill="#f4b942"/></svg>
       <div>RenoTrack<div class="tagline">Home Renovation Budget Tracker</div></div>
+      <h1 class="sr-only">Renovation Budget Tracker &amp; Remodel Cost Calculator</h1>
     </div>
     <div class="spacer"></div>
     <button id="exportBtn" class="small" title="Download all data as JSON">
@@ -391,7 +397,7 @@ function save(){
   catch(e){
     if(!quotaWarned && e && e.name==="QuotaExceededError"){
       quotaWarned=true;
-      dlgAlert("Browser storage is full — changes are NOT being saved. Export your data now so you don't lose work.");
+      dlgAlert("Browser storage is full — changes are <b>not</b> being saved. Export your data now so you don't lose work.");
     }
   }
 }
@@ -793,7 +799,7 @@ function statDetailHTML(kind){
     title="Total budget — composition";
     sub=`Base ${fmt(base)} + contingency ${fmt(coAlloc)} (${p.contingencyPct}% of base)`;
     row("Base budget (category budgets)", base);
-    row(`Contingency set-aside (${p.contingencyPct}% of base)`, coAlloc);
+    row(`Contingency budget (${p.contingencyPct}% of base)`, coAlloc);
     row("Total budget", tb);
   }else if(kind==="spent"){
     title="Spent (actual) — composition";
@@ -814,10 +820,10 @@ function statDetailHTML(kind){
     row("Committed", com);
     row("Remaining", rem);
   }else if(kind==="cont-set"){
-    title="Contingency set — composition";
+    title="Contingency budget — composition";
     sub=`${p.contingencyPct}% of base budget ${fmt(base)}`;
     row("Base budget", base);
-    row(`Contingency set-aside (${p.contingencyPct}%)`, coAlloc);
+    row(`Contingency budget (${p.contingencyPct}%)`, coAlloc);
     row("Net approved change-order draw", apprCents);
   }else if(kind==="co-approved"){
     title="Approved change orders";
@@ -829,7 +835,7 @@ function statDetailHTML(kind){
     title="Contingency remaining — composition";
     const avg=appr.length?Math.round(Math.abs(apprCents)/appr.length):0;
     sub=avg>0&&coRem>0?`Would cover ~${Math.floor(coRem/avg)} more change orders at the average approved size of ${fmt(avg)}`:"No approved change orders yet";
-    row("Contingency set-aside", coAlloc);
+    row("Contingency budget", coAlloc);
     row("Net approved change-order draw", apprCents);
     row("Contingency remaining", coRem);
   }else return "";
@@ -986,7 +992,7 @@ function renderBudget(p){
   <div class="card" style="margin-bottom:14px"><h2>Category budgets</h2>
     <div class="toolbar no-print">
       <button class="small" onclick="categoryForm()">+ Add category</button>
-      <span class="muted">Edit a budget amount, then press Enter or click out — totals update instantly.</span>
+      <span class="muted">Edit a budget amount, then press Enter or click elsewhere — totals update instantly.</span>
       <span class="right"></span>
       <label class="lbl" style="margin:0" for="coPct">Contingency %</label>
       <input id="coPct" type="number" min="0" max="50" step="1" value="${p.contingencyPct}" style="width:70px" aria-label="Contingency percent">
@@ -1075,7 +1081,7 @@ function renderQuotes(p){
       <div class="quote-grid">${bidsHTML}</div></div>`;
   }).join("");
   return `<div class="toolbar no-print"><button class="small primary" onclick="quoteForm()">+ New quote request</button>
-    <span class="muted">Store up to 4 bids per job, compare side by side, mark the winner.</span></div>
+    <span class="muted">Store up to 4 bids per job, compare side by side, mark the accepted bid.</span></div>
     ${p.quotes.length?cards:`<div class="card"><div class="empty">No quote requests yet — e.g. “Kitchen rewire”, then collect bids.</div></div>`}`;
 }
 
@@ -1096,7 +1102,7 @@ function coForm(editId){
     else{ p.changeOrders.push({id:uid(),description:vals.description.trim(),categoryId:vals.categoryId,deltaCents:dc,date:vals.date,status:vals.status}); coFilter="all"; }
     save(); render();
   },{saveLabel:c?"Save":"Add change order",
-      note:"Approved change orders roll into that category's actuals and draw on your contingency guard."});
+      note:"Approved change orders roll into that category's actuals and draw on your contingency buffer."});
 }
 function deleteCO(id){
   const p=P(); const c=p.changeOrders.find(x=>x.id===id); if(!c) return;
@@ -1230,7 +1236,7 @@ function importData(file){
         S=sanitizeState(s);
         save(); initTheme(); renderProjectSel(); render(); Sound.success();
       });
-    }catch(e){ dlgAlert("That file isn't a valid RenoTrack backup."); Sound.error(); }
+    }catch(e){ dlgAlert("That file isn't a valid backup file."); Sound.error(); }
   };
   r.readAsText(file);
 }

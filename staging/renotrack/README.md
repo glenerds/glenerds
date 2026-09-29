@@ -2,7 +2,7 @@
 
 A single-file, fully offline web app for tracking home renovation budgets:
 per-category budgets vs. actuals, an expense log, contractor quote comparison
-(up to 4 bids per job), a change-order log, and a contingency guard that warns
+(up to 4 bids per job), a change-order log, and a contingency buffer that warns
 you before surprise costs eat your buffer.
 
 ## Run it
