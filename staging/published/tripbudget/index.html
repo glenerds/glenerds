@@ -3,15 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Offline trip budget planner: set a travel budget, track expenses in any currency with exact exchange-rate conversion, and see daily spend at a glance. No account, no fees — your data never leaves this device.">
+<meta name="description" content="Offline trip budget planner: set a travel budget, track expenses in any currency with exact exchange-rate conversion, and see daily spend at a glance. No account, no signup — your data never leaves this device.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e7490'/%3E%3Ctext x='32' y='44' font-size='28' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9C%88%3C/text%3E%3C/svg%3E">
 <title>Offline Trip Budget Planner &amp; Travel Expense Tracker</title>
 <meta property="og:title" content="Offline Trip Budget Planner & Travel Expense Tracker">
 <meta property="og:description" content="Offline trip budget planner and travel expense tracker. Set budgets, convert currencies without internet, track daily spending, and avoid post-trip credit shock.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://glenerds.github.io/glenerds/staging/published/tripbudget/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/tripbudget/">
+<meta property="og:image" content="https://glenerds.github.io/glenerds/staging/published/tripbudget/gallery/cover-square-1200.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Offline Trip Budget Planner & Travel Expense Tracker">
 <meta name="twitter:description" content="Offline trip budget planner and travel expense tracker. Set budgets, convert currencies without internet, track daily spending, and avoid post-trip credit shock.">
+<meta name="twitter:image" content="https://glenerds.github.io/glenerds/staging/published/tripbudget/gallery/cover-square-1200.png">
 <style>
 :root{
   --bg:#f6f7f9; --surface:#ffffff; --surface2:#eef0f4; --text:#1c2230; --muted:#64707f;
@@ -415,7 +419,8 @@ function sanitizeTrip(t){
       cat: CATEGORIES.some(c=>c.id===e.cat) ? e.cat : "other",
       tripAmount: Math.max(0, toCents(num(e.tripAmount))/100),
       homeCents: hc,
-      note: s(e.note).slice(0,500)
+      note: s(e.note).slice(0,500),
+      inHome: !!e.inHome
     });
   });
   return out;
@@ -612,9 +617,23 @@ document.getElementById("tripSave").addEventListener("click", ()=>{
   if(!dest){ alert("Please enter a destination."); Sound.error(); return; }
   if(!start || !end){ alert("Please pick start and end dates."); Sound.error(); return; }
   if(daysBetween(start,end) < 0){ alert("End date must be on or after the start date."); Sound.error(); return; }
-  if(!(rate > 0)){ alert("Please enter a valid exchange rate greater than 0."); Sound.error(); return; }
+  if(!(rate > 0) || !isFinite(rate)){ alert("Please enter a valid exchange rate greater than 0."); Sound.error(); return; }
+  if(sampleOn || window.__gSampleOn){ alert("Turn off sample data first — changes made now would be discarded when sample mode is turned off."); Sound.error(); return; }
   if(editingTrip){
     const t = tripById(editingTrip); if(!t) return;
+    const rateChanged = (t.rate !== rate || t.homeCur !== homeCur || t.tripCur !== tripCur);
+    if(rateChanged && t.expenses && t.expenses.length){
+      if(!confirm("The exchange rate or currencies changed. Re-convert all "+t.expenses.length+" existing expenses to the new rate? (Cancel keeps the old conversions.)")) return;
+      // Re-convert each expense using its stored tripAmount and the new rate.
+      // Home-currency-entered expenses keep their exact typed homeCents; re-derive tripAmount instead.
+      t.expenses.forEach(e=>{
+        if(e.inHome){
+          e.tripAmount = toCents(homeCentsToTrip(e.homeCents, rate))/100;
+        }else if(e.tripAmount != null){
+          e.homeCents = tripToHomeCents(e.tripAmount, rate);
+        }
+      });
+    }
     Object.assign(t,{destination:dest,start,end,homeCur,tripCur,rate,totalBudgetCents:budgetCents});
   } else {
     const t = {id:uid(), destination:dest, start, end, homeCur, tripCur, rate,
@@ -676,7 +695,7 @@ document.getElementById("importFile").addEventListener("change", e=>{
       save(); renderAll();
       alert("Import complete: "+state.trips.length+" trip(s) loaded.");
       Sound.success();
-    }catch(err){ alert("Could not import that file — it isn't a valid TripBudget export."); Sound.error(); }
+    }catch(err){ alert("Could not import that file — it isn't a valid trip planner backup."); Sound.error(); }
     e.target.value = "";
   };
   r.readAsText(f);
@@ -1027,12 +1046,15 @@ function openExpenseModal(editId){
 let editingExpense = null;
 document.getElementById("expenseSave").addEventListener("click", ()=>{
   const t = activeTrip(); if(!t) return;
+  if(sampleOn || window.__gSampleOn){ alert("Turn off sample data first — expenses logged now would be discarded when sample mode is turned off."); Sound.error(); return; }
   const date = document.getElementById("eDate").value;
   const cat = document.getElementById("eCat").value;
   const amt = document.getElementById("eAmount").value;
   const note = document.getElementById("eNote").value.trim();
   const inHome = document.getElementById("eHomeCur").checked;
   if(!date){ alert("Pick a date for the expense."); return; }
+  // Warn if date is outside the trip range
+  if((date < t.start || date > t.end) && !confirm("That date is outside your trip ("+t.start+" to "+t.end+"). Log it anyway?")) return;
   const num = Number(amt);
   if(!(num > 0)){ alert("Enter an amount greater than 0."); return; }
   if(toCents(num) <= 0){ alert("Enter an amount of at least 0.01."); return; }
@@ -1040,7 +1062,7 @@ document.getElementById("expenseSave").addEventListener("click", ()=>{
   const tripAmount = inHome ? homeCentsToTrip(toCents(num), t.rate) : toCents(num)/100;
   const homeCents = inHome ? toCents(num) : tripToHomeCents(tripAmount, t.rate);
   const rec = {id: editingExpense || uid(), date, cat,
-    tripAmount: toCents(tripAmount)/100, homeCents, note};
+    tripAmount: toCents(tripAmount)/100, homeCents, note, inHome: !!inHome};
   if(editingExpense){
     const i = t.expenses.findIndex(e=>e.id===editingExpense);
     if(i>=0) t.expenses[i] = rec;

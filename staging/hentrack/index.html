@@ -3,8 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Backyard Chicken Egg Tracker — Flock Records, Feed Costs &amp; Cost Per Dozen | HenTrack</title>
-<meta name="description" content="Track daily egg production, feed costs, flock health and egg sales for your backyard chickens. Offline, private, free forever.">
+<title>Backyard Chicken Egg Tracker — Flock Records & Cost Per Dozen</title>
+<meta name="description" content="Track daily egg production, feed costs, flock health and egg sales for your backyard chickens. Offline and private.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/hentrack/">
+<meta property="og:title" content="Backyard Chicken Egg Tracker — Flock Records & Cost Per Dozen">
+<meta property="og:description" content="Track daily egg production, feed costs, flock health and egg sales for your backyard chickens. Offline and private.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://glenerds.github.io/glenerds/staging/hentrack/gallery/cover-square-1200.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Backyard Chicken Egg Tracker — Flock Records & Cost Per Dozen">
+<meta name="twitter:description" content="Track daily egg production, feed costs, flock health and egg sales for your backyard chickens. Offline and private.">
+<meta name="twitter:image" content="https://glenerds.github.io/glenerds/staging/hentrack/gallery/cover-square-1200.png">
 <style>
 :root{
   --bg:#f6f4ec; --card:#ffffff; --ink:#23281f; --muted:#4a5040;
@@ -38,10 +47,15 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 .btn.small{padding:5px 10px;font-size:15px;border-radius:8px}
 .theme-btn{white-space:nowrap}
 .tabs{display:flex;gap:6px;overflow-x:auto;background:var(--card);border:1px solid var(--line);
-  border-radius:var(--radius);padding:6px;margin:0 0 14px;box-shadow:var(--shadow)}
-.tabs button{flex:1;white-space:nowrap;border:0;background:transparent;color:var(--muted);font:inherit;
-  font-weight:600;padding:10px 8px;border-radius:9px;cursor:pointer;font-size:16px}
+  border-radius:var(--radius);padding:6px;margin:0 0 14px;box-shadow:var(--shadow);
+  -webkit-overflow-scrolling:touch;scrollbar-width:thin}
+.tabs button{flex:1 0 auto;white-space:nowrap;border:0;background:transparent;color:var(--muted);font:inherit;
+  font-weight:600;padding:10px 12px;border-radius:9px;cursor:pointer;font-size:16px;min-width:max-content}
 .tabs button.active{background:var(--accent-soft);color:var(--ink)}
+@media (max-width:480px){
+  .tabs{gap:4px;padding:4px}
+  .tabs button{padding:8px 10px;font-size:15px}
+}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:16px;margin:0 0 14px;box-shadow:var(--shadow)}
 .card h2{font-size:18px;font-weight:700;margin:0 0 4px}
@@ -211,7 +225,7 @@ svg.chart{width:100%;height:170px;display:block}
       <button id="soundToggle" class="round-btn sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)">&#128266;</button>
     </div>
   </header>
-  <p class="tagline">Daily egg counts, feed costs, flock records &amp; egg sales for backyard chicken keepers. 100% offline — your data never leaves this device.</p>
+  <p class="tagline">Daily egg counts, feed costs, flock records &amp; egg sales for backyard chicken keepers. 100% offline — your data never leaves this browser.</p>
 
   <nav class="tabs no-print" role="tablist" aria-label="Sections">
     <button role="tab" data-tab="dash" class="active">Dashboard</button>
@@ -288,7 +302,7 @@ svg.chart{width:100%;height:170px;display:block}
             <option value="molting">Molting</option>
             <option value="broody">Broody</option>
             <option value="retired">Retired</option>
-            <option value="lost">Lost / rehomed</option>
+            <option value="lost">Lost / Rehomed</option>
           </select>
         </div>
       </div>
@@ -377,7 +391,7 @@ svg.chart{width:100%;height:170px;display:block}
   <span>Like this tool? Check out our other apps</span><span class="g-cta-arrow" aria-hidden="true">➔</span>
 </a>
 <footer class="attrib">
-    Free offline tool <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this device.
+    Offline tool <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this browser.
   </footer>
 </div>
 <script>
@@ -399,9 +413,20 @@ var KEY="hentrack-v1";
 var state={hens:[],eggLogs:[],expenses:[],sales:[],theme:null};
 var sampleOn=false, sampleSnap=null;
 function load(){
-  try{var raw=localStorage.getItem(KEY);if(raw){var s=JSON.parse(raw);for(var k in state){if(s[k]!==undefined)state[k]=s[k];}}}catch(e){}
+  try{var raw=localStorage.getItem(KEY);if(raw){var s=JSON.parse(raw);
+    // shape validation: arrays must be arrays, theme must be dark|light, numbers must be numbers
+    if(Array.isArray(s.hens))state.hens=s.hens;
+    if(Array.isArray(s.eggLogs))state.eggLogs=s.eggLogs;
+    if(Array.isArray(s.expenses))state.expenses=s.expenses;
+    if(Array.isArray(s.sales))state.sales=s.sales;
+    if(s.theme==="dark"||s.theme==="light")state.theme=s.theme;
+    if(typeof s.sound==="boolean")state.sound=s.sound;
+  }}catch(e){}
 }
-function save(){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+var quotaWarned=false;
+function save(){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){
+  if(!quotaWarned){quotaWarned=true;alert("Couldn't save your data — browser storage is full or unavailable. Export a backup now to avoid losing your entries.");}
+}}
 load();
 
 /* ---------- theme ---------- */
@@ -505,15 +530,26 @@ var Sound=(function(){
 
 /* ---------- tabs ---------- */
 document.querySelectorAll(".tabs button").forEach(function(b){
+  b.setAttribute("aria-selected", b.classList.contains("active") ? "true" : "false");
   b.addEventListener("click",function(){
-    document.querySelectorAll(".tabs button").forEach(function(x){x.classList.remove("active");});
-    b.classList.add("active");
+    document.querySelectorAll(".tabs button").forEach(function(x){x.classList.remove("active");x.setAttribute("aria-selected","false");});
+    b.classList.add("active");b.setAttribute("aria-selected","true");
     ["dash","eggs","flock","costs","sales","data"].forEach(function(t){
       $("tab-"+t).hidden=(t!==b.dataset.tab);
     });
     if(b.dataset.tab==="dash"){renderDash();}
     if(b.dataset.tab==="data"){renderDataStats();}
     Sound.click();
+  });
+  // Arrow-key navigation between tabs
+  b.addEventListener("keydown",function(e){
+    if(e.key==="ArrowRight"||e.key==="ArrowLeft"){
+      e.preventDefault();
+      var tabs=Array.prototype.slice.call(document.querySelectorAll(".tabs button"));
+      var i=tabs.indexOf(b);
+      var n=e.key==="ArrowRight"?(i+1)%tabs.length:(i-1+tabs.length)%tabs.length;
+      tabs[n].focus();tabs[n].click();
+    }
   });
 });
 
@@ -551,6 +587,15 @@ var PAL=["#5b8c3e","#0e7490","#b7791f","#9333ea","#dc2626","#0d9488","#db2777"];
 function svgEl(t,a){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);return e;}
 function polar(cx,cy,r,deg){var a=(deg-90)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
 function donutPath(cx,cy,r,ir,a0,a1){
+  // Full 360° arc degenerates in SVG (start==end); split into two 180° arcs
+  if(a1-a0>=359.9){
+    var m0=polar(cx,cy,r,a0),m1=polar(cx,cy,r,a0+180);
+    var n1=polar(cx,cy,ir,a0+180),n0=polar(cx,cy,ir,a0);
+    return "M"+m0[0].toFixed(2)+","+m0[1].toFixed(2)+" A"+r+","+r+" 0 0,1 "+m1[0].toFixed(2)+","+m1[1].toFixed(2)+
+      " A"+r+","+r+" 0 0,1 "+m0[0].toFixed(2)+","+m0[1].toFixed(2)+
+      " L"+n0[0].toFixed(2)+","+n0[1].toFixed(2)+" A"+ir+","+ir+" 0 0,0 "+n1[0].toFixed(2)+","+n1[1].toFixed(2)+
+      " A"+ir+","+ir+" 0 0,0 "+n0[0].toFixed(2)+","+n0[1].toFixed(2)+" Z";
+  }
   var large=(a1-a0)>180?1:0;
   var p0=polar(cx,cy,r,a0),p1=polar(cx,cy,r,a1),q1=polar(cx,cy,ir,a1),q0=polar(cx,cy,ir,a0);
   return "M"+p0[0].toFixed(2)+","+p0[1].toFixed(2)+" A"+r+","+r+" 0 "+large+",1 "+p1[0].toFixed(2)+","+p1[1].toFixed(2)+
@@ -801,9 +846,11 @@ document.addEventListener("keydown",function(e){
 $("eggDate").value=todayStr();
 $("eggAdd").addEventListener("click",function(){
   var d=$("eggDate").value||todayStr();
+  if(d>todayStr()&&!confirm("That date is in the future. Log it anyway?"))return;
   var ex=state.eggLogs.find(function(l){return l.date===d;});
-  var rec={id:ex?ex.id:uid(),date:d,count:Math.max(0,Math.round(num($("eggCount").value))),
-    broken:Math.max(0,Math.round(num($("eggBroken").value))),notes:$("eggNotes").value.trim()};
+  var count=Math.max(0,Math.round(num($("eggCount").value)));
+  var broken=Math.min(count,Math.max(0,Math.round(num($("eggBroken").value))));
+  var rec={id:ex?ex.id:uid(),date:d,count:count,broken:broken,notes:$("eggNotes").value.trim()};
   if(ex){state.eggLogs[state.eggLogs.indexOf(ex)]=rec;}else{state.eggLogs.push(rec);}
   save();$("eggNotes").value="";renderEggs();Sound.success();
 });
@@ -812,7 +859,7 @@ function renderEggs(){
   if(!rows.length){$("eggList").innerHTML='<div class="empty">No egg counts yet — log your first day above.</div>';return;}
   var h='<table><thead><tr><th>Date</th><th class="num">Eggs</th><th class="num">Damaged</th><th>Notes</th><th></th></tr></thead><tbody>';
   rows.forEach(function(l){
-    h+='<tr><td>'+esc(fmtDate(l.date))+'</td><td class="num"><b>'+num(l.count)+'</b></td><td class="num">'+num(l.broken)+'</td><td>'+esc(l.notes)+'</td><td class="num"><button class="xbtn no-print" data-del-egg="'+l.id+'" aria-label="Delete">×</button></td></tr>';
+    h+='<tr><td>'+esc(fmtDate(l.date))+'</td><td class="num"><b>'+num(l.count)+'</b></td><td class="num">'+num(l.broken)+'</td><td>'+esc(l.notes)+'</td><td class="num"><button class="xbtn no-print" data-del-egg="'+l.id+'" aria-label="Delete egg log for '+fmtDate(l.date)+'">×</button></td></tr>';
   });
   $("eggList").innerHTML=h+'</tbody></table>';
 }
@@ -822,7 +869,7 @@ $("eggList").addEventListener("click",function(e){
 });
 
 /* ---------- flock ---------- */
-var STATUS_LABEL={laying:"Laying",pullet:"Pullet",molting:"Molting",broody:"Broody",retired:"Retired",lost:"Lost / rehomed"};
+var STATUS_LABEL={laying:"Laying",pullet:"Pullet",molting:"Molting",broody:"Broody",retired:"Retired",lost:"Lost / Rehomed"};
 var STATUS_CLASS={laying:"",pullet:"warn",molting:"warn",broody:"warn",retired:"",lost:"bad"};
 $("henAdd").addEventListener("click",function(){
   var name=$("henName").value.trim();
@@ -837,7 +884,7 @@ function renderFlock(){
     h+='<tr><td><b>'+esc(x.name)+'</b>'+(x.hatch?'<br><span class="kbd-note">'+esc(fmtDate(x.hatch))+'</span>':"")+'</td><td>'+esc(x.breed||"—")+'</td>';
     h+='<td><select data-hen-status="'+x.id+'" aria-label="Status for '+esc(x.name)+'">';
     Object.keys(STATUS_LABEL).forEach(function(k){h+='<option value="'+k+'"'+(x.status===k?" selected":"")+'>'+STATUS_LABEL[k]+'</option>';});
-    h+='</select></td><td class="num"><button class="xbtn no-print" data-del-hen="'+x.id+'" aria-label="Remove">×</button></td></tr>';
+    h+='</select></td><td class="num"><button class="xbtn no-print" data-del-hen="'+x.id+'" aria-label="Remove '+esc(x.name)+'">×</button></td></tr>';
   });
   $("flockList").innerHTML=h+'</tbody></table>';
 }
@@ -854,7 +901,7 @@ $("flockList").addEventListener("click",function(e){
 $("expDate").value=todayStr();
 $("expAdd").addEventListener("click",function(){
   var cost=num($("expCost").value);
-  if(cost<=0){Sound.error();alert("Enter the cost first.");return;}
+  if($("expCost").value===""||cost<0){Sound.error();alert("Enter the cost first.");return;}
   state.expenses.push({id:uid(),date:$("expDate").value||todayStr(),cat:$("expCat").value,item:$("expItem").value.trim(),cost:cost});
   save();$("expItem").value="";$("expCost").value="";renderExp();Sound.success();
 });
@@ -867,7 +914,7 @@ function renderExp(){
   if(!rows.length){$("expList").innerHTML='<div class="empty">No expenses yet.</div>';return;}
   var h='<table><thead><tr><th>Date</th><th>Item</th><th>Category</th><th class="num">Cost</th><th></th></tr></thead><tbody>';
   rows.forEach(function(e){
-    h+='<tr><td>'+esc(fmtDate(e.date))+'</td><td>'+esc(e.item||"—")+'</td><td><span class="pill">'+esc(e.cat)+'</span></td><td class="num">'+money(e.cost)+'</td><td class="num"><button class="xbtn no-print" data-del-exp="'+e.id+'" aria-label="Delete">×</button></td></tr>';
+    h+='<tr><td>'+esc(fmtDate(e.date))+'</td><td>'+esc(e.item||"—")+'</td><td><span class="pill">'+esc(e.cat)+'</span></td><td class="num">'+money(e.cost)+'</td><td class="num"><button class="xbtn no-print" data-del-exp="'+e.id+'" aria-label="Delete expense '+esc(e.item||e.cat)+'">×</button></td></tr>';
   });
   $("expList").innerHTML=h+'</tbody></table>';
 }
@@ -892,7 +939,7 @@ function renderSales(){
   if(!rows.length){$("saleList").innerHTML='<div class="empty">No sales logged yet.</div>';return;}
   var h='<table><thead><tr><th>Date</th><th class="num">Dozens</th><th class="num">$/dozen</th><th class="num">Total</th><th></th></tr></thead><tbody>';
   rows.forEach(function(s){
-    h+='<tr><td>'+esc(fmtDate(s.date))+'</td><td class="num">'+num(s.dozens).toFixed(1)+'</td><td class="num">'+money(s.pricePerDozen)+'</td><td class="num"><b>'+money(num(s.dozens)*num(s.pricePerDozen))+'</b></td><td class="num"><button class="xbtn no-print" data-del-sale="'+s.id+'" aria-label="Delete">×</button></td></tr>';
+    h+='<tr><td>'+esc(fmtDate(s.date))+'</td><td class="num">'+num(s.dozens).toFixed(1)+'</td><td class="num">'+money(s.pricePerDozen)+'</td><td class="num"><b>'+money(num(s.dozens)*num(s.pricePerDozen))+'</b></td><td class="num"><button class="xbtn no-print" data-del-sale="'+s.id+'" aria-label="Delete sale on '+fmtDate(s.date)+'">×</button></td></tr>';
   });
   $("saleList").innerHTML=h+'</tbody></table>';
 }
@@ -906,6 +953,7 @@ function renderDataStats(){
   $("dataStats").textContent=state.hens.length+" hens · "+state.eggLogs.length+" egg days · "+state.expenses.length+" expenses · "+state.sales.length+" sales logged.";
 }
 $("expJson").addEventListener("click",function(){
+  if(sampleOn){alert("Turn off sample data first — exporting now would save the sample flock, not your real data.");return;}
   var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download="hentrack-backup-"+todayStr()+".json";document.body.appendChild(a);a.click();
@@ -913,19 +961,22 @@ $("expJson").addEventListener("click",function(){
 });
 $("impJson").addEventListener("change",function(e){
   var f=e.target.files[0];if(!f)return;
+  if(sampleOn){alert("Turn off sample data first — importing now would be discarded when sample mode is turned off.");e.target.value="";return;}
   var r=new FileReader();
   r.onload=function(){
     try{
       var s=JSON.parse(r.result);
       if(!s||typeof s!=="object"||!Array.isArray(s.hens))throw new Error("bad file");
       ["eggLogs","expenses","sales"].forEach(function(k){if(!Array.isArray(s[k]))s[k]=[];});
-      state=s;save();renderAll();renderDataStats();Sound.success();alert("Backup imported.");
+      if(s.theme!=="dark"&&s.theme!=="light")s.theme="light";
+      state=s;save();applyTheme(state.theme);renderAll();renderDataStats();Sound.success();alert("Backup imported.");
     }catch(err){Sound.error();alert("That file doesn't look like a HenTrack backup.");}
   };
   r.readAsText(f);e.target.value="";
 });
 $("printBtn").addEventListener("click",function(){window.print();});
 $("wipeBtn").addEventListener("click",function(){
+  if(sampleOn){alert("Turn off sample data first — deleting now would be undone when sample mode is turned off.");return;}
   if(confirm("Delete ALL HenTrack data? This cannot be undone.")&&confirm("Really delete everything?")){
     state={hens:[],eggLogs:[],expenses:[],sales:[],theme:state.theme};
     save();renderAll();renderDataStats();
