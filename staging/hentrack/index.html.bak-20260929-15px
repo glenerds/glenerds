@@ -65,7 +65,7 @@ header.top{display:flex;align-items:center;justify-content:space-between;gap:12p
 @media(max-width:560px){.grid3{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}
 .field{margin:0 0 10px}
 .field label{display:block;font-size:15px;font-weight:600;margin:0 0 4px}
-.field .hint{font-weight:400;color:var(--muted);font-size:15px}
+.field .hint{font-weight:400;color:var(--muted);font-size:14px}
 input,select,textarea{font:inherit;width:100%;background:var(--input-bg);color:var(--ink);
   border:1px solid var(--line);border-radius:10px;padding:10px 12px}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
@@ -117,7 +117,7 @@ details.how summary{cursor:pointer;font-weight:700;font-size:16px;color:var(--ac
   color: #ffffff;
   border-radius: var(--g-radius-pill, 999px);
   padding: 8px 15px;
-  font-size: 0.95rem; font-weight: 700; line-height: 1.2;
+  font-size: 0.88rem; font-weight: 700; line-height: 1.2;
   text-decoration: none; white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0,0,0,.12);
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
@@ -142,7 +142,7 @@ svg.chart{width:100%;height:170px;display:block}
 .chart-seg.spot{stroke:#23281f;stroke-width:2}
 [data-theme="dark"] .chart-seg.spot{stroke:#ecead9}
 .chart-detail{font-size:20px;font-weight:600;color:#fff;margin:10px 0 0;min-height:1.4em;line-height:1.55}[data-theme="light"] .chart-detail{color:#16210f}.chart-detail strong,.chart-detail b{color:var(--accent);font-weight:800}
-.viz-note{font-size:15px;color:var(--muted);margin:4px 0 0}[data-theme="dark"] .viz-note{color:#d8dbc6}
+.viz-note{font-size:14.5px;color:var(--muted);margin:4px 0 0}[data-theme="dark"] .viz-note{color:#d8dbc6}
 /* readability: secondary text stays bright in both themes (Glen's rule 2026-09-21) */
 [data-theme="dark"] .stat .k,[data-theme="dark"] .card .sub,[data-theme="dark"] .tabs button:not(.active),
 [data-theme="dark"] .tagline,[data-theme="dark"] .hm-legend,[data-theme="dark"] .wd-lbl,
@@ -629,7 +629,7 @@ function drawChart(){
   var X=function(i){return padL+i*(W-padL-14)/13;}, Y=function(c){return padT+(H-padT-padB)*(1-c/max);};
   for(var g=0;g<=4;g++){var y=padT+(H-padT-padB)*(g/4);
     svg.appendChild(svgEl("line",{x1:padL,y1:y,x2:W-10,y2:y,stroke:grid,"stroke-width":1}));
-    var t=svgEl("text",{x:6,y:y+4,fill:txt,"font-size":15});t.textContent=Math.round(max*(1-g/4));svg.appendChild(t);}
+    var t=svgEl("text",{x:6,y:y+4,fill:txt,"font-size":11});t.textContent=Math.round(max*(1-g/4));svg.appendChild(t);}
   var pts=data.map(function(x,i){return X(i).toFixed(1)+","+Y(x.c).toFixed(1);}).join(" ");
   var area=svgEl("polyline",{points:padL+","+(H-padB)+" "+pts+" "+(W-10)+","+(H-padB),fill:line,opacity:0.14,stroke:"none"});
   svg.appendChild(area);
@@ -650,7 +650,7 @@ function drawChart(){
     });
     if(eggSpot===i)cEl.classList.add("spot");
     svg.appendChild(cEl);dots.push(cEl);
-    if(i%2===0){var dl=svgEl("text",{x:X(i),y:H-8,"text-anchor":"middle",fill:txt,"font-size":15});dl.textContent=lab;svg.appendChild(dl);}
+    if(i%2===0){var dl=svgEl("text",{x:X(i),y:H-8,"text-anchor":"middle",fill:txt,"font-size":11});dl.textContent=lab;svg.appendChild(dl);}
   });
 }
 
