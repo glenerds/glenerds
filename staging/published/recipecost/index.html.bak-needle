@@ -1069,15 +1069,14 @@ h.setAttribute('data-theme',n);try{localStorage.setItem('glenerds-theme',n)}catc
           <div class="cc-legend" id="cc-legend"></div>
         </div>
         <div class="gauge-wrap">
-          <svg class="gauge-svg" viewBox="0 0 300 220" role="img" aria-labelledby="fc-t">
+          <svg class="gauge-svg" viewBox="0 0 300 185" role="img" aria-labelledby="fc-t">
             <title id="fc-t">Food cost percent gauge, target at or under 35 percent</title>
-            <path d="M45 140 A105 105 0 0 1 255 140" fill="none" stroke="var(--g-border, #e2e8f0)" stroke-width="22" stroke-linecap="round"/>
+            <path d="M45 150 A105 105 0 0 1 255 150" fill="none" stroke="var(--g-border, #e2e8f0)" stroke-width="22" stroke-linecap="round"/>
             <path id="fc-arc" d="" fill="none" stroke="#10b981" stroke-width="22" stroke-linecap="round"/>
-            <line id="fc-needle-outline" x1="150" y1="140" x2="45" y2="140" stroke="rgba(0,0,0,0.5)" stroke-width="9" stroke-linecap="round"/>
-            <line id="fc-needle" x1="150" y1="140" x2="45" y2="140" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-            <circle cx="150" cy="140" r="10" fill="#ffffff" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>
-            <text id="fc-num" x="150" y="188" text-anchor="middle" style="fill:var(--g-text, #0f172a);font-size:30px;font-weight:800">–</text>
-            <text x="150" y="208" text-anchor="middle" style="fill:var(--g-muted, #64748b);font-size:12px;letter-spacing:.08em">FOOD COST %</text>
+            <line id="fc-needle" x1="150" y1="150" x2="45" y2="150" stroke="var(--g-text, #0f172a)" stroke-width="5" stroke-linecap="round"/>
+            <circle cx="150" cy="150" r="10" fill="var(--g-text, #0f172a)"/>
+            <text id="fc-num" x="150" y="110" text-anchor="middle" style="fill:var(--g-text, #0f172a);font-size:30px;font-weight:800">–</text>
+            <text x="150" y="142" text-anchor="middle" style="fill:var(--g-muted, #64748b);font-size:12px;letter-spacing:.08em">FOOD COST %</text>
           </svg>
           <div class="gauge-cap" id="fc-cap">Healthy food cost is ≤ 35%.</div>
         </div>
@@ -1843,15 +1842,11 @@ function paintFoodGauge(t, pct, ok) {
   var f = ok ? pct / 60 : 0;
   if (f > 1) f = 1;
   var th = (180 - f * 180) * Math.PI / 180;
-  arc.setAttribute('d', ok ? 'M45 140 A105 105 0 0 1 ' + (150 + 105 * Math.cos(th)).toFixed(1) + ' ' + (140 - 105 * Math.sin(th)).toFixed(1) : '');
+  arc.setAttribute('d', ok ? 'M45 150 A105 105 0 0 1 ' + (150 + 105 * Math.cos(th)).toFixed(1) + ' ' + (150 - 105 * Math.sin(th)).toFixed(1) : '');
   arc.setAttribute('stroke', !ok ? '#94a3b8' : (pct <= 35 ? '#10b981' : (pct <= 45 ? '#f59e0b' : '#ef4444')));
   var nd = document.getElementById('fc-needle');
-  var ndo = document.getElementById('fc-needle-outline');
-  var nx2 = (150 + 78 * Math.cos(th)).toFixed(1);
-  var ny2 = (140 - 78 * Math.sin(th)).toFixed(1);
-  nd.setAttribute('x2', nx2);
-  nd.setAttribute('y2', ny2);
-  if (ndo) { ndo.setAttribute('x2', nx2); ndo.setAttribute('y2', ny2); }
+  nd.setAttribute('x2', (150 + 78 * Math.cos(th)).toFixed(1));
+  nd.setAttribute('y2', (150 - 78 * Math.sin(th)).toFixed(1));
   document.getElementById('fc-num').textContent = ok ? pct.toFixed(1) + '%' : '–';
   document.getElementById('fc-cap').textContent = !ok ? 'Set a yield and target margin to price this recipe.' :
     (pct <= 35 ? 'Healthy — at or under the 35% target.' :

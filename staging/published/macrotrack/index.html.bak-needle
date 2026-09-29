@@ -1071,15 +1071,14 @@ input[type="range"] { width: 100%; accent-color: var(--g-accent); margin-top: 8p
         <input type="range" id="goal-slider" min="-30" max="20" step="1" value="-20">
       </div>
       <div class="gauge-wrap" aria-hidden="false">
-        <svg class="gauge-svg" viewBox="0 0 300 220" role="img" aria-labelledby="gg-t">
+        <svg class="gauge-svg" viewBox="0 0 300 185" role="img" aria-labelledby="gg-t">
           <title id="gg-t">Goal adjustment gauge, from 30 percent cut to 20 percent surplus</title>
-          <path d="M45 140 A105 105 0 0 1 255 140" fill="none" stroke="var(--g-border)" stroke-width="22" stroke-linecap="round"/>
+          <path d="M45 150 A105 105 0 0 1 255 150" fill="none" stroke="var(--g-border)" stroke-width="22" stroke-linecap="round"/>
           <path id="gg-arc" d="" fill="none" stroke="#f59e0b" stroke-width="22" stroke-linecap="round"/>
-          <line id="gg-needle-outline" x1="150" y1="140" x2="80" y2="140" stroke="rgba(0,0,0,0.5)" stroke-width="9" stroke-linecap="round"/>
-          <line id="gg-needle" x1="150" y1="140" x2="80" y2="140" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
-          <circle cx="150" cy="140" r="10" fill="#ffffff" stroke="rgba(0,0,0,0.5)" stroke-width="2"/>
-          <text id="gg-num" x="150" y="188" text-anchor="middle" class="gauge-num">−20%</text>
-          <text x="150" y="208" text-anchor="middle" class="gauge-cap" style="letter-spacing:.08em">VS TDEE</text>
+          <line id="gg-needle" x1="150" y1="150" x2="80" y2="150" stroke="var(--g-text)" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="150" cy="150" r="10" fill="var(--g-text)"/>
+          <text id="gg-num" x="150" y="110" text-anchor="middle" class="gauge-num">−20%</text>
+          <text x="150" y="142" text-anchor="middle" class="gauge-cap" style="letter-spacing:.08em">VS TDEE</text>
         </svg>
         <div class="gauge-cap" id="gg-cap">Steady cut</div>
       </div>
@@ -1456,18 +1455,14 @@ input[type="range"] { width: 100%; accent-color: var(--g-accent); margin-top: 8p
     var f = (p + 30) / 50;
     if (f < 0) f = 0; if (f > 1) f = 1;
     var th = (180 - f * 180) * Math.PI / 180;
-    var ax = 150 + 105 * Math.cos(th), ay = 140 - 105 * Math.sin(th);
+    var ax = 150 + 105 * Math.cos(th), ay = 150 - 105 * Math.sin(th);
     var arc = $('gg-arc');
     if (!arc) return;
-    arc.setAttribute('d', 'M45 140 A105 105 0 0 1 ' + ax.toFixed(1) + ' ' + ay.toFixed(1));
+    arc.setAttribute('d', 'M45 150 A105 105 0 0 1 ' + ax.toFixed(1) + ' ' + ay.toFixed(1));
     arc.setAttribute('stroke', p < 0 ? '#f59e0b' : (p > 0 ? '#0ea5e9' : '#10b981'));
     var nd = $('gg-needle');
-    var ndo = $('gg-needle-outline');
-    var nx2 = (150 + 78 * Math.cos(th)).toFixed(1);
-    var ny2 = (140 - 78 * Math.sin(th)).toFixed(1);
-    nd.setAttribute('x2', nx2);
-    nd.setAttribute('y2', ny2);
-    if (ndo) { ndo.setAttribute('x2', nx2); ndo.setAttribute('y2', ny2); }
+    nd.setAttribute('x2', (150 + 78 * Math.cos(th)).toFixed(1));
+    nd.setAttribute('y2', (150 - 78 * Math.sin(th)).toFixed(1));
     $('gg-num').textContent = (p > 0 ? '+' : '') + p + '%';
     $('gg-cap').textContent = p <= -25 ? 'Deep cut — aggressive deficit' :
       (p < 0 ? (p <= -10 ? 'Steady cut' : 'Gentle cut') :
