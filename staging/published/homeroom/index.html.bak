@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Homeschool Lesson Planner — Attendance, Grades & Reading Logs</title>
+<meta name="description" content="Plan weekly lessons, take attendance, track grades and reading logs for your homeschool. Offline, private — your data never leaves this device.">
+<link rel="canonical" href="https://glenerds.gumroad.com/l/homeroom">
+<meta property="og:title" content="Homeschool Lesson Planner — Attendance, Grades & Reading Logs">
+<meta property="og:description" content="Plan weekly lessons, take attendance, track grades and reading logs for your homeschool. Offline, private — your data never leaves this device.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://glenerds.gumroad.com/l/homeroom">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Homeschool Lesson Planner — Attendance, Grades & Reading Logs">
+<meta name="twitter:description" content="Plan weekly lessons, take attendance, track grades and reading logs for your homeschool. Offline, private — your data never leaves this device.">
+<style>
+:root{
+  --bg:#f4f2fa; --card:#ffffff; --ink:#25222e; --muted:#6f6a7d;
+  --line:#e2ddf0; --accent:#6a5acd; --accent-d:#5746b8; --accent-soft:#ece8fb;
+  --warn:#b7791f; --bad:#b3402e; --good:#3e7d44;
+  --input-bg:#ffffff; --shadow:0 1px 3px rgba(37,34,46,.08);
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#15141b; --card:#1f1d29; --ink:#eae7f5; --muted:#a49eb8;
+  --line:#322e44; --accent:#9d8ff0; --accent-d:#b3a6f5; --accent-soft:#2a2540;
+  --warn:#d9a441; --bad:#e0684f; --good:#7cc47f;
+  --input-bg:#292636; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5;-webkit-text-size-adjust:100%}
+.wrap{max-width:900px;margin:0 auto;padding:16px 14px 90px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 4px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-d));
+  display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+.brand h1{font-size:22px;margin:0;letter-spacing:-.3px}
+.tagline{color:var(--muted);font-size:13.5px;margin:2px 0 14px}
+.btn{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);
+  border-radius:10px;padding:9px 14px;font-weight:600}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:var(--accent-d)}
+.btn.danger{background:transparent;color:var(--bad);border-color:var(--line)}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:8px}
+.tabs{display:flex;gap:6px;overflow-x:auto;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:6px;margin:0 0 14px;box-shadow:var(--shadow)}
+.tabs button{flex:1;white-space:nowrap;border:0;background:transparent;color:var(--muted);font:inherit;
+  font-weight:600;padding:10px 8px;border-radius:9px;cursor:pointer;font-size:14px}
+.tabs button.active{background:var(--accent-soft);color:var(--ink)}
+@media (max-width:480px){
+  .tabs{flex-wrap:wrap;gap:4px;padding:4px;overflow-x:visible}
+  .tabs button{flex:1 1 30%;padding:10px 4px;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin:0 0 14px;box-shadow:var(--shadow)}
+.card h2{font-size:17px;margin:0 0 4px}
+.card .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr}}
+.field{margin:0 0 10px}
+.field label{display:block;font-size:13px;font-weight:600;margin:0 0 4px}
+.field .hint{font-weight:400;color:var(--muted);font-size:12px}
+input,select,textarea{font:inherit;width:100%;background:var(--input-bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+input[type="checkbox"]{width:auto;transform:scale(1.25)}
+.rowline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px}
+@media(max-width:640px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px;box-shadow:var(--shadow)}
+.stat .k{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.stat .v{font-size:22px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);
+  padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.num{font-variant-numeric:tabular-nums;text-align:right}
+.pill{display:inline-block;font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;
+  background:var(--accent-soft);color:var(--accent-d)}
+[data-theme="dark"] .pill{color:var(--accent)}
+.pill.good{background:#dcefe0;color:#2c6b32}
+[data-theme="dark"] .pill.good{background:#20301f;color:var(--good)}
+.xbtn{border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:8px;line-height:1}
+.xbtn:hover{color:var(--bad);background:var(--accent-soft)}
+.empty{color:var(--muted);text-align:center;padding:22px 10px;font-size:14px}
+.lesson{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);
+  border-radius:10px;margin:0 0 8px;background:var(--input-bg)}
+.lesson.done{opacity:.62}
+.lesson.done .ltitle{text-decoration:line-through}
+.lesson input[type="checkbox"]{margin-top:4px;flex:none}
+.lesson .lbody{flex:1;min-width:0}
+.lesson .ltitle{font-weight:700}
+.lesson .lmeta{font-size:12.5px;color:var(--muted)}
+.dayhead{font-weight:800;margin:14px 0 8px;font-size:15px}
+.dayhead:first-child{margin-top:0}
+.stu-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.stu-tabs button{border:1px solid var(--line);background:var(--card);color:var(--muted);font:inherit;
+  font-weight:700;font-size:13px;padding:7px 14px;border-radius:99px;cursor:pointer}
+.stu-tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.att-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.att-card{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--input-bg)}
+.att-card .nm{font-weight:700;margin-bottom:6px}
+.att-card .btns{display:flex;gap:6px}
+.att-card .btns .btn{flex:1;padding:7px 4px;font-size:13px}
+.att-card .btns .btn.on-p{background:var(--good);border-color:var(--good);color:#fff}
+.att-card .btns .btn.on-a{background:var(--bad);border-color:var(--bad);color:#fff}
+footer.attrib{text-align:center;color:var(--muted);font-size:13px;margin:26px 0 8px}
+footer.attrib a{color:var(--accent);font-weight:700;text-decoration:none}
+.kbd-note{font-size:13px;color:var(--muted)}
+@media print{
+  .tabs,.no-print,header.top .theme-btn{display:none!important}
+  body{background:#fff;color:#000}
+  .card,.stat{box-shadow:none;break-inside:avoid}
+  .wrap{padding:0;max-width:100%}
+}
+/* Glenerds cross-promo: More Apps button + bottom CTA (shared) */
+.g-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.g-store-btn {
+  display: inline-flex; align-items: center;
+  background: var(--g-accent, #4f46e5);
+  color: var(--g-accent-ink, #ffffff);
+  border-radius: var(--g-radius-pill, 999px);
+  padding: 8px 15px;
+  font-size: 0.88rem; font-weight: 700; line-height: 1.2;
+  text-decoration: none; white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,.12);
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.g-store-btn:hover { background: var(--g-accent-hover, #4338ca); color: var(--g-accent-ink, #ffffff); box-shadow: 0 4px 12px rgba(0,0,0,.16); }
+.g-store-btn:active { transform: scale(0.97); }
+.g-store-btn:focus-visible { outline: 2px solid var(--g-accent, #4f46e5); outline-offset: 2px; }
+/* Glenerds standard header cluster: More Apps + sample flask + theme + sound */
+.g-header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; row-gap: 6px; justify-content: flex-end; }
+a.g-store-btn, header .g-store-btn { color: #ffffff; }
+.round-btn {
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px; padding: 0;
+  border-radius: 999px; display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer; background: var(--card); border: 1px solid var(--line);
+  color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.10); flex: none; font-size: 1.1rem;
+}
+.round-btn svg { width: 30px; height: 30px; flex: none; fill: none; stroke: currentColor;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Glen FINAL rev 4: all three icons fill their 44px button — flask 26px, theme+sound emoji 1.65rem */
+.round-btn.theme-toggle,.round-btn.sound-toggle{font-size:1.65rem;line-height:1}
+.round-btn:hover { border-color: var(--accent); }
+.round-btn:active { transform: scale(.92); border-color: var(--accent); }
+.round-btn:focus { outline: none; }
+.round-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.round-btn.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+/* ---- Dashboard visuals: progress rings, grade bars, week columns (sweep 2026-09-21) ---- */
+.stat-link { cursor: pointer; transition: border-color .18s, transform .18s; }
+.stat-link:hover { border-color: var(--accent); }
+.stat-link:focus { outline: none; }
+.stat-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.stat-link:active { transform: scale(.97); }
+.viz-cap { font-size: .82rem; color: var(--muted); margin: 8px 0 0; }
+.ring-row { display: flex; gap: 16px; flex-wrap: wrap; margin: 4px 0 6px; }
+.ring-item { display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; border-radius: 12px; padding: 4px 6px; }
+.ring-item .ring-name { font-size: .8rem; font-weight: 700; }
+.ring-item.spot .ring-name { color: var(--accent); }
+.ring-item:focus { outline: none; }
+.ring-item:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ring-item.spot .ring-svg { filter: drop-shadow(0 0 4px var(--accent)); }
+.ring-svg { width: 88px; height: 88px; }
+.ring-bg { fill: none; stroke: var(--line); stroke-width: 10; }
+.ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; }
+.ring-txt { font-size: 17px; font-weight: 800; fill: var(--ink); }
+.tot-row.spot td { background: var(--accent-soft); font-weight: 700; }
+.grbar { cursor: pointer; border-radius: 10px; padding: 2px 4px; margin: 0 -4px; }
+.grbar:focus { outline: none; }
+.grbar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grbar.spot .bar-label, .grbar.spot .bar-val { color: var(--accent); font-weight: 800; }
+.bar-row { display: flex; align-items: center; gap: 10px; padding: 5px 2px; }
+.bar-label { flex: 0 0 92px; font-weight: 600; font-size: .85rem; }
+.bar-track { flex: 1; height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: var(--accent); }
+.bar-val { flex: 0 0 108px; text-align: right; font-variant-numeric: tabular-nums; font-size: .85rem; color: var(--muted); }
+.dayhead.spot { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.wkcols { display: flex; gap: 8px; align-items: stretch; height: 132px; margin: 4px 0 6px; }
+.wkcol { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end;
+  align-items: center; cursor: pointer; border-radius: 8px; padding: 2px; }
+.wkcol:focus { outline: none; }
+.wkcol:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.wkcol .seg { width: 70%; max-width: 34px; border-radius: 4px; }
+.wkcol .seg-done { background: var(--good); }
+.wkcol .seg-pend { background: var(--warn); }
+.wkcol .wk-x { font-size: .68rem; color: var(--muted); margin-top: 4px; font-weight: 700; }
+.wkcol.spot .wk-x { color: var(--accent); }
+.wkcol.spot .seg { filter: drop-shadow(0 0 3px var(--accent)); }
+/* ---- unified chart detail panel (spotlight breakdown) ---- */
+.chart-detail{margin:10px 0 6px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--card)}
+.cd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.cd-title{font-weight:800;font-size:1.02rem;color:var(--ink)}
+.cd-sub{color:var(--muted);font-size:.85rem;margin-top:2px}
+.cd-x{flex:0 0 auto;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:1.25rem;line-height:1;cursor:pointer}
+.cd-rows{display:grid;gap:6px;max-height:260px;overflow:auto}
+.cd-row{display:flex;align-items:baseline;gap:10px;padding:7px 10px;border-radius:8px;background:var(--bg)}
+.cd-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:.88rem;color:var(--ink)}
+.cd-meta{color:var(--muted);font-size:.8rem;white-space:nowrap}
+.cd-val{font-weight:700;font-size:.88rem;white-space:nowrap;color:var(--accent)}
+@media (max-width: 640px) {
+  header.top { flex-wrap: wrap; }
+  .g-header-actions { margin-left: 0; gap: 6px; }
+}
+.g-cta-strip {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 28px 0 0; padding: 16px 20px;
+  border-radius: 14px;
+  background: rgba(79,70,229,.08);
+  border: 1px solid rgba(79,70,229,.28);
+  color: inherit;
+  font-size: 0.95rem; font-weight: 600;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.g-cta-strip:hover { background: rgba(79,70,229,.14); border-color: rgba(79,70,229,.45); }
+.g-cta-strip:active { transform: scale(0.99); }
+.g-cta-strip:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+.g-cta-strip .g-cta-arrow { color: #4f46e5; font-weight: 700; font-size: 1.4em; line-height: 1; transform: translateY(-0.04em); }
+[data-theme="dark"] .g-cta-strip .g-cta-arrow { color: #a5b4fc; }
+@media (max-width: 440px) {
+  .g-store-btn { padding: 8px 12px; }
+  .g-header-actions { gap: 6px; }
+}
+@media print {
+  .g-store-btn, .g-header-actions, .g-cta-strip { display: none !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🏫</div>
+      <h1>HomeRoom</h1>
+    </div>
+    <div class="g-header-actions">
+      <a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="sampleToggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+      <button id="themeToggle" class="round-btn theme-toggle" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
+      <button id="soundToggle" class="round-btn sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)">&#128266;</button>
+    </div>
+  </header>
+  <p class="tagline">Weekly lesson plans, one-tap attendance, gradebook &amp; reading logs for your homeschool. 100% offline — your family's data never leaves this device.</p>
+
+  <nav class="tabs no-print" role="tablist" aria-label="Sections">
+    <button role="tab" data-tab="dash" class="active">Today</button>
+    <button role="tab" data-tab="lessons">Lessons</button>
+    <button role="tab" data-tab="attend">Attendance</button>
+    <button role="tab" data-tab="grades">Gradebook</button>
+    <button role="tab" data-tab="reading">Reading</button>
+    <button role="tab" data-tab="students">Students</button>
+    <button role="tab" data-tab="data">Backup</button>
+  </nav>
+
+  <section id="tab-dash">
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="card">
+      <h2>Today's lessons <span class="kbd-note" id="todayLabel"></span></h2>
+      <div id="todayList"></div>
+    </div>
+  </section>
+
+  <section id="tab-lessons" hidden>
+    <div class="card">
+      <h2>Plan a lesson</h2>
+      <div class="grid2">
+        <div class="field"><label for="lesStu">Student</label><select id="lesStu"></select></div>
+        <div class="field"><label for="lesSubj">Subject</label><select id="lesSubj"></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="lesDate">Date</label><input type="date" id="lesDate"></div>
+        <div class="field"><label for="lesTitle">Lesson</label><input type="text" id="lesTitle" placeholder="e.g. Fractions ch. 4, pp. 112–118"></div>
+      </div>
+      <div class="field"><label for="lesNotes">Notes <span class="hint">(optional — materials, page numbers…)</span></label><input type="text" id="lesNotes" placeholder="e.g. manipulatives + worksheet 4B"></div>
+      <button class="btn primary" id="lesAdd" type="button">Add lesson</button>
+    </div>
+    <div class="card">
+      <h2>This week</h2>
+      <div class="rowline no-print" style="margin-bottom:10px">
+        <button class="btn small" id="wkPrev" type="button">← Prev</button>
+        <button class="btn small" id="wkToday" type="button">This week</button>
+        <button class="btn small" id="wkNext" type="button">Next →</button>
+        <span class="kbd-note" id="wkLabel"></span>
+      </div>
+      <div class="stu-tabs" id="wkStuTabs"></div>
+      <div class="wkcols" id="wkChart"></div>
+      <p class="viz-cap" id="wkChartCap"></p>
+      <div class="chart-detail" id="wkChartDetail" aria-live="polite" hidden></div>
+      <div id="wkList"></div>
+    </div>
+  </section>
+
+  <section id="tab-attend" hidden>
+    <div class="card">
+      <h2>Take attendance</h2>
+      <p class="sub" id="attDateLabel"></p>
+      <div class="rowline no-print" style="margin-bottom:12px">
+        <button class="btn small" id="attPrev" type="button">← Prev day</button>
+        <button class="btn small" id="attToday" type="button">Today</button>
+        <button class="btn small" id="attNext" type="button">Next day →</button>
+      </div>
+      <div class="att-grid" id="attGrid"></div>
+    </div>
+    <div class="card">
+      <h2>Year totals</h2>
+      <p class="sub">Many states require 175–180 school days — track your progress here.</p>
+      <div class="ring-row" id="attRings"></div>
+      <p class="viz-cap" id="ringCap"></p>
+      <div id="attTotals"></div>
+      <div class="chart-detail" id="ringChartDetail" aria-live="polite" hidden></div>
+    </div>
+  </section>
+
+  <section id="tab-grades" hidden>
+    <div class="card">
+      <h2>Log an assignment</h2>
+      <div class="grid2">
+        <div class="field"><label for="grStu">Student</label><select id="grStu"></select></div>
+        <div class="field"><label for="grSubj">Subject</label><select id="grSubj"></select></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="grName">Assignment</label><input type="text" id="grName" placeholder="e.g. Quiz 4"></div>
+        <div class="field"><label for="grScore">Score</label><input type="number" id="grScore" min="0" step="0.5" placeholder="0"></div>
+        <div class="field"><label for="grMax">Out of</label><input type="number" id="grMax" min="0" step="0.5" placeholder="100"></div>
+      </div>
+      <button class="btn primary" id="grAdd" type="button">Add grade</button>
+    </div>
+    <div class="card">
+      <h2>Gradebook</h2>
+      <div class="stu-tabs" id="grStuTabs"></div>
+      <div id="grChart"></div>
+      <p class="viz-cap" id="grChartCap"></p>
+      <div class="chart-detail" id="grChartDetail" aria-live="polite" hidden></div>
+      <div id="grList"></div>
+    </div>
+  </section>
+
+  <section id="tab-reading" hidden>
+    <div class="card">
+      <h2>Log a book</h2>
+      <div class="grid2">
+        <div class="field"><label for="rdStu">Student</label><select id="rdStu"></select></div>
+        <div class="field"><label for="rdTitle">Book title</label><input type="text" id="rdTitle" placeholder="e.g. Charlotte's Web"></div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label for="rdAuthor">Author <span class="hint">(optional)</span></label><input type="text" id="rdAuthor" placeholder=""></div>
+        <div class="field"><label for="rdPages">Pages</label><input type="number" id="rdPages" min="0" step="1" placeholder="0"></div>
+        <div class="field"><label for="rdDate">Finished <span class="hint">(optional)</span></label><input type="date" id="rdDate"></div>
+      </div>
+      <button class="btn primary" id="rdAdd" type="button">Add book</button>
+    </div>
+    <div class="card">
+      <h2>Reading log</h2>
+      <div class="stu-tabs" id="rdStuTabs"></div>
+      <div id="rdList"></div>
+    </div>
+  </section>
+
+  <section id="tab-students" hidden>
+    <div class="card">
+      <h2>Add a student</h2>
+      <div class="grid2">
+        <div class="field"><label for="stuName">Name</label><input type="text" id="stuName" placeholder="e.g. Emma"></div>
+        <div class="field"><label for="stuGrade">Grade level <span class="hint">(optional)</span></label><input type="text" id="stuGrade" placeholder="e.g. 4th"></div>
+      </div>
+      <button class="btn primary" id="stuAdd" type="button">Add student</button>
+    </div>
+    <div class="card">
+      <h2>Students &amp; subjects</h2>
+      <p class="sub">Subjects are per student — add the ones you actually teach.</p>
+      <div id="stuList"></div>
+    </div>
+  </section>
+
+  <section id="tab-data" hidden>
+    <div class="card">
+      <h2>Backup &amp; restore</h2>
+      <p class="sub">Your data lives only in this browser. Export a backup before clearing browser data or switching devices.</p>
+      <div class="rowline no-print" style="flex-wrap:wrap">
+        <button class="btn" id="expJson" type="button">Export backup (JSON)</button>
+        <label class="btn" for="impJson" style="cursor:pointer">Import backup</label>
+        <input type="file" id="impJson" accept="application/json" hidden>
+        <button class="btn" id="printBtn" type="button">Print summary</button>
+      </div>
+      <p class="kbd-note no-print" id="dataStats" style="margin-top:12px"></p>
+      <div class="no-print" style="margin-top:14px">
+        <button class="btn danger small" id="wipeBtn" type="button">Delete all HomeRoom data</button>
+      </div>
+    </div>
+  </section>
+
+  <a class="g-cta-strip" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" aria-label="Like this tool? Check out our other apps on Gumroad">
+  <span>Like this tool? Check out our other apps</span><span class="g-cta-arrow" aria-hidden="true">➔</span>
+</a>
+<footer class="attrib">
+    Offline tool <a href="https://glenerds.gumroad.com">by Glenerds</a> — no signup, no tracking, your data never leaves this device.
+  </footer>
+</div>
+<script>
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function todayStr(){var d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function num(v){var n=parseFloat(v);return isFinite(n)?n:0;}
+function parseDate(s){var p=String(s||"").split("-");return new Date(+p[0],(+p[1]||1)-1,+p[2]||1);}
+function fmtDate(s){return parseDate(s).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
+function fmtLong(s){return parseDate(s).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"});}
+function addDays(s,n){var d=parseDate(s);d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function weekStart(s){var d=parseDate(s);var dow=(d.getDay()+6)%7;d.setDate(d.getDate()-dow);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function letterGrade(pct){if(pct>=90)return"A";if(pct>=80)return"B";if(pct>=70)return"C";if(pct>=60)return"D";return"F";}
+
+var KEY="homeroom-v1";
+var state={students:[],lessons:[],attendance:{},grades:[],books:[],theme:null};
+var sampleOn=false, sampleSnap=null;
+function load(){try{var raw=localStorage.getItem(KEY);if(raw){var s=JSON.parse(raw);for(var k in state){if(s[k]!==undefined)state[k]=s[k];}}}catch(e){}}
+function save(){/* Suppressed for the whole sample cycle: __gSampleOn is set true
+  before demo state is swapped in and back to false only after the user state
+  is restored, so user data can never be overwritten by sample-mode edits. */
+  if(window.__gSampleOn||sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+load();
+
+function applyTheme(t){state.theme=t;document.documentElement.setAttribute("data-theme",t);save();
+  var dark=(t==="dark"),btn=$("themeToggle"),l=dark?"Switch to light mode":"Switch to dark mode";
+  btn.innerHTML=dark?"☀️":"🌙";
+  btn.setAttribute("aria-pressed",dark?"true":"false");
+  btn.setAttribute("aria-label",l);btn.title=l;}
+(function(){var t=state.theme;if(!t){t=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}applyTheme(t);})();
+$("themeToggle").addEventListener("click",function(){applyTheme(state.theme==="dark"?"light":"dark");Sound.toggleTheme();Sound.click();});
+
+/* ---------- sample data toggle (transient: snapshot user data + ALL transient UI, never persisted) ---------- */
+function paintSample(){
+  var btn=$("sampleToggle"),l=sampleOn?"Clear sample data":"Try sample data";
+  btn.setAttribute("aria-pressed",sampleOn?"true":"false");
+  btn.setAttribute("aria-label",l);btn.title=l;
+}
+/* Snapshot every transient UI state: typed-but-uncommitted inputs, selects,
+   textareas, checked states, the active tab, view cursors, and validation notices. */
+function snapTransient(){
+  var s={vals:{},checks:{},cursors:{},activeTab:activeTab};
+  var els=document.querySelectorAll("input,select,textarea");
+  for(var i=0;i<els.length;i++){var el=els[i];
+    if(!el.id||el.type==="file")continue;
+    var key=el.id;
+    if(!key&&el.getAttribute("data-stu-subj"))key="subj|"+el.getAttribute("data-stu-subj");
+    if(!key)continue;
+    if(el.type==="checkbox"||el.type==="radio")s.checks[key]=el.checked;
+    else s.vals[key]=el.value;}
+  s.cursors={wkCursor:wkCursor,wkStudent:wkStudent,attCursor:attCursor,grStudent:grStudent,rdStudent:rdStudent};
+  return s;}
+function setSelectVal(el,val){
+  for(var o=0;o<el.options.length;o++)if(el.options[o].value===val){el.value=val;return;}
+}
+function restoreTransient(s){
+  if(!s)return;
+  var c=s.cursors||{};
+  if(c.wkCursor!==undefined)wkCursor=c.wkCursor;
+  if(c.wkStudent!==undefined)wkStudent=c.wkStudent;
+  if(c.attCursor!==undefined)attCursor=c.attCursor;
+  if(c.grStudent!==undefined)grStudent=c.grStudent;
+  if(c.rdStudent!==undefined)rdStudent=c.rdStudent;
+  for(var k in s.vals){var el=null;
+    if(k.indexOf("subj|")===0)el=document.querySelector('[data-stu-subj="'+k.slice(5)+'"]');
+    else el=$(k);
+    if(!el)continue;
+    if(el.tagName==="SELECT")setSelectVal(el,s.vals[k]);
+    else el.value=s.vals[k];}
+  for(var k2 in s.checks){var el2=$(k2);if(el2)el2.checked=s.checks[k2];}
+  showTab(s.activeTab||"dash");
+}
+function setSample(on){
+  if(on&&!sampleOn){
+    sampleSnap=JSON.stringify({state:state,trans:snapTransient()});
+    window.__gSampleOn=true;sampleOn=true;
+    var emma=uid(),liam=uid(),wk=weekStart(todayStr());
+    state.students=[
+      {id:emma,name:"Emma Everitt",grade:"Grade 4",subjects:["Math","Reading","Writing","Science","History"]},
+      {id:liam,name:"Liam Everitt",grade:"Grade 2",subjects:["Math","Reading","Writing","Science","History"]}
+    ];
+    state.lessons=[
+      {id:uid(),studentId:emma,subject:"Math",date:wk,title:"Long division review",notes:"Workbook p. 41-44",done:true},
+      {id:uid(),studentId:emma,subject:"Science",date:addDays(wk,1),title:"Water cycle experiment",notes:"",done:true},
+      {id:uid(),studentId:emma,subject:"Reading",date:addDays(wk,2),title:"Charlotte's Web ch. 8-9",notes:"Reading log 20 min",done:false},
+      {id:uid(),studentId:liam,subject:"Math",date:wk,title:"Times tables x3",notes:"Flashcards",done:true},
+      {id:uid(),studentId:liam,subject:"Writing",date:addDays(wk,1),title:"Journal entry: fall leaves",notes:"",done:false}
+    ];
+    state.attendance={};
+    for(var i=4;i>=0;i--){var d=addDays(todayStr(),-i);state.attendance[d]={};
+      state.attendance[d][emma]="p";state.attendance[d][liam]=(i===2?"a":"p");}
+    state.grades=[
+      {id:uid(),studentId:emma,subject:"Math",name:"Fractions quiz",score:17,max:20},
+      {id:uid(),studentId:emma,subject:"Science",name:"Water cycle worksheet",score:24,max:25},
+      {id:uid(),studentId:liam,subject:"Math",name:"x3 timed drill",score:9,max:10},
+      {id:uid(),studentId:liam,subject:"Reading",name:"Spelling test 12",score:10,max:12}
+    ];
+    state.books=[
+      {id:uid(),studentId:emma,title:"Charlotte's Web",author:"E.B. White",pages:192,finished:""},
+      {id:uid(),studentId:liam,title:"Frog and Toad Are Friends",author:"Arnold Lobel",pages:64,finished:todayStr()}
+    ];
+    wkCursor=weekStart(todayStr());wkStudent=emma;attCursor=todayStr();grStudent=emma;rdStudent=liam;
+    init();renderDataStats();
+  }else if(!on&&sampleOn){
+    var trans=null;
+    try{var s=JSON.parse(sampleSnap);
+      if(s&&s.state){state=s.state;trans=s.trans||null;}}catch(e){}
+    sampleOn=false;window.__gSampleOn=false;
+    sampleSnap=null;
+    init();renderDataStats();
+    restoreTransient(trans);
+  }
+  paintSample();
+}
+$("sampleToggle").addEventListener("click",function(){setSample(!sampleOn);Sound.click();});
+paintSample();
+
+/* ---------- subtle sounds (Web Audio oscillator, no files, offline) ---------- */
+var Sound=(function(){
+  var KEY="homeroom.sound",on=true,ctx=null;
+  try{if(window.localStorage.getItem(KEY)==="off")on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||"sine";o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==="suspended"){c.resume().then(play,play);}else{play();}}
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?"on":"off");}catch(e){}return on;},
+    click:function(){if(on)tone(520,0.06,"sine",0.045);},
+    select:function(){if(on){tone(660,0.07,"sine",0.055);tone(880,0.09,"sine",0.045,0.06);}},
+    success:function(){if(on){tone(660,0.09,"sine",0.06);tone(990,0.12,"sine",0.05,0.08);}},
+    error:function(){if(on)tone(170,0.16,"sawtooth",0.045);},
+    toggleTheme:function(){if(on)tone(440,0.06,"triangle",0.05);}
+  };
+})();
+(function(){
+  var btn=$("soundToggle");if(!btn)return;
+  function paint(){var on=Sound.isOn();
+    btn.innerHTML=on?"🔊":"🔇";
+    btn.setAttribute("aria-pressed",on?"true":"false");
+    btn.setAttribute("aria-label","Sound: "+(on?"on":"off"));
+    btn.title="Toggle sounds ("+(on?"on":"off")+")";}
+  btn.addEventListener("click",function(){Sound.toggle();paint();Sound.click();});
+  paint();
+})();
+
+var activeTab="dash";
+function showTab(t){
+  activeTab=t;
+  document.querySelectorAll(".tabs button").forEach(function(x){x.classList.toggle("active",x.dataset.tab===t);});
+  ["dash","lessons","attend","grades","reading","students","data"].forEach(function(k){$("tab-"+k).hidden=(k!==t);});
+  if(t==="dash")renderDash();
+  if(t==="lessons")renderWeek();
+  if(t==="attend")renderAttend();
+  if(t==="grades")renderGrades();
+  if(t==="reading")renderReading();
+  if(t==="students")renderStudents();
+  if(t==="data")renderDataStats();
+  Sound.click();
+}
+document.querySelectorAll(".tabs button").forEach(function(b){
+  b.addEventListener("click",function(){showTab(b.dataset.tab);});
+});
+
+function stuName(id){var s=state.students.find(function(x){return x.id===id;});return s?s.name:"?";}
+function stuSubjects(id){var s=state.students.find(function(x){return x.id===id;});return s?(s.subjects||[]):[];}
+function fillStudentSelects(){
+  ["lesStu","grStu","rdStu"].forEach(function(id){
+    var sel=$(id),cur=sel.value;
+    sel.innerHTML=state.students.map(function(s){return '<option value="'+s.id+'">'+esc(s.name)+'</option>';}).join("");
+    if(cur&&state.students.some(function(s){return s.id===cur;}))sel.value=cur;
+  });
+  fillSubjectSelect($("lesStu").value,$("lesSubj"));
+  fillSubjectSelect($("grStu").value,$("grSubj"));
+}
+function fillSubjectSelect(stuId,sel){
+  var subs=stuSubjects(stuId),cur=sel.value;
+  sel.innerHTML=subs.map(function(s){return '<option>'+esc(s)+'</option>';}).join("");
+  if(cur&&subs.indexOf(cur)>=0)sel.value=cur;
+}
+["lesStu","grStu"].forEach(function(id){
+  $(id).addEventListener("change",function(){fillSubjectSelect($(id).value,id==="lesStu"?$("lesSubj"):$("grSubj"));});
+});
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  var t=todayStr();
+  var todays=state.lessons.filter(function(l){return l.date===t;});
+  var done=todays.filter(function(l){return l.done;}).length;
+  var att=state.attendance[t]||{};
+  var present=Object.keys(att).filter(function(k){return att[k]==="p";}).length;
+  var totalDays=Object.keys(state.attendance).filter(function(d){return Object.keys(state.attendance[d]).some(function(k){return state.attendance[d][k]==="p";});}).length;
+  var totAssign=state.grades.length, totBooks=state.books.length;
+  var html="";
+  html+='<div class="stat stat-link" tabindex="0" role="button" data-goto="lessons" aria-label="Lessons today '+done+' of '+todays.length+'. Go to the Lessons tab."><div class="k">Lessons today</div><div class="v">'+done+"/"+todays.length+'</div></div>';
+  html+='<div class="stat stat-link" tabindex="0" role="button" data-goto="attend" aria-label="Present today '+present+' of '+state.students.length+'. Go to the Attendance tab."><div class="k">Present today</div><div class="v">'+present+"/"+state.students.length+'</div></div>';
+  html+='<div class="stat stat-link" tabindex="0" role="button" data-goto="attend" aria-label="School days '+totalDays+'. Go to the Attendance tab."><div class="k">School days</div><div class="v">'+totalDays+'</div></div>';
+  html+='<div class="stat stat-link" tabindex="0" role="button" data-goto="grades" aria-label="Assignments '+totAssign+'. Go to the Gradebook tab."><div class="k">Assignments</div><div class="v">'+totAssign+'</div></div>';
+  $("statGrid").innerHTML=html;
+$("statGrid").addEventListener("click",function(e){
+  var el=e.target&&e.target.closest?e.target.closest(".stat-link"):null;
+  if(el)showTab(el.getAttribute("data-goto"));
+});
+$("statGrid").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  var el=e.target&&e.target.closest?e.target.closest(".stat-link"):null;
+  if(el){e.preventDefault();showTab(el.getAttribute("data-goto"));}
+});
+  $("todayLabel").textContent="— "+fmtLong(t);
+  if(!state.students.length){$("todayList").innerHTML='<div class="empty">Add a student first, then plan lessons.</div>';return;}
+  if(!todays.length){$("todayList").innerHTML='<div class="empty">Nothing planned for today. Add lessons under the Lessons tab.</div>';return;}
+  var h="";
+  todays.forEach(function(l){
+    h+='<div class="lesson'+(l.done?" done":"")+'"><input type="checkbox" data-lesson-done="'+l.id+'"'+(l.done?" checked":"")+' aria-label="Mark done">'
+      +'<div class="lbody"><div class="ltitle">'+esc(l.title)+'</div><div class="lmeta">'+esc(stuName(l.studentId))+' · '+esc(l.subject)+'</div></div></div>';
+  });
+  $("todayList").innerHTML=h;
+}
+$("todayList").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-lesson-done");
+  if(id){var l=state.lessons.find(function(x){return x.id===id;});if(l){l.done=e.target.checked;save();renderDash();}}
+});
+
+/* ---------- lessons ---------- */
+var wkCursor=weekStart(todayStr()), wkStudent=null;
+$("lesDate").value=todayStr();
+function refreshLessonStudentTabs(){
+  var box=$("wkStuTabs");
+  if(!wkStudent&&state.students.length)wkStudent=state.students[0].id;
+  box.innerHTML=state.students.map(function(s){
+    return '<button type="button" data-wk-stu="'+s.id+'" class="'+(wkStudent===s.id?"active":"")+'">'+esc(s.name)+'</button>';
+  }).join("");
+}
+$("wkStuTabs").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-wk-stu");
+  if(id){wkStudent=id;renderWeek();}
+});
+$("lesAdd").addEventListener("click",function(){
+  var stu=$("lesStu").value,title=$("lesTitle").value.trim();
+  if(!stu){Sound.error();alert("Add a student first (Students tab).");return;}
+  if(!title){Sound.error();alert("Name the lesson first.");return;}
+  state.lessons.push({id:uid(),studentId:stu,subject:$("lesSubj").value||"",date:$("lesDate").value||todayStr(),title:title,notes:$("lesNotes").value.trim(),done:false});
+  save();$("lesTitle").value="";$("lesNotes").value="";renderWeek();Sound.success();
+});
+$("wkPrev").addEventListener("click",function(){wkCursor=addDays(wkCursor,-7);renderWeek();Sound.click();});
+$("wkNext").addEventListener("click",function(){wkCursor=addDays(wkCursor,7);renderWeek();Sound.click();});
+$("wkToday").addEventListener("click",function(){wkCursor=weekStart(todayStr());renderWeek();});
+function renderWeek(){
+  refreshLessonStudentTabs();
+  if(!wkStudent&&state.students.length)wkStudent=state.students[0].id;
+  $("wkLabel").textContent=fmtDate(wkCursor)+" – "+fmtDate(addDays(wkCursor,6));
+  var box=$("wkList");
+  if(!wkStudent){box.innerHTML='<div class="empty">Add a student first.</div>';
+    $("wkChart").innerHTML="";$("wkChartCap").textContent="";return;}
+  var h="";
+  for(var i=0;i<7;i++){
+    var d=addDays(wkCursor,i);
+    var ls=state.lessons.filter(function(l){return l.date===d&&l.studentId===wkStudent;});
+    h+='<div class="dayhead">'+fmtLong(d)+'</div>';
+    if(!ls.length){h+='<div class="kbd-note" style="margin-bottom:8px">—</div>';continue;}
+    ls.forEach(function(l){
+      h+='<div class="lesson'+(l.done?" done":"")+'"><input type="checkbox" data-wk-done="'+l.id+'"'+(l.done?" checked":"")+' aria-label="Mark done">'
+        +'<div class="lbody"><div class="ltitle">'+esc(l.title)+'</div><div class="lmeta">'+esc(l.subject)+(l.notes?" · "+esc(l.notes):"")+'</div></div>'
+        +'<button class="xbtn no-print" data-wk-del="'+l.id+'" aria-label="Delete">×</button></div>';
+    });
+  }
+  box.innerHTML=h;
+  renderWkChart();
+}
+var wkChartSpot=null;
+function renderWkChart(){
+  var box=$("wkChart"),cap=$("wkChartCap");wkChartSpot=null;
+  hideChartDetail("wkChartDetail");
+  if(!wkStudent){box.innerHTML="";cap.textContent="";return;}
+  var days=[],maxT=1,plan=0,donen=0;
+  for(var i=0;i<7;i++){
+    var d=addDays(wkCursor,i);
+    var ls=state.lessons.filter(function(l){return l.date===d&&l.studentId===wkStudent;});
+    var dn=ls.filter(function(l){return l.done;}).length;
+    days.push({d:d,done:dn,pend:ls.length-dn});
+    if(ls.length>maxT)maxT=ls.length;plan+=ls.length;donen+=dn;}
+  if(!plan){box.innerHTML="";cap.textContent="No lessons planned this week.";return;}
+  var h="";
+  days.forEach(function(x){
+    var dh=parseDate(x.d),xl="MTWTFSS".charAt((dh.getDay()+6)%7);
+    var al=fmtLong(x.d)+": "+x.done+" of "+(x.done+x.pend)+" lessons done. Activate for details.";
+    var segs="";
+    if(x.pend>0)segs='<div class="seg seg-pend" style="height:'+(x.pend/maxT*88).toFixed(0)+'px" title="'+x.pend+' pending"></div>';
+    if(x.done>0)segs+='<div class="seg seg-done" style="height:'+(x.done/maxT*88).toFixed(0)+'px" title="'+x.done+' done"></div>';
+    h+='<div class="wkcol" tabindex="0" role="button" data-d="'+x.d+'" aria-label="'+esc(al)+'">'
+      +'<div style="display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:96px;width:100%">'+segs+'</div>'
+      +'<span class="wk-x">'+xl+'</span></div>';
+  });
+  box.innerHTML=h;
+  cap.textContent=plan+" lesson"+(plan===1?"":"s")+" planned this week · "+donen+" done — activate a column for the day's detail.";
+}
+function spotWkChart(col){
+  var d=col.getAttribute("data-d");
+  wkChartSpot=(wkChartSpot===d)?null:d;
+  $("wkChart").querySelectorAll(".wkcol").forEach(function(x){
+    var on=x.getAttribute("data-d")===wkChartSpot;
+    x.classList.toggle("spot",on);
+    x.style.opacity=(wkChartSpot&&!on)?".45":"1";});
+  if(wkChartSpot){
+    var v=col.getAttribute("aria-label").split(". Activate")[0];
+    $("wkChartCap").textContent=v+" — activate again to release.";
+    renderWkDetail();
+    Sound.select();
+  }else{
+    var plan=0,donen=0;
+    state.lessons.forEach(function(l){if(l.studentId===wkStudent){plan++;if(l.done)donen++;}});
+    $("wkChartCap").textContent=plan+" lesson"+(plan===1?"":"s")+" planned this week · "+donen+" done — activate a column for the day's detail.";
+    hideChartDetail("wkChartDetail");
+    Sound.click();
+  }
+}
+/* Real breakdown behind the spotlighted day column: every lesson behind the count. */
+function hideChartDetail(id){var b=$(id);if(b){b.hidden=true;b.innerHTML="";}}
+function renderWkDetail(){
+  var box=$("wkChartDetail");
+  if(!box||!wkChartSpot){hideChartDetail("wkChartDetail");return;}
+  var ls=state.lessons.filter(function(l){return l.date===wkChartSpot&&l.studentId===wkStudent;});
+  var dn=ls.filter(function(l){return l.done;}).length;
+  var html='<div class="cd-head"><div><div class="cd-title">'+esc(fmtLong(wkChartSpot))+' — '+esc(stuName(wkStudent))+'</div>'
+    +'<div class="cd-sub">'+dn+' of '+ls.length+' lesson'+(ls.length===1?"":"s")+' done</div></div>'
+    +'<button type="button" class="cd-x" id="wkChartDetailX" aria-label="Clear selection and show totals">×</button></div>';
+  if(ls.length){
+    html+='<div class="cd-rows">'+ls.map(function(l){
+      return '<div class="cd-row"><span class="cd-name">'+esc(l.title)+'</span>'
+        +'<span class="cd-meta">'+esc(l.subject||"")+'</span>'
+        +'<span class="cd-val">'+(l.done?"✓ done":"pending")+'</span></div>';}).join("")+'</div>';
+  }else html+='<p class="empty">No lessons this day.</p>';
+  box.innerHTML=html;box.hidden=false;
+  var x=$("wkChartDetailX");
+  if(x)x.addEventListener("click",function(){
+    var cur=null;
+    $("wkChart").querySelectorAll(".wkcol").forEach(function(el){
+      if(el.getAttribute("data-d")===wkChartSpot)cur=el;});
+    if(cur)spotWkChart(cur);});
+}
+$("wkChart").addEventListener("click",function(e){
+  var col=e.target&&e.target.closest?e.target.closest(".wkcol"):null;
+  if(col)spotWkChart(col);});
+$("wkChart").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  var col=e.target&&e.target.closest?e.target.closest(".wkcol"):null;
+  if(col){e.preventDefault();spotWkChart(col);}});
+$("wkList").addEventListener("click",function(e){
+  var t=e.target, doneId=t.getAttribute?t.getAttribute("data-wk-done"):null,
+      delId=t.getAttribute?t.getAttribute("data-wk-del"):null;
+  if(doneId){var l=state.lessons.find(function(x){return x.id===doneId;});if(l){l.done=e.target.checked;save();renderWeek();}}
+  if(delId&&confirm("Delete this lesson?")){state.lessons=state.lessons.filter(function(x){return x.id!==delId;});save();renderWeek();}
+});
+
+/* ---------- attendance ---------- */
+var attCursor=todayStr();
+function renderAttend(){
+  $("attDateLabel").textContent=fmtLong(attCursor);
+  var grid=$("attGrid");
+  if(!state.students.length){grid.innerHTML='<div class="empty">Add a student first.</div>';}
+  else{
+    var day=state.attendance[attCursor]||{};
+    grid.innerHTML=state.students.map(function(s){
+      var v=day[s.id]||"";
+      return '<div class="att-card"><div class="nm">'+esc(s.name)+'</div><div class="btns no-print">'
+        +'<button type="button" class="btn'+(v==="p"?" on-p":"")+'" data-att="'+s.id+'|p">Present</button>'
+        +'<button type="button" class="btn'+(v==="a"?" on-a":"")+'" data-att="'+s.id+'|a">Absent</button></div>'
+        +(v?'<div class="kbd-note" style="margin-top:6px">Marked: '+(v==="p"?"Present":"Absent")+'</div>':"")
+        +'</div>';
+    }).join("");
+  }
+  var rows=state.students.map(function(s){
+    var p=0,a=0;
+    Object.keys(state.attendance).forEach(function(d){var v=state.attendance[d][s.id];if(v==="p")p++;else if(v==="a")a++;});
+    var rate=(p+a)>0?Math.round(p/(p+a)*100):0;
+    return{id:s.id,name:s.name,p:p,a:a,rate:rate};});
+  renderAttRings(rows);
+  var h='<table><thead><tr><th>Student</th><th class="num">Present</th><th class="num">Absent</th><th class="num">Rate</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    h+='<tr class="tot-row" data-stu="'+r.id+'"><td><b>'+esc(r.name)+'</b></td><td class="num">'+r.p+'</td><td class="num">'+r.a+'</td><td class="num">'+r.rate+'%</td></tr>';
+  });
+  $("attTotals").innerHTML=state.students.length?h+'</tbody></table>':'<div class="empty">No students yet.</div>';
+}
+var attRingSpot=null;
+function ringColor(rate){return rate>=90?"var(--good)":rate>=75?"var(--warn)":"var(--bad)";}
+function renderAttRings(rows){
+  var box=$("attRings");attRingSpot=null;
+  hideChartDetail("ringChartDetail");
+  if(!rows.length){box.innerHTML="";$("ringCap").textContent="";return;}
+  box.innerHTML=rows.map(function(r){
+    var C=(2*Math.PI*40).toFixed(1),off=(C*(1-Math.min(100,Math.max(0,r.rate))/100)).toFixed(1);
+    var al=r.name+": "+r.rate+"% present ("+r.p+" present, "+r.a+" absent). Activate for the breakdown.";
+    return '<div class="ring-item" tabindex="0" role="button" data-stu="'+r.id+'" aria-label="'+esc(al)+'">'
+      +'<svg class="ring-svg" viewBox="0 0 100 100" aria-hidden="true">'
+      +'<circle class="ring-bg" cx="50" cy="50" r="40"/>'
+      +'<circle class="ring-fg" cx="50" cy="50" r="40" stroke="'+ringColor(r.rate)+'" stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 50 50)"/>'
+      +'<text class="ring-txt" x="50" y="56" text-anchor="middle">'+r.rate+'%</text></svg>'
+      +'<span class="ring-name">'+esc(r.name)+'</span></div>';
+  }).join("");
+  $("ringCap").textContent="Attendance rate per student — activate a ring for the breakdown.";
+}
+function paintRingCap(){
+  var cap=$("ringCap");
+  if(!attRingSpot){cap.textContent="Attendance rate per student — activate a ring for the breakdown.";return;}
+}
+function spotRing(item){
+  var id=item.getAttribute("data-stu");
+  attRingSpot=(attRingSpot===id)?null:id;
+  $("attRings").querySelectorAll(".ring-item").forEach(function(x){
+    x.classList.toggle("spot",x.getAttribute("data-stu")===attRingSpot);
+    x.style.opacity=(attRingSpot&&x.getAttribute("data-stu")!==attRingSpot)?".45":"1";});
+  $("attTotals").querySelectorAll(".tot-row").forEach(function(x){
+    x.classList.toggle("spot",x.getAttribute("data-stu")===attRingSpot);});
+  if(attRingSpot){
+    var v=item.getAttribute("aria-label").split(". Activate")[0];
+    $("ringCap").textContent=v+" — activate again to release.";
+    renderRingDetail();
+    Sound.select();
+  }else{paintRingCap();hideChartDetail("ringChartDetail");Sound.click();}
+}
+/* Real breakdown behind the spotlighted attendance ring: every marked day. */
+function renderRingDetail(){
+  var box=$("ringChartDetail");
+  if(!box||!attRingSpot){hideChartDetail("ringChartDetail");return;}
+  var s=state.students.find(function(x){return x.id===attRingSpot;});
+  var nm=s?s.name:"(removed student)";
+  var rows=[];
+  Object.keys(state.attendance).sort().forEach(function(d){
+    var v=(state.attendance[d]||{})[attRingSpot];
+    if(v==="p"||v==="a")rows.push({d:d,v:v});
+  });
+  var p=rows.filter(function(r){return r.v==="p";}).length,a=rows.length-p;
+  var html='<div class="cd-head"><div><div class="cd-title">'+esc(nm)+' — attendance detail</div>'
+    +'<div class="cd-sub">'+p+' present · '+a+' absent</div></div>'
+    +'<button type="button" class="cd-x" id="ringChartDetailX" aria-label="Clear selection and show totals">×</button></div>';
+  if(rows.length){
+    html+='<div class="cd-rows">'+rows.map(function(r){
+      return '<div class="cd-row"><span class="cd-name">'+esc(fmtLong(r.d))+'</span>'
+        +'<span class="cd-meta">'+esc(r.d)+'</span>'
+        +'<span class="cd-val">'+(r.v==="p"?"Present":"Absent")+'</span></div>';}).join("")+'</div>';
+  }else html+='<p class="empty">No attendance marks yet.</p>';
+  box.innerHTML=html;box.hidden=false;
+  var x=$("ringChartDetailX");
+  if(x)x.addEventListener("click",function(){
+    var cur=null;
+    $("attRings").querySelectorAll(".ring-item").forEach(function(el){
+      if(el.getAttribute("data-stu")===attRingSpot)cur=el;});
+    if(cur)spotRing(cur);});
+}
+$("attRings").addEventListener("click",function(e){
+  var item=e.target&&e.target.closest?e.target.closest(".ring-item"):null;
+  if(item)spotRing(item);});
+$("attRings").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  var item=e.target&&e.target.closest?e.target.closest(".ring-item"):null;
+  if(item){e.preventDefault();spotRing(item);}});
+$("attGrid").addEventListener("click",function(e){
+  var v=e.target.getAttribute&&e.target.getAttribute("data-att");
+  if(!v)return;
+  var parts=v.split("|"),sid=parts[0],mark=parts[1];
+  if(!state.attendance[attCursor])state.attendance[attCursor]={};
+  state.attendance[attCursor][sid]=(state.attendance[attCursor][sid]===mark)?"":mark;
+  save();renderAttend();Sound.select();
+});
+$("attPrev").addEventListener("click",function(){attCursor=addDays(attCursor,-1);renderAttend();Sound.click();});
+$("attNext").addEventListener("click",function(){attCursor=addDays(attCursor,1);renderAttend();Sound.click();});
+$("attToday").addEventListener("click",function(){attCursor=todayStr();renderAttend();Sound.click();});
+
+/* ---------- gradebook ---------- */
+var grStudent=null;
+function refreshGradeTabs(){
+  var box=$("grStuTabs");
+  if(!grStudent&&state.students.length)grStudent=state.students[0].id;
+  box.innerHTML=state.students.map(function(s){
+    return '<button type="button" data-gr-stu="'+s.id+'" class="'+(grStudent===s.id?"active":"")+'">'+esc(s.name)+'</button>';
+  }).join("");
+}
+$("grStuTabs").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-gr-stu");
+  if(id){grStudent=id;renderGrades();}
+});
+$("grAdd").addEventListener("click",function(){
+  var stu=$("grStu").value,name=$("grName").value.trim(),sc=num($("grScore").value),mx=num($("grMax").value);
+  if(!stu){Sound.error();alert("Add a student first (Students tab).");return;}
+  if(!name){Sound.error();alert("Name the assignment first.");return;}
+  if(mx<=0){Sound.error();alert("Enter the max points first.");return;}
+  if(sc<0){Sound.error();alert("Score can't be negative.");return;}
+  state.grades.push({id:uid(),studentId:stu,subject:$("grSubj").value||"",name:name,score:sc,max:mx});
+  save();$("grName").value="";$("grScore").value="";$("grMax").value="";grStudent=stu;renderGrades();Sound.success();
+});
+function renderGrades(){
+  refreshGradeTabs();
+  if(!grStudent&&state.students.length)grStudent=state.students[0].id;
+  var box=$("grList");
+  if(!grStudent){box.innerHTML='<div class="empty">Add a student first.</div>';
+    $("grChart").innerHTML="";$("grChartCap").textContent="";return;}
+  var rows=state.grades.filter(function(g){return g.studentId===grStudent;});
+  var bySubj={};
+  rows.forEach(function(g){(bySubj[g.subject||"General"]=bySubj[g.subject||"General"]||[]).push(g);});
+  var h="";
+  Object.keys(bySubj).sort().forEach(function(subj){
+    var gs=bySubj[subj],ts=0,tm=0;
+    gs.forEach(function(g){ts+=num(g.score);tm+=num(g.max);});
+    var pct=tm>0?ts/tm*100:0;
+    h+='<div class="dayhead" data-subj="'+esc(subj)+'">'+esc(subj)+' <span class="pill good">'+pct.toFixed(1)+'% · '+letterGrade(pct)+'</span></div>';
+    h+='<table><thead><tr><th>Assignment</th><th class="num">Score</th><th class="num">Grade</th><th></th></tr></thead><tbody>';
+    gs.forEach(function(g){
+      var p=num(g.max)>0?num(g.score)/num(g.max)*100:0;
+      h+='<tr><td>'+esc(g.name)+'</td><td class="num">'+num(g.score)+' / '+num(g.max)+'</td><td class="num"><b>'+p.toFixed(0)+'%</b> '+letterGrade(p)+'</td><td class="num"><button class="xbtn no-print" data-gr-del="'+g.id+'" aria-label="Delete">×</button></td></tr>';
+    });
+    h+='</tbody></table>';
+  });
+  box.innerHTML=h||'<div class="empty">No grades yet for '+esc(stuName(grStudent))+'.</div>';
+  renderGrChart(bySubj,rows);
+}
+var grBarSpot=null;
+function renderGrChart(bySubj,rows){
+  var box=$("grChart"),cap=$("grChartCap");grBarSpot=null;
+  hideChartDetail("grChartDetail");
+  var subs=Object.keys(bySubj).sort();
+  if(!subs.length){box.innerHTML="";cap.textContent="";return;}
+  var h="";
+  subs.forEach(function(subj){
+    var gs=bySubj[subj],ts=0,tm=0;
+    gs.forEach(function(g){ts+=num(g.score);tm+=num(g.max);});
+    var pct=tm>0?ts/tm*100:0;
+    var lbl=subj+": "+pct.toFixed(1)+"% ("+letterGrade(pct)+") across "+gs.length+" assignment"+(gs.length===1?"":"s")+". Activate to jump to this subject.";
+    h+='<div class="grbar" tabindex="0" role="button" data-subj="'+esc(subj)+'" aria-label="'+esc(lbl)+'">'
+      +'<div class="bar-row" style="pointer-events:none">'
+      +'<div class="bar-label">'+esc(subj)+'</div>'
+      +'<div class="bar-track"><div class="bar-fill" style="width:'+Math.min(100,Math.max(2,pct)).toFixed(1)+'%"></div></div>'
+      +'<div class="bar-val">'+pct.toFixed(1)+'% · '+letterGrade(pct)+'</div></div></div>';
+  });
+  box.innerHTML=h;
+  cap.textContent="Average per subject — activate a bar to jump to its assignments.";
+}
+function spotGrBar(bar){
+  var subj=bar.getAttribute("data-subj");
+  grBarSpot=(grBarSpot===subj)?null:subj;
+  $("grChart").querySelectorAll(".grbar").forEach(function(x){
+    var on=x.getAttribute("data-subj")===grBarSpot;
+    x.classList.toggle("spot",on);
+    x.style.opacity=(grBarSpot&&!on)?".45":"1";});
+  $("grList").querySelectorAll(".dayhead").forEach(function(x){
+    x.classList.toggle("spot",x.getAttribute("data-subj")===grBarSpot);});
+  if(grBarSpot){
+    var v=bar.getAttribute("aria-label").split(". Activate")[0];
+    $("grChartCap").textContent=v+" — activate again to release.";
+    $("grList").querySelectorAll(".dayhead").forEach(function(x){
+      if(x.getAttribute("data-subj")===grBarSpot)x.scrollIntoView({behavior:"smooth",block:"nearest"});});
+    renderGrDetail();
+    Sound.select();
+  }else{
+    $("grChartCap").textContent="Average per subject — activate a bar to jump to its assignments.";
+    hideChartDetail("grChartDetail");
+    Sound.click();
+  }
+}
+/* Real breakdown behind the spotlighted subject bar: every assignment behind the average. */
+function renderGrDetail(){
+  var box=$("grChartDetail");
+  if(!box||!grBarSpot){hideChartDetail("grChartDetail");return;}
+  var gs=state.grades.filter(function(g){return g.studentId===grStudent&&(g.subject||"General")===grBarSpot;});
+  var ts=0,tm=0;gs.forEach(function(g){ts+=num(g.score);tm+=num(g.max);});
+  var pct=tm>0?ts/tm*100:0;
+  var html='<div class="cd-head"><div><div class="cd-title">'+esc(grBarSpot)+' — assignments</div>'
+    +'<div class="cd-sub">'+gs.length+' assignment'+(gs.length===1?"":"s")+' · '+pct.toFixed(1)+'% '+letterGrade(pct)+'</div></div>'
+    +'<button type="button" class="cd-x" id="grChartDetailX" aria-label="Clear selection and show totals">×</button></div>';
+  if(gs.length){
+    html+='<div class="cd-rows">'+gs.map(function(g){
+      var p=num(g.max)>0?num(g.score)/num(g.max)*100:0;
+      return '<div class="cd-row"><span class="cd-name">'+esc(g.name)+'</span>'
+        +'<span class="cd-meta">'+num(g.score)+' / '+num(g.max)+'</span>'
+        +'<span class="cd-val">'+p.toFixed(0)+'% '+letterGrade(p)+'</span></div>';}).join("")+'</div>';
+  }else html+='<p class="empty">No assignments in this subject.</p>';
+  box.innerHTML=html;box.hidden=false;
+  var x=$("grChartDetailX");
+  if(x)x.addEventListener("click",function(){
+    var cur=null;
+    $("grChart").querySelectorAll(".grbar").forEach(function(el){
+      if(el.getAttribute("data-subj")===grBarSpot)cur=el;});
+    if(cur)spotGrBar(cur);});
+}
+$("grChart").addEventListener("click",function(e){
+  var bar=e.target&&e.target.closest?e.target.closest(".grbar"):null;
+  if(bar)spotGrBar(bar);});
+$("grChart").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ")return;
+  var bar=e.target&&e.target.closest?e.target.closest(".grbar"):null;
+  if(bar){e.preventDefault();spotGrBar(bar);}});
+/* Esc releases all chart spotlights (clickability spec B, 2026-09-21) */
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Escape")return;
+  if(wkChartSpot){var c=document.querySelector("#wkChart .wkcol.spot");if(c)spotWkChart(c);}
+  if(attRingSpot){var r=document.querySelector("#attRings .ring-item.spot");if(r)spotRing(r);}
+  if(grBarSpot){var g=document.querySelector("#grChart .grbar.spot");if(g)spotGrBar(g);}});
+$("grList").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-gr-del");
+  if(id&&confirm("Delete this grade?")){state.grades=state.grades.filter(function(g){return g.id!==id;});save();renderGrades();}
+});
+
+/* ---------- reading ---------- */
+var rdStudent=null;
+function refreshReadTabs(){
+  var box=$("rdStuTabs");
+  if(!rdStudent&&state.students.length)rdStudent=state.students[0].id;
+  box.innerHTML=state.students.map(function(s){
+    return '<button type="button" data-rd-stu="'+s.id+'" class="'+(rdStudent===s.id?"active":"")+'">'+esc(s.name)+'</button>';
+  }).join("");
+}
+$("rdStuTabs").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-rd-stu");
+  if(id){rdStudent=id;renderReading();}
+});
+$("rdAdd").addEventListener("click",function(){
+  var stu=$("rdStu").value,title=$("rdTitle").value.trim();
+  if(!stu){Sound.error();alert("Add a student first (Students tab).");return;}
+  if(!title){Sound.error();alert("Enter the book title first.");return;}
+  state.books.push({id:uid(),studentId:stu,title:title,author:$("rdAuthor").value.trim(),pages:Math.max(0,Math.round(num($("rdPages").value))),finished:$("rdDate").value||""});
+  save();$("rdTitle").value="";$("rdAuthor").value="";$("rdPages").value="";$("rdDate").value="";rdStudent=stu;renderReading();Sound.success();
+});
+function renderReading(){
+  refreshReadTabs();
+  if(!rdStudent&&state.students.length)rdStudent=state.students[0].id;
+  var box=$("rdList");
+  if(!rdStudent){box.innerHTML='<div class="empty">Add a student first.</div>';return;}
+  var rows=state.books.filter(function(b){return b.studentId===rdStudent;});
+  var pages=rows.reduce(function(a,b){return a+num(b.pages);},0);
+  var h='<p class="sub">'+rows.length+' books · '+pages+' pages</p>';
+  if(rows.length){
+    h+='<table><thead><tr><th>Title</th><th>Author</th><th class="num">Pages</th><th>Finished</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(b){
+      h+='<tr><td><b>'+esc(b.title)+'</b></td><td>'+esc(b.author||"—")+'</td><td class="num">'+num(b.pages)+'</td><td>'+(b.finished?esc(fmtDate(b.finished)):"—")+'</td><td class="num"><button class="xbtn no-print" data-rd-del="'+b.id+'" aria-label="Delete">×</button></td></tr>';
+    });
+    h+='</tbody></table>';
+  }else{h+='<div class="empty">No books logged yet for '+esc(stuName(rdStudent))+'.</div>';}
+  box.innerHTML=h;
+}
+$("rdList").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-rd-del");
+  if(id&&confirm("Delete this book?")){state.books=state.books.filter(function(b){return b.id!==id;});save();renderReading();}
+});
+
+/* ---------- students ---------- */
+$("stuAdd").addEventListener("click",function(){
+  var name=$("stuName").value.trim();
+  if(!name){Sound.error();alert("Enter the student's name first.");return;}
+  state.students.push({id:uid(),name:name,grade:$("stuGrade").value.trim(),subjects:["Math","Reading","Writing","Science","History"]});
+  save();$("stuName").value="";$("stuGrade").value="";fillStudentSelects();renderStudents();renderAttend();Sound.success();
+});
+function renderStudents(){
+  var box=$("stuList");
+  if(!state.students.length){box.innerHTML='<div class="empty">No students yet.</div>';return;}
+  box.innerHTML=state.students.map(function(s){
+    return '<div class="card" style="margin:0 0 10px"><div class="rowline" style="justify-content:space-between">'
+      +'<div><b>'+esc(s.name)+'</b>'+(s.grade?' <span class="kbd-note">'+esc(s.grade)+'</span>':"")+'</div>'
+      +'<button class="xbtn no-print" data-stu-del="'+s.id+'" aria-label="Remove student">×</button></div>'
+      +'<div class="field" style="margin:10px 0 0"><label>Subjects <span class="hint">(comma-separated)</span></label>'
+      +'<input type="text" data-stu-subj="'+s.id+'" value="'+esc((s.subjects||[]).join(", "))+'"></div></div>';
+  }).join("");
+}
+$("stuList").addEventListener("click",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-stu-del");
+  if(id&&confirm("Remove "+stuName(id)+" and ALL their lessons, grades and books? This cannot be undone.")){
+    state.students=state.students.filter(function(s){return s.id!==id;});
+    state.lessons=state.lessons.filter(function(l){return l.studentId!==id;});
+    state.grades=state.grades.filter(function(g){return g.studentId!==id;});
+    state.books=state.books.filter(function(b){return b.studentId!==id;});
+    Object.keys(state.attendance).forEach(function(d){delete state.attendance[d][id];});
+    if(wkStudent===id)wkStudent=null;if(grStudent===id)grStudent=null;if(rdStudent===id)rdStudent=null;
+    save();fillStudentSelects();renderStudents();renderWeek();renderAttend();renderGrades();renderReading();
+  }
+});
+$("stuList").addEventListener("change",function(e){
+  var id=e.target.getAttribute&&e.target.getAttribute("data-stu-subj");
+  if(id){var s=state.students.find(function(x){return x.id===id;});
+    if(s){s.subjects=e.target.value.split(",").map(function(x){return x.trim();}).filter(Boolean);save();fillStudentSelects();}}
+});
+
+/* ---------- backup ---------- */
+function renderDataStats(){
+  $("dataStats").textContent=state.students.length+" students · "+state.lessons.length+" lessons · "+state.grades.length+" grades · "+state.books.length+" books logged.";
+}
+$("expJson").addEventListener("click",function(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="homeroom-backup-"+todayStr()+".json";document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  Sound.success();
+});
+$("impJson").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var s=JSON.parse(r.result);
+      if(!s||typeof s!=="object"||!Array.isArray(s.students))throw new Error("bad file");
+      ["lessons","grades","books"].forEach(function(k){if(!Array.isArray(s[k]))s[k]=[];});
+      if(!s.attendance||typeof s.attendance!=="object")s.attendance={};
+      state=s;save();applyTheme(state.theme||((window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light"));init();renderDataStats();Sound.success();alert("Backup imported.");
+    }catch(err){Sound.error();alert("That file doesn't look like a HomeRoom backup.");}
+  };
+  r.readAsText(f);e.target.value="";
+});
+$("printBtn").addEventListener("click",function(){window.print();});
+$("wipeBtn").addEventListener("click",function(){
+  if(confirm("Delete ALL HomeRoom data? This cannot be undone.")&&confirm("Really delete everything?")){
+    state={students:[],lessons:[],attendance:{},grades:[],books:[],theme:state.theme};
+    wkStudent=null;grStudent=null;rdStudent=null;save();init();renderDataStats();
+  }
+});
+
+/* ---------- init ---------- */
+function init(){
+  fillStudentSelects();renderDash();renderWeek();renderAttend();renderGrades();renderReading();renderStudents();
+}
+init();
+</script>
+</body>
+</html>
