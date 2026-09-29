@@ -628,22 +628,26 @@ function methodAgg(){
   });
   return Object.keys(map).map(function(k){return{method:k,total:map[k].total,count:map[k].count};});
 }
-/* gallery-style donut: dashed-circle segments, center readout */
+/* gallery-style donut: dashed-circle segments, center readout.
+   Center text lives in a dedicated clear zone: hole diameter (116) minus
+   >=12 padding -> 104-unit box. Top text scales 20px -> 15px floor by length
+   so 7-digit totals ($X,XXX,XXX.XX) fit without touching the ring. */
 function donutSVG(uidp,segs,total,topText,subText){
-  var C=345.6,acc=0,i;
+  var C=414.7,acc=0,i,R=66,SW=16;
   var g="";
   for(i=0;i<segs.length;i++){
     var frac=total>0?segs[i].value/total:0;
     var len=segs.length>1?Math.max(frac*C-1.4,0.6):C;
     g+='<g class="seg" tabindex="0" role="button" data-i="'+i+'" aria-pressed="false" aria-label="'+esc(segs[i].label+": "+segs[i].hint)+'">'
-      +'<circle cx="80" cy="80" r="55" fill="none" stroke="'+segs[i].color+'" stroke-width="24"'
+      +'<circle cx="80" cy="80" r="'+R+'" fill="none" stroke="'+segs[i].color+'" stroke-width="'+SW+'"'
       +' stroke-dasharray="'+len.toFixed(1)+" "+C.toFixed(1)+'" stroke-dashoffset="'+(-acc).toFixed(1)+'"/></g>';
     acc+=frac*C;
   }
+  var topSize=Math.max(15,Math.min(20,Math.floor(104/(String(topText).length*0.55))));
   return '<svg viewBox="0 0 160 160" role="img" aria-label="Payment method breakdown donut chart">'
-    +'<circle cx="80" cy="80" r="55" fill="none" stroke="var(--border)" stroke-width="24"/>'
+    +'<circle cx="80" cy="80" r="'+R+'" fill="none" stroke="var(--border)" stroke-width="'+SW+'"/>'
     +'<g fill="none" transform="rotate(-90 80 80)">'+g+'</g>'
-    +'<text x="80" y="78" text-anchor="middle" pointer-events="none" style="font-size:20px;font-weight:700;fill:var(--text)" id="'+uidp+'-top">'+esc(topText)+'</text>'
+    +'<text x="80" y="78" text-anchor="middle" pointer-events="none" style="font-size:'+topSize+'px;font-weight:700;fill:var(--text)" id="'+uidp+'-top">'+esc(topText)+'</text>'
     +'<text x="80" y="98" text-anchor="middle" pointer-events="none" style="font-size:15px;letter-spacing:1.2px;fill:var(--muted)" id="'+uidp+'-sub">'+esc(subText)+'</text></svg>';
 }
 function legendHTML(segs){
@@ -654,11 +658,14 @@ function legendHTML(segs){
   }).join("")+'</div>';
 }
 function barsSVG(months){
-  var W=380,padL=100,rowH=40,top=8;
+  var padL=100,rowH=40,top=8,maxBW=180;
   var max=Math.max.apply(null,months.map(function(m){return m.total;}).concat([0]));
+  /* reserve room for the longest value label so it never clips the viewBox edge */
+  var maxLabelLen=Math.max.apply(null,months.map(function(m){return fmtMoney(m.total).length;}).concat([0]));
+  var W=Math.ceil(padL+maxBW+8+maxLabelLen*8.5+8);
   var H=top+months.length*rowH+6,s="";
   months.forEach(function(m,i){
-    var y=top+i*rowH,bw=max>0?Math.max(Math.round(m.total/max*180),3):0;
+    var y=top+i*rowH,bw=max>0?Math.max(Math.round(m.total/max*maxBW),3):0;
     s+='<g class="ch-bar" tabindex="0" role="button" data-i="'+i+'" aria-pressed="false"'
       +' aria-label="'+esc(m.label+": "+fmtMoney(m.total)+", "+m.count+" receipts")+'">'
       +'<text x="0" y="'+(y+21)+'" style="font-size:15px;fill:var(--muted)">'+esc(m.label)+'</text>'
