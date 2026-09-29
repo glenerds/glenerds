@@ -1253,20 +1253,25 @@ function render(){
     inp.addEventListener("change",()=>{
       const c=catById(p,inp.dataset.budget); if(!c) return;
       const stripped=String(inp.value).replace(/[$,\s]/g,"");
-      if(stripped!=="" && !/^\d*(\.\d*)?$/.test(stripped)){
-        dlgAlert("Enter a valid budget amount."); inp.value=(c.budgetCents/100).toFixed(2); return;
+      if(stripped===""||!/^\d*(\.\d*)?$/.test(stripped)){
+        /* number inputs blank invalid text to "" — never silently zero the budget */
+        if(stripped!=="") dlgAlert("Enter a valid budget amount.");
+        inp.value=(c.budgetCents/100).toFixed(2); return;
       }
       const v=toCents(inp.value);
-      if(v<0){ dlgAlert("Budget can't be negative."); inp.value=(c.budgetCents/100).toFixed(2); return; }
       c.budgetCents=v; save(); render();
     });
     inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); inp.blur(); } });
   });
   const coPct=document.getElementById("coPct");
   if(coPct) coPct.addEventListener("change",()=>{
-    let v=parseInt(coPct.value,10);
-    if(!isFinite(v)||v<0) v=0; if(v>50) v=50;
-    p.contingencyPct=v; save(); render();
+    const raw=String(coPct.value).trim();
+    const v=parseInt(raw,10);
+    if(raw===""||!/^\d+$/.test(raw)||!isFinite(v)){
+      /* number inputs blank invalid text to "" — never silently zero the contingency */
+      coPct.value=String(p.contingencyPct); return;
+    }
+    p.contingencyPct=Math.min(50,Math.max(0,v)); save(); render();
   });
   /* stat boxes: click/Enter/Space shows the real breakdown */
   el.querySelectorAll(".stat[role=\"button\"]").forEach(st=>{
