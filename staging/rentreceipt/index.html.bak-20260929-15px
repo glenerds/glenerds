@@ -46,9 +46,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Hel
   display:flex;align-items:center;justify-content:center;border:none}
 .logo-badge svg{width:28px;height:28px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .hero h1{margin:0;font-size:1.45rem;letter-spacing:.2px}
-.hero .tagline{margin:2px 0 0;font-size:15px;color:var(--muted);opacity:1}
+.hero .tagline{margin:2px 0 0;font-size:.85rem;color:var(--muted);opacity:1}
 .theme-pill{margin-left:auto;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.14);
-  border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:15px}
+  border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:999px;padding:8px 14px;cursor:pointer;font-size:.85rem}
 .theme-pill:hover{background:rgba(255,255,255,.24)}
 .theme-pill svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round}
 /* Glenerds standard cluster: flask, dark-mode, sound — circular 44x44 icon-only on the hero gradient */
@@ -74,7 +74,7 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Hel
 .kpi[role="button"]:hover{border-color:var(--primary)}
 .kpi[role="button"]:focus{outline:none;filter:drop-shadow(0 0 5px var(--primary2))}
 .kpi[role="button"][aria-pressed="true"]{border-color:var(--primary)}
-.kpi .k{font-size:15px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
+.kpi .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);font-weight:700}
 .kpi .v{font-size:1.28rem;font-weight:700}
 #kpiDet{margin-bottom:14px}
 .hist-item[role="button"]{cursor:pointer;border-radius:8px}
@@ -89,11 +89,11 @@ svg .seg:focus,svg .ch-bar:focus{outline:none;filter:drop-shadow(0 0 5px rgba(14
 .ch-bar:focus{outline:none;filter:drop-shadow(0 2px 5px rgba(0,0,0,.28))}
 .ch-leg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--input-border);
   background:var(--input-bg);color:var(--text);border-radius:999px;padding:5px 12px;
-  font-size:15px;cursor:pointer;margin:3px 6px 3px 0}
+  font-size:.8rem;cursor:pointer;margin:3px 6px 3px 0}
 .ch-leg .sw{width:11px;height:11px;border-radius:3px;flex:none}
 .ch-leg[aria-pressed="true"]{border-color:var(--primary);box-shadow:0 0 0 2px rgba(14,116,144,.28)}
 .ch-leg:focus-visible{outline:2px solid var(--primary2);outline-offset:2px}
-.ch-det{margin-top:10px;font-size:15px;background:var(--chip-bg);border-radius:10px;padding:10px 14px;min-height:2.6em}
+.ch-det{margin-top:10px;font-size:.9rem;background:var(--chip-bg);border-radius:10px;padding:10px 14px;min-height:2.6em}
 @media(max-width:480px){.g-header-actions{gap:6px}}
 @media(max-width:520px){
   .hero-inner{flex-wrap:wrap;row-gap:8px}
@@ -114,14 +114,14 @@ main{max-width:1024px;margin:0 auto;padding:20px 16px 60px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media (max-width:480px){.grid2{grid-template-columns:1fr}}
 .field{margin-bottom:12px}
-.field label{display:block;font-size:15px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.field label{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
 input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:10px 12px;border:1px solid var(--input-border);
   border-radius:10px;background:var(--input-bg);color:var(--text);font-size:.95rem}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--primary2);border-color:var(--primary2)}
-.err{font-size:15px;color:var(--danger);margin-top:4px;min-height:1.1em}
+.err{font-size:.8rem;color:var(--danger);margin-top:4px;min-height:1.1em}
 .field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--danger)}
 .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:10px;cursor:pointer;
-  font-size:15px;font-weight:600;padding:10px 16px;margin:4px 8px 4px 0}
+  font-size:.92rem;font-weight:600;padding:10px 16px;margin:4px 8px 4px 0}
 .btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;
   box-shadow:0 4px 14px rgba(15,118,110,.35)}
@@ -130,41 +130,41 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--primary2);border
 .btn-secondary:hover{border-color:var(--primary)}
 .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
 .btn-danger:hover{background:var(--danger-bg)}
-.btn-sm{padding:6px 10px;font-size:15px;border-radius:8px}
+.btn-sm{padding:6px 10px;font-size:.8rem;border-radius:8px}
 /* ---- Printable receipt ---- */
 .receipt-paper{background:#fff;color:#111;border:1px solid #ddd;border-radius:8px;padding:28px 30px;
   font-family:Georgia,"Times New Roman",serif;box-shadow:0 4px 18px rgba(0,0,0,.08)}
 .receipt-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #111;
   padding-bottom:12px;margin-bottom:16px}
 .receipt-head h2{margin:0;font-size:1.7rem;letter-spacing:2px;text-transform:uppercase;font-family:inherit}
-.receipt-num{font-size:15px;color:#444;text-align:right;font-family:-apple-system,Helvetica,Arial,sans-serif}
+.receipt-num{font-size:.85rem;color:#444;text-align:right;font-family:-apple-system,Helvetica,Arial,sans-serif}
 .receipt-num strong{font-size:1.05rem;color:#111}
 .receipt-rows{margin:0 0 16px;font-family:-apple-system,Helvetica,Arial,sans-serif}
 .receipt-row{display:flex;gap:10px;padding:7px 0;border-bottom:1px dotted #ccc;font-size:.95rem}
-.receipt-row .k{flex:0 0 150px;color:#555;font-size:15px;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.receipt-row .k{flex:0 0 150px;color:#555;font-size:.82rem;text-transform:uppercase;letter-spacing:.4px;font-weight:600}
 .receipt-row .v{flex:1;color:#111;word-break:break-word}
 .receipt-amount{display:flex;justify-content:space-between;align-items:center;background:#f5f5f5;
   border:1px solid #ddd;border-radius:6px;padding:12px 16px;margin:0 0 16px}
-.receipt-amount .lbl{font-size:15px;text-transform:uppercase;letter-spacing:.5px;color:#555;font-family:-apple-system,Helvetica,Arial,sans-serif}
+.receipt-amount .lbl{font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;color:#555;font-family:-apple-system,Helvetica,Arial,sans-serif}
 .receipt-amount .val{font-size:1.6rem;font-weight:700;color:#111}
 .receipt-sig{display:flex;justify-content:space-between;margin-top:34px;gap:24px;
   font-family:-apple-system,Helvetica,Arial,sans-serif}
-.sig-line{flex:1;border-top:1px solid #888;padding-top:6px;font-size:15px;color:#555}
-.receipt-foot{margin-top:18px;font-size:15px;color:#777;text-align:center;
+.sig-line{flex:1;border-top:1px solid #888;padding-top:6px;font-size:.78rem;color:#555}
+.receipt-foot{margin-top:18px;font-size:.75rem;color:#777;text-align:center;
   font-family:-apple-system,Helvetica,Arial,sans-serif;border-top:1px solid #ddd;padding-top:10px}
-.hist-item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:15px}
+.hist-item{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);font-size:.9rem}
 .hist-item:last-child{border-bottom:none}
 .hist-item .grow{flex:1;min-width:0}
 .hist-item .num{font-weight:700}
-.hist-item .meta{font-size:15px;color:var(--muted)}
-.empty{color:var(--muted);font-size:15px;text-align:center;padding:18px 0}
+.hist-item .meta{font-size:.8rem;color:var(--muted)}
+.empty{color:var(--muted);font-size:.9rem;text-align:center;padding:18px 0}
 .promo{border-left:4px solid var(--primary);padding:14px 18px}
 .promo p{margin:0;font-size:.95rem}
 .promo a{color:var(--primary);font-weight:700}
-footer{max-width:1024px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:15px}
+footer{max-width:1024px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.85rem}
 footer a{color:var(--primary)}
 footer>div{margin-bottom:6px}
-.disclaimer{font-size:15px;opacity:.85}
+.disclaimer{font-size:.75rem;opacity:.85}
 /* ---- Print: only the receipt ---- */
 @media print{
   @page{size:letter;margin:12mm}
@@ -183,7 +183,7 @@ footer>div{margin-bottom:6px}
   color: #fff;
   border-radius: var(--g-radius-pill, 999px);
   padding: 8px 15px;
-  font-size: 15px; font-weight: 700; line-height: 1.2;
+  font-size: 0.88rem; font-weight: 700; line-height: 1.2;
   text-decoration: none; white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0,0,0,.12);
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
@@ -307,7 +307,7 @@ footer>div{margin-bottom:6px}
           <button type="button" class="btn btn-secondary" id="clearFormBtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 14h10l1-14"/></svg><span>New</span></button>
         </div>
         <div class="err" id="formErr" role="alert"></div>
-        <p style="font-size:15px;color:var(--muted);margin:10px 0 0">Saving a receipt adds it to your rent payment record in this browser&rsquo;s history below. Your draft is auto-saved as you type.</p>
+        <p style="font-size:.8rem;color:var(--muted);margin:10px 0 0">Saving a receipt adds it to your rent payment record in this browser&rsquo;s history below. Your draft is auto-saved as you type.</p>
       </form>
     </section>
 
@@ -343,7 +343,7 @@ footer>div{margin-bottom:6px}
           <div class="receipt-foot">This receipt was generated with the RentReceipt generator &mdash; no account, no sign-up, no data sent anywhere.</div>
         </div>
       </div>
-      <p class="no-print" style="font-size:15px;color:var(--muted);margin:12px 0 0">The preview updates as you type. Printing outputs only the receipt, fitted to one page.</p>
+      <p class="no-print" style="font-size:.82rem;color:var(--muted);margin:12px 0 0">The preview updates as you type. Printing outputs only the receipt, fitted to one page.</p>
     </section>
   </div>
 
@@ -639,7 +639,7 @@ function donutSVG(uidp,segs,total,topText,subText){
     +'<circle cx="80" cy="80" r="55" fill="none" stroke="var(--border)" stroke-width="24"/>'
     +'<g fill="none" transform="rotate(-90 80 80)">'+g+'</g>'
     +'<text x="80" y="78" text-anchor="middle" pointer-events="none" style="font-size:20px;font-weight:700;fill:var(--text)" id="'+uidp+'-top">'+esc(topText)+'</text>'
-    +'<text x="80" y="98" text-anchor="middle" pointer-events="none" style="font-size:15px;letter-spacing:1.2px;fill:var(--muted)" id="'+uidp+'-sub">'+esc(subText)+'</text></svg>';
+    +'<text x="80" y="98" text-anchor="middle" pointer-events="none" style="font-size:10.5px;letter-spacing:1.2px;fill:var(--muted)" id="'+uidp+'-sub">'+esc(subText)+'</text></svg>';
 }
 function legendHTML(segs){
   return '<div class="ch-legend">'+segs.map(function(s,i){
@@ -656,9 +656,9 @@ function barsSVG(months){
     var y=top+i*rowH,bw=max>0?Math.max(Math.round(m.total/max*180),3):0;
     s+='<g class="ch-bar" tabindex="0" role="button" data-i="'+i+'" aria-pressed="false"'
       +' aria-label="'+esc(m.label+": "+fmtMoney(m.total)+", "+m.count+" receipts")+'">'
-      +'<text x="0" y="'+(y+21)+'" style="font-size:15px;fill:var(--muted)">'+esc(m.label)+'</text>'
+      +'<text x="0" y="'+(y+21)+'" style="font-size:12px;fill:var(--muted)">'+esc(m.label)+'</text>'
       +'<rect x="'+padL+'" y="'+(y+8)+'" width="'+bw+'" height="20" rx="5" fill="var(--ch1)"/>'
-      +'<text x="'+(padL+bw+8)+'" y="'+(y+21)+'" style="font-size:15px;font-weight:600;fill:var(--text)">'+esc(fmtMoney(m.total))+'</text></g>';
+      +'<text x="'+(padL+bw+8)+'" y="'+(y+21)+'" style="font-size:12px;font-weight:600;fill:var(--text)">'+esc(fmtMoney(m.total))+'</text></g>';
   });
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Monthly rent totals bar chart">'+s+'</svg>';
 }
