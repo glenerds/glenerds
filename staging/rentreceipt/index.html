@@ -596,7 +596,12 @@ function getHistory(){
   if(sampleOn&&sampleHist)return sampleHist.slice();
   var h=load(K.hist,[]);return Array.isArray(h)?h:[];
 }
-function setHistory(h){store(K.hist,h);}
+function setHistory(h){
+  /* sample data is transient: mutate the in-memory sample copy so
+     save/delete visibly work in sample mode; never touch real storage */
+  if(sampleOn){sampleHist=h.slice();return;}
+  store(K.hist,h);
+}
 
 /* ---------- receipt insights: monthly bars + payment-method donut ---------- */
 var CH_COLORS=["var(--ch1)","var(--ch2)","var(--ch3)","var(--ch4)","var(--ch5)"];
