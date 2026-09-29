@@ -926,7 +926,7 @@ if(window.paintSoundBtn)window.paintSoundBtn();}
     </div>
     <div class="gc-frost" id="gc-frost"></div>
     <div class="gc-gauge-wrap">
-      <svg class="gc-gauge" id="gc-gauge" viewBox="0 0 220 132" width="220" height="132" role="button" tabindex="0"
+      <svg class="gc-gauge" id="gc-gauge" viewBox="0 0 280 190" width="280" height="190" role="button" tabindex="0"
            aria-label="Growing season progress — click to switch between days elapsed and days remaining"></svg>
       <p class="gc-gauge-label" id="gc-glabel" aria-live="polite"></p>
     </div>
@@ -1431,52 +1431,59 @@ function renderGauge(L, F) {
   if (el < 0) { phase = 'pre'; pct = 0; }
   else if (el > total) { phase = 'post'; pct = 1; }
   else { phase = 'in'; pct = el / total; }
-  function pt(a) { var r = a * Math.PI / 180; return [110 + 88 * Math.cos(r), 112 - 88 * Math.sin(r)]; }
+  function pt(a) { var r = a * Math.PI / 180; return [140 + 105 * Math.cos(r), 135 - 105 * Math.sin(r)]; }
   function arc(a0, a1) {
     var p0 = pt(a0), p1 = pt(a1);
     return 'M' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) +
-      ' A88 88 0 0 1 ' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1);
+      ' A105 105 0 0 1 ' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1);
   }
   var bg = document.createElementNS(NS, 'path');
   bg.setAttribute('d', arc(180, 0)); bg.setAttribute('fill', 'none');
-  bg.setAttribute('stroke', 'var(--g-border)'); bg.setAttribute('stroke-width', '16');
+  bg.setAttribute('stroke', 'var(--g-border)'); bg.setAttribute('stroke-width', '18');
   bg.setAttribute('stroke-linecap', 'round'); svg.appendChild(bg);
   if (pct > 0) {
     var fg = document.createElementNS(NS, 'path');
     fg.setAttribute('d', arc(180, 180 - 180 * pct)); fg.setAttribute('fill', 'none');
     fg.setAttribute('stroke', phase === 'in' ? '#22c55e' : 'var(--g-accent,#4f46e5)');
-    fg.setAttribute('stroke-width', '16'); fg.setAttribute('stroke-linecap', 'round');
+    fg.setAttribute('stroke-width', '18'); fg.setAttribute('stroke-linecap', 'round');
     svg.appendChild(fg);
   }
   var na = 180 - 180 * pct, np = pt(na);
+  /* needle with dark outline so it stays visible against text/background */
+  var ndOutline = document.createElementNS(NS, 'line');
+  ndOutline.setAttribute('x1', 140); ndOutline.setAttribute('y1', 135);
+  ndOutline.setAttribute('x2', np[0].toFixed(1)); ndOutline.setAttribute('y2', np[1].toFixed(1));
+  ndOutline.setAttribute('stroke', 'rgba(0,0,0,0.55)'); ndOutline.setAttribute('stroke-width', '7');
+  ndOutline.setAttribute('stroke-linecap', 'round'); svg.appendChild(ndOutline);
   var nd = document.createElementNS(NS, 'line');
-  nd.setAttribute('x1', 110); nd.setAttribute('y1', 112);
+  nd.setAttribute('x1', 140); nd.setAttribute('y1', 135);
   nd.setAttribute('x2', np[0].toFixed(1)); nd.setAttribute('y2', np[1].toFixed(1));
-  nd.setAttribute('stroke', 'var(--g-text)'); nd.setAttribute('stroke-width', '3');
+  nd.setAttribute('stroke', '#ffffff'); nd.setAttribute('stroke-width', '3.5');
   nd.setAttribute('stroke-linecap', 'round'); svg.appendChild(nd);
   var hub = document.createElementNS(NS, 'circle');
-  hub.setAttribute('cx', 110); hub.setAttribute('cy', 112); hub.setAttribute('r', '6');
-  hub.setAttribute('fill', 'var(--g-text)'); svg.appendChild(hub);
+  hub.setAttribute('cx', 140); hub.setAttribute('cy', 135); hub.setAttribute('r', '7');
+  hub.setAttribute('fill', '#ffffff'); hub.setAttribute('stroke', 'rgba(0,0,0,0.55)'); hub.setAttribute('stroke-width', '2');
+  svg.appendChild(hub);
   function tx(yy, size, weight, str) {
     var t = document.createElementNS(NS, 'text');
-    t.setAttribute('x', 110); t.setAttribute('y', yy); t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('x', 140); t.setAttribute('y', yy); t.setAttribute('text-anchor', 'middle');
     t.setAttribute('font-size', size); t.setAttribute('font-weight', weight);
     t.setAttribute('fill', 'var(--g-text)'); t.textContent = str; svg.appendChild(t);
   }
   var pctS = Math.round(pct * 100) + '%';
   if (phase === 'in') {
     if (gaugeMode === 'elapsed') {
-      tx(88, 18, 800, 'Day ' + el + ' of ' + total);
+      tx(172, 20, 800, 'Day ' + el + ' of ' + total);
       lab.innerHTML = '<strong>' + pctS + '</strong> through the growing season — click the gauge to see days remaining.';
     } else {
-      tx(88, 18, 800, (total - el) + ' days left');
+      tx(172, 20, 800, (total - el) + ' days left');
       lab.innerHTML = '<strong>' + (total - el) + ' days</strong> of growing season remaining — click the gauge to see days elapsed.';
     }
   } else if (phase === 'pre') {
-    tx(88, 18, 800, (-el) + ' days');
+    tx(172, 20, 800, (-el) + ' days');
     lab.innerHTML = 'Growing season starts in <strong>' + (-el) + ' days</strong> (' + fmtD(L) + ' – ' + fmtD(F) + ').';
   } else {
-    tx(88, 18, 800, 'Done');
+    tx(172, 20, 800, 'Done');
     lab.innerHTML = 'Growing season ended <strong>' + (el - total) + ' days</strong> ago (' + fmtD(L) + ' – ' + fmtD(F) + ').';
   }
   svg.setAttribute('aria-label', 'Growing season progress: ' + lab.textContent + ' — click to switch between elapsed and remaining');
