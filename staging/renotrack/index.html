@@ -361,7 +361,7 @@ function fmt(cents){
   return (neg?"-$":"$") + Math.floor(a/100).toLocaleString("en-US") +
     "." + String(a%100).padStart(2,"0");
 }
-function fmtSigned(cents){ return (cents<0?"-":"+") + fmt(Math.abs(cents)); }
+function fmtSigned(cents){ if(!cents) return fmt(0); return (cents<0?"-":"+") + fmt(Math.abs(cents)); }
 function pct(part,whole){
   part=Number(part); whole=Number(whole);
   if(!isFinite(part)) part=0;
@@ -458,7 +458,7 @@ function initTheme(){
     (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark":"light");
   document.documentElement.setAttribute("data-theme", t);
   paintTheme();
-  if(S && !S.theme){ S.theme=t; }
+  if(S && !S.theme){ S.theme=t; save(); }
 }
 
 /* ---------- sample data toggle (transient: snapshot user data, never persisted) ---------- */
@@ -705,8 +705,9 @@ function donutSpot(i){
 }
 function renderPace(p){
   const ev=[];
-  p.expenses.forEach(e=>ev.push({d:e.date,c:e.cents,lbl:e.vendor||catName(p,e.categoryId)}));
-  p.changeOrders.filter(c=>c.status==="approved").forEach(c=>ev.push({d:c.date,c:c.deltaCents,lbl:"Change order"}));
+  const okD=d=>/^\d{4}-\d{2}-\d{2}$/.test(d||"")&&!isNaN(Date.parse(d));
+  p.expenses.forEach(e=>{ if(okD(e.date)) ev.push({d:e.date,c:e.cents,lbl:e.vendor||catName(p,e.categoryId)}); });
+  p.changeOrders.filter(c=>c.status==="approved"&&okD(c.date)).forEach(c=>ev.push({d:c.date,c:c.deltaCents,lbl:"Change order"}));
   ev.sort((a,b)=>a.d.localeCompare(b.d));
   paceSel=-1;
   if(!ev.length){ pacePtsArr=[]; return `<div class="empty">No dated spend yet — add expenses to see your spending pace.</div><div id="paceWrap"></div>`; }
@@ -822,7 +823,7 @@ function statDetailHTML(kind){
     title="Approved change orders";
     sub=`${appr.length} approved · net ${fmtSigned(apprCents)}`;
     appr.slice().sort((a,b)=>Math.abs(b.deltaCents)-Math.abs(a.deltaCents)).slice(0,6)
-      .forEach(c=>row((c.desc||"Change order")+" · "+c.date, c.deltaCents));
+      .forEach(c=>row((c.description||"Change order")+" · "+c.date, c.deltaCents));
     if(appr.length>6) row(`…and ${appr.length-6} more`, 0);
   }else if(kind==="co-rem"){
     title="Contingency remaining — composition";
@@ -913,6 +914,8 @@ function categoryForm(editId){
     {k:"name",lbl:"Category name",val:c?c.name:"",req:true}
   ],(vals)=>{
     const name=vals.name.trim(); if(!name) return;
+    if(c && c.name===CONTINGENCY_NAME){ dlgAlert("The Contingency category can't be renamed."); return; }
+    if(name.toLowerCase()===CONTINGENCY_NAME.toLowerCase()){ dlgAlert("That name is reserved for the automatic Contingency category."); return; }
     if(p.categories.some(x=>x.id!==editId&&x.name.toLowerCase()===name.toLowerCase())){
       dlgAlert("A category with that name already exists."); return;
     }
@@ -1001,6 +1004,7 @@ function quoteForm(editId){
   const p=P(); if(!p) return;
   const q=editId?p.quotes.find(x=>x.id===editId):null;
   const opts=p.categories.filter(c=>c.name!==CONTINGENCY_NAME).map(c=>[c.id,c.name]);
+  if(!opts.length){ dlgAlert("Add a category first."); return; }
   dlgForm(q?"Edit quote request":"New quote request",[
     {k:"jobTitle",lbl:"Job / scope",val:q?q.jobTitle:"",req:true,ph:"e.g. Kitchen rewire"},
     {k:"categoryId",lbl:"Category",type:"select",val:q?q.categoryId:(opts[0]?opts[0][0]:""),opts},
@@ -1146,40 +1150,60 @@ function asDate(v,fb){ return /^\d{4}-\d{2}-\d{2}$/.test(asStr(v,""))?asStr(v,""
 function sanitizeState(s){
   const clean={version:1,theme:(s.theme==="dark"||s.theme==="light")?s.theme:null,
     activeProjectId:asStr(s.activeProjectId,null),projects:[]};
-  for(const p of s.projects){
+  for(const p of (s.projects||[])){
+    if(!p||typeof p!=="object") continue;
     const cp={id:safeId(p.id),name:asStr(p.name,"Project").slice(0,120),
       createdAt:asCents(p.createdAt)||Date.now(),
       contingencyPct:Math.min(50,Math.max(0,parseInt(p.contingencyPct,10)||0)),
       categories:[],expenses:[],quotes:[],changeOrders:[]};
-    const catIds=new Set();
-    for(const c of p.categories){
+    const catIds=new Set(), catNames=new Set();
+    for(const c of (p.categories||[])){
+      if(!c||typeof c!=="object") continue;
       const cc={id:safeId(c.id),name:asStr(c.name,"Category").slice(0,80),budgetCents:Math.max(0,asCents(c.budgetCents))};
       if(catIds.has(cc.id)) cc.id=uid();
-      catIds.add(cc.id); cp.categories.push(cc);
+      catIds.add(cc.id);
+      const nl=cc.name.toLowerCase();
+      if(catNames.has(nl)) cc.name=(cc.name+" (2)").slice(0,80);
+      catNames.add(cc.name.toLowerCase());
+      cp.categories.push(cc);
+    }
+    /* exactly one Contingency category survives an import */
+    let seenCont=false;
+    for(const cc of cp.categories){
+      if(cc.name===CONTINGENCY_NAME){ if(seenCont) cc.name="Contingency (imported)"; else seenCont=true; }
     }
     if(!cp.categories.length) cp.categories.push({id:uid(),name:"General",budgetCents:0});
     const okCat=id=>catIds.has(id)?id:cp.categories[0].id;
-    for(const e of p.expenses) cp.expenses.push({id:safeId(e.id),date:asDate(e.date,todayStr()),
+    for(const e of (p.expenses||[])){
+      if(!e||typeof e!=="object") continue;
+      cp.expenses.push({id:safeId(e.id),date:asDate(e.date,todayStr()),
       categoryId:okCat(e.categoryId),vendor:asStr(e.vendor,"").slice(0,120),
       cents:Math.max(0,asCents(e.cents)),note:asStr(e.note,"").slice(0,500)});
-    for(const q of p.quotes){
+    }
+    for(const q of (p.quotes||[])){
+      if(!q||typeof q!=="object") continue;
       const cq={id:safeId(q.id),jobTitle:asStr(q.jobTitle,"Job").slice(0,120),
         categoryId:okCat(q.categoryId),date:asDate(q.date,todayStr()),bids:[]};
-      for(const b of (Array.isArray(q.bids)?q.bids:[]).slice(0,4))
+      for(const b of (Array.isArray(q.bids)?q.bids:[]).slice(0,4)){
+        if(!b||typeof b!=="object") continue;
         cq.bids.push({contractor:asStr(b.contractor,"").slice(0,120),cents:Math.max(0,asCents(b.cents)),
           notes:asStr(b.notes,"").slice(0,500),accepted:b.accepted===true});
+      }
       // at most one accepted bid survives
       let seen=false;
       for(const b of cq.bids){ if(b.accepted){ if(seen) b.accepted=false; else seen=true; } }
       cp.quotes.push(cq);
     }
     const STATUSES=["proposed","approved","rejected"];
-    for(const c of p.changeOrders)
+    for(const c of (p.changeOrders||[])){
+      if(!c||typeof c!=="object") continue;
       cp.changeOrders.push({id:safeId(c.id),description:asStr(c.description,"").slice(0,500),
         categoryId:okCat(c.categoryId),deltaCents:asCents(c.deltaCents),
         date:asDate(c.date,todayStr()),status:STATUSES.includes(c.status)?c.status:"proposed"});
+    }
     clean.projects.push(cp);
   }
+  if(!clean.projects.length) clean.projects.push(blankProject("Project"));
   if(!clean.projects.some(p=>p.id===clean.activeProjectId))
     clean.activeProjectId=clean.projects[0].id;
   return clean;
@@ -1228,6 +1252,10 @@ function render(){
   el.querySelectorAll("input[data-budget]").forEach(inp=>{
     inp.addEventListener("change",()=>{
       const c=catById(p,inp.dataset.budget); if(!c) return;
+      const stripped=String(inp.value).replace(/[$,\s]/g,"");
+      if(stripped!=="" && !/^\d*(\.\d*)?$/.test(stripped)){
+        dlgAlert("Enter a valid budget amount."); inp.value=(c.budgetCents/100).toFixed(2); return;
+      }
       const v=toCents(inp.value);
       if(v<0){ dlgAlert("Budget can't be negative."); inp.value=(c.budgetCents/100).toFixed(2); return; }
       c.budgetCents=v; save(); render();
