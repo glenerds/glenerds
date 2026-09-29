@@ -46,7 +46,6 @@ button.primary{background:var(--accent);color:var(--accent-ink);border-color:tra
 button.danger{color:var(--bad);border-color:var(--bad)}
 button.icon{padding:.4rem;line-height:0}
 button.icon svg{width:18px;height:18px;vertical-align:middle}
-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* Glenerds standard cluster: flask, dark-mode, sound — circular 44x44 icon-only */
 .g-round-btn{flex:0 0 auto;width:44px;height:44px;min-width:44px;min-height:44px;padding:0;
   display:inline-flex;align-items:center;justify-content:center;
@@ -183,11 +182,6 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
 .g-cta-strip:hover { background: rgba(79,70,229,.14); border-color: rgba(79,70,229,.45); }
 .g-cta-strip:active { transform: scale(0.99); }
 .g-cta-strip:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
-.rate-info{background:none;border:1px solid var(--muted);border-radius:50%;width:1.2rem;height:1.2rem;line-height:1;font-size:.78rem;color:var(--muted);cursor:pointer;padding:0;margin-left:.35rem;vertical-align:middle}
-.rate-info:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.rate-note{display:block;font-size:.9375rem;color:var(--muted);margin-top:.15rem}
-.rate-note[hidden]{display:none}
-@media print{.rate-info{display:none}.rate-note{display:block!important;color:#333}}
 .g-cta-strip .g-cta-arrow { color: #4f46e5; font-weight: 700; font-size: 1.4em; line-height: 1; vertical-align: -0.08em; }
 [data-theme="dark"] .g-cta-strip .g-cta-arrow { color: #a5b4fc; }
 @media (max-width: 440px) {
@@ -286,18 +280,6 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
       <button id="expenseCancel">Cancel</button>
       <button id="expenseSave" class="primary">Save expense</button>
-    </div>
-  </div>
-</div>
-
-<div id="rateModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:60;align-items:center;justify-content:center;padding:1rem">
-  <div class="card" style="max-width:480px;width:100%;margin:0" role="alertdialog" aria-modal="true" aria-labelledby="rateModalTitle" aria-describedby="rateModalDesc">
-    <h2 id="rateModalTitle">Exchange rate changed</h2>
-    <p id="rateModalDesc"></p>
-    <div style="display:flex;gap:.5rem;justify-content:flex-end;flex-wrap:wrap">
-      <button id="rateBack">Go back</button>
-      <button id="rateKeep">Keep old conversions</button>
-      <button id="rateReconvert" class="primary">Reconvert expenses</button>
     </div>
   </div>
 </div>
@@ -618,7 +600,6 @@ function openTripModal(editing){
   document.getElementById("fRate").value = t ? t.rate : "";
   document.getElementById("fBudget").value = t ? (t.totalBudgetCents/100) : "";
   updateRateHint();
-  trackOpener();
   document.getElementById("tripModal").style.display = "flex";
   editingTrip = editing ? t.id : null;
   const firstTripInput = document.getElementById("fDest"); if(firstTripInput) firstTripInput.focus();
@@ -641,20 +622,20 @@ document.getElementById("tripSave").addEventListener("click", ()=>{
   if(editingTrip){
     const t = tripById(editingTrip); if(!t) return;
     const rateChanged = (t.rate !== rate || t.homeCur !== homeCur || t.tripCur !== tripCur);
-    const applyEdit = ()=>Object.assign(t,{destination:dest,start,end,homeCur,tripCur,rate,totalBudgetCents:budgetCents});
     if(rateChanged && t.expenses && t.expenses.length){
-      /* rate/currency change with existing expenses: ask via modal.
-         Reconvert = update old expenses to new rate; Keep = new rate applies to future expenses only;
-         Go back = abort, return to trip settings. */
-      pendingRate = {trip:t, apply:applyEdit, newRate:rate};
-      document.getElementById("rateModalDesc").textContent =
-        "The exchange rate or currencies changed. Re-convert all "+t.expenses.length+" existing expense(s) to the new rate? Keeping the old conversions saves the new rate for future expenses only.";
-      document.getElementById("rateModal").style.display = "flex";
-      document.getElementById("rateReconvert").focus();
-      Sound.select();
-      return;
+      if(!confirm("The exchange rate or currencies changed. Re-convert all "+t.expenses.length+" existing expenses to the new rate? (Cancel keeps the old conversions.)")) return;
+      // Re-convert each expense using its stored tripAmount and the new rate.
+      // Home-currency-entered expenses keep their exact typed homeCents; re-derive tripAmount instead.
+      t.expenses.forEach(e=>{
+        if(e.inHome){
+          e.tripAmount = toCents(homeCentsToTrip(e.homeCents, rate))/100;
+        }else if(e.tripAmount != null){
+          e.homeCents = tripToHomeCents(e.tripAmount, rate);
+        }
+        e.rateUsed = rate;
+      });
     }
-    applyEdit();
+    Object.assign(t,{destination:dest,start,end,homeCur,tripCur,rate,totalBudgetCents:budgetCents});
   } else {
     const t = {id:uid(), destination:dest, start, end, homeCur, tripCur, rate,
       totalBudgetCents:budgetCents, allocations:{}, savings:{targetCents:0}, expenses:[]};
@@ -664,46 +645,7 @@ document.getElementById("tripSave").addEventListener("click", ()=>{
   }
   save(); closeModal("tripModal"); renderAll(); Sound.success();
 });
-let pendingRate = null;
-function reconvertExpenses(t, rate){
-  // Re-convert each expense using its stored tripAmount and the new rate.
-  // Home-currency-entered expenses keep their exact typed homeCents; re-derive tripAmount instead.
-  t.expenses.forEach(e=>{
-    if(e.inHome){
-      e.tripAmount = toCents(homeCentsToTrip(e.homeCents, rate))/100;
-    }else if(e.tripAmount != null){
-      e.homeCents = tripToHomeCents(e.tripAmount, rate);
-    }
-    e.rateUsed = rate;
-  });
-}
-document.getElementById("rateReconvert").addEventListener("click", ()=>{
-  const pr = pendingRate; if(!pr) return;
-  reconvertExpenses(pr.trip, pr.newRate);
-  pr.apply(); pendingRate = null;
-  document.getElementById("rateModal").style.display = "none";
-  save(); closeModal("tripModal"); renderAll(); Sound.success();
-});
-document.getElementById("rateKeep").addEventListener("click", ()=>{
-  const pr = pendingRate; if(!pr) return;
-  /* Cancel-equivalent: new settings/rate saved, each historical expense keeps its exact homeCents */
-  pr.apply(); pendingRate = null;
-  document.getElementById("rateModal").style.display = "none";
-  save(); closeModal("tripModal"); renderAll(); Sound.success();
-});
-document.getElementById("rateBack").addEventListener("click", ()=>{
-  pendingRate = null;
-  document.getElementById("rateModal").style.display = "none";
-  const sv = document.getElementById("tripSave"); if(sv) sv.focus();
-});
-/* opener focus tracking: modals return focus to whatever opened them */
-let modalOpener = null;
-function trackOpener(){ modalOpener = document.activeElement; }
-function closeModal(id){
-  document.getElementById(id).style.display = "none";
-  if(modalOpener && document.contains(modalOpener)){ try{ modalOpener.focus(); }catch(e){} }
-  modalOpener = null;
-}
+function closeModal(id){ document.getElementById(id).style.display = "none"; }
 document.getElementById("tripCancel").addEventListener("click", ()=>closeModal("tripModal"));
 document.getElementById("newTripBtn").addEventListener("click", ()=>openTripModal(false));
 document.getElementById("emptyNewBtn").addEventListener("click", ()=>openTripModal(false));
@@ -1100,7 +1042,6 @@ function openExpenseModal(editId){
   document.getElementById("eNote").value = x ? (x.note||"") : "";
   document.getElementById("eHomeCur").checked = false;
   editingExpense = editId || null;
-  trackOpener();
   document.getElementById("expenseModal").style.display = "flex";
   const firstInput = document.getElementById("eDate"); if(firstInput) firstInput.focus();
 }
@@ -1155,22 +1096,12 @@ function renderExpenses(t){
         const tSym = CURR_SYMBOLS[t.tripCur]!==undefined?CURR_SYMBOLS[t.tripCur]:t.tripCur+" ";
         return '<tr class="exp-tr" data-id="'+x.id+'" role="button" tabindex="0" aria-label="Expense '+esc(fmtDate(x.date))+' '+esc(c.name)+' — activate to edit"><td>'+esc(fmtDate(x.date))+'</td><td>'+esc(c.name)+'</td><td>'+esc(x.note||"—")+'</td>'+
           '<td class="num">'+esc(tSym+Number(x.tripAmount).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}))+'</td>'+
-          '<td class="num">'+esc(fmtCents(x.homeCents,t.homeCur))+
-            ' <button type="button" class="rate-info no-print" aria-expanded="false" aria-label="Show conversion rate for this expense">\u24d8</button>'+
-            '<span class="rate-note" hidden>Converted at 1 '+esc(t.tripCur)+' = '+esc(String(x.rateUsed!=null?x.rateUsed:t.rate))+' '+esc(t.homeCur)+'</span></td>'+
+          '<td class="num" title="Converted at 1 '+esc(t.tripCur)+' = '+esc(String(x.rateUsed!=null?x.rateUsed:t.rate))+' '+esc(t.homeCur)+'">'+esc(fmtCents(x.homeCents,t.homeCur))+'</td>'+
           '<td class="num no-print"><button data-edit="'+x.id+'">Edit</button> <button data-del="'+x.id+'" class="danger">✕</button></td></tr>';
       }).join("")+'</tbody></table></div>'
     : '<p class="empty">No expenses yet — log your first one above.</p>')+'</div>';
   document.getElementById("addExpBtn").addEventListener("click", ()=>openExpenseModal(null));
   el.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click", ()=>openExpenseModal(b.dataset.edit)));
-  el.querySelectorAll(".rate-info").forEach(b=>b.addEventListener("click", ()=>{
-    const note = b.parentElement.querySelector(".rate-note"); if(!note) return;
-    const show = note.hasAttribute("hidden");
-    if(show) note.removeAttribute("hidden"); else note.setAttribute("hidden","");
-    b.setAttribute("aria-expanded", show?"true":"false");
-    b.setAttribute("aria-label", (show?"Hide":"Show")+" conversion rate for this expense");
-    Sound.click();
-  }));
   el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click", ()=>{
     if(!confirm("Delete this expense?")) return;
     t.expenses = t.expenses.filter(e=>e.id!==b.dataset.del);
@@ -1330,7 +1261,7 @@ paintSoundBtn(document.getElementById("soundToggle"));
 /* Focus trap: while a modal is open, Tab cycles only within it */
 document.addEventListener("keydown", e=>{
   if(e.key !== "Tab") return;
-  const openId = ["rateModal","tripModal","expenseModal"].find(id=>{
+  const openId = ["tripModal","expenseModal"].find(id=>{
     const m = document.getElementById(id);
     return m && m.style.display!=="none" && m.style.display!=="";
   });
@@ -1349,14 +1280,10 @@ document.addEventListener("keydown", e=>{
 /* Escape closes open modals first, then releases every tap-detail readout back to the default view */
 document.addEventListener("keydown",e=>{
   if(e.key!=="Escape") return;
-  const rm = document.getElementById("rateModal");
-  if(rm && rm.style.display!=="none" && rm.style.display!==""){
-    document.getElementById("rateBack").click(); Sound.click(); return;
-  }
   let closedModal = false;
   ["tripModal","expenseModal"].forEach(id=>{
     const m = document.getElementById(id);
-    if(m && m.style.display!=="none" && m.style.display!==""){ closeModal(id); closedModal=true; }
+    if(m && m.style.display!=="none" && m.style.display!==""){ m.style.display="none"; closedModal=true; }
   });
   if(closedModal){ Sound.click(); return; }
   if(releaseToggles()) Sound.click();

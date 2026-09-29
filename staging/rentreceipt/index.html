@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rent Receipt Generator &mdash; Free Printable Landlord Receipts</title>
-<meta name="description" content="Free rent receipt generator: create a printable landlord receipt in seconds. Enter tenant and rent details, then print — 100% offline, no account, no subscription, your data never leaves this device. By Glenerds.">
+<title>Rent Receipt Generator &mdash; Printable Landlord Receipts</title>
+<meta name="description" content="Rent receipt generator: create a printable rent receipt in seconds. Enter tenant and rent details, then print — fully offline, no account needed.">
 <script>
 /* Pre-theme: set data-theme before first paint to avoid flash */
 (function(){try{
@@ -223,7 +223,7 @@ footer>div{margin-bottom:6px}
   <div class="hero-inner">
     <div class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9h12M6 13h12M6 17h7"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg></div>
     <div>
-      <h1>Free Rent Receipt Generator</h1>
+      <h1>Rent Receipt Generator</h1>
       <p class="tagline">Create and print professional rent receipts. Works offline &mdash; your data never leaves this device.</p>
     </div>
     <div class="g-header-actions no-print">
@@ -307,7 +307,7 @@ footer>div{margin-bottom:6px}
           <button type="button" class="btn btn-secondary" id="clearFormBtn"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V5h6v2M6 7l1 14h10l1-14"/></svg><span>New</span></button>
         </div>
         <div class="err" id="formErr" role="alert"></div>
-        <p style="font-size:.8rem;color:var(--muted);margin:10px 0 0">Saving a receipt stores it in this browser&rsquo;s history below. Your draft is auto-saved as you type.</p>
+        <p style="font-size:.8rem;color:var(--muted);margin:10px 0 0">Saving a receipt adds it to your rent payment record in this browser&rsquo;s history below. Your draft is auto-saved as you type.</p>
       </form>
     </section>
 
@@ -340,7 +340,7 @@ footer>div{margin-bottom:6px}
             <div class="sig-line">Landlord signature / date</div>
             <div class="sig-line">Tenant signature / date</div>
           </div>
-          <div class="receipt-foot">This receipt was generated with the free RentReceipt generator &mdash; no account, no sign-up, no data sent anywhere.</div>
+          <div class="receipt-foot">This receipt was generated with the RentReceipt generator &mdash; no account, no sign-up, no data sent anywhere.</div>
         </div>
       </div>
       <p class="no-print" style="font-size:.82rem;color:var(--muted);margin:12px 0 0">The preview updates as you type. Printing outputs only the receipt, fitted to one page.</p>
@@ -375,7 +375,7 @@ footer>div{margin-bottom:6px}
   <span>Like this tool? Check out our other apps</span><span class="g-cta-arrow" aria-hidden="true">➔</span>
 </a>
 <footer>
-  <div>RentReceipt &mdash; Free Rent Receipt Generator. Your data never leaves this device.</div>
+  <div>RentReceipt &mdash; Rent Receipt Generator. Your data never leaves this device.</div>
   <div>by <a href="https://glenerds.gumroad.com">Glenerds</a></div>
   <div class="disclaimer">For record-keeping only &mdash; not legal or tax advice. Verify payment details with both parties before relying on a receipt.</div>
 </footer>
@@ -508,6 +508,8 @@ function store(key,val){
 }
 
 function fmtMoney(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+/* tolerate pasted/formatted amounts: strip currency symbols, commas, spaces */
+function parseAmount(s){var v=parseFloat(String(s==null?"":s).replace(/[$,\s]/g,""));return isFinite(v)?v:NaN;}
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
 function fmtDate(iso){try{var d=new Date(iso+"T12:00:00");if(isNaN(d))return iso;
   return d.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});}catch(e){return iso;}}
@@ -536,7 +538,7 @@ function bumpNext(){
 /* ---------- preview ---------- */
 function updatePreview(){
   var d=formData();
-  var amt=parseFloat(d.amount);
+  var amt=parseAmount(d.amount);
   $("pvNum").textContent=d.receiptNo||nextReceiptNo();
   $("pvTenant").textContent=d.tenant||"—";
   $("pvLandlord").textContent=d.landlord||"—";
@@ -555,7 +557,7 @@ function validate(d){
   var errs={};
   if(!d.landlord)errs.landlord="Landlord name is required.";
   if(!d.tenant)errs.tenant="Tenant name is required.";
-  var amt=parseFloat(d.amount);
+  var amt=parseAmount(d.amount);
   if(d.amount===""||!isFinite(amt))errs.amount="Enter a valid amount.";
   else if(amt<=0)errs.amount="Amount must be greater than zero.";
   else if(amt>1000000)errs.amount="Amount looks unusually large — please check it.";
@@ -839,7 +841,7 @@ document.addEventListener("keydown",function(e){
 $("saveBtn").addEventListener("click",function(){
   var d=formData(),errs=validate(d);
   if(!showErrors(errs)){Sound.error();return;}
-  var rec=Object.assign({},d,{amount:parseFloat(d.amount),id:"r"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36)});
+  var rec=Object.assign({},d,{amount:parseAmount(d.amount),id:"r"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36)});
   if(!rec.receiptNo)rec.receiptNo=nextReceiptNo();
   var h=getHistory();h.push(rec);setHistory(h);
   if(!d.receiptNo){

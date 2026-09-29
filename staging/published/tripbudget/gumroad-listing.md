@@ -18,7 +18,7 @@ A self-contained trip budget planner and travel expense tracker that starts work
 - **Import replaces everything:** importing a backup file replaces all trips currently in the app (you'll be asked to confirm first).
 
 ## 🚀 After download
-1. Download `index.html` and `README.md` from your Gumroad library.
+1. Download `index.html` from your Gumroad library.
 2. Double-click `index.html` — it opens in any modern browser on your phone, tablet, or computer. No install, no sign-up.
 3. Create your first trip, set your dates and budget, and start planning.
 
@@ -42,7 +42,6 @@ A self-contained trip budget planner and travel expense tracker that starts work
 
 ## 📦 What's included
 - `index.html` — the complete app, works in any modern browser on desktop or phone
-- `README.md` — quick-start guide
 - Future updates to this product
 
 ## ✉️ Questions/support
@@ -52,4 +51,3 @@ If you run into any issues or have questions, reach out through my Gumroad store
 
 *More from Glenerds — simple offline tools that respect your privacy: [RenoTrack](https://glenerds.gumroad.com) (home renovation budget tracker) · [DebtPayoff](https://glenerds.gumroad.com) (debt payoff planner) — https://glenerds.gumroad.com*
 
-*Affiliates welcome — 30% commission: [INSERT-AFFILIATE-SIGNUP-URL]*
