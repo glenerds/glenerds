@@ -1115,8 +1115,8 @@ function cropSchedule(c, L, F) {
     s.harvest = addD(s.fallSow, c.mat || 240);
     return s;
   }
-  if (c.in != null) s.indoor = addD(L, -c.in * 7);
   if (c.tr != null) s.transplant = addD(L, c.tr * 7);
+  if (c.in != null) s.indoor = addD(s.transplant || L, -c.in * 7);
   if (c.ds) { s.dsA = addD(L, c.ds[0] * 7); s.dsB = addD(L, c.ds[1] * 7); }
   var plantD = s.transplant || s.dsA;
   if (plantD && c.mat) s.harvest = addD(plantD, c.mat);
