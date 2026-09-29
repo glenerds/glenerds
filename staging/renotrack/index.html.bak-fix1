@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Plan renovation costs, compare contractor quotes, track invoices and payments, and stay on budget with a private tool that works offline without an account.">
+<meta name="description" content="Free offline home renovation budget tracker: set category budgets, log expenses, compare contractor quotes, and manage change orders with a contingency buffer. No account, no subscription — your data never leaves this device.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23b45309'/%3E%3Ctext x='32' y='44' font-size='28' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9A%92%3C/text%3E%3C/svg%3E">
-<title>Renovation Budget Tracker & Remodel Cost Calculator</title>
+<title>Free Home Renovation Budget Tracker: Remodel Cost Planner & Quote Comparison (RenoTrack)</title>
 <style>
 :root{
   --bg:#f4f6f9; --bg2:#eef1f5; --card:#ffffff; --ink:#1c2430; --ink2:#5b6b7d;
@@ -945,17 +945,7 @@ function expenseForm(editId){
     const cents=toCents(vals.amount);
     if(cents<=0){ dlgAlert("Enter an amount greater than $0."); return; }
     if(e){ Object.assign(e,{date:vals.date,categoryId:vals.categoryId,vendor:vals.vendor.trim(),cents,note:vals.note.trim()}); }
-    else{
-      p.expenses.push({id:uid(),date:vals.date,categoryId:vals.categoryId,vendor:vals.vendor.trim(),cents,note:vals.note.trim()});
-      // Prevent double-counting: if an accepted bid matches this expense (same category, same amount), mark it as paid (unaccept)
-      for(const q of p.quotes){
-        if(q.categoryId===vals.categoryId){
-          for(const b of q.bids){
-            if(b.accepted && b.cents===cents){ b.accepted=false; }
-          }
-        }
-      }
-    }
+    else{ p.expenses.push({id:uid(),date:vals.date,categoryId:vals.categoryId,vendor:vals.vendor.trim(),cents,note:vals.note.trim()}); }
     save(); render();
   },{saveLabel:e?"Save":"Add expense"});
 }
@@ -1150,30 +1140,29 @@ function renderChanges(p){
 
 /* ---------- export / import ---------- */
 function asStr(v,fb){ return typeof v==="string"?v:(v===null||v===undefined?fb:String(v)); }
-function safeId(v,fb){ const s=asStr(v,""); return /^[A-Za-z0-9_-]{1,64}$/.test(s)?s:(fb||uid()); }
 function asCents(v){ v=Number(v); return isFinite(v)?Math.round(v):0; }
 function asDate(v,fb){ return /^\d{4}-\d{2}-\d{2}$/.test(asStr(v,""))?asStr(v,""):fb; }
 function sanitizeState(s){
   const clean={version:1,theme:(s.theme==="dark"||s.theme==="light")?s.theme:null,
-    activeProjectId:safeId(s.activeProjectId,null),projects:[]};
+    activeProjectId:asStr(s.activeProjectId,null),projects:[]};
   for(const p of s.projects){
-    const cp={id:safeId(p.id,uid()),name:asStr(p.name,"Project").slice(0,120),
+    const cp={id:asStr(p.id,uid()),name:asStr(p.name,"Project").slice(0,120),
       createdAt:asCents(p.createdAt)||Date.now(),
       contingencyPct:Math.min(50,Math.max(0,parseInt(p.contingencyPct,10)||0)),
       categories:[],expenses:[],quotes:[],changeOrders:[]};
     const catIds=new Set();
     for(const c of p.categories){
-      const cc={id:safeId(c.id,uid()),name:asStr(c.name,"Category").slice(0,80),budgetCents:Math.max(0,asCents(c.budgetCents))};
+      const cc={id:asStr(c.id,uid()),name:asStr(c.name,"Category").slice(0,80),budgetCents:Math.max(0,asCents(c.budgetCents))};
       if(catIds.has(cc.id)) cc.id=uid();
       catIds.add(cc.id); cp.categories.push(cc);
     }
     if(!cp.categories.length) cp.categories.push({id:uid(),name:"General",budgetCents:0});
     const okCat=id=>catIds.has(id)?id:cp.categories[0].id;
-    for(const e of p.expenses) cp.expenses.push({id:safeId(e.id,uid()),date:asDate(e.date,todayStr()),
+    for(const e of p.expenses) cp.expenses.push({id:asStr(e.id,uid()),date:asDate(e.date,todayStr()),
       categoryId:okCat(e.categoryId),vendor:asStr(e.vendor,"").slice(0,120),
       cents:Math.max(0,asCents(e.cents)),note:asStr(e.note,"").slice(0,500)});
     for(const q of p.quotes){
-      const cq={id:safeId(q.id,uid()),jobTitle:asStr(q.jobTitle,"Job").slice(0,120),
+      const cq={id:asStr(q.id,uid()),jobTitle:asStr(q.jobTitle,"Job").slice(0,120),
         categoryId:okCat(q.categoryId),date:asDate(q.date,todayStr()),bids:[]};
       for(const b of (Array.isArray(q.bids)?q.bids:[]).slice(0,4))
         cq.bids.push({contractor:asStr(b.contractor,"").slice(0,120),cents:Math.max(0,asCents(b.cents)),
@@ -1185,7 +1174,7 @@ function sanitizeState(s){
     }
     const STATUSES=["proposed","approved","rejected"];
     for(const c of p.changeOrders)
-      cp.changeOrders.push({id:safeId(c.id,uid()),description:asStr(c.description,"").slice(0,500),
+      cp.changeOrders.push({id:asStr(c.id,uid()),description:asStr(c.description,"").slice(0,500),
         categoryId:okCat(c.categoryId),deltaCents:asCents(c.deltaCents),
         date:asDate(c.date,todayStr()),status:STATUSES.includes(c.status)?c.status:"proposed"});
     clean.projects.push(cp);
@@ -1349,7 +1338,6 @@ function seedDemo(){
 /* ---------- init ---------- */
 function init(){
   S=load();
-  if(S){ try{ S=sanitizeState(S); }catch(e){ S=null; } }
   if(!S){ S=blankState(); S.projects.push(blankProject("Project 1")); S.activeProjectId=S.projects[0].id; save(); }
   else if(!S.projects.length){ S.projects.push(blankProject("Project 1")); S.activeProjectId=S.projects[0].id; save(); }
   else if(!P()){ S.activeProjectId=S.projects[0].id; save(); }

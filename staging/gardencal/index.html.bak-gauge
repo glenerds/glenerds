@@ -1431,7 +1431,7 @@ function renderGauge(L, F) {
   if (el < 0) { phase = 'pre'; pct = 0; }
   else if (el > total) { phase = 'post'; pct = 1; }
   else { phase = 'in'; pct = el / total; }
-  function pt(a) { var r = a * Math.PI / 180; return [110 + 88 * Math.cos(r), 112 - 88 * Math.sin(r)]; }
+  function pt(a) { var r = a * Math.PI / 180; return [110 - 88 * Math.cos(r), 112 - 88 * Math.sin(r)]; }
   function arc(a0, a1) {
     var p0 = pt(a0), p1 = pt(a1);
     return 'M' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) +
