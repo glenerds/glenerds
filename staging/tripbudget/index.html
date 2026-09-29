@@ -3,9 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Free offline trip budget planner: set a travel budget, track expenses in any currency with exact exchange-rate conversion, and see daily spend at a glance. No account, no fees — your data never leaves this device.">
+<meta name="description" content="Offline trip budget planner: set a travel budget, track expenses in any currency with exact exchange-rate conversion, and see daily spend at a glance. No account, no fees — your data never leaves this device.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230e7490'/%3E%3Ctext x='32' y='44' font-size='28' text-anchor='middle' fill='white' font-family='sans-serif'%3E%E2%9C%88%3C/text%3E%3C/svg%3E">
-<title>Free Trip Budget Planner: Travel Expense Tracker with Currency Conversion (TripBudget)</title>
+<title>Offline Trip Budget Planner &amp; Travel Expense Tracker</title>
+<meta property="og:title" content="Offline Trip Budget Planner & Travel Expense Tracker">
+<meta property="og:description" content="Offline trip budget planner and travel expense tracker. Set budgets, convert currencies without internet, track daily spending, and avoid post-trip credit shock.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Offline Trip Budget Planner & Travel Expense Tracker">
+<meta name="twitter:description" content="Offline trip budget planner and travel expense tracker. Set budgets, convert currencies without internet, track daily spending, and avoid post-trip credit shock.">
 <style>
 :root{
   --bg:#f6f7f9; --surface:#ffffff; --surface2:#eef0f4; --text:#1c2230; --muted:#64707f;
@@ -25,7 +31,8 @@ html[data-theme="dark"]{
 }
 *{box-sizing:border-box}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45}
-header.top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+header.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border);padding:.6rem 1rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 header.top h1{font-size:1.15rem;margin:0;display:flex;align-items:center;gap:.45rem}
 header.top h1 svg{width:24px;height:24px}
 .top-row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;width:100%}
@@ -55,17 +62,17 @@ button.icon svg{width:18px;height:18px;vertical-align:middle}
 .ch-legend{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
 .ch-leg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);
   background:var(--surface2);color:var(--text);border-radius:999px;padding:5px 12px;
-  font-size:.8rem;cursor:pointer;font-weight:600}
+  font-size:.9375rem;cursor:pointer;font-weight:600}
 .ch-leg .sw{width:11px;height:11px;border-radius:3px;flex:none}
 .ch-leg[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
 .ch-leg:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.ch-det{margin-top:10px;font-size:.92rem;background:var(--surface2);border-radius:10px;padding:10px 14px;min-height:2.6em}
+.ch-det{margin-top:10px;font-size:1rem;background:var(--surface2);border-radius:10px;padding:10px 14px;min-height:2.6em}
 .ch-panel svg{width:100%;height:auto;display:block}
 svg .seg,svg .ch-bar{cursor:pointer}
 svg .seg:focus,svg .ch-bar:focus{outline:none;filter:drop-shadow(0 0 5px rgba(91,141,239,.9))}
 input,select,textarea{font:inherit;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:.45rem .6rem;width:100%}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
-label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.25rem}
+label{display:block;font-size:.9375rem;color:var(--muted);margin-bottom:.25rem}
 .field{margin-bottom:.7rem}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 main{max-width:960px;margin:0 auto;padding:1rem}
@@ -87,7 +94,7 @@ nav.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accen
 tr.exp-tr[role="button"]{cursor:pointer}
 tr.exp-tr[role="button"]:hover td{background:var(--surface2)}
 tr.exp-tr[role="button"]:focus{outline:none;filter:drop-shadow(0 0 5px var(--accent))}
-.stat .k{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.stat .k{font-size:.9375rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .stat .v{font-size:1.35rem;font-weight:700;margin-top:.15rem}
 .stat .v.bad{color:var(--bad)} .stat .v.warn{color:var(--warn)} .stat .v.good{color:var(--good)}
 .progress{height:10px;background:var(--bar-bg);border-radius:999px;overflow:hidden;margin:.4rem 0}
@@ -97,11 +104,11 @@ tr.exp-tr[role="button"]:focus{outline:none;filter:drop-shadow(0 0 5px var(--acc
 .cat-row .nm{display:flex;align-items:center;gap:.5rem;font-weight:600}
 .cat-row .nm svg{width:20px;height:20px;flex:none}
 .cat-row input{width:100%}
-table{width:100%;border-collapse:collapse;font-size:.92rem}
+table{width:100%;border-collapse:collapse;font-size:1rem}
 th,td{text-align:left;padding:.5rem .4rem;border-bottom:1px solid var(--border)}
-th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+th{color:var(--muted);font-weight:600;font-size:.9375rem;text-transform:uppercase;letter-spacing:.03em}
 td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.badge{display:inline-block;font-size:.75rem;font-weight:700;border-radius:999px;padding:.15rem .55rem}
+.badge{display:inline-block;font-size:.9375rem;font-weight:700;border-radius:999px;padding:.15rem .55rem}
 .badge.over{background:var(--bad-soft);color:var(--bad)}
 .badge.ok{background:var(--good-soft);color:var(--good)}
 .badge.soon{background:var(--warn-soft);color:var(--warn)}
@@ -111,14 +118,14 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .day-row .hd{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline;margin-bottom:.35rem}
 .day-row .hd .d{font-weight:700}
 .empty{color:var(--muted);text-align:center;padding:2rem 1rem}
-footer.app{max-width:960px;margin:1.5rem auto 2.5rem;padding:0 1rem;color:var(--muted);font-size:.85rem;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+footer.app{max-width:960px;margin:1.5rem auto 2.5rem;padding:0 1rem;color:var(--muted);font-size:.9375rem;display:flex;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
 footer.app a{color:var(--accent)}
 .tripbar{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .tripbar select{width:auto;min-width:180px;font-weight:600}
 .toolbar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .toolbar .spacer{flex:1}
 details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
-.note{font-size:.85rem;color:var(--muted)}
+.note{font-size:.9375rem;color:var(--muted)}
 .savings-out{background:var(--accent-soft);border-radius:10px;padding:.9rem 1rem;font-size:1.05rem;font-weight:600;margin-top:.7rem}
 #print-only{display:none}
 @media (max-width:560px){
@@ -127,7 +134,7 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
   .cat-row .bar-cell{order:3}
   header.top h1{font-size:1rem}
   main{padding:.7rem}
-  table{font-size:.85rem}
+  table{font-size:.9375rem}
 }
 @media print{
   header.top,nav.tabs,.toolbar,footer.app,.no-print{display:none!important}
@@ -143,12 +150,12 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
 /* Glenerds cross-promo: More Apps button + bottom CTA (shared) */
 .g-header-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
 .g-store-btn {
-  display: inline-flex; align-items: center;
+  display: inline-flex; align-items: center; min-height:44px;
   background: var(--g-accent, #4f46e5);
   color: #fff;
   border-radius: var(--g-radius-pill, 999px);
   padding: 8px 15px;
-  font-size: 0.88rem; font-weight: 700; line-height: 1.2;
+  font-size: 0.9375rem; font-weight: 700; line-height: 1.2;
   text-decoration: none; white-space: nowrap;
   box-shadow: 0 1px 2px rgba(0,0,0,.12);
   transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
@@ -185,7 +192,8 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
 <body>
 <header class="top">
   <div class="top-row">
-    <h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>TripBudget</h1>
+    <h1 class="sr-only">Offline Trip Budget Planner &amp; Travel Expense Tracker</h1>
+    <h1 aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>TripBudget</h1>
     <span class="spacer"></span>
     <div class="g-header-actions no-print">
       <a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
@@ -245,7 +253,7 @@ details summary{cursor:pointer;font-weight:600;padding:.4rem 0}
     </div>
     <div class="field"><label for="fRate">Exchange rate <span class="note" id="rateHint"></span></label>
       <input id="fRate" type="number" min="0" step="any" placeholder="e.g. 1.08">
-      <div class="note">You enter the rate yourself — no internet needed. Check your bank or a recent receipt.</div>
+      <div class="note">Home-currency units per 1 trip-currency unit — you enter it yourself, no internet needed. Check your bank or a recent receipt.</div>
     </div>
     <div class="field"><label for="fBudget">Total trip budget (home currency)</label><input id="fBudget" type="number" min="0" step="0.01" placeholder="e.g. 3500"></div>
     <div style="display:flex;gap:.5rem;justify-content:flex-end">
@@ -294,10 +302,16 @@ const CURR_SYMBOLS = {USD:"$",EUR:"€",GBP:"£",JPY:"¥",CAD:"$",AUD:"$",NZD:"$
 const CURR_LIST = ["USD","EUR","GBP","JPY","CAD","AUD","NZD","CHF","CNY","HKD","SGD","KRW","INR","MXN","BRL","SEK","NOK","DKK","PLN","CZK","THB","VND","PHP","MYR","IDR","ZAR","AED","TRY","ILS","RUB","UAH"];
 
 /* ---------- money helpers (integer cents, exact) ---------- */
-function toCents(amount){ // number|string -> integer cents, exact for 2dp input
-  const n = Number(amount);
-  if(!isFinite(n)) return 0;
-  return Math.round(n * 100);
+function toCents(amount){ // number|string -> integer cents; string-parsed, exact (no float drift)
+  var as = String(amount).trim();
+  if(/e/i.test(as)){ var en = Number(as); if(!isFinite(en)) return 0; return Math.round(en*100); } // exponent form: float fallback
+  const m = /^(-?)(\d*)(?:\.(\d*))?$/.exec(as);
+  if(!m || (!m[2] && !m[3])) return 0;
+  const sign = m[1] ? -1 : 1;
+  const frac3 = (m[3]||"").slice(0,3).padEnd(3,"0");
+  let cents = parseInt(m[2]||"0",10)*100 + parseInt(frac3.slice(0,2),10);
+  if(parseInt(frac3[2],10) >= 5) cents += 1; // round half up on 3rd decimal
+  return sign * cents;
 }
 function fmtCents(cents, code){
   if(!isFinite(Number(cents))) return "0.00";
@@ -351,13 +365,17 @@ function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&am
 function blankState(){ return {version:1, trips:[], activeTripId:null}; }
 let state = blankState();
 function save(){ if(window.__gSampleOn || sampleOn) return; /* sample data is transient — never persisted */
-  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){ if(!window.__gSaveWarned){ window.__gSaveWarned=true; alert("Could not save your data \u2014 browser storage is unavailable or full. Export a backup now."); } } }
 function load(){
   try{
     const raw = localStorage.getItem(STORE_KEY);
     if(!raw) return;
     const s = JSON.parse(raw);
     if(!s || !Array.isArray(s.trips)) return;
+    const clean=[];
+    s.trips.forEach(function(t){ const c=sanitizeTrip(t); if(c) clean.push(c); });
+    s.trips=clean;
+    if(s.activeTripId && !clean.some(function(t){return t.id===s.activeTripId;})) s.activeTripId=clean.length?clean[0].id:null;
     state = s;
   }catch(e){ console.warn("TripBudget: stored data was unreadable, starting fresh.", e); }
 }
@@ -373,7 +391,7 @@ function sanitizeTrip(t){
   const s = (v)=> String(v==null?"":v).slice(0,500);
   const num = (v)=> { const n = Number(v); return isFinite(n) ? n : 0; };
   const out = {
-    id: s(t.id) || uid(),
+    id: s(t.id).replace(/[^a-zA-Z0-9_-]/g,"") || uid(),
     destination: s(t.destination) || "Untitled trip",
     start: isValidDateStr(t.start) ? t.start : "",
     end: isValidDateStr(t.end) ? t.end : "",
@@ -392,10 +410,10 @@ function sanitizeTrip(t){
     if(!e || typeof e !== "object") return;
     const hc = Math.max(0, Math.round(num(e.homeCents)));
     out.expenses.push({
-      id: s(e.id) || uid(),
+      id: s(e.id).replace(/[^a-zA-Z0-9_-]/g,"") || uid(),
       date: isValidDateStr(e.date) ? e.date : todayStr(),
       cat: CATEGORIES.some(c=>c.id===e.cat) ? e.cat : "other",
-      tripAmount: Math.max(0, Math.round(num(e.tripAmount)*100)/100),
+      tripAmount: Math.max(0, toCents(num(e.tripAmount))/100),
       homeCents: hc,
       note: s(e.note).slice(0,500)
     });
@@ -635,6 +653,7 @@ function downloadFile(name, text){
   setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 document.getElementById("exportBtn").addEventListener("click", ()=>{
+  if(sampleOn||window.__gSampleOn){ alert("Turn off sample data mode before exporting a backup — right now you would only export the sample data."); return; }
   const stamp = todayStr();
   downloadFile("tripbudget-export-"+stamp+".json", JSON.stringify(state,null,2));
   Sound.success();
@@ -642,6 +661,7 @@ document.getElementById("exportBtn").addEventListener("click", ()=>{
 document.getElementById("importBtn").addEventListener("click", ()=>document.getElementById("importFile").click());
 document.getElementById("importFile").addEventListener("change", e=>{
   const f = e.target.files[0]; if(!f) return;
+  if(sampleOn||window.__gSampleOn){ alert("Turn off sample data mode before importing — imports are disabled while sample data is shown."); e.target.value=""; return; }
   const r = new FileReader();
   r.onload = ()=>{
     try{
@@ -650,6 +670,7 @@ document.getElementById("importFile").addEventListener("change", e=>{
       const clean = [];
       s.trips.forEach(t=>{ const c = sanitizeTrip(t); if(c) clean.push(c); });
       if(!clean.length) throw new Error("no valid trips");
+      if(state.trips.length && !confirm("Importing will REPLACE all "+state.trips.length+" trip(s) currently in the app with the "+clean.length+" trip(s) from this file. Continue?")){ e.target.value=""; return; }
       state = {version:1, trips:clean, activeTripId:null};
       if(!tripById(state.activeTripId)) state.activeTripId = state.trips.length?state.trips[0].id:null;
       save(); renderAll();
@@ -675,21 +696,23 @@ document.querySelectorAll("nav.tabs button").forEach(b=>{
 /* ---------- inline SVG charts (dependency-free, gallery-style) ---------- */
 const CH_COLORS=["var(--ch1)","var(--ch2)","var(--ch3)","var(--ch4)","var(--ch5)","var(--ch6)","var(--ch7)","var(--ch8)"];
 /* dashed-circle donut with center readout */
+function fitDonutLabel(name){ return name.length>11 ? name.slice(0,10)+"\u2026" : name; }
 function donutSVG(uidp,segs,total,topText,subText){
-  const C=345.6; let acc=0,g="";
+  const C=439.8; let acc=0,g="";
+  const topSize = String(topText).length>10 ? 15 : 19;
   segs.forEach((s,i)=>{
     const frac=total>0?s.value/total:0;
     const len=segs.length>1?Math.max(frac*C-1.4,0.6):C;
     g+='<g class="seg" tabindex="0" role="button" data-i="'+i+'" aria-pressed="false" aria-label="'+esc(s.name+": "+s.hint)+'">'
-      +'<circle cx="80" cy="80" r="55" fill="none" stroke="'+s.color+'" stroke-width="24"'
+      +'<circle cx="100" cy="100" r="70" fill="none" stroke="'+s.color+'" stroke-width="28"'
       +' stroke-dasharray="'+len.toFixed(1)+" "+C.toFixed(1)+'" stroke-dashoffset="'+(-acc).toFixed(1)+'"/></g>';
     acc+=frac*C;
   });
-  return '<svg viewBox="0 0 160 160" role="img" aria-label="Spending by category donut chart">'
-    +'<circle cx="80" cy="80" r="55" fill="none" stroke="var(--border)" stroke-width="24"/>'
-    +'<g fill="none" transform="rotate(-90 80 80)">'+g+'</g>'
-    +'<text x="80" y="78" text-anchor="middle" pointer-events="none" style="font-size:19px;font-weight:700;fill:var(--text)" id="'+uidp+'-top">'+esc(topText)+'</text>'
-    +'<text x="80" y="98" text-anchor="middle" pointer-events="none" style="font-size:10.5px;letter-spacing:1.2px;fill:var(--muted)" id="'+uidp+'-sub">'+esc(subText)+'</text></svg>';
+  return '<svg viewBox="0 0 200 200" role="img" aria-label="Spending by category donut chart">'
+    +'<circle cx="100" cy="100" r="70" fill="none" stroke="var(--border)" stroke-width="28"/>'
+    +'<g fill="none" transform="rotate(-90 100 100)">'+g+'</g>'
+    +'<text x="100" y="97" text-anchor="middle" pointer-events="none" style="font-size:'+topSize+'px;font-weight:700;fill:var(--text)" id="'+uidp+'-top">'+esc(topText)+'</text>'
+    +'<text x="100" y="121" text-anchor="middle" pointer-events="none" style="font-size:15px;fill:var(--muted)" id="'+uidp+'-sub">'+esc(subText)+'</text></svg>';
 }
 function legendHTML(segs){
   return '<div class="ch-legend">'+segs.map((s,i)=>
@@ -699,6 +722,11 @@ function legendHTML(segs){
 }
 /* select-to-spotlight: click/Enter/Space spotlights an item and swaps the detail
    readout; clicking again restores the default view */
+const __gEscRegistry=new Set();
+document.addEventListener("keydown",function(e){
+  if(e.key!=="Escape")return;
+  __gEscRegistry.forEach(function(o){ if(o.getSel()!==-1){ o.pick(o.getSel()); Sound.click(); } });
+});
 function wireSelectable(scope,segs,fmtDetail,fmtDefault,detId,onPick){
   const det=document.getElementById(detId); let sel=-1;
   const items=scope.querySelectorAll(".seg,.ch-bar");
@@ -717,8 +745,10 @@ function wireSelectable(scope,segs,fmtDetail,fmtDefault,detId,onPick){
     g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick(i);Sound.click();}});
   });
   scope.querySelectorAll(".ch-leg").forEach((l,i)=>l.addEventListener("click",()=>{pick(i);Sound.click();}));
-  /* Escape restores the default view for this chart's spotlight */
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&sel!==-1){pick(sel);Sound.click();}});
+  /* Escape restores the default view — one global listener (see __gEscRegistry); stale entries pruned on re-render */
+  const __gEntry={detId:detId,getSel:function(){return sel;},pick:pick};
+  __gEscRegistry.forEach(function(o){ if(o.detId===detId&&o!==__gEntry) __gEscRegistry.delete(o); });
+  __gEscRegistry.add(__gEntry);
   det.innerHTML=fmtDefault();
 }
 /* category spend segments (positive spend only), in CATEGORIES order */
@@ -744,7 +774,7 @@ function wireMixCard(t,d){
     "mixDet",
     i=>{
       document.getElementById("mixDonut-top").textContent=i===-1?fmtCents(d.spent,t.homeCur):fmtCents(segs[i].value,t.homeCur);
-      document.getElementById("mixDonut-sub").textContent=i===-1?"TOTAL":segs[i].name.toUpperCase();
+      document.getElementById("mixDonut-sub").textContent=i===-1?"TOTAL":fitDonutLabel(segs[i].name.toUpperCase());
     });
 }
 
@@ -754,7 +784,7 @@ function statToggle(el){
   const d=tripTotals(t), days=tripDays(t);
   const det=document.getElementById("statDet");
   const was=el.getAttribute("aria-pressed")==="true";
-  document.querySelectorAll('.stat[role="button"]').forEach(s=>s.setAttribute("aria-pressed","false"));
+  document.querySelectorAll('.stat[role="button"]').forEach(s=>{s.setAttribute("aria-pressed","false");s.setAttribute("aria-expanded","false");});
   if(was||!det){ if(det){det.hidden=true;det.innerHTML="";} Sound.click(); return; }
   const kind=el.dataset.stat;
   const dailyAllow=days>0&&d.budget>0?Math.floor(d.budget/days):0;
@@ -787,7 +817,7 @@ function statToggle(el){
       esc(fmtCents(d.budget,t.homeCur))+" &divide; "+days+" day"+(days===1?"":"s")+".";
   }
   if(!html){Sound.click();return;}
-  el.setAttribute("aria-pressed","true");
+  el.setAttribute("aria-pressed","true");el.setAttribute("aria-expanded","true");
   det.innerHTML=html; det.hidden=false;
   Sound.click();
 }
@@ -795,7 +825,7 @@ function catToggle(el){
   const t=activeTrip(); if(!t) return;
   const id=el.dataset.cat, det=document.getElementById(el.dataset.det);
   const was=el.getAttribute("aria-pressed")==="true";
-  document.querySelectorAll('.day-row[role="button"]').forEach(r=>r.setAttribute("aria-pressed","false"));
+  document.querySelectorAll('.day-row[role="button"]').forEach(r=>{r.setAttribute("aria-pressed","false");r.setAttribute("aria-expanded","false");});
   if(was||!det){ if(det){det.hidden=true;det.innerHTML="";} Sound.click(); return; }
   const d=tripTotals(t), c=catById(id);
   const alloc=t.allocations[id]||0, spent=d.perCat[id]||0, left=alloc-spent;
@@ -806,7 +836,7 @@ function catToggle(el){
   if(ex.length) html+="<br>"+ex.map(x=>esc(fmtDate(x.date))+" "+esc(x.note||"—")+" "+
     esc(fmtCents(x.homeCents,t.homeCur))).join(" &middot; ")+".";
   else html+=" No expenses logged in this category yet.";
-  el.setAttribute("aria-pressed","true");
+  el.setAttribute("aria-pressed","true");el.setAttribute("aria-expanded","true");
   det.innerHTML=html; det.hidden=false;
   Sound.click();
 }
@@ -815,7 +845,7 @@ function releaseToggles(){
   const det=document.getElementById("statDet"); if(det&&!det.hidden){det.hidden=true;det.innerHTML="";open=true;}
   ["catDetDash","catDetExp"].forEach(id=>{const c=document.getElementById(id); if(c&&!c.hidden){c.hidden=true;c.innerHTML="";open=true;}});
   document.querySelectorAll('.stat[role="button"][aria-pressed="true"],.day-row[role="button"][aria-pressed="true"]')
-    .forEach(s=>{s.setAttribute("aria-pressed","false");open=true;});
+    .forEach(s=>{s.setAttribute("aria-pressed","false");s.setAttribute("aria-expanded","false");open=true;});
   return open;
 }
 function wireToggles(scope){
@@ -905,7 +935,7 @@ function renderPlanner(t){
   const dailyAllow = days>0 ? Math.floor((t.totalBudgetCents||0)/days) : 0;
   el.innerHTML =
     '<div class="card"><h2>Pre-trip budget allocation <span class="note">(in '+esc(t.homeCur)+')</span></h2>'+
-    '<div class="field" style="max-width:320px"><label>Total trip budget ('+esc(t.homeCur)+')</label>'+
+    '<div class="field" style="max-width:320px"><label for="pBudget">Total trip budget ('+esc(t.homeCur)+')</label>'+
       '<input id="pBudget" type="number" min="0" step="0.01" value="'+(t.totalBudgetCents/100)+'"></div>'+
     CATEGORIES.map(c=>
       '<div class="cat-row" data-focusrow="'+c.id+'"><div class="nm">'+c.icon+' '+esc(c.name)+'</div>'+
@@ -919,8 +949,8 @@ function renderPlanner(t){
     (days>0?'<p class="note">Per-day allowance: <strong>'+esc(fmtCents(dailyAllow,t.homeCur))+'</strong> over '+days+' day'+(days===1?"":"s")+'.</p>':'<p class="note">Pick valid trip dates to see the per-day allowance.</p>')+
     '</div>'+
     '<div class="card"><h2>Savings target</h2>'+
-    '<div class="form-grid"><div class="field"><label>Departure date</label><input id="sDepart" type="date" value="'+esc(t.start||'')+'"></div>'+
-    '<div class="field"><label>Target to save ('+esc(t.homeCur)+')</label><input id="sTarget" type="number" min="0" step="0.01" value="'+((t.savings&&t.savings.targetCents||0)/100)+'"></div></div>'+
+    '<div class="form-grid"><div class="field"><label for="sDepart">Departure date</label><input id="sDepart" type="date" value="'+esc(t.start||'')+'"></div>'+
+    '<div class="field"><label for="sTarget">Target to save ('+esc(t.homeCur)+')</label><input id="sTarget" type="number" min="0" step="0.01" value="'+((t.savings&&t.savings.targetCents||0)/100)+'"></div></div>'+
     '<div id="savingsOut" class="savings-out">Enter a departure date and a target above.</div>'+
     '<p class="note">Based on today ('+esc(fmtDate(todayStr()))+'). Save a little each week and the trip pays for itself.</p></div>';
   const recalcAlloc = ()=>{
@@ -1005,11 +1035,12 @@ document.getElementById("expenseSave").addEventListener("click", ()=>{
   if(!date){ alert("Pick a date for the expense."); return; }
   const num = Number(amt);
   if(!(num > 0)){ alert("Enter an amount greater than 0."); return; }
+  if(toCents(num) <= 0){ alert("Enter an amount of at least 0.01."); return; }
   // round trip amount to 2dp to keep money exact
-  const tripAmount = inHome ? homeCentsToTrip(toCents(num), t.rate) : Math.round(num*100)/100;
+  const tripAmount = inHome ? homeCentsToTrip(toCents(num), t.rate) : toCents(num)/100;
   const homeCents = inHome ? toCents(num) : tripToHomeCents(tripAmount, t.rate);
   const rec = {id: editingExpense || uid(), date, cat,
-    tripAmount: Math.round(tripAmount*100)/100, homeCents, note};
+    tripAmount: toCents(tripAmount)/100, homeCents, note};
   if(editingExpense){
     const i = t.expenses.findIndex(e=>e.id===editingExpense);
     if(i>=0) t.expenses[i] = rec;
@@ -1071,12 +1102,12 @@ function dailyChartHTML(t,dailyAllow,dayRows){
       +' aria-label="'+esc(r.full+": "+fmtCents(r.spent,t.homeCur))+'">'
       +'<rect x="'+x.toFixed(1)+'" y="'+(baseY-bh).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="4"'
       +' fill="'+(over?"var(--bad)":"var(--bar)")+'"/>'
-      +'<text x="'+cx.toFixed(1)+'" y="'+(baseY+18)+'" text-anchor="middle" style="font-size:11px;fill:var(--muted)">'+esc(r.dayShort)+'</text></g>';
+      +'<text x="'+cx.toFixed(1)+'" y="'+(baseY+18)+'" text-anchor="middle" style="font-size:15px;fill:var(--muted)">'+esc(r.dayShort)+'</text></g>';
   });
   if(dailyAllow>0){
     const ay=y(dailyAllow);
     s+='<line x1="'+pad+'" y1="'+ay.toFixed(1)+'" x2="'+(W-pad)+'" y2="'+ay.toFixed(1)+'" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="6 4"/>'
-      +'<text x="'+(W-pad)+'" y="'+(ay-6).toFixed(1)+'" text-anchor="end" style="font-size:11px;font-weight:600;fill:var(--warn)">allowance '+esc(fmtCents(dailyAllow,t.homeCur))+'</text>';
+      +'<text x="'+(W-pad)+'" y="'+(ay-6).toFixed(1)+'" text-anchor="end" style="font-size:15px;font-weight:600;fill:var(--warn)">allowance '+esc(fmtCents(dailyAllow,t.homeCur))+'</text>';
   }
   s+='<line x1="'+pad+'" y1="'+baseY+'" x2="'+(W-pad)+'" y2="'+baseY+'" stroke="var(--border)" stroke-width="1"/>';
   return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Daily spending bar chart">'+s+'</svg>';
