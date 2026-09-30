@@ -1,70 +1,72 @@
-# MacroTrack — Gumroad listing (UNPUBLISHED $0 draft)
+# MacroTrack — Gumroad listing (polish pass 2026-09-30)
 
 ## Title
-Free TDEE Calculator & Macro Calculator: BMR, Calories, Macros
+TDEE Calculator & Macro Calculator — See Every Step of the Math
 
 ## Permalink slug
-free-tdee-calculator-macro-calculator
+free-tdee-calculator-macro-calculator (existing — unchanged)
 
 ## Price
-$0
+$0+ (pay what you want — unchanged)
 
-## CTA preset
-I want this!
+## Cover (APPROVED — ship exactly)
+gallery/covers-mt1/mt1-cover-12-piechart-squished.png
 
-## Thumbnail
-gallery/cover-square-1200.png (Gumroad thumbnail; also attach the gallery images below as product images)
+## Square thumbnail (APPROVED — ship exactly)
+gallery/mt-thumb-square-1080.png (MD5 07aedff4abfcbe7799b21b1fe1cadce2)
 
-## Gallery (in order)
-1. `gallery/cover-1280x720.png` — Hero cover: populated app in browser frame
-2. `gallery/1-inputs.png` — Input form: units, age, sex, height, weight, body fat, activity, goal
-3. `gallery/2-results.png` — Results: BMR, TDEE, target calories, pace estimate, daily macro bars
-4. `gallery/3-show-your-work.png` — Show-your-work: exact formula and every calculation step
-5. `gallery/4-dark-mode.png` — Dark mode: same dense layout, dark theme
-6. `gallery/5-mobile.png` — Mobile layout
-7. `gallery/6-metric.png` — Metric units (kg, cm) input mode
-8. `gallery/7-katch-mcardle.png` — Katch-McArdle formula with body-fat input
+## Gallery (in order, all re-shot 2026-09-30 from bytes ebb568bd1c0b9ad83d5955803c4b63b7)
+1. cover (above — set as the cover image, NOT in gallery)
+2. gallery/1-inputs.png — input form
+3. gallery/2-results.png — BMR / TDEE / target results
+4. gallery/3-show-your-work.png — formula working shown step by step
+5. gallery/4-dark-mode.png — dark mode
+6. gallery/5-mobile.png — mobile layout
+7. gallery/6-metric.png — metric units
+8. gallery/7-katch-mcardle.png — Katch-McArdle formula
 
 ## Product file
-macrotrack-bundle.zip
+macrotrack-bundle.zip (index.html only; extracted MD5 ebb568bd1c0b9ad83d5955803c4b63b7)
 
-## Tags
-tdee calculator, macro calculator, bmr calculator, calorie calculator, protein calculator, maintenance calories, iifym calculator, mifflin st jeor, cutting calories, bulking calories
+## Tags (10, each <= 20 chars)
+tdee calculator, macro calculator, calorie calculator, bmr calculator, protein intake, weight loss, muscle gain, nutrition, diet planner, macro tracker
 
-## Description (paste in ONE operation: select-all, delete existing, paste all, save, reload-verify)
+## Description (SaveTrail format — paste in ONE operation: select-all, delete existing, paste all, save, reload-verify)
 
-🔥 Free TDEE Calculator & Macro Calculator — MacroTrack: BMR, Calories & Daily Macros
+MacroTrack — TDEE & Macro Calculator
 
-Stop trusting black-box calorie calculators. Enter your age, height, weight, activity level and goal, and MacroTrack shows your BMR, TDEE, target calories and protein/carb/fat grams — with the exact formula and every calculation step shown on screen, so you can verify it yourself.
+If you are unsatisfied for any reason, please contact me for a full refund.
 
-💸 100% FREE — free forever. No upsells, no subscription, no account, no internet required.
+🎯 THE PROBLEM
+Most calorie calculators hand you a single number and expect you to trust it. You can't see which formula they used, how your activity level changed the result, or where your protein, carb, and fat targets came from — so there's no way to know whether the numbers actually fit you.
 
-✨ WHAT IT DOES
-• 🧮 BMR with 3 published formulas — Mifflin-St Jeor (default), Harris-Benedict (revised 1984), Katch-McArdle (uses lean body mass)
-• 🔥 TDEE from 5 activity levels, from sedentary to extra active
-• 🎯 Goal targets — cut, maintain, or lean bulk, with a fine-tune slider (−30% to +20%)
-• 🍗 Daily macros in grams — protein, carbs, fat with 3 split presets (balanced, high protein, lower carb)
-• 📏 Imperial + metric units (lb/ft-in or kg/cm)
-• 🔍 SHOW YOUR WORK — every formula printed with your numbers substituted, step by step
-• 📈 Weekly pace estimate — how fast you'll lose/gain at your target
-• 🖨️ Print / save a clean results sheet
+✅ THE FIX
+MacroTrack shows every step of the math. Enter your stats, pick a BMR formula, set your activity level and goal, and get your BMR, TDEE, calorie target, and full macro split — with each calculation shown exactly as it was computed, so you can verify it yourself.
 
-📦 WHAT YOU GET
-• MacroTrack as a single HTML file — double-click to open in any browser
-• Free updates forever
+⚠️ READ FIRST
+Your data is stored only in your own browser. Nothing is uploaded, tracked, or shared — your numbers never leave the page. The download is a single file that works offline.
 
-🖥️ HOW IT WORKS
-No install, no account. Open the file, enter your details, and your numbers appear instantly — with the full math shown underneath. Everything is stored privately in your own browser — your data never leaves your device.
+🚀 After download
+1. Open index.html in any modern browser — no install, no account.
+2. Enter your age, sex, height, weight, and activity level.
+3. Read your BMR, TDEE, calorie target, and macros — with the full working shown underneath.
 
-🔒 PRIVACY
-MacroTrack is fully offline. No trackers, no analytics, no external requests. Unlike the big calculator sites: no ads, no cookie banners, no account funnel.
+✨ What it does
+- BMR via Mifflin-St Jeor or Katch-McArdle (uses body-fat %)
+- TDEE from 5 activity levels, shown as a clickable calorie ladder
+- Calorie target with a fine-tune goal slider (−30% to +20%) and weekly pace estimate
+- Daily macros in grams — protein, carbs, fat — with 3 split presets (balanced 30/40/30, high-protein 35/35/30, lower-carb 30/25/45)
+- "Show your work" panel: every formula with your numbers substituted, step by step
+- Clickable charts — click a bar or macro slice to spotlight it
+- Imperial + metric units, dark mode, sample data, sound effects with mute option
 
-🔗 MORE FROM GLENERDS
-• More free Glenerds tools → [glenerds.gumroad.com](https://glenerds.gumroad.com)
+🛠️ Honest notes
+- These are estimates, not medical advice — check with a professional before a big diet change.
+- Katch-McArdle only beats Mifflin-St Jeor if your body-fat % is accurate.
+- Weekly pace uses the ~7,700 kcal per kg rule of thumb.
 
-📩 SUPPORT
-Questions or issues? Reply to your Gumroad receipt email and we'll sort it out.
+📦 What's included
+- index.html — the complete app in one file; double-click to open, works offline
 
-⚠️ Estimates only — these formulas are population averages. For weight loss, muscle gain, or any health concern, talk to a doctor or registered dietitian.
-
-by Glenerds — free tools, no accounts, no ads: [glenerds.gumroad.com](https://glenerds.gumroad.com)
+✉️ Questions / support
+Reply to your Gumroad receipt email and I'll help out.
