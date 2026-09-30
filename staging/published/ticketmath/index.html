@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Event Ticket Pricing Calculator (TicketMath)</title>
-<meta name="description" content="Free event ticket pricing calculator: model venue capacity, fixed costs, and up to 4 ticket tiers to find break-even points and projected profit. Offline, single-file tool (TicketMath).">
+<title>Event Ticket Pricing Calculator: Break-Even &amp; Profit Projector</title>
+<meta name="description" content="Event ticket pricing calculator: model venue capacity, fixed costs, and up to 4 ticket tiers to find break-even points and projected profit. Offline, single-file tool.">
 <style>
 :root{
   --bg:#f4f5fb; --fg:#171821; --muted:#5b5e70;
@@ -875,7 +875,7 @@ function renderDonut(){
 function renderGauge(){
   var wrap = $("gauge-wrap"); if(!wrap) return; clear(wrap);
   var F = totalCosts(), A = totalAlloc(), R = fullRevenue();
-  var W = 300, H = 172, cx = 150, cy = 142, r = 104;
+  var W = 300, H = 212, cx = 150, cy = 142, r = 104;
   var svg = svgEl("svg", {viewBox: "0 0 " + W + " " + H, width: "100%", role: "img",
     "aria-label": "Break-even gauge"});
   function pt(pct){
@@ -909,10 +909,10 @@ function renderGauge(){
     stroke: "var(--fg)", "stroke-width": "4", "stroke-linecap": "round"}));
   svg.appendChild(svgEl("circle", {cx: cx, cy: cy, r: 8, fill: "var(--fg)"}));
   var label = (Math.round(pct * 10) / 10) + "%";
-  var main = svgEl("text", {x: cx, y: cy - 36, "text-anchor": "middle",
+  var main = svgEl("text", {x: cx, y: cy + 36, "text-anchor": "middle",
     "font-size": "24", "font-weight": "800"}, label);
   svg.appendChild(main);
-  svg.appendChild(svgEl("text", {x: cx, y: cy - 16, "text-anchor": "middle",
+  svg.appendChild(svgEl("text", {x: cx, y: cy + 58, "text-anchor": "middle",
     "font-size": "11", class: "chart-sub"}, "OF ALLOCATION TO BREAK EVEN"));
   wrap.appendChild(svg);
   var detail = el("div", {class: "chart-detail"});
