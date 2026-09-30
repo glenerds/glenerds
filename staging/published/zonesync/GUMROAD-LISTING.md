@@ -1,59 +1,42 @@
-# ZoneSync — Gumroad listing (UNPUBLISHED $0 draft)
+# ZoneSync — Gumroad listing
+
+## Status (2026-09-30)
+Polish pass complete. Cover approved by Glen (option A revised v4: globe lifted, symmetric hands, centered wordmark, larger bottom text).
+
+## Product
+- Public URL: https://glenerds.gumroad.com/l/free-time-zone-meeting-planner
+- Price: $0+ (pay-what-you-want, "I want this!" CTA)
 
 ## Title
-Free Time Zone Overlap Calculator & Meeting Planner for Remote Teams — ZoneSync
+Time Zone Overlap Calculator & Meeting Planner for Remote Teams
 
 ## Permalink slug
-free-time-zone-meeting-planner
+free-time-zone-meeting-planner (existing — not changed)
 
-## Price
-$0
+## Final app bytes
+- MD5: 8834f6d199d4236e72b4096c8c77cedb
+- Changes in this pass (small-changes rule): SEO <title> (no "free", no brand name); mobile header wraps to two rows at ≤560px so the brand title never overlaps the action buttons (visual bug fix, verified at 390px).
+- ZIP: zonesync-bundle.zip (index.html only; extracted MD5 matches source MD5)
 
-## CTA preset
-I want this!
+## Images (8 total, in order)
+1. gallery/0-cover.png — approved cover (1080×1080, Glen's pick, revised v4)
+2. gallery/1-overview.png — desktop 1280×800, demo team loaded
+3. gallery/2-overlap.png — overlap windows section
+4. gallery/3-meeting-planner.png — meeting planner section
+5. gallery/4-dark-mode.png — dark mode, desktop
+6. gallery/5-mobile.png — mobile 390×844 @2x
+7. gallery/6-strip.png — team day timeline strip
+8. gallery/7-team-members.png — team members table (4 demo members)
+- All 7 screenshots re-shot 2026-09-30 from final bytes, viewport-sized (no full-page strips).
+- Thumbnail field: gallery/0-cover.png (true 1080×1080 square design).
 
-## Thumbnail
-gallery/cover-square-1200.png (also attach gallery/0-cover.png and gallery/1-overview.png … gallery/7-team-members.png as product images)
+## Tags (10, each ≤20 chars)
+time zone converter, meeting planner, remote team tools, timezone calculator, team scheduling, overlap finder, distributed teams, work hours planner, schedule meetings, world clock tool
 
-## Product file
-zonesync-bundle.zip
+## Description
+SaveTrail format in GUMROAD-DESCRIPTION.txt (pasted in one operation 2026-09-30). No "free" wording anywhere.
 
-## Tags
-time zone meeting planner, timezone overlap calculator, remote team scheduling, team availability, offline productivity tool
-
-## Description (paste in ONE operation: select-all, delete existing, paste all, save, reload-verify)
-
-ZoneSync is a free time zone meeting planner and overlap calculator for remote and distributed teams. Stop doing time-zone math in your head — add your remote teammates once, and ZoneSync finds the best shared working windows across time zones, ranked by team availability in plain language, with a 24-hour availability strip so you can see remote team availability at a glance.
-
-💸 100% FREE — no subscription, no upsells, no account, no internet required.
-
-✨ WHAT IT DOES
-• 👥 Team members — name, time zone, local work hours (overnight shifts supported)
-• 🏆 Today's overlap windows — ranked by team availability in plain language ("9 AM – 12 PM — 2 of 3 free"), gold-highlighted when everyone overlaps
-• 📊 24-hour availability strip — color intensity shows how many teammates are within their working hours each hour, in your own time zone
-• 📅 Meeting planner — pick a time, see every member's local time + in/out-of-hours status; find the best meeting time across time zones for distributed teams
-• 🌐 DST-safe — uses your browser's own time-zone engine, no hand-rolled offsets
-
-📦 WHAT YOU GET
-• ZoneSync as a single HTML file — double-click to open in any browser
-• 8 walkthrough images (cover + 7 screenshots)
-• README with quick-start guide
-• Free updates included
-
-🖥️ HOW IT WORKS
-No install, no internet, no account — a no-signup meeting planner. Open the file, add your team once, and instantly see today's overlap windows ranked by how many members are free. Everything is stored locally in your browser — ZoneSync does not send your data anywhere. Includes JSON backup export/import and one-click demo data.
-
-🔒 PRIVACY
-ZoneSync is a fully offline time zone tool. No trackers, no analytics, no external requests.
-
-🎯 BUILT FOR
-Remote teams, distributed companies, freelancers, and agencies scheduling across time zones — from US–Europe standups to US–India working-hours overlap.
-
-🛠️ MORE FROM GLENERDS — made by Glenerds → https://glenerds.gumroad.com
-• Also building better routines? HabitTrack — free habit tracker with daily streaks & heatmap → https://glenerds.gumroad.com
-• Browse all Glenerds tools → https://glenerds.gumroad.com
-
-📩 SUPPORT
-Questions or issues? Reply to your Gumroad receipt email and we'll sort it out.
-
-🚀 Ready to simplify remote scheduling? Download ZoneSync free and find your next meeting window in under a minute.
+## Cover source
+- Generator: ~/workspace/zonesync-covers.py
+- Approved file: gallery/covers/ZS-A-globe-v4.png (copied to gallery/0-cover.png)
+- SVG source: gallery/covers/ZS-A-globe.png.svg
