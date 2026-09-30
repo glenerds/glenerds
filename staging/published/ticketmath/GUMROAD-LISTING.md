@@ -1,56 +1,35 @@
-# TicketMath — Gumroad listing (UNPUBLISHED $0 draft)
+# TicketMath — Gumroad listing (PUBLISHED $0 pay-what-you-want)
+
+Live: https://glenerds.gumroad.com/l/free-event-ticket-pricing-break-even-calculator
+Product ID: imhlvhu
+Editor: https://gumroad.com/products/imhlvhu/edit
+Published: 2026-09-30 (verified live: "$0+", "Name a fair price" input, "I want this!" button)
 
 ## Title
-Free Event Ticket Pricing Calculator: Break-Even & Profit Projector for Organizers
+Event Ticket Pricing & Break-Even Calculator for Organizers
 
 ## Permalink slug
-free-event-ticket-pricing-break-even-calculator
+free-event-ticket-pricing-break-even-calculator (unchanged)
 
 ## Price
-$0
+$0 — pay-what-you-want ON (required for $0 products)
 
-## CTA preset
-I want this!
+## Product images (8, in order)
+0-cover.png (cover — Glen-approved TM5-V2-darkfan design, 1080×1080, MD5 267ff1ed48bba6b14df55252139e5232)
+1-overview.png, 2-break-even.png, 3-chart.png, 4-dark-mode.png, 5-mobile.png, 6-tier-editor.png, 7-fixed-costs.png
 
-## Thumbnail
-gallery/0-cover.png (also attach gallery/1-overview.png … 7-fixed-costs.png as product images)
+## Thumbnail (separate square field)
+gallery/0-cover.png
 
 ## Product file
-ticketmath-bundle.zip
+ticketmath-bundle.zip (18.1 KB; contains index.html, MD5 db6ed66001c27ca11227b177921d89f2 — gauge text-below-needle fix)
 
-## Tags
-event planning, ticket pricing, break even calculator, event organizer, ticket tiers, revenue projection, profit calculator, workshop planning, fundraiser, meetup
+## Tags (10)
+event planning, ticket pricing, event organizer, ticket tiers, profit calculator, workshop planning, fundraiser, meetup, breakeven calculator, revenue projections
+("break even calculator" exceeds Gumroad's 20-char tag limit; "revenue projection" auto-matches Gumroad's existing "revenue projections" tag)
 
-## Description (paste in ONE operation: select-all, delete existing, paste all, save, reload-verify)
+## Description
+See GUMROAD-DESCRIPTION.txt (SaveTrail format, no "free")
 
-🎟️ Free Event Ticket Pricing Calculator — TicketMath
-
-Price your event with confidence. Model your venue capacity, fixed costs, and up to 4 ticket tiers to find your exact break-even point — then slide sell-through rates to project profit or loss before you sell a single ticket.
-
-💸 100% FREE — no upsells, no account, no internet required. If you were ever charged for this product, contact us for a full refund, no questions asked.
-
-✨ WHAT IT DOES
-• 🏟️ Event setup — name, venue capacity, date
-• 🧾 Fixed-cost line items — venue rental, marketing, anything else
-• 🎫 Up to 4 ticket tiers — Early Bird, General, VIP, Student, or custom names, with price + allocation (allocation can't exceed capacity)
-• 🎯 Break-even analysis — exact number of tickets to sell, as a count and a percentage
-• 📊 Sell-through scenario — per-tier sliders project revenue and profit/loss live
-• 📈 Per-tier revenue table + revenue bar chart
-
-📦 WHAT YOU GET
-• TicketMath as a single HTML file — double-click to open in any browser
-• 8 screenshot walkthrough images
-• README with quick-start guide
-• Free updates forever
-
-🖥️ HOW IT WORKS
-No install, no internet, no account. Open the file, enter your costs and ticket tiers, and instantly see your break-even point and projected profit. Everything is stored privately in your own browser — your data never leaves your device. Includes JSON backup export/import and one-click demo data.
-
-🔒 PRIVACY
-TicketMath is fully offline. No trackers, no analytics, no external requests.
-
-🛠️ MORE FROM GLENERDS
-• Browse all Glenerds tools → https://glenerds.gumroad.com
-
-📩 SUPPORT
-Questions or issues? Reply to your Gumroad receipt email and we'll sort it out.
+## App source
+index.html MD5 db6ed66001c27ca11227b177921d89f2 — pushed to glenerds/glenerds and live at https://glenerds.github.io/glenerds/staging/published/ticketmath/index.html
