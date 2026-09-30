@@ -1,4 +1,13 @@
-# GradePlan — Gumroad listing (UNPUBLISHED $0 draft)
+# GradePlan — Gumroad listing (PUBLISHED)
+
+## Product ID
+zppmw
+
+## Public URL
+https://glenerds.gumroad.com/l/free-final-grade-calculator-gpa-calculator
+
+## Status
+PUBLISHED — $0+ pay-what-you-want, live 2026-09-30
 
 ## Title
 Final Grade & GPA Calculator for Students
@@ -7,57 +16,34 @@ Final Grade & GPA Calculator for Students
 free-final-grade-calculator-gpa-calculator
 
 ## Price
-$0
+$0+ pay-what-you-want
 
-## CTA preset
+## CTA
 I want this!
 
+## Images (8, in order)
+1. gallery/covers/GP-F-midnight-v4.png (approved cover, Glen 2026-09-30 — 1080x1080, dark navy, "GradePlan" top, purple calculator medallion center, "WHAT DO YOU NEED ON THE FINAL?" bottom; SHA-256 a99f9d5b5987aef7e75b1a4b4eb14f37930a9dc1388f74f7783829eb88eecacf)
+2. gallery/1-final-solver.png (working example: current 88, goal 90, final weight 25; MD5 101584262371bfc5ab7910c568c60cf0)
+3. gallery/2-impossible.png (impossible-result case; MD5 0e3db0fa38b5b311c812181bedf9c033)
+4. gallery/3-course-grade.png (weighted-course view; MD5 e4b91b80ef701ae50bc7aa05c5853488)
+5. gallery/4-gpa.png (GPA, weighted mode off; MD5 47df5307143efbf12aab8b5d30a55dfa)
+6. gallery/5-weighted-gpa.png (GPA, weighted mode on; MD5 ddd1613c3639869db6c5a4ebc941a3c8)
+7. gallery/6-dark-mode.png (dark-mode final-exam view; MD5 131fd4be6d218d393afe90e9cb2bbd77)
+8. gallery/7-mobile.png (mobile final-exam view, 390x844 @2x; MD5 4ddc28fd812241c36473ce8253bef298)
+
+All 7 screenshots re-shot 2026-09-30 from final app bytes MD5 ba608232a1067b4a663214220dcfdc21.
+
 ## Thumbnail
-gallery/cover-square-1200.png (also attach gallery/0-cover.png … 7-mobile.png as product images)
+Gumroad Thumbnail field set to GP-F-midnight-v4.png (true 1080x1080 square, edge-to-edge, approved)
+
+## Description
+SaveTrail format (see GUMROAD-DESCRIPTION.md) — GRADEPLAN header, refund line, 🎯 THE PROBLEM, ✅ THE FIX, ⚠️ READ FIRST, 🚀 AFTER DOWNLOAD, ✨ WHAT IT DOES, 🛠️ HONEST NOTES, 📦 WHAT'S INCLUDED, ✉️ QUESTIONS / SUPPORT. No "free" wording anywhere.
+
+## Tags (10, all ≤20 chars)
+grade calculator, final exam grade, gpa calculator, college grades, study planner, student tools, course grade, exam prep, school planner, homework tracker
 
 ## Product file
-gradeplan-bundle.zip
+gradeplan-bundle.zip (contains only index.html; extracted index.html MD5 ba608232a1067b4a663214220dcfdc21)
 
-## Tags
-final grade calculator, gpa calculator, grade calculator, what do i need on the final, weighted grade calculator, college gpa calculator, high school gpa calculator, final exam calculator, cumulative gpa calculator, semester gpa calculator
-
-## Description (paste in ONE operation: select-all, delete existing, paste all, save, reload-verify)
-
-Free GPA calculator and final exam solver for students — GradePlan 🎓
-
-Need to know what grade you need on your final? GradePlan calculates it instantly — including when your goal is mathematically impossible.
-
-Calculate your current grade, find the score you need on your final exam, and calculate your semester and cumulative GPA from letter grades and credit hours. Every result shows the full math with your numbers substituted, so you can verify it yourself and compare against your official syllabus.
-
-Always free. No account, email signup, subscription, or hidden upgrade. No coding or setup required — open the file and get your answer in under a minute.
-
-✨ WHAT IT DOES
-• 📝 FINAL EXAM SOLVER — current grade + desired grade + final weight → the exact score you need on the final
-• 📉 KNOW YOUR REALISTIC OUTCOME — if the math doesn't work, it says so honestly and shows the highest grade a perfect 100% on the final can reach
-• 🛡️ PROTECT YOUR CURRENT GRADE — already locked in your goal? It tells you the lowest final score you can afford
-• 📊 WEIGHTED COURSE GRADE — categories with weights and scores; if your weights don't total 100%, they're scaled fairly
-• 🏅 GPA CALCULATOR — courses with credits and letter grades on a 4.0 scale, with a weighted toggle for Honors/AP (+1.0; an F still counts as 0)
-• 🔍 SHOW YOUR WORK — every formula printed with your numbers substituted, step by step
-• 🌙 DARK MODE — toggle, respects your system setting, remembers your choice
-• 💾 SAVES YOUR INPUTS — everything stored privately in your browser, picks up where you left off
-• 📱 PHONE, TABLET, COMPUTER — use it from any device, no internet needed
-
-⚠️ Estimates for planning only — always confirm with your official syllabus or registrar.
-
-📦 WHAT YOU GET
-• GradePlan as a single offline file — a private copy you can keep forever; double-click to open in any browser
-• 8 screenshot walkthrough images
-• README with quick-start guide
-• Future improvements will remain free
-
-🔒 PRIVACY
-GradePlan is fully offline. No trackers, no analytics, no external requests, no ads, no cookie banners. Everything is stored privately in your own browser — your grades never leave your device.
-
-🛠️ MORE FROM GLENERDS
-• HomeRoom (homeschool lesson planner & attendance tracker) and DebtPayoff (student-loan payoff planner) — free offline tools by Glenerds
-• Browse all Glenerds tools → https://glenerds.gumroad.com
-
-📩 SUPPORT
-Questions or issues? Reply to your Gumroad receipt email and we'll sort it out.
-
-by Glenerds — free offline tools with no account, no subscription, no ads: https://glenerds.gumroad.com
+## Microsite
+Live page https://glenerds.github.io/glenerds/staging/published/gradeplan/ serves exact final bytes MD5 ba608232a1067b4a663214220dcfdc21 (verified 2026-09-30, 3x cache-busted fetches).
