@@ -245,7 +245,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
   <button class="icon-btn" id="soundBtn" aria-pressed="true" title="Toggle sound" aria-label="Toggle sound">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.4 9.4 0 0 1 0 13"/></svg>
   </button>
-  <button class="icon-btn" id="langBtn" aria-pressed="false" title="Español / English" aria-label="Toggle Spanish language" style="font-weight:800;font-size:17px">ES</button>
+  <button class="icon-btn" id="langBtn" aria-pressed="false" title="Switch language / Cambiar idioma" aria-label="Switch language: English / Español" style="font-weight:800;font-size:17px">ES</button>
 </header>
 
 <nav class="tabs" role="tablist" aria-label="Main sections">
@@ -280,7 +280,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
       <div class="card hidden" id="nudgeCard"><h3 id="nudgeTitle">Smart Nudges</h3><div id="nudgePanel"></div></div>
       <div class="grid4" id="gaugeRow"></div>
       <div class="card chart-card">
-        <h3>Open Findings by Category</h3>
+        <h3 data-str="findings">Open Findings by Category</h3>
         <div class="field" style="max-width:340px">
           <label for="barTrackFilter" data-str="fltTrack"></label>
           <select id="barTrackFilter">
@@ -301,7 +301,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
         <div class="chart-tip" id="trendTip"></div>
       </div>
       <div class="card chart-card">
-        <h3>Incidents per Month</h3>
+        <h3 data-str="incidents">Incidents per Month</h3>
         <div id="incChart"></div>
         <div class="chart-tip" id="incTip"></div>
       </div>
@@ -311,7 +311,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
 
   <!-- AUDITS -->
   <section class="view" id="view-audits">
-    <h2 style="margin-bottom:16px" data-str="auditsH"></h2>
+    <h2 style="margin-bottom:4px" data-str="auditsH"></h2><p class="small dim" style="margin-bottom:16px" data-str="auditsSub"></p>
     <div id="auditPicker" class="grid3"></div>
     <div id="auditRunner" class="hidden"></div>
   </section>
@@ -373,7 +373,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
       <button class="tab" data-logtab="injury" role="tab">Injury / Illness</button>
       <button class="tab" data-logtab="training" role="tab">Training</button>
       <button class="tab" data-logtab="dvir" role="tab">Vehicle Inspection</button>
-      <button class="tab" data-logtab="sds" role="tab">SDS Inventory</button>
+      <button class="tab" data-logtab="sds" role="tab">Safety Data Sheets</button>
     </nav>
     <div id="log-actions"></div>
     <div id="log-injury" class="hidden"></div>
@@ -384,7 +384,7 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
 
   <!-- CHECKLISTS -->
   <section class="view" id="view-checklists">
-    <h2 style="margin-bottom:16px" data-str="checkH"></h2>
+    <h2 style="margin-bottom:4px" data-str="checkH"></h2><p class="small dim" style="margin-bottom:16px" data-str="checkSub"></p>
     <div id="checklistWrap"></div>
   </section>
 
@@ -688,7 +688,7 @@ function renderAuditPicker(){
       let ans=0; sec.questions.forEach((q,i)=>{ if(getAnswer(t,sec.id,i)) ans++; });
       const frac=sec.questions.length?ans/sec.questions.length:0;
       const cap=esc(sectitle(t,sec).replace(/^.+?:\s*/,""));
-      const short=cap.length>18?cap.slice(0,17)+"…":cap;
+      const short=cap.length>20?cap.slice(0,20).replace(/\s+\S*$/,"")+"\u2026":cap;
       return '<button class="iring" data-ring="'+t+'|'+sec.id+'" title="'+cap+' — '+ans+'/'+sec.questions.length+' answered" aria-label="'+cap+": "+ans+" of "+sec.questions.length+' answered">'+
         ringSVG(frac,scoreColor(frac*100))+'<span class="iring-pct">'+ans+'/'+sec.questions.length+'</span>'+
         '<span class="iring-cap">'+short+'</span></button>';
@@ -869,9 +869,10 @@ function renderBarChart(){
   list.forEach((c,i)=>{
     const y=i*54+8, w=Math.max(8,(c.items.length/max)*380);
     const key=c.track+"|"+c.section, sel=selectedBar===key;
-    const label=(TRACKS[c.track].short+": "+c.section).slice(0,24);
+    const fullLbl=TRACKS[c.track].short+": "+c.section;
+    const label=fullLbl.length>24?fullLbl.slice(0,24).replace(/\s+\S*$/,"")+"\u2026":fullLbl;
     svg+='<text x="4" y="'+(y+22)+'" font-size="15" fill="var(--muted)">'+esc(label)+'</text>'+
-      '<g class="bar'+(sel?" selected":"")+'" data-key="'+esc(key)+'" tabindex="0" role="button" aria-label="'+esc(label)+': '+c.items.length+' open findings">'+
+      '<g class="bar'+(sel?" selected":"")+'" data-key="'+esc(key)+'" tabindex="0" role="button" aria-label="'+esc(fullLbl)+': '+c.items.length+' open findings">'+
       '<rect x="200" y="'+y+'" width="'+w.toFixed(0)+'" height="30" rx="6" fill="'+TRACK_COLORS[c.track]+'"'+
       (sel?' style="stroke:var(--text);stroke-width:3"':"")+'/>'+
       '<text x="'+(208+w)+'" y="'+(y+21)+'" font-size="15" font-weight="700" fill="var(--text)">'+c.items.length+'</text></g>';
@@ -909,16 +910,18 @@ function renderTrend(){
          '<text x="'+(padL-8)+'" y="'+(Y(g)+5)+'" font-size="15" fill="var(--muted)" text-anchor="end">'+g+'</text>';
   }
   const step=Math.max(1,Math.ceil(dates.length/8));
-  dates.forEach((d,i)=>{ if(i%step===0) svg+='<text x="'+X(i)+'" y="'+(H-14)+'" font-size="15" fill="var(--muted)" text-anchor="middle">'+esc(d.slice(5))+'</text>'; });
+  dates.forEach((d,i)=>{ if(i%step===0){ const xr=X(i), nearR=xr>=624;
+    svg+='<text x="'+(nearR?636:xr)+'" y="'+(H-14)+'" font-size="15" fill="var(--muted)" text-anchor="'+(nearR?"end":"middle")+'">'+esc(d.slice(5))+'</text>'; } });
   Object.keys(TRACKS).forEach(t=>{
-    const pts=dates.map((d,i)=>{ const e=[...h].reverse().find(x=>x.track===t&&x.date<=d); return e?{i,s:e.score,d:e.date}:null; });
+    const pts=dates.map((d,i)=>{ const e=h.find(x=>x.track===t&&x.date<=d); return e?{i,s:e.score,d:e.date}:null; });
     const valid=pts.map((p,pi)=>p?pi:-1).filter(x=>x>=0);
     if(!valid.length) return;
     let path="";
     valid.forEach((pi,k)=>{ path+=(k?"L":"M")+X(pi).toFixed(1)+" "+Y(pts[pi].s).toFixed(1)+" "; });
     svg+='<path d="'+path+'" fill="none" stroke="'+TRACK_COLORS[t]+'" stroke-width="3"/>';
     valid.forEach(pi=>{
-      const p=pts[pi], key=t+"|"+p.d+"|"+p.i;
+      const p=pts[pi]; if(p.d!==dates[pi]) return; // step-line carry-forward: line only, no button
+      const key=t+"|"+p.d+"|"+p.i;
       const sel=selectedTrend===key;
       svg+='<circle class="bar" data-key="'+key+'" cx="'+X(pi).toFixed(1)+'" cy="'+Y(p.s).toFixed(1)+'" r="'+(sel?10:6)+'" fill="'+TRACK_COLORS[t]+'" tabindex="0" role="button" aria-label="'+TRACKS[t].short+" "+p.s+"% on "+p.d+'"'+
         (sel?' style="stroke:var(--text);stroke-width:3"':"")+'/>';
@@ -1254,8 +1257,8 @@ function renderTraining(){
   $("#log-training").innerHTML=renderHeatmap()+
     '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+
     "<h3 style='margin:0'>"+D("Safety Training Log","Registro de capacitación en seguridad")+" ("+logs.training.length+")</h3><button class='btn small' id='addTraining'>＋ "+D("Log training","Registrar capacitación")+"</button></div>"+
-    (logs.training.length?'<div style="overflow-x:auto"><table class="log"><tr><th>"+D("Date","Fecha")+"</th><th>"+D("Topic","Tema")+"</th><th>"+D("Trainer","Capacitador")+"</th><th>"+D("Attendees","Asistentes")+"</th><th>"+D("Duration","Duración")+"</th><th></th></tr>'+rows+"</table></div>"
-    :'<div class="empty">"+D("No training sessions logged.","Sin sesiones de capacitación registradas.")+"</div>')+"</div>";
+    (logs.training.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Topic","Tema")+'</th><th>'+D("Trainer","Capacitador")+'</th><th>'+D("Attendees","Asistentes")+'</th><th>'+D("Duration","Duración")+'</th><th></th></tr>'+rows+"</table></div>"
+    :'<div class="empty">'+D("No training sessions logged.","Sin sesiones de capacitación registradas.")+'</div>')+"</div>";
   $("#addEmpBtn").addEventListener("click",()=>{ sndClick();
     openModal('<h3>'+D("Add employee","Agregar empleado")+'</h3><div class="field"><label>'+D("Name","Nombre")+'</label><input id="m-emp"></div>'+
       '<div style="display:flex;gap:10px"><button class="btn" id="m-save">'+D("Save","Guardar")+'</button><button class="btn secondary" id="m-cancel">'+D("Cancel","Cancelar")+'</button></div>');
@@ -1291,8 +1294,8 @@ function renderDvir(){
     "<td><button class='btn small danger' data-i='"+i+"'>"+D("Delete","Eliminar")+"</button></td></tr>").join("");
   $("#log-dvir").innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+
     "<h3 style='margin:0'>"+D("Vehicle Inspection Log","Registro de inspección vehicular")+" ("+logs.dvir.length+")</h3><button class='btn small' id='addDvir'>＋ "+D("Log inspection","Registrar inspección")+"</button></div>"+
-    (logs.dvir.length?'<div style="overflow-x:auto"><table class="log"><tr><th>"+D("Date","Fecha")+"</th><th>"+D("Unit #","Unidad #")+"</th><th>"+D("Driver","Conductor")+"</th><th>"+D("Odometer","Odómetro")+"</th><th>"+D("Defects","Defectos")+"</th><th>"+D("Details / corrective action","Detalles / acción correctiva")+"</th><th></th></tr>'+rows+"</table></div>"
-    :'<div class="empty">"+D("No vehicle inspections logged.","Sin inspecciones vehiculares registradas.")+"</div>')+"</div>";
+    (logs.dvir.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Unit #","Unidad #")+'</th><th>'+D("Driver","Conductor")+'</th><th>'+D("Odometer","Odómetro")+'</th><th>'+D("Defects","Defectos")+'</th><th>'+D("Details / corrective action","Detalles / acción correctiva")+'</th><th></th></tr>'+rows+"</table></div>"
+    :'<div class="empty">'+D("No vehicle inspections logged.","Sin inspecciones vehiculares registradas.")+'</div>')+"</div>";
   $("#addDvir").addEventListener("click",()=>{ sndClick(); openModal(
     '<h3>'+D("Log vehicle inspection","Registrar inspección vehicular")+'</h3><div class="form-row"><div class="field"><label>'+D("Date","Fecha")+'</label><input type="date" id="m-date" value="'+todayISO()+'"></div>'+
     '<div class="field"><label>'+D("Unit / vehicle #","Unidad / vehículo #")+'</label><input id="m-unit"></div></div>'+
@@ -1390,15 +1393,24 @@ function initSettings(){
       answers={};actions=[];history=[];logs={injury:[],training:[],dvir:[]};checklists={};profile={};auditDone={};
       try{ drivers=[];vehicles=[];locations=[];trainingMatrix=[];sdsList=[];savedLabels=[];reviews={};employees=[];auditRuns=[];
         saveDrivers();saveVehicles();saveLocations();saveMatrix();saveSds();saveLabels();saveReviews();saveEmployees();saveRuns(); }catch(e){}
-      sampleOn=false; $("#sampleBtn").setAttribute("aria-pressed","false");
+      sampleOn=false; store.del("sampleOn"); store.del("snapshot"); $("#sampleBtn").setAttribute("aria-pressed","false");
       refreshProfileFields(); sndBad(); toast(D("All data reset","Todos los datos eliminados")); goto("dashboard"); } });
   $("#reshowDisclaimer").addEventListener("click",()=>{ sndClick(); store.del("disclaimerSeen"); $("#disclaimerBanner").classList.remove("hidden"); });
 }
 
 /* ---- sample data ---- */
-let sampleOn=false;
+let sampleOn=store.get("sampleOn",false);
+function hasUserData(){ try{
+  if(Object.keys(answers||{}).length) return true;
+  if((actions||[]).length||(history||[]).length) return true;
+  const _l=logs||{}; if((_l.injury||[]).length||(_l.training||[]).length||(_l.dvir||[]).length) return true;
+  if(Object.keys(checklists||{}).length||Object.keys(auditDone||{}).length) return true;
+  if((drivers||[]).length||(vehicles||[]).length||(locations||[]).length) return true;
+  if(Object.keys(trainingMatrix||{}).length||(sdsList||[]).length||(savedLabels||[]).length) return true;
+  if(Object.keys(profile||{}).length||(auditRuns||[]).length) return true;
+}catch(e){} return false; }
 function applySampleData(){
-  store.set("snapshot",{answers,actions,history,logs,checklists,profile,auditDone,drivers,vehicles,locations,trainingMatrix,sdsList,savedLabels,auditRuns});
+  if(!store.get("snapshot",null)){ store.set("snapshot",{answers,actions,history,logs,checklists,profile,auditDone,drivers,vehicles,locations,trainingMatrix,sdsList,savedLabels,auditRuns}); }
   const A={osha:{},fmcsa:{},cottage:{}};
   // OSHA: fully answered, several "no"s
   const oNo={"osha-hazcom-1":1,"osha-ppe-0":1,"osha-record-1":1,"osha-training-2":1,"osha-eap-3":1,"osha-wws-4":1,"osha-electrical-2":1};
@@ -1450,9 +1462,14 @@ function applySampleData(){
   profile={name:"Sample Company LLC",contact:"Sam Owner",addr:"100 Demo Ave, Bloomington, IN 47401",phone:"(555) 010-2030"}; saveProfile();
 }
 function toggleSample(){
-  sndClick(); sampleOn=!sampleOn;
+  sndClick();
+  if(!sampleOn && hasUserData() && !store.get("snapshot",null)){
+    if(!confirm(D("Replace your current data with sample data? Your own data is kept and will be restored when you turn sample data off.",
+      "¿Reemplazar sus datos actuales con datos de ejemplo? Sus datos se conservan y se restaurarán cuando desactive los datos de ejemplo."))) return;
+  }
+  sampleOn=!sampleOn; store.set("sampleOn",sampleOn);
   $("#sampleBtn").setAttribute("aria-pressed",sampleOn?"true":"false");
-  if(sampleOn){ applySampleData(); toast(D("Sample data loaded","Datos de ejemplo cargados")); }
+  if(sampleOn){ applySampleData(); toast(D("Sample data loaded — toggle the flask again to restore your data","Datos de ejemplo cargados — toque el matraz de nuevo para restaurar sus datos")); }
   else { const s=store.get("snapshot",null);
     if(s){ answers=s.answers;actions=s.actions;history=s.history;logs=s.logs;checklists=s.checklists;profile=s.profile;auditDone=s.auditDone;
       drivers=s.drivers||[];vehicles=s.vehicles||[];locations=s.locations||[];trainingMatrix=s.trainingMatrix||[];
@@ -1467,6 +1484,7 @@ function toggleSample(){
 
 /* ---- header buttons ---- */
 $("#sampleBtn").addEventListener("click",toggleSample);
+$("#sampleBtn").setAttribute("aria-pressed",sampleOn?"true":"false");
 $("#themeBtn").addEventListener("click",()=>{ sndClick();
   applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"); });
 $("#soundBtn").addEventListener("click",function(){ soundOn=!soundOn; store.set("sound",soundOn);
@@ -1678,10 +1696,11 @@ const STR={
  dashboard:{en:"Compliance Dashboard",es:"Panel de cumplimiento"},
  audits:{en:"Self-Audits",es:"Autoauditorías"}, fleet:{en:"Fleet",es:"Flota"}, documents:{en:"Documents",es:"Documentos"},
  labels:{en:"Labels",es:"Etiquetas"}, logs:{en:"Logs",es:"Registros"}, checklists:{en:"Checklists",es:"Listas"}, settings:{en:"Settings",es:"Ajustes"},
- findings:{en:"Open Findings by Category",es:"Hallazgos abiertos por categoría"},
+ findings:{en:"Open Issues by Category",es:"Hallazgos abiertos por categoría"},
+ incidents:{en:"Incidents per Month",es:"Incidentes por mes"},
  trend:{en:"Score History",es:"Historial de puntajes"},
  renewals:{en:"Renewal Alerts",es:"Alertas de vencimiento"},
- nudges:{en:"Smart Nudges",es:"Avisos inteligentes"},
+ nudges:{en:"Action items",es:"Avisos inteligentes"},
  logsH:{en:"Logs & Corrective Actions",es:"Registros y acciones correctivas"},
  logActions:{en:"Corrective Actions",es:"Acciones correctivas"},
  logInjury:{en:"Injury / Illness",es:"Lesiones / Enfermedades"},
@@ -1704,10 +1723,10 @@ const STR={
  pfState:{en:"State (adjusts label disclaimers & state-plan notices)",es:"Estado (ajusta advertencias de etiquetas y avisos)"},
  pfUsdot:{en:"USDOT # (optional, for FMCSA documents)",es:"USDOT # (opcional, para documentos FMCSA)"},
  dataMgmt:{en:"Data Management",es:"Gestión de datos"},
- exportJson:{en:"Export JSON",es:"Exportar JSON"},
- importJson:{en:"Import JSON",es:"Importar JSON"},
+ exportJson:{en:"Export backup file",es:"Exportar archivo de respaldo"},
+ importJson:{en:"Import backup file",es:"Importar archivo de respaldo"},
  resetAll:{en:"Reset All Data",es:"Borrar todos los datos"},
- dataNote:{en:"All data stays in this browser (localStorage). Export regularly as a backup.",es:"Todos los datos permanecen en este navegador (localStorage). Exporte regularmente como respaldo."},
+ dataNote:{en:"All data stays on this device, in this browser. Export a backup file regularly.",es:"Todos los datos permanecen en este dispositivo, en este navegador. Exporte un archivo de respaldo regularmente."},
  aboutH:{en:"About",es:"Acerca de"},
  aboutP:{en:"AuditReady helps small businesses run structured compliance self-audits, track corrective actions, keep required logs, and generate tailored program documents. Everything runs locally in your browser — no account, no uploads.",
    es:"AuditReady ayuda a pequeñas empresas a realizar autoauditorías de cumplimiento estructuradas, dar seguimiento a acciones correctivas, mantener registros requeridos y generar documentos de programa personalizados. Todo funciona localmente en tu navegador — sin cuenta, sin subidas."},
@@ -1715,16 +1734,18 @@ const STR={
  footerNote:{en:"AuditReady is a self-assessment aid — <strong>not legal advice</strong>. Consult a qualified professional before acting on results.",
    es:"AuditReady es una ayuda de autoevaluación — <strong>no es asesoría legal</strong>. Consulte a un profesional calificado antes de actuar según los resultados."},
  auditsH:{en:"Self-Audits",es:"Autoauditorías"},
+ auditsSub:{en:"Question-by-question compliance reviews — answer every question, then generate your corrective-action plan and documents. For quick walk-through task lists, use the Inspection Checklists tab.",es:"Revisiones de cumplimiento pregunta por pregunta — responda todo y genere su plan de acciones correctivas y documentos. Para listas rápidas de tareas, use la pestaña Listas de verificación."},
  fleetH:{en:"Fleet — Drivers, Vehicles & Renewals",es:"Flota — Conductores, vehículos y vencimientos"},
  labelsH:{en:"Cottage Food Label Generator",es:"Generador de etiquetas de comida casera"},
- labelsSub:{en:"Deterministic labels: product name, ingredients by weight, allergens, net weight, and your state's required disclaimer line. Uses the state selected in Settings.",
-   es:"Etiquetas deterministas: nombre del producto, ingredientes por peso, alérgenos, peso neto y la línea de advertencia requerida por tu estado. Usa el estado seleccionado en Ajustes."},
+ labelsSub:{en:"Complete labels: product name, ingredients by weight, allergens, net weight, and your state's required disclaimer line. Uses the state selected in Settings.",
+   es:"Etiquetas completas: nombre del producto, ingredientes por peso, alérgenos, peso neto y la línea de advertencia requerida por tu estado. Usa el estado seleccionado en Ajustes."},
  docsH:{en:"Document Generator",es:"Generador de documentos"},
  docsSub:{en:"Documents are generated from your audit answers. Every document carries the not-legal-advice disclaimer. Use <strong>Print / Save PDF</strong> for a clean printout.",
    es:"Los documentos se generan a partir de tus respuestas de auditoría. Cada documento lleva el aviso de no-asesoría-legal. Usa <strong>Imprimir / Guardar PDF</strong> para una impresión limpia."},
  checkH:{en:"Inspection Checklists",es:"Listas de verificación"},
- fltTrack:{en:"Track",es:"Tema"},
- fltAll:{en:"All tracks",es:"Todos los temas"},
+ checkSub:{en:"Short task lists for walk-throughs and vehicle inspections. For scored compliance reviews, use the Self-Audits tab.",es:"Listas cortas para recorridos e inspecciones vehiculares. Para revisiones de cumplimiento con puntaje, use la pestaña Autoauditorías."},
+ fltTrack:{en:"Audit type",es:"Tipo de auditoría"},
+ fltAll:{en:"All audit types",es:"Todos los tipos de auditoría"},
  fltCottage:{en:"Cottage Food",es:"Comida casera"}};
 const T=k=> (STR[k]&&STR[k][lang])||(STR[k]&&STR[k].en)||k;
 function applyLang(){
@@ -1752,6 +1773,9 @@ function daysUntil(d){
   return Math.round((x-t)/86400000);
 }
 function fmtD(d){ if(!d) return "—"; const [y,m,dd]=d.split("-"); return m+"/"+dd+"/"+y; }
+const saneDate=v=>{ if(!v) return true; const y=parseInt(v.slice(0,4),10); const cy=new Date().getFullYear(); return y>=1900&&y<=cy+1; };
+const badDateMsg=()=>D("Please enter a realistic date (1900\u2013"+(new Date().getFullYear()+1)+")","Ingrese una fecha realista (1900\u2013"+(new Date().getFullYear()+1)+")");
+const rItem=k=>({cdl:"CDL",med:D("Medical","M\u00e9dica"),mvr:"MVR",reg:D("Registration","Registro"),ins:D("Insurance","Seguro"),permit:D("Permit","Permiso")}[k]||k);
 function renewClass(days){
   if(days<0) return "od"; if(days<=7) return "u7"; if(days<=30) return "u30"; if(days<=60) return "u60"; return "ok";
 }
@@ -1759,7 +1783,7 @@ function renewColor(days){
   if(days<0) return "#d64545"; if(days<=7) return "#d64545"; if(days<=30) return "#e07b1f"; if(days<=60) return "#e8b71a"; return "#2f9e5f";
 }
 function renewLabel(days){
-  if(days<0) return lang==="es"?"Vencido hace "+(-days)+" d":"Overdue "+(-days)+"d";
+  if(days<0) return lang==="es"?"Vencido hace "+(-days)+" días":"Overdue by "+(-days)+" days";
   if(days===0) return lang==="es"?"Vence hoy":"Due today";
   if(days<=60) return lang==="es"?"Vence en "+days+" d":"Due in "+days+"d";
   return fmtD(null)||"";
@@ -1807,12 +1831,12 @@ function openFleetModal(kind,id){
 function fleetRow(kind,rec){
   const isD=kind==="driver", isV=kind==="vehicle";
   const name=isD?rec.name:isV?rec.unit:rec.name;
-  const dates=isD?[["CDL",rec.cdlExp],["Med",rec.medExp],["MVR",rec.mvrExp]]
-    :isV?[["Reg",rec.regExp],["Ins",rec.insExp]]:[["Permit",rec.permitExp]];
+  const dates=isD?[["cdl",rec.cdlExp],["med",rec.medExp],["mvr",rec.mvrExp]]
+    :isV?[["reg",rec.regExp],["ins",rec.insExp]]:[["permit",rec.permitExp]];
   let chips=dates.map(([k,d])=>{
-    if(!d) return '<span class="chip ok dim">'+k+' —</span>';
+    if(!d) return '<span class="chip ok dim">'+rItem(k)+' —</span>';
     const n=daysUntil(d), c=renewClass(n);
-    return '<span class="chip '+c+'">'+k+' '+fmtD(d)+'</span>';
+    return '<span class="chip '+c+'">'+rItem(k)+' '+fmtD(d)+'</span>';
   }).join("");
   return '<div class="fleet-row"><div class="fleet-row-main"><strong>'+esc(name)+'</strong>'+
     (rec.address?'<span class="small dim"> '+esc(rec.address)+'</span>':"")+
@@ -1823,9 +1847,9 @@ function fleetRow(kind,rec){
 }
 function renewalItems(){
   const out=[];
-  drivers.forEach(d=>{[["CDL",d.cdlExp],["Medical",d.medExp],["MVR",d.mvrExp]].forEach(([k,v])=>{ if(v) out.push({kind:"driver",ref:d.id,name:d.name,item:k,date:v}); });});
-  vehicles.forEach(v=>{[["Registration",v.regExp],["Insurance",v.insExp]].forEach(([k,vv])=>{ if(vv) out.push({kind:"vehicle",ref:v.id,name:v.unit,item:k,date:vv}); });});
-  locations.forEach(l=>{ if(l.permitExp) out.push({kind:"location",ref:l.id,name:l.name,item:"Permit",date:l.permitExp}); });
+  drivers.forEach(d=>{[["cdl",d.cdlExp],["med",d.medExp],["mvr",d.mvrExp]].forEach(([k,v])=>{ if(v) out.push({kind:"driver",ref:d.id,name:d.name,item:k,date:v}); });});
+  vehicles.forEach(v=>{[["reg",v.regExp],["ins",v.insExp]].forEach(([k,vv])=>{ if(vv) out.push({kind:"vehicle",ref:v.id,name:v.unit,item:k,date:vv}); });});
+  locations.forEach(l=>{ if(l.permitExp) out.push({kind:"location",ref:l.id,name:l.name,item:"permit",date:l.permitExp}); });
   out.forEach(r=>{ r.days=daysUntil(r.date); r.cls=renewClass(r.days); });
   return out.sort((a,b)=>a.days-b.days);
 }
@@ -1875,9 +1899,9 @@ function renderTimeline(){
   items.forEach((r,i)=>{
     const y=(i%2===0)?30:66; // stagger two lanes, clear of bottom tick labels
     const c=renewColor(r.days);
-    const label=esc(r.name+" · "+r.item)+" — "+(r.days<0?renewLabel(r.days):fmtD(r.date));
+    const label=esc(r.name+" · "+rItem(r.item))+" — "+(r.days<0?renewLabel(r.days):fmtD(r.date));
     dots+='<button class="tl-dot" style="left:'+xpos(r.days)+';top:'+y+'px;background:'+c+'" title="'+label+'" aria-label="'+label+'" data-k="'+r.kind+'" data-ref="'+r.ref+'">'+
-      '<span class="tl-pop">'+esc(r.name)+'<br><span class="dim">'+esc(r.item)+' · '+(r.days<0?renewLabel(r.days):fmtD(r.date))+'</span></span></button>';
+      '<span class="tl-pop">'+esc(r.name)+'<br><span class="dim">'+esc(rItem(r.item))+' · '+(r.days<0?renewLabel(r.days):fmtD(r.date))+'</span></span></button>';
   });
   el.innerHTML='<div class="tl-wrap"><div class="tl-track">'+ticks+dots+'</div>'+
     '<div class="tl-legend">'+
@@ -1887,7 +1911,7 @@ function renderTimeline(){
       '<span><i style="background:#2f9e5f"></i>'+(lang==="es"?"Al día":"Current")+'</span></div>'+
     '<div class="tl-list">'+items.slice(0,12).map(r=>
       '<button class="tl-item" data-k="'+r.kind+'" data-ref="'+r.ref+'"><span class="chip '+r.cls+'">'+(r.days<0?renewLabel(r.days):r.days+"d")+'</span>'+
-      '<strong>'+esc(r.name)+'</strong><span class="dim small">'+esc(r.item)+' · '+fmtD(r.date)+'</span></button>').join("")+'</div></div>';
+      '<strong>'+esc(r.name)+'</strong><span class="dim small">'+esc(rItem(r.item))+' · '+fmtD(r.date)+'</span></button>').join("")+'</div></div>';
   el.querySelectorAll("[data-ref]").forEach(b=>b.addEventListener("click",()=>{
     sndClick(); openFleetModal(b.dataset.k,b.dataset.ref);
   }));
@@ -1920,28 +1944,28 @@ table.hm td.emp{font-size:16px;font-weight:700;padding:6px 10px;white-space:nowr
 .hm-cell{display:block;width:100%;min-height:52px;border-radius:10px;border:3px solid transparent;cursor:pointer;font-size:15px;font-weight:700;color:#fff;padding:4px 6px;line-height:1.25}
 .hm-cell.cur{background:#2f9e5f}.hm-cell.exp{background:#d9930d}.hm-cell.ovd{background:#d64545}.hm-cell.miss{background:#9aa1ab}
 .hm-cell.selected{border-color:var(--text);outline:3px solid var(--text);outline-offset:2px;transform:translateY(-2px)}
-.hm-cell small{display:block;font-size:13px;font-weight:600;color:#fff;opacity:.92}
+.hm-cell small{display:block;font-size:15px;font-weight:600;color:#fff;opacity:.92}
 .hm-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;margin:4px 0 2px}
 .hm-legend i{display:inline-block;width:18px;height:18px;border-radius:5px;margin-right:6px;vertical-align:-3px}
 /* ---- progress rings ---- */
 .ring-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
 .iring{display:flex;flex-direction:column;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:6px;border-radius:10px;min-width:74px}
 .iring:hover{background:var(--surface2)}
-.iring-cap{font-size:15px;font-weight:600;color:var(--muted);text-align:center;line-height:1.2;max-width:86px}
+.iring-cap{font-size:15px;font-weight:600;color:var(--muted);text-align:center;line-height:1.25;max-width:96px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-word}
 .iring-pct{font-size:15px;font-weight:800;color:var(--text)}
 /* ---- incidents mini bars ---- */
 .inc-bars{display:flex;align-items:flex-end;gap:8px;height:170px;padding:8px 4px 0}
 .inc-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;min-width:0;background:none;border:none;cursor:pointer;padding:0}
 .inc-bar .col{width:100%;max-width:44px;border-radius:6px 6px 0 0;background:var(--accent,#4d8dff);transition:transform .12s}
 .inc-bar .cnt{font-size:15px;font-weight:800;color:var(--text)}
-.inc-bar .mo{font-size:14px;color:var(--muted);white-space:nowrap}
+.inc-bar .mo{font-size:15px;color:var(--muted);white-space:nowrap}
 .inc-bar.zero .col{background:var(--border)}
 .inc-bar.selected .col{transform:translateY(-6px);outline:3px solid var(--text);outline-offset:2px}
 /* ---- timeline (density: full-bleed track) ---- */
 .tl-wrap{margin:6px 0 4px}
 .tl-track{position:relative;height:120px;background:var(--surface2);border-radius:14px;border:1px solid var(--border);overflow:hidden}
 .tl-tick{position:absolute;top:0;bottom:0;border-left:1px dashed var(--border);pointer-events:none}
-.tl-tick span{position:absolute;bottom:6px;left:6px;font-size:14px;color:var(--muted);font-weight:700}
+.tl-tick span{position:absolute;bottom:6px;left:6px;font-size:15px;color:var(--muted);font-weight:700}
 .tl-tick span.last{left:auto;right:6px}
 .tl-dot{position:absolute;width:30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);cursor:pointer;transform:translate(-50%,-50%)}
 .tl-dot:hover,.tl-dot:focus-visible{transform:translate(-50%,-50%) scale(1.25);z-index:5}
@@ -2013,7 +2037,7 @@ function renderIncChart(){
 const _hcss=document.createElement("style");
 _hcss.textContent=`
 .badge-all{background:var(--warn-soft);color:var(--warn)}
-.rec-badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:14px;font-weight:800;white-space:nowrap}
+.rec-badge{display:inline-block;padding:4px 12px;border-radius:999px;font-size:15px;font-weight:800;white-space:nowrap}
 .rec-yes{background:var(--bad-soft);color:var(--bad);border:1px solid var(--bad)}
 .rec-no{background:var(--good-soft);color:var(--good);border:1px solid var(--good)}
 .rec-unsure{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn)}
@@ -2063,7 +2087,7 @@ function previewLabel(){
     (d.permit?'<p>Permit # '+esc(d.permit)+'</p>':"")+
     (d.bestby?'<p>Best by: '+esc(fmtDate(d.bestby))+'</p>':"")+
     '<p class="disc">'+esc(st.text)+'</p>'+
-    (st.verified?'':'<p class="small" style="font-size:13px">Generic disclaimer — verify your state\'s exact required wording in Settings.</p>')+
+    (st.verified?'':'<p class="small" style="font-size:15px">Generic disclaimer — verify your state\'s exact required wording in Settings.</p>')+
     '</div>';
   $("#labelPreview").innerHTML=curLabelHTML;
   $("#lb-print").disabled=false;
@@ -2112,6 +2136,7 @@ function renderSds(){
     '<div style="display:flex;gap:10px"><button class="btn" id="m-save">'+D("Save","Guardar")+'</button><button class="btn secondary" id="m-cancel">'+D("Cancel","Cancelar")+'</button></div>');
     $("#m-cancel").addEventListener("click",closeModal);
     $("#m-save").addEventListener("click",()=>{ const p=$("#m-text").value.trim(); if(!p){toast(D("Enter a product name","Ingrese el nombre"));return;}
+      if(!saneDate($("#m-date").value)){ toast(badDateMsg()); return; }
       sdsList.push({id:uid(),product:p,mfr:$("#m-mfr").value.trim(),loc:$("#m-where").value.trim(),updated:$("#m-date").value||todayISO()});
       saveSds(); closeModal(); sndOk(); renderSds(); });
   });
@@ -2131,7 +2156,7 @@ function renderRenewals(){
   card.classList.remove("hidden");
   box.innerHTML=items.slice(0,6).map(r=>
     '<div class="fleet-row"><span class="chip '+r.cls+'">'+esc(renewLabel(r.days))+'</span>'+
-    '<div class="fleet-row-main"><strong>'+esc(r.name)+'</strong> <span class="small dim">'+esc(r.item)+' · '+esc(fmtD(r.date))+'</span></div>'+
+    '<div class="fleet-row-main"><strong>'+esc(r.name)+'</strong> <span class="small dim">'+esc(rItem(r.item))+' · '+esc(fmtD(r.date))+'</span></div>'+
     '<div class="fleet-row-actions"><button class="btn secondary small" data-rk="'+r.kind+'" data-rr="'+r.ref+'">'+D("View","Ver")+'</button></div></div>').join("")+
     (items.length>6?'<p class="small">+'+(items.length-6)+(lang==="es"?" más — ver la pestaña Flota.":" more — see the Fleet tab.")+'</p>':"");
   box.querySelectorAll("[data-rr]").forEach(b=>b.addEventListener("click",()=>{ sndClick(); goto("fleet"); openFleetModal(b.dataset.rk,b.dataset.rr); }));
@@ -2154,7 +2179,7 @@ function renderNudges(){
   if(od) out.push({bad:true,tx:"⏰ "+od+(es?" acciones correctivas vencidas.":" overdue corrective actions.")});
   let exp=0; trainingMatrix.forEach(r=>{ const s=trainingStatus(r.date); if(s==="ovd"||s==="exp") exp++; });
   if(exp) out.push({bad:true,tx:"🎓 "+exp+(es?" capacitaciones vencidas o por vencer.":" trainings expired or expiring soon.")});
-  [["injury","Injury / Illness"],["training","Safety Training"],["dvir","Vehicle Inspection"]].forEach(([k,label])=>{
+  [["injury",D("Injury / Illness","Lesiones / Enfermedades")],["training",D("Safety Training","Capacitaci\u00f3n de seguridad")],["dvir",D("Vehicle Inspection","Inspecci\u00f3n vehicular")]].forEach(([k,label])=>{
     const arr=logs[k]||[];
     if(arr.length&&!reviews[k]) out.push({bad:false,tx:"👀 "+esc(label)+(es?" sin marcar como revisado — los auditores preguntan <em>¿quién revisa estos registros y cuándo?</em>":" log never marked reviewed — auditors ask <em>'who checks these records, and when?'</em>")});
   });
@@ -2295,12 +2320,12 @@ function renderInjury(){
   const rows=logs.injury.map((e,i)=>{
     const kind=e.kind==="nearmiss"?D("Near miss","Casi-accidente"):e.kind==="illness"?D("Illness","Enfermedad"):D("Injury","Lesión");
     const photo=e.photo?'<img class="photo-thumb" src="'+e.photo+'" data-ph="'+i+'" alt="'+D("Incident photo","Foto del incidente")+'">':"—";
-    return "<tr><td>"+fmtDate(e.date)+"</td><td>"+esc(kind)+"</td><td>"+esc(e.where)+"</td><td>"+esc(e.job)+"</td><td>"+esc(e.desc)+"</td><td>"+recBadge(e)+"</td><td>"+photo+"</td>"+
+    return "<tr><td>"+fmtDate(e.date)+"</td><td>"+esc(kind)+"</td><td>"+esc(e.type||"\u2014")+"</td><td>"+esc(e.where)+"</td><td>"+esc(e.job)+"</td><td>"+esc(e.desc)+"</td><td>"+recBadge(e)+"</td><td>"+photo+"</td>"+
     "<td><button class='btn small danger' data-i='"+i+"'>"+D("Delete","Eliminar")+"</button></td></tr>"; }).join("");
   $("#log-injury").innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+
     "<h3 style='margin:0'>"+D("Injury / Illness / Near-Miss Log","Registro de lesiones / enfermedades / casi-accidentes")+" ("+logs.injury.length+")</h3><button class='btn small' id='addInjury'>＋ "+D("Log incident","Registrar incidente")+"</button></div>"+
     '<p class="small" style="margin-bottom:12px">'+D("OSHA 300-style log. Use the recordability helper when logging to screen whether an injury belongs on the 300 log. Near-misses can carry a photo.","Registro estilo OSHA 300. Use la ayuda de registrabilidad al registrar para saber si una lesión va en el registro 300. Los casi-accidentes pueden llevar foto.")+'</p>'+
-    (logs.injury.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Type","Tipo")+'</th><th>'+D("Where","Dónde")+'</th><th>'+D("Job title","Puesto")+'</th><th>'+D("Description","Descripción")+'</th><th>'+D("Recordable","Registrable")+'</th><th>'+D("Photo","Foto")+'</th><th></th></tr>'+rows+"</table></div>"
+    (logs.injury.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Kind","Clase")+'</th><th>'+D("Incident type","Tipo de incidente")+'</th><th>'+D("Where","Dónde")+'</th><th>'+D("Job title","Puesto")+'</th><th>'+D("Description","Descripción")+'</th><th>'+D("Recordable","Registrable")+'</th><th>'+D("Photo","Foto")+'</th><th></th></tr>'+rows+"</table></div>"
     :'<div class="empty">'+D("No incidents logged.","Sin incidentes registrados.")+'</div>')+"</div>";
   $("#addInjury").addEventListener("click",()=>{ sndClick(); pendingRec=null; injuryDraft=null; openInjuryModal(); });
   $$("#log-injury [data-i]").forEach(b=>b.addEventListener("click",()=>{ if(confirm(D("Delete this entry?","¿Eliminar este registro?"))){ logs.injury.splice(+b.dataset.i,1); saveLogs(); renderInjury(); } }));
@@ -2453,14 +2478,14 @@ function genMasterDoc(){
     :D("<p>No open corrective actions.</p>","<p>Sin acciones correctivas abiertas.</p>");
   h+="<h2>4. "+D("Logs summary","Resumen de registros")+"</h2><ul>"+
     "<li>"+D("Injury / illness / near-miss entries: ","Entradas de lesiones / enfermedades / casi-accidentes: ")+(logs.injury||[]).length+"</li>"+
-    "<li>"+D("Training sessions logged: ","Sesiones de capacitación registradas: ")+(logs.training||[]).length+"</li>"+
+    "<li>"+D("Training sessions logged: ","Sesiones de capacitación registradas: ")+(logs.training||[]).length+" ("+D("session log","registro de sesiones")+") · "+trainingMatrix.length+" ("+D("training matrix records","registros en la matriz")+")</li>"+
     "<li>"+D("Vehicle inspections logged: ","Inspecciones de vehículos registradas: ")+(logs.dvir||[]).length+"</li>"+
     "<li>"+D("Chemicals in SDS inventory: ","Químicos en inventario SDS: ")+sdsList.length+"</li>"+
     "<li>"+D("Drivers on file: ","Conductores registrados: ")+drivers.length+" · "+D("Vehicles: ","Vehículos: ")+vehicles.length+"</li></ul>";
   h+="<h2>5. "+D("Upcoming renewals","Próximos vencimientos")+"</h2>";
   const ren=renewalItems().filter(r=>r.days<=60);
   h+=ren.length?'<table class="log"><tr><th>'+D("Name","Nombre")+'</th><th>'+D("Item","Concepto")+'</th><th>'+D("Date","Fecha")+'</th><th>'+D("Status","Estado")+'</th></tr>'+
-    ren.map(r=>"<tr><td>"+esc(r.name)+"</td><td>"+esc(r.item)+"</td><td>"+esc(fmtD(r.date))+"</td><td>"+esc(renewLabel(r.days))+"</td></tr>").join("")+"</table>"
+    ren.map(r=>"<tr><td>"+esc(r.name)+"</td><td>"+esc(rItem(r.item))+"</td><td>"+esc(fmtD(r.date))+"</td><td>"+esc(renewLabel(r.days))+"</td></tr>").join("")+"</table>"
     :D("<p>No renewals due within 60 days.</p>","<p>Sin vencimientos en los próximos 60 días.</p>");
   h+=docFoot();
   return h;
@@ -2497,6 +2522,51 @@ function genNewEntrantDoc(){
      [D("Accident records","Registros de accidentes"),D("3 years","3 años")],
      [D("Drug & alcohol records","Registros de drogas y alcohol"),D("1–5 years by type","1–5 años según tipo")]
     ].map(r=>"<tr><td>"+esc(r[0])+"</td><td>"+esc(r[1])+"</td></tr>").join("")+"</table>";
+  h+=docFoot();
+  return h;
+}
+
+/* ---- 4. 48-Hour Audit Response Pack: everything an auditor asks for, one export ---- */
+function gen48HourDoc(){
+  let h=docHead(D("48-Hour Audit Response Pack","Paquete de respuesta de auditoría en 48 horas"),
+    D("Every record an auditor typically demands \u2014 assembled for production within 48 hours","Todos los registros que un auditor suele exigir \u2014 reunidos para entrega en 48 horas"));
+  h+=D("<p>Safety investigators can require a motor carrier to produce supporting records within 48 hours of the request. This pack assembles every record AuditReady holds, in the order an auditor typically asks for them. Print it or save it as PDF and keep it with your compliance binder.</p>",
+       "<p>Los investigadores pueden exigir que un transportista presente sus registros dentro de las 48 horas siguientes a la solicitud. Este paquete re\u00fane todos los registros de AuditReady en el orden en que suelen pedirse. Impr\u00edmalo o gu\u00e1rdelo como PDF junto a su carpeta de cumplimiento.</p>");
+  const nDrv=drivers.length, nVeh=vehicles.length, nDvir=(logs.dvir||[]).length,
+        nInj=(logs.injury||[]).length, nTrL=(logs.training||[]).length,
+        nAct=actions.length, nOpen=actions.filter(a=>actionStatus(a)!=="done").length;
+  const chk=[
+    [D("Driver roster + qualification file summary","Lista de conductores + resumen de calificaci\u00f3n"),nDrv+" "+D("drivers","conductores")],
+    [D("Vehicle list + inspection records (DVIR)","Veh\u00edculos + registros de inspecci\u00f3n (DVIR)"),nVeh+" "+D("vehicles","veh\u00edculos")+" \u00b7 "+nDvir+" "+D("inspections","inspecciones")],
+    [D("Accident / incident register","Registro de accidentes / incidentes"),nInj+" "+D("entries","entradas")],
+    [D("Training records","Registros de capacitaci\u00f3n"),nTrL+" "+D("sessions logged","sesiones registradas")],
+    [D("Corrective-action log","Registro de acciones correctivas"),nAct+" "+D("actions","acciones")+" ("+nOpen+" "+D("open","abiertas")+")"],
+    [D("Self-audit scores by area","Puntajes de autoauditor\u00eda por \u00e1rea"),Object.keys(TRACKS).length+" "+D("tracks","\u00e1reas")]
+  ];
+  h+="<h2>"+D("Production checklist \u2014 hand these over first","Lista de entrega \u2014 entregue esto primero")+"</h2><ol class='doc-toc'>"+
+    chk.map(c=>"<li>\u2610 <strong>"+esc(c[0])+"</strong> \u2014 "+esc(c[1])+"</li>").join("")+"</ol>";
+  h+="<h2>1. "+D("Drivers & qualification files","Conductores y archivos de calificaci\u00f3n")+"</h2>";
+  h+=nDrv?'<table class="log"><tr><th>'+D("Driver","Conductor")+'</th><th>'+D("CDL expires","CDL vence")+'</th><th>'+D("Medical card expires","Tarjeta m\u00e9dica vence")+'</th><th>'+D("MVR review due","Revisi\u00f3n MVR")+'</th></tr>'+
+    drivers.map(d=>"<tr><td>"+esc(d.name)+"</td><td>"+esc(d.cdlExp?fmtDate(d.cdlExp):"\u2014")+"</td><td>"+esc(d.medExp?fmtDate(d.medExp):"\u2014")+"</td><td>"+esc(d.mvrExp?fmtDate(d.mvrExp):"\u2014")+"</td></tr>").join("")+"</table>"
+    :"<p>\u2610 "+D("No drivers on file \u2014 add them in the Fleet tab, then generate the Driver Qualification File Packet per driver.","Sin conductores registrados \u2014 agr\u00e9guelos en la pesta\u00f1a Flota y genere el Paquete de calificaci\u00f3n por conductor.")+"</p>";
+  h+="<h2>2. "+D("Vehicles & inspections","Veh\u00edculos e inspecciones")+"</h2>";
+  h+=nVeh?'<table class="log"><tr><th>'+D("Unit #","Unidad #")+'</th><th>'+D("Registration expires","Registro vence")+'</th><th>'+D("Insurance expires","Seguro vence")+'</th></tr>'+
+    vehicles.map(v=>"<tr><td>"+esc(v.unit||"\u2014")+"</td><td>"+esc(v.regExp?fmtDate(v.regExp):"\u2014")+"</td><td>"+esc(v.insExp?fmtDate(v.insExp):"\u2014")+"</td></tr>").join("")+"</table>"
+    :"<p>\u2610 "+D("No vehicles on file.","Sin veh\u00edculos registrados.")+"</p>";
+  h+="<p>"+D("DVIR inspections logged: ","Inspecciones DVIR registradas: ")+nDvir+"</p>";
+  h+="<h2>3. "+D("Self-audit scores by area","Puntajes de autoauditor\u00eda por \u00e1rea")+"</h2>"+
+    '<table class="log"><tr><th>'+D("Area","\u00c1rea")+'</th><th>'+D("Score","Puntaje")+'</th><th>'+D("Status","Estado")+'</th></tr>'+
+    Object.keys(TRACKS).map(t=>{ const s=trackScore(t).score; return "<tr><td>"+esc(TRACKS[t].name)+"</td><td><strong>"+(s==null?"\u2014":s+"%")+"</strong></td><td>"+esc(scoreWord(s))+"</td></tr>"; }).join("")+"</table>";
+  h+="<h2>4. "+D("Corrective-action log","Registro de acciones correctivas")+"</h2>";
+  h+=nAct?'<table class="log"><tr><th>'+D("Finding","Hallazgo")+'</th><th>'+D("Status","Estado")+'</th><th>'+D("Due","Vence")+'</th></tr>'+
+    actions.map(a=>"<tr><td>"+esc(a.text||a.question||"")+"</td><td>"+esc(actionStatus(a))+"</td><td>"+esc(a.due?fmtDate(a.due):"\u2014")+"</td></tr>").join("")+"</table>"
+    :"<p>"+D("No corrective actions \u2014 complete a self-audit to generate them.","Sin acciones correctivas \u2014 complete una autoauditor\u00eda para generarlas.")+"</p>";
+  h+="<h2>5. "+D("Accident / incident register","Registro de accidentes / incidentes")+"</h2>";
+  h+=nInj?'<table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Location","Ubicaci\u00f3n")+'</th><th>'+D("Type","Tipo")+'</th><th>'+D("Description","Descripci\u00f3n")+'</th></tr>'+
+    logs.injury.map(e=>"<tr><td>"+esc(fmtDate(e.date))+"</td><td>"+esc(e.where||"\u2014")+"</td><td>"+esc(e.type||"\u2014")+"</td><td>"+esc(e.desc||"\u2014")+"</td></tr>").join("")+"</table>"
+    :"<p>"+D("No incidents recorded.","Sin incidentes registrados.")+"</p>";
+  h+="<h2>6. "+D("Training records","Registros de capacitaci\u00f3n")+"</h2><p>"+
+    D("Training sessions logged: ","Sesiones de capacitaci\u00f3n registradas: ")+nTrL+" ("+D("session log","registro de sesiones")+") \u00b7 "+trainingMatrix.length+" ("+D("training matrix records","registros en la matriz")+")</p>";
   h+=docFoot();
   return h;
 }
@@ -2608,13 +2678,16 @@ Object.assign(DOCS,{
   fmcsaReport:{title:"FMCSA Mock-Audit Report",titleEs:"Informe de autoauditoría FMCSA",desc:"6-area scores with prioritized fix list.",descEs:"Puntajes de 6 áreas con lista priorizada.",gen:genFmcsaReportDoc,badge:"FMCSA",cls:"badge-fmcsa"},
   dvir:{title:"DVIR Inspection Template",titleEs:"Plantilla de inspección DVIR",desc:"Walk-around ordered, defect + repair signoff.",descEs:"En orden de inspección, con defectos y aprobación de reparación.",gen:genDvirDoc,badge:"FMCSA",cls:"badge-fmcsa"},
   master:{title:"Master Audit Report",titleEs:"Informe maestro de auditoría",desc:"One-click report across all tracks — scores, findings, actions.",descEs:"Informe de un clic de todas las áreas.",gen:genMasterDoc,badge:"ALL",cls:"badge-all"},
-  newentrant:{title:"New-Entrant Safety Audit Prep Pack",titleEs:"Paquete para nuevo entrante",desc:"Checklist + document bundle for new carriers.",descEs:"Lista + paquete documental para nuevos transportistas.",gen:genNewEntrantDoc,badge:"FMCSA",cls:"badge-fmcsa"}
+  newentrant:{title:"New-Entrant Safety Audit Prep Pack",titleEs:"Paquete para nuevo entrante",desc:"Checklist + document bundle for new carriers.",descEs:"Lista + paquete documental para nuevos transportistas.",gen:genNewEntrantDoc,badge:"FMCSA",cls:"badge-fmcsa"},
+  pack48:{title:"48-Hour Audit Response Pack",titleEs:"Paquete de respuesta en 48 horas",desc:"Everything an auditor asks for \u2014 one export, producible within 48 hours.",descEs:"Todo lo que pide un auditor \u2014 una exportaci\u00f3n, lista en 48 horas.",gen:gen48HourDoc,badge:"ALL",cls:"badge-all"}
 });
 /* override: doc picker supports badge/title per doc + ES */
 function renderDocPicker(){
   $("#docPicker").innerHTML=Object.keys(DOCS).map(k=>{
     const d=DOCS[k], es=lang==="es";
-    return '<button class="card track-card" data-doc="'+k+'"><span class="track-badge '+(d.cls||"badge-all")+'">'+esc(d.badge||"DOC")+'</span>'+
+    const _t=es&&d.titleEs?d.titleEs:d.title, _b=d.badge||"DOC";
+    const _badge=(_t.toLowerCase().indexOf(_b.toLowerCase())===0)?"":'<span class="track-badge '+(d.cls||"badge-all")+'">'+esc(_b)+'</span>';
+    return '<button class="card track-card" data-doc="'+k+'">'+_badge+
     "<h3>"+esc(es&&d.titleEs?d.titleEs:d.title)+"</h3><p class='small'>"+esc(es&&d.descEs?d.descEs:d.desc)+"</p></button>";
   }).join("");
   $$("#docPicker .track-card").forEach(c=>c.addEventListener("click",()=>{ sndClick(); previewDoc(c.dataset.doc); }));
