@@ -5,184 +5,321 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Security Deposit Deduction Calculator for Landlords | Glenerds</title>
 <meta name="description" content="Free security deposit deduction calculator: itemize deductions and compute the tenant refund instantly. Offline, no account, printable.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/security-deposit-deduction-calculator/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Free Security Deposit Deduction Calculator for Landlords | Glenerds">
-<meta property="og:description" content="Free security deposit deduction calculator: itemize deductions and compute the tenant refund instantly. Offline, no account, printable.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/security-deposit-deduction-calculator/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/security-deposit-deduction-calculator/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script><link rel="stylesheet" href="../../style.css">
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <style>
-/* deposit visual: refund-vs-deductions split + per-deduction bars */
-.sd-vis{display:grid;gap:8px;margin:14px 0 4px}
-.sd-split{display:flex;height:16px;border-radius:999px;overflow:hidden;background:var(--border)}
-.sd-seg-r{background:var(--accent)}
-.sd-seg-d{background:#c0392b}
-html[data-theme="dark"] .sd-seg-d{background:#e57373}
-.sd-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem}
-.sd-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
-.sd-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sd-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
-.sd-track{grid-column:1/-1;height:12px;border-radius:999px;background:var(--border);overflow:hidden}
-.sd-fill{height:100%;border-radius:999px;background:#c0392b}
-html[data-theme="dark"] .sd-fill{background:#e57373}
-/* ---------- sweep baseline: standard header cluster + sounds ---------- */
-.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:1.1rem}
-.g-store-btn{display:inline-block;padding:8px 15px;font-size:.88rem;font-weight:700;border-radius:999px;background:var(--accent);color:var(--accent-fg,#fff);text-decoration:none;white-space:nowrap}
-.g-store-btn:hover{filter:brightness(1.08)}
-#theme-toggle.theme-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin-left:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-#theme-toggle.theme-toggle svg{width:18px;height:18px}
-#theme-toggle.theme-toggle .ic-sun{display:none}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-sun{display:inline}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-moon{display:none}
-#sound-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-#sound-toggle:hover{color:var(--fg);border-color:var(--muted)}
-#theme-toggle.theme-toggle:focus-visible,#sound-toggle:focus-visible,#sample-toggle:focus-visible,.g-store-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* ---------- shared round icon-button class ---------- */
-.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-/* ---------- sample data toggle: icon-only flask button in header cluster ---------- */
-.sample-toggle{border:1px solid var(--border);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted)}
-.sample-toggle svg{width:18px;height:18px;flex:none}
-.sample-toggle:hover{color:var(--fg);border-color:var(--muted)}
-.sample-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
-@media (max-width:600px){
-header.site .wrap{flex-wrap:wrap;gap:.6rem}
-nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
-nav.main a{margin-left:.6rem}
-.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+:root{
+  --bg:#f6f4fb; --card:#ffffff; --ink:#1d1830; --muted:#5f5878; --border:#e2dcf2;
+  --accent:#7c3aed; --accent-ink:#6d28d9; --accent-soft:#ece4fd;
+  --deduct:#c2410c; --good:#15803d;
+  --shadow:0 2px 10px rgba(124,58,237,.08);
 }
-@media print{.g-header-actions{display:none!important}}
+html[data-theme="dark"]{
+  --bg:#12101a; --card:#1b1727; --ink:#efeaf9; --muted:#a89fc4; --border:#332b4d;
+  --accent:#a78bfa; --accent-ink:#c4b5fd; --accent-soft:#241d38;
+  --deduct:#fb923c; --good:#4ade80;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#8b5cf6,#4c1d95);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.5rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);min-height:44px}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+.add-row{display:grid;grid-template-columns:1fr 9rem auto;gap:.6rem;align-items:end;margin:.7rem 0}
+@media (max-width:520px){.add-row{grid-template-columns:1fr 1fr}.add-row .field:first-child{grid-column:1/-1}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.btn.plain{background:none;border:0;color:var(--accent-ink);font-size:15px;font-weight:600;
+  cursor:pointer;text-decoration:underline;padding:.4rem .2rem;min-height:44px}
+table.sd{width:100%;border-collapse:collapse;font-size:15px;margin:.6rem 0}
+table.sd th{text-align:left;color:var(--muted);font-size:15px;padding:.5rem .6rem;border-bottom:1px solid var(--border)}
+table.sd td{padding:.55rem .6rem;border-bottom:1px solid var(--border)}
+table.sd td.amt{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+table.sd tr.drow{cursor:pointer}
+table.sd tr.drow:hover td{background:var(--accent-soft)}
+table.sd tr.drow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+table.sd tr.drow.sel td{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+#sd-out{font-size:1.3rem;font-weight:800;margin:.9rem 0 .3rem;font-variant-numeric:tabular-nums}
+.sd-vis{display:grid;gap:10px;margin:14px 0 4px}
+.sd-split{display:flex;height:18px;border-radius:999px;overflow:hidden;background:var(--border)}
+.sd-seg-r{background:var(--accent);cursor:pointer;min-width:2px}
+.sd-seg-d{background:var(--deduct);cursor:pointer;min-width:2px}
+.sd-seg-r:hover,.sd-seg-d:hover{filter:brightness(1.12)}
+.sd-seg-r.sel,.sd-seg-d.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.sd-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:15px}
+.sd-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;cursor:pointer;
+  border-radius:10px;padding:.3rem .4rem}
+.sd-row:hover{background:var(--accent-soft)}
+.sd-row.sel{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+.sd-row:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.sd-name{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sd-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap;font-size:15px}
+.sd-track{grid-column:1/-1;height:12px;border-radius:999px;background:var(--border);overflow:hidden}
+.sd-fill{height:100%;border-radius:999px;background:var(--deduct)}
+#sd-detail{margin:.6rem 0;font-size:15px;color:var(--muted);min-height:1.2em}
+#sd-detail strong{color:var(--ink)}
+table.cmp{width:100%;border-collapse:collapse;font-size:15px;margin:.6rem 0}
+table.cmp td{padding:.55rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+table.cmp tr:first-child td{font-weight:800;background:var(--accent-soft)}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{
+  .actions,.cta-strip,.card.related,.prose,header.top,.no-print{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border:1px solid #ccc}
+}
 </style>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "How fast must I return the deposit?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It depends on your state \u2014 commonly 14 to 60 days. The deadline is strict in most states, and missing it can cost you multiples of the deposit, so calendar it at move-out."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I deduct for normal wear and tear?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. Wear and tear is the landlord\u2019s cost of doing business. Only damage beyond ordinary use, unpaid amounts, and agreed cleaning qualify."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What if deductions exceed the deposit?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The calculator flags it. You can bill the former tenant for the balance, but collecting is a separate battle \u2014 small claims court is the usual venue."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should I keep receipts?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes \u2014 every deduction should trace to an invoice or receipt. \u201cEstimated\u201d deductions without documentation are the first thing challenged."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about deadlines and full tenancy records?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "DepositDocket (Landlord Ledger) tracks each tenancy with deduction itemization, a return-deadline countdown, and professional printable tenant statements \u2014 built for landlords with 1\u201310 units, $14 one-time, offline."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"How fast must I return the deposit?","acceptedAnswer":{"@type":"Answer","text":"It depends on your state — commonly 14 to 60 days. The deadline is strict in most states, and missing it can cost you multiples of the deposit, so calendar it at move-out."}},
+{"@type":"Question","name":"Can I deduct for normal wear and tear?","acceptedAnswer":{"@type":"Answer","text":"No. Wear and tear is the landlord’s cost of doing business. Only damage beyond ordinary use, unpaid amounts, and agreed cleaning qualify."}},
+{"@type":"Question","name":"What if deductions exceed the deposit?","acceptedAnswer":{"@type":"Answer","text":"The calculator flags it. You can bill the former tenant for the balance, but collecting is a separate battle — small claims court is the usual venue."}},
+{"@type":"Question","name":"Should I keep receipts?","acceptedAnswer":{"@type":"Answer","text":"Yes — every deduction should trace to an invoice or receipt. “Estimated” deductions without documentation are the first thing challenged."}},
+{"@type":"Question","name":"What about deadlines and full tenancy records?","acceptedAnswer":{"@type":"Answer","text":"DepositDocket (Landlord Ledger) tracks each tenancy with deduction itemization, a return-deadline countdown, and professional printable tenant statements — built for landlords with 1–10 units, $14 one-time, offline."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<div class="g-header-actions">
-<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-<button id="theme-toggle" class="theme-toggle round-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
-<button id="sound-toggle" class="round-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
-</div>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Free Tools</a> &rsaquo; Deposit Deduction Calculator</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="Deposit Shield — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.8l7.5 2.9v5.6c0 4.6-3.2 7.9-7.5 9.4-4.3-1.5-7.5-4.8-7.5-9.4V5.7L12 2.8z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.8 11.8l2.3 2.3 4.2-4.6" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span><span class="bname">Deposit Shield</span><span class="bsub">Security deposit deduction calculator</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Free Security Deposit Deduction Calculator</h1>
-<p class="lead">How much of the deposit do you actually return? Itemize every deduction &mdash; cleaning, repairs,
-missing items &mdash; and this free calculator computes the tenant's refund instantly, with a clean itemized
-statement you can print. Built for small landlords who want deposit math that holds up if a tenant disputes
-it. Free, offline, no account.</p>
+<section class="hero">
+  <h1>Free Security Deposit Deduction Calculator</h1>
+  <p class="lead">How much of the deposit do you actually return? Itemize every deduction &mdash; cleaning, repairs, missing items &mdash; and this calculator computes the tenant&rsquo;s refund instantly, with a clean itemized statement you can print. Built for small landlords who want deposit math that holds up if a tenant disputes it. Offline, no account.</p>
+</section>
+
+<section class="card" role="region" aria-label="Security deposit deduction calculator">
+  <h2>Itemize deductions</h2>
+  <div class="field-row">
+    <label class="field">Deposit held ($)<input type="number" id="sd-dep" value="1500" min="0" step="0.01" inputmode="decimal" aria-label="Deposit amount"></label>
+    <label class="field">Tenant<input type="text" id="sd-tenant" placeholder="Tenant name" aria-label="Tenant name"></label>
+  </div>
+  <div class="add-row">
+    <label class="field">Deduction description<input type="text" id="sd-desc" placeholder="e.g. Carpet cleaning" aria-label="Deduction description"></label>
+    <label class="field">Amount ($)<input type="number" id="sd-amt" min="0" step="0.01" inputmode="decimal" placeholder="0.00" aria-label="Deduction amount"></label>
+    <button class="btn" id="sd-add" type="button">Add</button>
+  </div>
+  <table class="sd"><thead><tr><th>Deduction</th><th>Amount</th><th></th></tr></thead>
+  <tbody id="sd-rows"></tbody></table>
+  <div id="sd-detail" aria-live="polite"></div>
+  <p id="sd-out" aria-live="polite"></p>
+  <div id="sd-vis" class="sd-vis" role="img" aria-label="Deposit breakdown chart"></div>
+  <p class="no-print"><button class="btn ghost" id="sd-print" type="button">Print statement</button></p>
+  <p class="small">A record-keeping tool, not legal advice &mdash; deposit rules and deadlines vary by state.</p>
+</section>
+
+<section class="card">
+  <h2>Free vs. full version</h2>
+  <table class="cmp"><tbody>
+  <tr><td>Free tool on this page</td><td>DepositDocket (Landlord Ledger) &mdash; $14 one-time</td></tr>
+  <tr><td>One deposit, one statement</td><td>Per-tenancy deposit records for 1&ndash;10 units</td></tr>
+  <tr><td>No deadline tracking</td><td>Return-deadline tracking and full tenancy records in one offline file</td></tr>
+  </tbody></table>
+  <p><a class="btn" href="https://glenerds.gumroad.com/l/depositdocket">Get DepositDocket &mdash; $14 one-time</a></p>
+  <p class="small">No subscription. No account. The full tool runs offline in your browser, just like this one.</p>
+</section>
+
+<section class="prose">
+  <h2>How to document deposit deductions</h2>
+  <p>Every deduction needs three things: what it was for, what it cost, and proof it was necessary. Add each deduction above with a plain description &mdash; &ldquo;carpet cleaning, unit 4B&rdquo; beats &ldquo;cleaning&rdquo; &mdash; and the calculator keeps a running refund total. Print the itemized statement and send it with the refund: tenants who see organized paperwork rarely dispute it, and the ones who do will find you already prepared.</p>
+  <h2>What you can and cannot deduct</h2>
+  <p>Unpaid rent, damage beyond normal wear and tear, and cleaning to return the unit to its move-in condition are the standard categories. &ldquo;Normal wear and tear&rdquo; is where most fights start: faded paint after three years is wear; a hole in the wall is damage. Photos at move-in and move-out settle more disputes than any calculator &mdash; take them every time, timestamped.</p>
+  <h2>Worked example</h2>
+  <p>$1,500 deposit, three deductions: carpet cleaning $180, wall repair $220, missing keys $75. Total deductions <strong>$475</strong>, refund <strong>$1,025</strong>. Add one more $1,100 repair and the tool flags that deductions exceed the deposit by $75 &mdash; the kind of edge case that&rsquo;s easy to get wrong by hand.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>How fast must I return the deposit?</summary><p>It depends on your state &mdash; commonly 14 to 60 days. The deadline is strict in most states, and missing it can cost you multiples of the deposit, so calendar it at move-out.</p></details>
+  <details><summary>Can I deduct for normal wear and tear?</summary><p>No. Wear and tear is the landlord&rsquo;s cost of doing business. Only damage beyond ordinary use, unpaid amounts, and agreed cleaning qualify.</p></details>
+  <details><summary>What if deductions exceed the deposit?</summary><p>The calculator flags it. You can bill the former tenant for the balance, but collecting is a separate battle &mdash; small claims court is the usual venue.</p></details>
+  <details><summary>Should I keep receipts?</summary><p>Yes &mdash; every deduction should trace to an invoice or receipt. &ldquo;Estimated&rdquo; deductions without documentation are the first thing challenged.</p></details>
+  <details><summary>What about deadlines and full tenancy records?</summary><p><strong>DepositDocket</strong> (Landlord Ledger) tracks each tenancy with deduction itemization, a return-deadline countdown, and professional printable tenant statements &mdash; built for landlords with 1&ndash;10 units. <a href="https://glenerds.gumroad.com/l/depositdocket">$14 one-time, offline.</a></p></details>
+</section>
+
+<section class="card related">
+  <h2>Related tools</h2>
+  <p><strong>DepositDocket (Landlord Ledger)</strong> &mdash; $14 one-time: offline record-keeping for landlords with 1&ndash;10 units, per-tenancy deposit records and deadline tracking. <a class="btn" href="https://glenerds.gumroad.com/l/depositdocket">Get DepositDocket</a></p>
+  <p><strong>Move Budget Calculator</strong>: between tenants? Budget the turnover move. <a class="btn ghost" href="../moving-cost-calculator/">Open the tool</a></p>
+</section>
+
+<div class="cta-strip">
+  <h2>Need the full version?</h2>
+  <p><strong>DepositDocket</strong> (Landlord Ledger) is the offline record-keeping tool for landlords with 1&ndash;10 units: per-tenancy deposit records, deduction itemization, return-deadline countdowns, and printable tenant statements. $14 one-time, no subscription.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/depositdocket">Get DepositDocket &mdash; $14 one-time</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
-
-<div class="toolbox" role="region" aria-label="Security deposit deduction calculator">
-
-<label>Deposit held: $<input type="number" id="sd-dep" value="1500" min="0" step="0.01" style="width:7rem" aria-label="Deposit amount"></label>
-<label>Tenant: <input type="text" id="sd-tenant" placeholder="Tenant name" aria-label="Tenant name"></label>
-<button id="sd-add">Add deduction</button>
-<table><thead><tr><th>Deduction</th><th>Amount</th><th></th></tr></thead>
-<tbody id="sd-rows"></tbody></table>
-<p id="sd-out" style="font-size:1.15rem"></p>
-<div id="sd-vis" class="sd-vis" role="img" aria-label="Deposit breakdown chart"></div>
-<button id="sd-print">Print statement</button>
-<p class="small">A record-keeping tool, not legal advice &mdash; deposit rules and deadlines vary by state.</p>
-</div>
-<p class="small" style="margin-top:1rem"><strong>Managing more than one tenancy?</strong> <a href="../../products/depositdocket/index.html">DepositDocket</a> keeps per-tenancy deposit records with deadlines, offline.</p>
-<p class="small">Free tool by <a href="../../index.html">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Free vs. full version</h3>
-<table><tbody>
-<tr><td><strong>Free tool on this page</strong></td><td><strong>DepositDocket (Landlord Ledger) &mdash; $14 one-time</strong></td></tr>
-<tr><td>One deposit, one statement</td><td>Per-tenancy deposit records for 1&ndash;10 units</td></tr>
-<tr><td>No deadline tracking</td><td>Return-deadline tracking and full tenancy records in one offline file</td></tr>
-</tbody></table>
-<p><a class="btn" href="https://glenerds.gumroad.com/l/depositdocket">Get DepositDocket (Landlord Ledger) &mdash; $14 one-time</a></p>
-<p class="small">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
-</div>
-
-
-
-
-
+</main>
+<footer class="site">
+  <p><strong>Deposit Shield</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
+/* ---------- theme toggle ---------- */
+(function(){
+  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
+  var SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+  function paint(){var t=cur();root.setAttribute('data-theme',t);
+    if(btn){btn.innerHTML=t==='dark'?SUN:MOON;
+      var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
+      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
+  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();});}
+  paint();
+})();
+/* ---------- sounds (Web Audio oscillator, on user interaction only) ---------- */
+var Sound=(function(){
+  var KEY='security-deposit-deduction-calculator.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){if(on)tone(520,0.06,'sine',0.045);},
+    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
+    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
+    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);}
+  };
+})();
+(function(){
+  var btn=document.getElementById('sound-toggle');
+  var ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+  var OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
+  function paint(){var on=Sound.isOn();btn.innerHTML=on?ON:OFF;
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    var lbl='Sound: '+(on?'on':'off');btn.setAttribute('aria-label',lbl);btn.title='Toggle sounds ('+(on?'on':'off')+')';}
+  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
+  paint();
+})();
+/* ---------- deposit deduction calculator ---------- */
 (function(){
   var KEY='glenerds-deposit-v1';
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{dep:1500,tenant:'',items:[]}}catch(e){return{dep:1500,tenant:'',items:[]}}}
-  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
-  var data=load();
+  function blank(){return {dep:1500,tenant:'',items:[]};}
+  function load(){try{var d=JSON.parse(localStorage.getItem(KEY));return d&&typeof d==='object'?d:blank();}catch(e){return blank();}}
+  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+  var data=load(),sampleOn=false,sampleSnap=null,selId=null;
+  function $(id){return document.getElementById(id);}
   function money(n){return '$'+Number(n).toFixed(2);}
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+  function totals(){var t=0;data.items.forEach(function(it){t+=it.amt;});return t;}
+  function clearSel(){
+    selId=null;$('sd-detail').textContent='';
+    var els=document.querySelectorAll('#sd-rows tr.drow.sel,#sd-vis .sd-row.sel,#sd-vis .sd-seg-r.sel,#sd-vis .sd-seg-d.sel');
+    for(var i=0;i<els.length;i++)els[i].classList.remove('sel');
+  }
+  function spot(txt,els){
+    clearSel();
+    if(!txt){Sound.click();return;}
+    Sound.select();
+    $('sd-detail').innerHTML=txt;
+    for(var i=0;i<els.length;i++)els[i].classList.add('sel');
+  }
   function render(){
-    var tb=document.getElementById('sd-rows');tb.innerHTML='';
-    var tot=0;
+    var tb=$('sd-rows');tb.innerHTML='';
+    var tot=totals();
     data.items.forEach(function(it){
-      tot+=it.amt;
       var tr=document.createElement('tr');
-      tr.innerHTML='<td>'+esc(it.desc||'(no description)')+'</td><td>'+money(it.amt)+'</td>';
-      var td=document.createElement('td');var b=document.createElement('button');
-      b.textContent='Remove';b.className='plain';
-      b.onclick=function(){data.items=data.items.filter(function(x){return x.id!==it.id;});save(data);render();};
-      td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
+      tr.className='drow'+(it.id===selId?' sel':'');tr.tabIndex=0;tr.setAttribute('role','button');
+      tr.setAttribute('aria-label',esc(it.desc||'deduction')+': '+money(it.amt)+'. Activate for details.');
+      var pct=data.dep>0?(it.amt/data.dep*100).toFixed(1)+'% of the deposit':'—';
+      tr.innerHTML='<td>'+esc(it.desc||'(no description)')+'</td><td class="amt">'+money(it.amt)+'</td>';
+      var td=document.createElement('td');
+      var b=document.createElement('button');b.type='button';b.textContent='Remove';b.className='plain';
+      b.setAttribute('aria-label','Remove deduction '+(it.desc||''));
+      b.addEventListener('click',function(e){
+        e.stopPropagation();
+        data.items=data.items.filter(function(x){return x.id!==it.id;});
+        if(selId===it.id)clearSel();
+        save(data);render();Sound.click();
+      });
+      td.appendChild(b);tr.appendChild(td);
+      tr.addEventListener('click',function(e){
+        if(e.target===b)return;
+        if(selId===it.id){clearSel();Sound.click();return;}
+        selId=it.id;
+        spot('<strong>'+esc(it.desc||'(no description)')+':</strong> '+money(it.amt)+' — '+pct+'. Trace this to an invoice or receipt before sending the statement.',[tr]);
+      });
+      tr.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();tr.click();}
+        if(e.key==='Escape')clearSel();
+      });
+      tb.appendChild(tr);
     });
-    var refund=Math.max(0,data.dep-tot);
-    var extra=tot>data.dep?tot-data.dep:0;
-    /* deposit breakdown visual: refund-vs-deductions split + per-deduction bars */
-    var svis=document.getElementById('sd-vis');svis.innerHTML='';
+    var refund=Math.max(0,data.dep-tot),extra=tot>data.dep?tot-data.dep:0;
+    /* breakdown visual: refund-vs-deductions split + per-deduction bars */
+    var svis=$('sd-vis');svis.innerHTML='';
     svis.style.display=data.items.length?'':'none';
     if(data.items.length){
       var dep=Math.max(data.dep,0);
@@ -190,170 +327,95 @@ it. Free, offline, no account.</p>
       var sr=document.createElement('div');sr.className='sd-seg-r';
       var sd2=document.createElement('div');sd2.className='sd-seg-d';
       if(dep>0){sr.style.width=(refund/dep*100).toFixed(1)+'%';sd2.style.width=(Math.min(tot,dep)/dep*100).toFixed(1)+'%';}
+      sr.tabIndex=0;sr.setAttribute('role','button');sr.setAttribute('aria-label','Refund segment: '+money(refund));
+      sd2.tabIndex=0;sd2.setAttribute('role','button');sd2.setAttribute('aria-label','Deductions segment: '+money(tot));
+      sr.addEventListener('click',function(){
+        if(selId==='refund'){clearSel();Sound.click();return;}
+        selId='refund';
+        spot('<strong>Refund to tenant:</strong> '+money(refund)+(dep>0?' — '+(refund/dep*100).toFixed(1)+'% of the deposit goes back.':'')+' Return it by your state\u2019s deadline.',[sr]);
+      });
+      sd2.addEventListener('click',function(){
+        if(selId==='dedtot'){clearSel();Sound.click();return;}
+        selId='dedtot';
+        spot('<strong>Total deductions:</strong> '+money(tot)+(dep>0?' — '+(Math.min(tot,dep)/dep*100).toFixed(1)+'% of the deposit.':'')+' Every line should trace to an invoice or receipt.',[sd2]);
+      });
+      [sr,sd2].forEach(function(el){
+        el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();el.click();}if(e.key==='Escape')clearSel();});
+      });
       split.appendChild(sr);split.appendChild(sd2);svis.appendChild(split);
       var leg=document.createElement('div');leg.className='sd-legend';
-      var lr=document.createElement('span');lr.textContent='● Refund '+money(refund);lr.style.color='var(--accent)';
-      var ld=document.createElement('span');ld.textContent='● Deductions '+money(tot);ld.style.color='#c0392b';
-      leg.appendChild(lr);leg.appendChild(ld);svis.appendChild(leg);
-      var sitems=data.items.slice().sort(function(a,b){return b.amt-a.amt;});
+      leg.innerHTML='<span><span style="display:inline-block;width:.7em;height:.7em;border-radius:3px;background:var(--accent)"></span> Refund '+money(refund)+'</span><span><span style="display:inline-block;width:.7em;height:.7em;border-radius:3px;background:var(--deduct)"></span> Deductions '+money(tot)+'</span>';
+      svis.appendChild(leg);
+      var sitems=data.items.slice().sort(function(a,b2){return b2.amt-a.amt;});
       var smx=sitems.length?sitems[0].amt:0;
       sitems.forEach(function(it){
-        var row=document.createElement('div');row.className='sd-row';
+        var row=document.createElement('div');row.className='sd-row'+(it.id===selId?' sel':'');
+        row.tabIndex=0;row.setAttribute('role','button');
+        row.setAttribute('aria-label',esc(it.desc||'deduction')+': '+money(it.amt)+'. Activate for details.');
         var nm=document.createElement('div');nm.className='sd-name';nm.textContent=it.desc||'(no description)';
         var vl=document.createElement('div');vl.className='sd-val';vl.textContent=money(it.amt);
-        var tr=document.createElement('div');tr.className='sd-track';
+        var tr2=document.createElement('div');tr2.className='sd-track';
         var fl=document.createElement('div');fl.className='sd-fill';
         fl.style.width=(smx>0?(it.amt/smx*100):0).toFixed(1)+'%';
-        tr.appendChild(fl);row.appendChild(nm);row.appendChild(vl);row.appendChild(tr);svis.appendChild(row);
+        tr2.appendChild(fl);row.appendChild(nm);row.appendChild(vl);row.appendChild(tr2);
+        row.addEventListener('click',function(){
+          if(selId===it.id){clearSel();Sound.click();return;}
+          selId=it.id;
+          var pct2=data.dep>0?(it.amt/data.dep*100).toFixed(1)+'% of the deposit':'—';
+          spot('<strong>'+esc(it.desc||'(no description)')+':</strong> '+money(it.amt)+' — '+pct2+'. Trace this to an invoice or receipt before sending the statement.',[row]);
+        });
+        row.addEventListener('keydown',function(e){
+          if(e.key==='Enter'||e.key===' '){e.preventDefault();row.click();}
+          if(e.key==='Escape')clearSel();
+        });
+        svis.appendChild(row);
       });
       svis.setAttribute('aria-label','Deposit '+money(dep)+', deductions '+money(tot)+', refund to tenant '+money(refund));
     }
-    document.getElementById('sd-out').innerHTML='<strong>Refund to tenant: '+money(refund)+'</strong>'
+    $('sd-out').innerHTML='Refund to tenant: '+money(refund)
       +(extra>0?'<br><span class="small">Deductions exceed the deposit by '+money(extra)+'.</span>':'');
-    document.getElementById('sd-dep').value=data.dep;
-    document.getElementById('sd-tenant').value=data.tenant||'';
+    if(document.activeElement!==$('sd-dep'))$('sd-dep').value=data.dep;
+    if(document.activeElement!==$('sd-tenant'))$('sd-tenant').value=data.tenant||'';
   }
-  document.getElementById('sd-add').onclick=function(){
-    var desc=prompt('Deduction description (e.g. Carpet cleaning):');
-    if(desc===null)return;
-    var amt=parseFloat(prompt('Amount for "'+desc+'":',''));
-    if(isNaN(amt)||amt<0){alert('Enter a valid amount.');return;}
-    data.items.push({id:'d'+Date.now().toString(36),desc:desc,amt:amt});
-    save(data);render();Sound.success();
-  };
-  document.getElementById('sd-dep').addEventListener('input',function(e){data.dep=parseFloat(e.target.value)||0;save(data);render();});
-  document.getElementById('sd-tenant').addEventListener('input',function(e){data.tenant=e.target.value;save(data);});
-  document.getElementById('sd-print').onclick=function(){Sound.click();window.print();};
+  function addDeduction(){
+    var desc=$('sd-desc').value.trim(),amt=parseFloat($('sd-amt').value);
+    if(!desc){Sound.error();$('sd-desc').focus();return;}
+    if(isNaN(amt)||amt<0){Sound.error();$('sd-amt').focus();return;}
+    data.items.push({id:'d'+Date.now().toString(36),desc:desc,amt:Math.round(amt*100)/100});
+    $('sd-desc').value='';$('sd-amt').value='';
+    save(data);render();Sound.success();$('sd-desc').focus();
+  }
+  $('sd-add').addEventListener('click',addDeduction);
+  [$('sd-desc'),$('sd-amt')].forEach(function(el){
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addDeduction();}});
+  });
+  $('sd-dep').addEventListener('input',function(e){data.dep=parseFloat(e.target.value)||0;save(data);render();});
+  $('sd-tenant').addEventListener('input',function(e){data.tenant=e.target.value;save(data);});
+  $('sd-print').addEventListener('click',function(){Sound.click();window.print();});
   render();
-
   /* ---------- sample data toggle: snapshot, fill realistic demo, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  function sampleSDData(){
+  function sampleData(){
     return {dep:1500,tenant:'Maya Chen',items:[
       {id:'ssd1',desc:'Carpet cleaning',amt:180},
       {id:'ssd2',desc:'Wall repair - living room',amt:220},
       {id:'ssd3',desc:'Missing keys (2 sets)',amt:75}]};
   }
-  var sbtn=document.getElementById('sample-toggle');
+  var sbtn=$('sample-toggle');
   function paintSample(){
     var lbl=sampleOn?'Clear sample data':'Try sample data';
     sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
     sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
   }
   if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){sampleOn=true;sampleSnap=JSON.stringify(data);data=sampleSDData();render();}
-    else{sampleOn=false;try{data=JSON.parse(sampleSnap)||{dep:1500,tenant:'',items:[]};}catch(e){data={dep:1500,tenant:'',items:[]};}sampleSnap=null;save(data);render();}
+    if(!sampleOn){
+      sampleSnap=JSON.stringify(data);sampleOn=true;data=sampleData();clearSel();render();
+    }else{
+      sampleOn=false;
+      try{data=JSON.parse(sampleSnap)||blank();}catch(e){data=blank();}
+      sampleSnap=null;clearSel();save(data);render();
+    }
     paintSample();Sound.click();
   });paintSample();}
-})();
-</script>
-<section class="block prose">
-
-<h2 class="sec">How to document deposit deductions</h2>
-<p>Every deduction needs three things: what it was for, what it cost, and proof it was necessary.
-Add each deduction above with a plain description &mdash; &ldquo;carpet cleaning, unit 4B&rdquo;
-beats &ldquo;cleaning&rdquo; &mdash; and the calculator keeps a running refund total. Print the
-itemized statement and send it with the refund: tenants who see organized paperwork rarely dispute it,
-and the ones who do will find you already prepared.</p>
-<h2 class="sec">What you can and cannot deduct</h2>
-<p>Unpaid rent, damage beyond normal wear and tear, and cleaning to return the unit to its move-in
-condition are the standard categories. &ldquo;Normal wear and tear&rdquo; is where most fights
-start: faded paint after three years is wear; a hole in the wall is damage. Photos at move-in and
-move-out settle more disputes than any calculator &mdash; take them every time, timestamped.</p>
-<h2 class="sec">Worked example</h2>
-<p>$1,500 deposit, three deductions: carpet cleaning $180, wall repair $220, missing keys $75. Total deductions
-<strong>$475</strong>, refund <strong>$1,025</strong>. Add one more $1,100 repair and the tool flags that
-deductions exceed the deposit by $75 &mdash; the kind of edge case that's easy to get wrong by hand.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>How fast must I return the deposit?</dt>
-<dd>It depends on your state &mdash; commonly 14 to 60 days. The deadline is strict in most states,
-and missing it can cost you multiples of the deposit, so calendar it at move-out.</dd>
-<dt>Can I deduct for normal wear and tear?</dt>
-<dd>No. Wear and tear is the landlord&rsquo;s cost of doing business. Only damage beyond ordinary
-use, unpaid amounts, and agreed cleaning qualify.</dd>
-<dt>What if deductions exceed the deposit?</dt>
-<dd>The calculator flags it. You can bill the former tenant for the balance, but collecting is a
-separate battle &mdash; small claims court is the usual venue.</dd>
-<dt>Should I keep receipts?</dt>
-<dd>Yes &mdash; every deduction should trace to an invoice or receipt. &ldquo;Estimated&rdquo;
-deductions without documentation are the first thing challenged.</dd>
-<dt>What about deadlines and full tenancy records?</dt>
-<dd><strong>DepositDocket</strong> (Landlord Ledger) tracks each tenancy with deduction itemization,
-a return-deadline countdown, and professional printable tenant statements &mdash; built for landlords
-with 1&ndash;10 units, $14 one-time, offline.</dd>
-</dl>
-</section>
-
-<section class="block">
-<h2 class="sec">Related tools</h2>
-<div class="grid">
-<div class="card"><h3>DepositDocket (Landlord Ledger) &mdash; $14 one-time</h3><p>Offline record-keeping for landlords with 1&ndash;10 units: per-tenancy deposit records and deadline tracking.</p><a class="btn" href="../../products/depositdocket/index.html">Learn more</a></div>
-<div class="card"><h3>Free Moving Cost Calculator</h3><p>Between tenants? Budget the turnover move.</p><a class="btn" href="../moving-cost-calculator/index.html">Open the free tool</a></div>
-<div class="card"><h3>Free HOA Special Assessment Calculator</h3><p>Own a condo rental? Estimate assessment exposure.</p><a class="btn" href="../hoa-special-assessment-calculator/index.html">Open the free tool</a></div>
-</div>
-</section>
-
-
-<div class="cta-band">
-<h2>Need the full version?</h2>
-<p><strong>DepositDocket</strong> (Landlord Ledger) is the offline record-keeping tool for landlords with 1&ndash;10 units: per-tenancy deposit records, deduction itemization, return-deadline countdowns, and printable tenant statements. $14 one-time, no subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/depositdocket">Get DepositDocket &mdash; $14 one-time</a>
-<p class="small"><a href="../../products/depositdocket/index.html">Learn more about DepositDocket</a>
-&middot; <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
-</div>
-</main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
-<script>
-(function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();Sound.toggleTheme();});}
-  paint();
-})();
-/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
-var Sound=(function(){
-  var KEY='security-deposit-deduction-calculator.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
-  function ac(){try{
-    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
-    if(ctx.state==='suspended')ctx.resume();return ctx;}catch(e){return null;}}
-  function tone(freq,dur,type,vol,delay){var c=ac();if(!c)return;try{
-    var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
-    o.type=type||'sine';o.frequency.value=freq;
-    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
-  return{
-    isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
-    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
-  };
-})();
-(function(){
-  var btn=document.getElementById('sound-toggle');if(!btn)return;
-  function paint(){var on=Sound.isOn();
-    btn.innerHTML=on?'&#128266;':'&#128263;';
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
-    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
 })();
 </script>
 </body>
