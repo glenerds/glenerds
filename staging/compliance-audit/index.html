@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AuditReady — Compliance Self-Audit &amp; Document Generator</title>
+<title>DOT Audit Checklist — FMCSA Trucking Compliance Self-Audit for Owner-Operators</title>
 <style>
-/* ============ AuditReady styles — chunk 1: tokens, base, header, tabs ============ */
+/* ============ RigAudit styles — chunk 1: tokens, base, header, tabs ============ */
 :root{
   --bg:#f6f7f9; --surface:#ffffff; --surface2:#eef1f5;
   --text:#1a2230; --muted:#5c6777; --border:#dde2ea;
@@ -229,10 +229,15 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
 <header class="topbar">
   <div class="brand">
     <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-      <path d="M17 2 L29 7 V15 C29 24 23 29.5 17 32 C11 29.5 5 24 5 15 V7 Z" fill="#1f6feb"/>
-      <path d="M12 16.5 L15.5 20 L22.5 12.5" stroke="#fff" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="2" y="10" width="15" height="10" rx="1.5" fill="#1f6feb"/>
+      <path d="M17 10 h5.5 l4.5 5 v5 h-10 z" fill="#1f6feb"/>
+      <path d="M19 12 h2.6 l2.9 3.2 H19 z" fill="#fff" opacity="0.9"/>
+      <rect x="4" y="12" width="11" height="2" fill="#fff" opacity="0.35"/>
+      <circle cx="7.5" cy="23" r="3" fill="#8a94a6"/><circle cx="7.5" cy="23" r="1.2" fill="#e8ecf1"/>
+      <circle cx="14" cy="23" r="3" fill="#8a94a6"/><circle cx="14" cy="23" r="1.2" fill="#e8ecf1"/>
+      <circle cx="24" cy="23" r="3" fill="#8a94a6"/><circle cx="24" cy="23" r="1.2" fill="#e8ecf1"/>
     </svg>
-    <span>AuditReady</span>
+    <span>RigAudit</span>
   </div>
   <div class="spacer"></div>
   <a class="pill-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" id="moreAppsBtn">More Apps</a>
@@ -945,7 +950,7 @@ function renderTrend(){
 <script>
 "use strict";
 /* ============ chunk 7: document generator + print ============ */
-const STAMP='<div class="doc-stamp">⚠ NOT LEGAL ADVICE — This document is a self-assessment aid generated from your AuditReady answers. It is not legal advice and does not guarantee compliance. Consult a qualified professional before relying on it.</div>';
+const STAMP='<div class="doc-stamp">⚠ NOT LEGAL ADVICE — This document is a self-assessment aid generated from your RigAudit answers. It is not legal advice and does not guarantee compliance. Consult a qualified professional before relying on it.</div>';
 let currentDocHTML="";
 function docHead(title,sub){
   const p=profile;
@@ -1356,7 +1361,7 @@ function initSettings(){
     $(map[k]).addEventListener("change",e=>{ profile[k]=e.target.value.trim(); saveProfile(); toast(D("Profile saved","Perfil guardado")); }); });
   $("#pf-state").addEventListener("change",e=>{ profile.state=e.target.value||""; saveProfile(); toast(D("State saved","Estado guardado")); });
   $("#exportBtn").addEventListener("click",()=>{ sndClick();
-    const data={app:"AuditReady",exported:todayISO(),answers,actions,history,logs,checklists,profile,auditDone,
+    const data={app:"RigAudit",exported:todayISO(),answers,actions,history,logs,checklists,profile,auditDone,
       drivers:typeof drivers!=="undefined"?drivers:[],vehicles:typeof vehicles!=="undefined"?vehicles:[],
       locations:typeof locations!=="undefined"?locations:[],trainingMatrix:typeof trainingMatrix!=="undefined"?trainingMatrix:[],
       sdsList:typeof sdsList!=="undefined"?sdsList:[],savedLabels:typeof savedLabels!=="undefined"?savedLabels:[],
@@ -1388,7 +1393,7 @@ function initSettings(){
     rd.readAsText(f); e.target.value="";
   });
   $("#resetBtn").addEventListener("click",()=>{ sndClick();
-    if(confirm(D("Delete ALL AuditReady data? This cannot be undone.","¿Eliminar TODOS los datos de AuditReady? No se puede deshacer."))){
+    if(confirm(D("Delete ALL RigAudit data? This cannot be undone.","¿Eliminar TODOS los datos de RigAudit? No se puede deshacer."))){
       LS_KEYS.forEach(k=>store.del(k));
       answers={};actions=[];history=[];logs={injury:[],training:[],dvir:[]};checklists={};profile={};auditDone={};
       try{ drivers=[];vehicles=[];locations=[];trainingMatrix=[];sdsList=[];savedLabels=[];reviews={};employees=[];auditRuns=[];
@@ -1707,8 +1712,8 @@ const STR={
  logTraining:{en:"Training",es:"Capacitación"},
  logDvir:{en:"Vehicle Inspection",es:"Inspección vehicular"},
  logSds:{en:"Safety Data Sheets",es:"Hojas de datos de seguridad"},
- discBody:{en:"<strong>⚠ Not legal advice</strong> AuditReady is a self-assessment aid, not legal advice and not a substitute for a qualified safety, transportation, or food-safety professional. Regulations change and vary by state — verify requirements with the proper authority or counsel before acting.",
-   es:"<strong>⚠ No es asesoría legal</strong> AuditReady es una ayuda de autoevaluación, no asesoría legal ni sustituto de un profesional calificado en seguridad, transporte o inocuidad alimentaria. Las regulaciones cambian y varían por estado — verifique los requisitos con la autoridad o asesor correspondiente antes de actuar."},
+ discBody:{en:"<strong>⚠ Not legal advice</strong> RigAudit is a self-assessment aid, not legal advice and not a substitute for a qualified safety, transportation, or food-safety professional. Regulations change and vary by state — verify requirements with the proper authority or counsel before acting.",
+   es:"<strong>⚠ No es asesoría legal</strong> RigAudit es una ayuda de autoevaluación, no asesoría legal ni sustituto de un profesional calificado en seguridad, transporte o inocuidad alimentaria. Las regulaciones cambian y varían por estado — verifique los requisitos con la autoridad o asesor correspondiente antes de actuar."},
  discOk:{en:"I understand",es:"Entendido"},
  deH:{en:"No audits completed yet",es:"Aún no hay auditorías completadas"},
  deP:{en:"Run a self-audit to see your scores, findings, and trends here.",es:"Realiza una autoauditoría para ver tus puntajes, hallazgos y tendencias aquí."},
@@ -1728,11 +1733,11 @@ const STR={
  resetAll:{en:"Reset All Data",es:"Borrar todos los datos"},
  dataNote:{en:"All data stays on this device, in this browser. Export a backup file regularly.",es:"Todos los datos permanecen en este dispositivo, en este navegador. Exporte un archivo de respaldo regularmente."},
  aboutH:{en:"About",es:"Acerca de"},
- aboutP:{en:"AuditReady helps small businesses run structured compliance self-audits, track corrective actions, keep required logs, and generate tailored program documents. Everything runs locally in your browser — no account, no uploads.",
-   es:"AuditReady ayuda a pequeñas empresas a realizar autoauditorías de cumplimiento estructuradas, dar seguimiento a acciones correctivas, mantener registros requeridos y generar documentos de programa personalizados. Todo funciona localmente en tu navegador — sin cuenta, sin subidas."},
+ aboutP:{en:"RigAudit helps small businesses run structured compliance self-audits, track corrective actions, keep required logs, and generate tailored program documents. Everything runs locally in your browser — no account, no uploads.",
+   es:"RigAudit ayuda a pequeñas empresas a realizar autoauditorías de cumplimiento estructuradas, dar seguimiento a acciones correctivas, mantener registros requeridos y generar documentos de programa personalizados. Todo funciona localmente en tu navegador — sin cuenta, sin subidas."},
  reshowDisc:{en:"Show disclaimer again",es:"Mostrar aviso de nuevo"},
- footerNote:{en:"AuditReady is a self-assessment aid — <strong>not legal advice</strong>. Consult a qualified professional before acting on results.",
-   es:"AuditReady es una ayuda de autoevaluación — <strong>no es asesoría legal</strong>. Consulte a un profesional calificado antes de actuar según los resultados."},
+ footerNote:{en:"RigAudit is a self-assessment aid — <strong>not legal advice</strong>. Consult a qualified professional before acting on results.",
+   es:"RigAudit es una ayuda de autoevaluación — <strong>no es asesoría legal</strong>. Consulte a un profesional calificado antes de actuar según los resultados."},
  auditsH:{en:"Self-Audits",es:"Autoauditorías"},
  auditsSub:{en:"Question-by-question compliance reviews — answer every question, then generate your corrective-action plan and documents. For quick walk-through task lists, use the Inspection Checklists tab.",es:"Revisiones de cumplimiento pregunta por pregunta — responda todo y genere su plan de acciones correctivas y documentos. Para listas rápidas de tareas, use la pestaña Listas de verificación."},
  fleetH:{en:"Fleet — Drivers, Vehicles & Renewals",es:"Flota — Conductores, vehículos y vencimientos"},
@@ -2508,7 +2513,7 @@ function genNewEntrantDoc(){
   ];
   h+="<h2>"+D("Audit-readiness checklist","Lista de preparación para la auditoría")+"</h2>";
   areas.forEach(([t,d],i)=>{ h+="<h3 style='font-size:17px'>"+(i+1)+". "+esc(t)+"</h3><p>☐ "+esc(d)+"</p>"; });
-  h+="<h2>"+D("Document bundle (generate from AuditReady)","Paquete documental (genere desde AuditReady)")+"</h2><ol>"+
+  h+="<h2>"+D("Document bundle (generate from RigAudit)","Paquete documental (genere desde RigAudit)")+"</h2><ol>"+
     "<li>☐ "+D("Driver Qualification File Packet (per driver)","Paquete de archivos de calificación (por conductor)")+"</li>"+
     "<li>☐ "+D("DVIR Inspection Template (blank copies for the file)","Plantilla DVIR (copias en blanco para el archivo)")+"</li>"+
     "<li>☐ "+D("FMCSA Mock-Audit Report with fix list","Informe de autoauditoría FMCSA con lista de correcciones")+"</li>"+
@@ -2530,8 +2535,8 @@ function genNewEntrantDoc(){
 function gen48HourDoc(){
   let h=docHead(D("48-Hour Audit Response Pack","Paquete de respuesta de auditoría en 48 horas"),
     D("Every record an auditor typically demands \u2014 assembled for production within 48 hours","Todos los registros que un auditor suele exigir \u2014 reunidos para entrega en 48 horas"));
-  h+=D("<p>Safety investigators can require a motor carrier to produce supporting records within 48 hours of the request. This pack assembles every record AuditReady holds, in the order an auditor typically asks for them. Print it or save it as PDF and keep it with your compliance binder.</p>",
-       "<p>Los investigadores de seguridad pueden exigir que un transportista presente sus registros dentro de las 48 horas siguientes a la solicitud. Este paquete re\u00fane todos los registros de AuditReady en el orden en que suelen pedirse. Impr\u00edmalo o gu\u00e1rdelo como PDF junto a su carpeta de cumplimiento.</p>");
+  h+=D("<p>Safety investigators can require a motor carrier to produce supporting records within 48 hours of the request. This pack assembles every record RigAudit holds, in the order an auditor typically asks for them. Print it or save it as PDF and keep it with your compliance binder.</p>",
+       "<p>Los investigadores de seguridad pueden exigir que un transportista presente sus registros dentro de las 48 horas siguientes a la solicitud. Este paquete re\u00fane todos los registros de RigAudit en el orden en que suelen pedirse. Impr\u00edmalo o gu\u00e1rdelo como PDF junto a su carpeta de cumplimiento.</p>");
   const nDrv=drivers.length, nVeh=vehicles.length, nDvir=(logs.dvir||[]).length,
         nInj=(logs.injury||[]).length, nTrL=(logs.training||[]).length,
         nAct=actions.length, nOpen=actions.filter(a=>actionStatus(a)!=="done").length;
@@ -2574,7 +2579,7 @@ function gen48HourDoc(){
 <script>
 "use strict";
 /* ============ chunk H4: Spanish document variants, doc registry, init fixups ============ */
-const STAMP_ES='<div class="doc-stamp">⚠ NO ES ASESORÍA LEGAL — Este documento es una ayuda de autoevaluación generada a partir de sus respuestas en AuditReady. No es asesoría legal y no garantiza el cumplimiento. Consulte a un profesional calificado antes de confiar en él.</div>';
+const STAMP_ES='<div class="doc-stamp">⚠ NO ES ASESORÍA LEGAL — Este documento es una ayuda de autoevaluación generada a partir de sus respuestas en RigAudit. No es asesoría legal y no garantiza el cumplimiento. Consulte a un profesional calificado antes de confiar en él.</div>';
 function docHeadEs(title,sub){
   const p=profile;
   const st=(typeof stateName==="function"&&p.state)?" · "+esc(stateName(p.state)):"";
