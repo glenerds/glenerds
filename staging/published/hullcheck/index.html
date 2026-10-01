@@ -5,173 +5,453 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Used Boat Pre-Purchase Inspection Checklist — Risk Score &amp; Repair Cost Estimate | Glenerds</title>
 <meta name="description" content="Offline inspection tool for used-boat buyers: boat-type-specific checklists, weighted risk scoring, repair-cost estimates, printable report. $29 one-time.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/hullcheck/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Used Boat Pre-Purchase Inspection Checklist — Risk Score &amp; Repair Cost Estimate | Glenerds">
-<meta property="og:description" content="Offline inspection tool for used-boat buyers: boat-type-specific checklists, weighted risk scoring, repair-cost estimates, printable report. $29 one-time.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/hullcheck/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/hullcheck/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "HullCheck",
-  "description": "Offline inspection tool for used-boat buyers: boat-type-specific checklists, weighted risk scoring, repair-cost estimates, printable report. $29 one-time.",
-  "url": "https://glenerds.github.io/glenerds/products/hullcheck/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "29",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/hullcheck"
-  }
+<style>
+:root{
+  --bg:#f4f8fa; --card:#ffffff; --ink:#16222c; --muted:#5a6b78; --border:#dce7ee;
+  --accent:#0e7490; --accent-ink:#0c5f76; --accent-soft:#ddf2f8;
+  --low:#16a34a; --med:#d97706; --high:#dc2626; --shadow:0 2px 10px rgba(14,116,144,.08);
 }
+html[data-theme="dark"]{
+  --bg:#0f151a; --card:#181f26; --ink:#eceff3; --muted:#9fb0bd; --border:#2a353e;
+  --accent:#67e8f9; --accent-ink:#a5f3fc; --accent-soft:#1c2a33;
+  --low:#4ade80; --med:#fbbf24; --high:#f87171; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#0e7490,#164e63);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.25rem;font-weight:800;background:var(--accent-soft);
+  border:1px solid var(--border);border-radius:12px;padding:.5rem 1rem;margin-right:.8rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.type-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin:.4rem 0 1rem}
+.type-tab{min-height:44px;padding:.55rem 1rem;border-radius:999px;border:1px solid var(--border);
+  background:var(--card);color:var(--ink);font-size:15px;font-weight:700;cursor:pointer}
+.type-tab:hover{border-color:var(--accent)}
+.type-tab[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.type-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hc-item{border:1px solid var(--border);border-radius:12px;padding:.7rem .9rem;margin:.6rem 0;cursor:pointer}
+.hc-item:hover{border-color:var(--accent)}
+.hc-item:focus-visible{outline:2px solid var(--accent)}
+.hc-item.sel{border-color:var(--accent);background:var(--accent-soft)}
+.hc-item .lbl{font-size:16px;font-weight:600}
+.hc-item .cost{font-size:15px;color:var(--muted)}
+.hc-radios{display:flex;gap:1rem;margin-top:.35rem;flex-wrap:wrap}
+.hc-radios label{display:inline-flex;align-items:center;gap:.4rem;font-size:15px;font-weight:600;cursor:pointer;min-height:44px}
+.hc-radios input{width:20px;height:20px;accent-color:var(--accent);cursor:pointer}
+.meter{position:relative;height:22px;border-radius:999px;margin:.8rem 0 .3rem;
+  background:linear-gradient(to right,var(--low) 0 25%,var(--med) 25% 50%,var(--high) 50% 100%)}
+.meter .needle{position:absolute;top:-5px;bottom:-5px;width:4px;border-radius:2px;background:var(--ink);
+  box-shadow:0 0 0 2px var(--card);transform:translateX(-50%)}
+.verdict{display:inline-block;font-size:1.2rem;font-weight:800;border-radius:12px;padding:.45rem 1rem;margin:.3rem 0}
+.verdict.low{background:color-mix(in srgb,var(--low) 14%,transparent);color:var(--low)}
+.verdict.med{background:color-mix(in srgb,var(--med) 16%,transparent);color:var(--med)}
+.verdict.high{background:color-mix(in srgb,var(--high) 14%,transparent);color:var(--high)}
+.stack{display:flex;height:22px;border-radius:999px;overflow:hidden;background:var(--border);margin:.7rem 0 .3rem}
+.stack>div{height:100%;cursor:pointer}
+.stack>div:hover{filter:brightness(1.15)}
+.stack>div.sel{outline:2px solid var(--ink);outline-offset:-2px}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:15px;color:var(--muted)}
+.legend b{color:var(--ink);font-variant-numeric:tabular-nums}
+#demo-detail{margin-top:.7rem;font-size:15px;color:var(--muted);min-height:1.2em}
+#demo-detail strong{color:var(--ink)}
+table.spec{border-collapse:collapse;font-size:15px;margin:.6rem 0;min-width:min(100%,420px)}
+table.spec td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
+table.spec td:last-child{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.feat{font-size:16px;padding-left:1.3rem}
+.feat li{margin:.35rem 0}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip,.type-tabs,.hc-radios{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"HullCheck",
+"description":"Offline inspection tool for used-boat buyers: boat-type-specific checklists, weighted risk scoring, repair-cost estimates, printable report. $29 one-time.",
+"url":"https://glenerds.github.io/glenerds/staging/published/hullcheck/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"29","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/hullcheck"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Does this replace a marine surveyor?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. It screens boats so you hire a surveyor only for the ones that pass \u2014 saving you the survey fee on the duds."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Which boat types are covered?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Outboard powerboats, sterndrive/inboard boats, sailboats, and pontoons, each with its own checklist."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the 'effective total'?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Asking price plus the estimated repair costs you flagged \u2014 the number that tells you what the boat really costs."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I really use it at the dock?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. It's a single offline file; open it on your phone, no signal needed."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Does this replace a marine surveyor?","acceptedAnswer":{"@type":"Answer","text":"No. It screens boats so you hire a surveyor only for the ones that pass — saving you the survey fee on the duds."}},
+{"@type":"Question","name":"Which boat types are covered?","acceptedAnswer":{"@type":"Answer","text":"Outboard powerboats, sterndrive/inboard boats, sailboats, and pontoons, each with its own checklist."}},
+{"@type":"Question","name":"What is the 'effective total'?","acceptedAnswer":{"@type":"Answer","text":"Asking price plus the estimated repair costs you flagged — the number that tells you what the boat really costs."}},
+{"@type":"Question","name":"Can I really use it at the dock?","acceptedAnswer":{"@type":"Answer","text":"Yes. It's a single offline file; open it on your phone, no signal needed."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; HullCheck</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="HullCheck — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 14.5h17l-2.2 3.4a2 2 0 0 1-1.7.9H7.4a2 2 0 0 1-1.7-.9L3.5 14.5z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 14.5V5.5M12 5.5l5.5 4.5H12" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 10.5c1.2 1 2.8 1 4 0s2.8-1 4 0 2.8 1 4 0" stroke="#7dd3fc" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+    <span><span class="bname">HullCheck</span><span class="bsub">Used-boat inspection scorer</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Used Boat Pre-Purchase Inspection Checklist — Risk Score &amp; Repair Cost Estimate</h1>
-<p class="lead">A used boat hides its problems well — until you&#x27;re paying for them. Pick your boat type (outboard powerboat, sterndrive/inboard, sailboat, or pontoon), work the matching checklist dockside, and get a scored low/medium/high risk level, a repair-cost estimate, the effective total next to the asking price, and a printable inspection report to take into negotiation.</p>
-<span class="pricebox">$29 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/hullcheck">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/used-boat-inspection-checklist/index.html"><strong>Free Used Boat Inspection Checklist</strong></a> &mdash; The generic dockside checklist: hull, engine, trailer, electrics with a repair tally.</p>
-<p class="small">Free forever, runs offline in your browser. HullCheck is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>Four boat-type-specific checklists: outboard, sterndrive/inboard, sailboat, pontoon</li>
-<li>Weighted scoring with a clear low / medium / high risk verdict</li>
-<li>Repair-cost estimate for every issue you flag</li>
-<li>Effective total shown next to the asking price — the real cost of the boat</li>
-<li>Printable inspection report for your file or the negotiation table</li>
-<li>Works offline dockside on a phone or laptop — no account, no subscription</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>First-time boat buyers doing their own pre-screening</li>
-<li>Buyers comparing several used boats on the same weekend</li>
-<li>Anyone deciding whether a cheap boat is a deal or a project</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You need a certified marine survey for insurance or a loan</li>
-<li>You&#x27;re buying new with a dealer warranty</li>
-<li>You manage a charter fleet and need maintenance tracking</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Does this replace a marine surveyor?</dt>
-<dd>No. It screens boats so you hire a surveyor only for the ones that pass — saving you the survey fee on the duds.</dd>
-<dt>Which boat types are covered?</dt>
-<dd>Outboard powerboats, sterndrive/inboard boats, sailboats, and pontoons, each with its own checklist.</dd>
-<dt>What is the &#x27;effective total&#x27;?</dt>
-<dd>Asking price plus the estimated repair costs you flagged — the number that tells you what the boat really costs.</dd>
-<dt>Can I really use it at the dock?</dt>
-<dd>Yes. It&#x27;s a single offline file; open it on your phone, no signal needed.</dd>
-</dl>
+<section class="hero">
+  <h1>Used Boat Pre-Purchase Inspection Checklist &mdash; Risk Score &amp; Repair Cost Estimate</h1>
+  <p class="lead">A used boat hides its problems well &mdash; until you&rsquo;re paying for them. Pick your boat type (outboard powerboat, sterndrive/inboard, sailboat, or pontoon), work the matching checklist dockside, and get a scored low/medium/high risk level, a repair-cost estimate, the effective total next to the asking price, and a printable inspection report to take into negotiation.</p>
+  <p><span class="pricebox">$29 one-time</span>
+  <a class="btn" href="https://glenerds.gumroad.com/l/hullcheck">Get it on Gumroad</a></p>
+  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related free tools</h2>
-<div class="grid">
-<div class="card"><h3>Free Espresso Machine Inspection Checklist</h3><p>The same inspection discipline, tuned for espresso machines.</p><a class="btn" href="../../tools/espresso-machine-inspection-checklist/index.html">Open the free tool</a></div>
-</div>
+<section class="card" aria-label="Inspection demo">
+  <h2>Try the dockside scoring</h2>
+  <p class="small" style="margin-top:0">Pick a boat type and mark each check pass, flag, or fail &mdash; the same weighted scoring HullCheck runs. Tap any repair-cost bar segment to see that issue&rsquo;s estimate.</p>
+  <div class="type-tabs" role="tablist" aria-label="Boat type">
+    <button class="type-tab" role="tab" data-type="outboard" aria-selected="true">Outboard</button>
+    <button class="type-tab" role="tab" data-type="sterndrive" aria-selected="false">Sterndrive / Inboard</button>
+    <button class="type-tab" role="tab" data-type="sailboat" aria-selected="false">Sailboat</button>
+    <button class="type-tab" role="tab" data-type="pontoon" aria-selected="false">Pontoon</button>
+  </div>
+  <div id="hc-list"></div>
+  <label class="field" style="max-width:22rem">Asking price ($)<input type="number" id="hc-ask" value="12500" min="0" step="100" inputmode="numeric"></label>
+  <div aria-live="polite">
+    <div class="meter" id="hc-meter" role="img" aria-label="Risk meter"><div class="needle" id="hc-needle"></div></div>
+    <p><span class="verdict" id="hc-verdict"></span></p>
+    <p class="legend" id="hc-totals"></p>
+    <div class="stack" id="hc-stack" role="img" aria-label="Repair cost breakdown"></div>
+    <p id="demo-detail" aria-live="polite"></p>
+  </div>
+  <p class="small">Ballpark repair ranges for budgeting and negotiation &mdash; not quotes. Get a marine surveyor before you buy.</p>
 </section>
-<div class="cta-band">
-<h2>Get HullCheck today</h2>
-<p>$29 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/hullcheck">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul class="feat">
+    <li>Four boat-type-specific checklists: outboard, sterndrive/inboard, sailboat, pontoon</li>
+    <li>Weighted scoring with a clear low / medium / high risk verdict</li>
+    <li>Repair-cost estimate for every issue you flag</li>
+    <li>Effective total shown next to the asking price &mdash; the real cost of the boat</li>
+    <li>Printable inspection report for your file or the negotiation table</li>
+    <li>Works offline dockside on a phone or laptop &mdash; no account, no subscription</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul class="feat">
+    <li>First-time boat buyers doing their own pre-screening</li>
+    <li>Buyers comparing several used boats on the same weekend</li>
+    <li>Anyone deciding whether a cheap boat is a deal or a project</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul class="feat">
+    <li>You need a certified marine survey for insurance or a loan</li>
+    <li>You&rsquo;re buying new with a dealer warranty</li>
+    <li>You manage a charter fleet and need maintenance tracking</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>Does this replace a marine surveyor?</summary><p>No. It screens boats so you hire a surveyor only for the ones that pass &mdash; saving you the survey fee on the duds.</p></details>
+  <details><summary>Which boat types are covered?</summary><p>Outboard powerboats, sterndrive/inboard boats, sailboats, and pontoons, each with its own checklist.</p></details>
+  <details><summary>What is the &lsquo;effective total&rsquo;?</summary><p>Asking price plus the estimated repair costs you flagged &mdash; the number that tells you what the boat really costs.</p></details>
+  <details><summary>Can I really use it at the dock?</summary><p>Yes. It&rsquo;s a single offline file; open it on your phone, no signal needed.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get HullCheck today</h2>
+  <p>$29 one-time &mdash; yours forever. No subscription. Four checklists, weighted scoring, repair estimates, and the printable report.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/hullcheck">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>HullCheck</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
-  paint();
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+var CHECKS={
+  outboard:[
+    ['Transom solid','No flex, rot, or stress cracks around the motor mount',500,2500],
+    ['Engine cold start','Starts cold, holds compression, idles smoothly',800,4000],
+    ['Lower unit','Gear oil clean with no metal shavings, no play in prop shaft',300,1500],
+    ['Steering & controls','Steering smooth lock to lock, throttle/shift crisp',200,800],
+    ['Trailer','Bearings quiet, lights and winch working',150,600]],
+  sterndrive:[
+    ['Bellows & gimbal','Bellows intact with no cracks; no water in the bilge at the transom',400,1800],
+    ['Manifolds & risers','Engine reaches temp without overheating; no rust weep at joints',600,2500],
+    ['Engine condition','Hours plausible for the boat; oil clean, no knocking',1000,5000],
+    ['Bilge & pumps','Bilge dry, automatic pump cycles, blower works',200,900],
+    ['Trailer or stands','Bunks/rollers support the hull evenly; winch and jack sound',150,600]],
+  sailboat:[
+    ['Hull & keel','Keel bolts tight, hull-deck joint sound, no blistering',800,4000],
+    ['Standing rigging','No cracked swages, meathooks, or corroded chainplates',500,2500],
+    ['Sails & canvas','Sails hold shape, stitching intact, UV covers present',400,2000],
+    ['Deck hardware','Winches turn, no soft spots around stanchions or cleats',300,1500],
+    ['Auxiliary engine','Starts, shifts, and pushes the boat; fuel system clean',600,3000]],
+  pontoon:[
+    ['Tubes & welds','No dents, leaks, or cracked welds; nose cones solid',400,2000],
+    ['Deck','Deck solid underfoot, no rot beneath the carpet or vinyl',500,2500],
+    ['Motor','Starts cold, good compression, pumps water strongly',800,4000],
+    ['Fence & rails','Fence panels and rails secure, gates latch',200,800],
+    ['Trailer','Bunks support the tubes evenly; winch and straps sound',150,600]]
+};
+var TYPES={outboard:'Outboard',sterndrive:'Sterndrive / Inboard',sailboat:'Sailboat',pontoon:'Pontoon'};
+var state={type:'outboard',marks:{},ask:12500};
+Object.keys(CHECKS).forEach(function(t){state.marks[t]={};});
+var segSel=null;
+var SEGCOLS=['#0e7490','#7c3aed','#b45309','#16a34a','#dc2626'];
+function curItems(){return CHECKS[state.type];}
+function curMarks(){return state.marks[state.type];}
+function render(){
+  var list=$('hc-list');list.innerHTML='';
+  var marks=curMarks(),items=curItems();
+  items.forEach(function(it,i){
+    var st=marks[i]||'';
+    var card=document.createElement('div');card.className='hc-item'+(segSel===i?' sel':'');
+    card.tabIndex=0;card.setAttribute('role','button');
+    card.setAttribute('aria-label',it[0]+'. Marked '+(st||'not checked')+'. Activate to see repair details.');
+    card.innerHTML='<div class="lbl">'+esc(it[0])+'</div><div>'+esc(it[1])+'</div>'
+      +'<div class="cost">Typical repair: '+money(it[2])+'&ndash;'+money(it[3])+'</div>';
+    var rg=document.createElement('div');rg.className='hc-radios';
+    ['pass','flag','fail'].forEach(function(s){
+      var lab=document.createElement('label');
+      var r=document.createElement('input');r.type='radio';r.name='hc'+state.type+i;r.value=s;
+      if(st===s)r.checked=true;
+      r.setAttribute('aria-label',it[0]+' — '+s);
+      r.addEventListener('click',function(e){e.stopPropagation();});
+      r.addEventListener('change',function(){
+        marks[i]=s;render();
+        if(s==='pass')Sound.click();else if(s==='flag')Sound.select();else Sound.error();
+      });
+      lab.appendChild(r);lab.appendChild(document.createTextNode(' '+s.charAt(0).toUpperCase()+s.slice(1)));
+      rg.appendChild(lab);
+    });
+    card.appendChild(rg);
+    card.addEventListener('click',function(){spot(i);});
+    card.addEventListener('keydown',function(e){
+      if(e.key==='Enter'&&e.target===card){spot(i);}
+    });
+    list.appendChild(card);
+  });
+  summarize();
+}
+function summarize(){
+  var marks=curMarks(),items=curItems();
+  var pts=0,max=items.length*2,lo=0,hi=0,done=0,bad=[];
+  items.forEach(function(it,i){
+    var st=marks[i]||'';
+    if(st==='pass'){done++;}
+    else if(st==='flag'){pts+=1;done++;lo+=it[2];hi+=it[3];bad.push(i);}
+    else if(st==='fail'){pts+=2;done++;lo+=it[2];hi+=it[3];bad.push(i);}
+  });
+  var score=max>0?Math.round(pts/max*100):0;
+  var v,vCls;
+  if(score<25){v='Low risk';vCls='low';}
+  else if(score<50){v='Medium risk';vCls='med';}
+  else{v='High risk';vCls='high';}
+  $('hc-needle').style.left=score+'%';
+  $('hc-meter').setAttribute('aria-label','Risk meter: '+score+' of 100 — '+v+'.');
+  var vd=$('hc-verdict');vd.className='verdict '+vCls;
+  vd.textContent=done+'/'+items.length+' checked — '+v+' ('+score+'/100)';
+  var ask=state.ask;
+  $('hc-totals').innerHTML='<span>Repair exposure: <b>'+money(lo)+'–'+money(hi)+'</b></span>'
+    +'<span>Effective total: <b>'+money(ask+lo)+'–'+money(ask+hi)+'</b></span>'
+    +'<span>Asking: <b>'+money(ask)+'</b></span>';
+  var stack=$('hc-stack');stack.innerHTML='';
+  var tot=Math.max(hi,0.001);
+  stack.setAttribute('aria-label','Repair cost breakdown: '+bad.map(function(i){return items[i][0]+' '+money(items[i][2])+' to '+money(items[i][3]);}).join(', ')+'.');
+  bad.forEach(function(i,k){
+    var mid=(items[i][2]+items[i][3])/2;
+    var d=document.createElement('div');
+    d.style.width=(mid/tot*100).toFixed(1)+'%';
+    d.style.background=SEGCOLS[k%SEGCOLS.length];
+    d.className=segSel===i?'sel':'';
+    d.title=items[i][0]+': '+money(items[i][2])+'–'+money(items[i][3]);
+    (function(idx){d.addEventListener('click',function(e){e.stopPropagation();spot(idx);});})(i);
+    stack.appendChild(d);
+  });
+  if(!bad.length){stack.innerHTML='<div style="width:100%;background:var(--low);cursor:default" title="No issues flagged"></div>';}
+  if(segSel!==null&&items[segSel]){
+    var it=items[segSel];
+    $('demo-detail').innerHTML='<strong>'+esc(it[0])+':</strong> '+esc(it[1])+' Typical repair '+money(it[2])+'–'+money(it[3])+'.';
+  }else{
+    $('demo-detail').innerHTML=bad.length
+      ?'Tap any bar segment or checklist row to see that issue\u2019s repair estimate.'
+      :'Mark each check pass, flag, or fail — fails count double in the risk score.';
+  }
+}
+function spot(i){
+  if(segSel===i){segSel=null;Sound.click();}
+  else{segSel=i;Sound.select();}
+  render();
+}
+document.querySelectorAll('.type-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    state.type=tab.getAttribute('data-type');
+    segSel=null;
+    document.querySelectorAll('.type-tab').forEach(function(t){
+      t.setAttribute('aria-selected',t===tab?'true':'false');
+    });
+    render();Sound.click();
+  });
+});
+$('hc-ask').addEventListener('input',function(){
+  var v=parseFloat($('hc-ask').value);state.ask=isNaN(v)||v<0?0:v;
+  segSel=null;summarize();
+});
+$('hc-ask').addEventListener('change',function(){Sound.click();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){segSel=null;render();}
+});
+
+/* ---------- sample data: flags two issues and fails one, restores on off ---------- */
+var sampleOn=false,sampleSnap=null;
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    sampleSnap={type:state.type,marks:JSON.parse(JSON.stringify(state.marks)),ask:state.ask};
+    sampleOn=true;
+    state.type='outboard';
+    state.marks.outboard={0:'pass',1:'flag',2:'fail',3:'pass',4:'flag'};
+    state.ask=12500;
+    document.querySelectorAll('.type-tab').forEach(function(t){
+      t.setAttribute('aria-selected',t.getAttribute('data-type')==='outboard'?'true':'false');
+    });
+    $('hc-ask').value='12500';
+  }else{
+    sampleOn=false;
+    if(sampleSnap){state.type=sampleSnap.type;state.marks=sampleSnap.marks;state.ask=sampleSnap.ask;}
+    sampleSnap=null;
+    document.querySelectorAll('.type-tab').forEach(function(t){
+      t.setAttribute('aria-selected',t.getAttribute('data-type')===state.type?'true':'false');
+    });
+    $('hc-ask').value=state.ask;
+  }
+  segSel=null;render();paintSample();Sound.select();
+});
+paintSample();
+render();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
+var Sound=(function(){
+  var SKEY='hullcheck.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
+  };
+})();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
