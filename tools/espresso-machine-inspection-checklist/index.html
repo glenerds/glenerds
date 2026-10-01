@@ -5,401 +5,375 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Free Used Espresso Machine Inspection Checklist | Glenerds</title>
 <meta name="description" content="Free used espresso machine inspection checklist: work through key inspection points, tally issues, and estimate repair costs before you buy. Offline, no account.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/espresso-machine-inspection-checklist/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Free Used Espresso Machine Inspection Checklist | Glenerds">
-<meta property="og:description" content="Free used espresso machine inspection checklist: work through key inspection points, tally issues, and estimate repair costs before you buy. Offline, no account.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/espresso-machine-inspection-checklist/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/espresso-machine-inspection-checklist/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script><link rel="stylesheet" href="../../style.css">
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <style>
-/* inspection visual: per-category pass/flag/fail stacked bars */
-.es-vis{display:grid;gap:8px;margin:14px 0 4px}
-.es-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
-.es-name{font-weight:600}
-.es-count{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
-.es-track{grid-column:1/-1;display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--border)}
-.es-seg-p{background:var(--accent)}
-.es-seg-f{background:#f59e0b}
-.es-seg-x{background:#c0392b}
-html[data-theme="dark"] .es-seg-x{background:#e57373}
-/* ---------- sweep baseline: standard header cluster + sounds ---------- */
-.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:1.1rem}
-.g-store-btn{display:inline-block;padding:8px 15px;font-size:.88rem;font-weight:700;border-radius:999px;background:var(--accent);color:var(--accent-fg,#fff);text-decoration:none;white-space:nowrap}
-.g-store-btn:hover{filter:brightness(1.08)}
-#theme-toggle.theme-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin-left:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
-#theme-toggle.theme-toggle svg{width:18px;height:18px}
-#theme-toggle.theme-toggle .ic-sun{display:none}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-sun{display:inline}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-moon{display:none}
-#sound-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-#sound-toggle:hover{color:var(--fg);border-color:var(--muted)}
-#theme-toggle.theme-toggle:focus-visible,#sound-toggle:focus-visible,#sample-toggle:focus-visible,.g-store-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* ---------- interactive category bars ---------- */
-.es-row{cursor:pointer;border-radius:8px;padding:4px 6px}
-.es-row:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
-.es-row.sel{box-shadow:inset 0 0 0 2px var(--accent)}
-#es-detail{margin:8px 0 4px;font-size:.88rem;color:var(--muted)}
-#es-detail strong{color:var(--fg)}
-@media print{.g-header-actions,.cross-promo{display:none!important}}
-/* ---------- shared round icon-button class: theme + sound stay round together ---------- */
-.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-/* ---------- sample data toggle: icon-only flask button + muted hint ---------- */
-.sample-toggle{border:1px solid var(--border);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted)}
-.sample-toggle svg{width:18px;height:18px}
-.sample-toggle:hover{color:var(--fg);border-color:var(--muted)}
-.sample-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
-/* ---------- bottom cross-promo ---------- */
-.cross-promo{margin:2rem 0 0;padding:1.25rem;border-top:1px solid var(--border);text-align:center}
-@media print{.g-header-actions,.cross-promo{display:none!important}}
-@media (max-width:600px){
-header.site .wrap{flex-wrap:wrap;gap:.6rem}
-nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
-nav.main a{margin-left:.6rem}
-.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+:root{
+  --bg:#faf8f4; --card:#ffffff; --ink:#241b12; --muted:#6b5d4f; --border:#e6ddcf;
+  --accent:#b45309; --accent-ink:#92400e; --accent-soft:#f6ead8;
+  --pass:#16a34a; --flag:#d97706; --fail:#c0392b; --shadow:0 2px 10px rgba(120,70,20,.08);
 }
+html[data-theme="dark"]{
+  --bg:#161210; --card:#211b17; --ink:#f2ece3; --muted:#b0a192; --border:#3a3027;
+  --accent:#f0a64b; --accent-ink:#f5bd76; --accent-soft:#2e2419;
+  --pass:#4ade80; --flag:#fbbf24; --fail:#e57373; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#b45309,#5f3208);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.btn-row{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:.8rem}
+.es-item{border-bottom:1px solid var(--border);padding:.6rem 0}
+.es-item:last-child{border-bottom:0}
+.es-item .lbl{font-size:16px}
+.es-item .cost{font-size:15px;color:var(--muted)}
+.es-radios{display:flex;gap:1rem;margin-top:.35rem;flex-wrap:wrap}
+.es-radios label{display:inline-flex;align-items:center;gap:.4rem;font-size:15px;font-weight:600;cursor:pointer;
+  min-height:44px;padding:.3rem .4rem}
+.es-radios input{width:20px;height:20px;accent-color:var(--accent);cursor:pointer}
+.es-vis{display:grid;gap:8px;margin:14px 0 4px}
+.es-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;
+  cursor:pointer;border-radius:10px;padding:.45rem .6rem;border:1px solid transparent;background:none;
+  font:inherit;color:inherit;text-align:left;width:100%}
+.es-row:hover{background:var(--accent-soft)}
+.es-row:focus-visible{outline:2px solid var(--accent)}
+.es-row.sel{border-color:var(--accent);background:var(--accent-soft)}
+.es-name{font-weight:600;font-size:15px}
+.es-count{font-variant-numeric:tabular-nums;font-size:15px;white-space:nowrap;color:var(--muted)}
+.es-track{grid-column:1/-1;display:flex;height:14px;border-radius:999px;overflow:hidden;background:var(--border)}
+.es-seg-p{background:var(--pass)} .es-seg-f{background:var(--flag)} .es-seg-x{background:var(--fail)}
+#es-detail{margin:.8rem 0 .2rem;font-size:15px;color:var(--muted);min-height:1.2em}
+#es-detail strong{color:var(--ink)}
+.tally{font-size:16px;margin:.8rem 0 .2rem}
+#es-cost{font-size:15px;color:var(--muted)}
+table.cmp{width:100%;border-collapse:collapse;font-size:15px;margin:.6rem 0}
+table.cmp td{padding:.55rem .6rem;border-bottom:1px solid var(--border);vertical-align:top}
+table.cmp tr:first-child td{font-weight:800;background:var(--accent-soft)}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip{display:none!important}}
 </style>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Should I bring a technician to the inspection?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For machines over a few thousand dollars, yes \u2014 a paid pre-purchase inspection is cheap insurance. Use this checklist to screen machines first, so you only pay a technician for the ones worth a closer look."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is the most expensive thing to go wrong?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Boiler and heat-exchanger work, followed by pumps and control boards. That is why the checklist starts at the boiler: a bad boiler can exceed the machine\u2019s value."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Are the repair ranges accurate?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "They are ballparks for budgeting and negotiation, varying by brand and region. Treat them as \u201corder of magnitude\u201d numbers, not quotes."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does this cover home machines too?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The inspection logic applies to any pump-driven machine, but the checklist is tuned for commercial units \u2014 groups, steam boilers, and the price points where mistakes get expensive."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about brand-specific weak points?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "That is the paid upgrade. CremaCheck adds brand-specific checklists for La Marzocco, Synesso, Nuova Simonelli, and Victoria Arduino, with weighted risk scoring and a printable report \u2014 $29 one-time, offline."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Should I bring a technician to the inspection?","acceptedAnswer":{"@type":"Answer","text":"For machines over a few thousand dollars, yes — a paid pre-purchase inspection is cheap insurance. Use this checklist to screen machines first, so you only pay a technician for the ones worth a closer look."}},
+{"@type":"Question","name":"What is the most expensive thing to go wrong?","acceptedAnswer":{"@type":"Answer","text":"Boiler and heat-exchanger work, followed by pumps and control boards. That is why the checklist starts at the boiler: a bad boiler can exceed the machine’s value."}},
+{"@type":"Question","name":"Are the repair ranges accurate?","acceptedAnswer":{"@type":"Answer","text":"They are ballparks for budgeting and negotiation, varying by brand and region. Treat them as “order of magnitude” numbers, not quotes."}},
+{"@type":"Question","name":"Does this cover home machines too?","acceptedAnswer":{"@type":"Answer","text":"The inspection logic applies to any pump-driven machine, but the checklist is tuned for commercial units — groups, steam boilers, and the price points where mistakes get expensive."}},
+{"@type":"Question","name":"What about brand-specific weak points?","acceptedAnswer":{"@type":"Answer","text":"That is the paid upgrade. CremaCheck adds brand-specific checklists for La Marzocco, Synesso, Nuova Simonelli, and Victoria Arduino, with weighted risk scoring and a printable report — $29 one-time, offline."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<div class="g-header-actions">
-<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-<button id="theme-toggle" class="theme-toggle round-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
-<button id="sound-toggle" class="round-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
-</div>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Free Tools</a> &rsaquo; Espresso Inspection Checklist</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="Espresso Inspector — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 10h11v5.5A5.5 5.5 0 0 1 10.5 21h-1A4.5 4.5 0 0 1 5 16.5V10z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M16 11h2.2a2.8 2.8 0 0 1 0 5.6H16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 3.5c-1 1.2-1 2.4 0 3.6M12 3.5c-1 1.2-1 2.4 0 3.6" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <span><span class="bname">Espresso Inspector</span><span class="bsub">Used-machine inspection checklist</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Free Used Espresso Machine Inspection Checklist</h1>
-<p class="lead">Buying a used commercial espresso machine? A bad one is a five-figure mistake. Work through the
-inspection points that matter &mdash; boiler, group heads, steam, pump, electrics &mdash; mark each pass,
-flag, or fail, and get an issue tally with a rough repair-cost exposure range. Designed for use at the
-seller's location, offline, on your phone. Free, no account.</p>
-</div>
-
-<div class="toolbox" role="region" aria-label="Espresso machine inspection checklist">
-
-
-<div id="es-list"></div>
-<p><strong id="es-tally"></strong><br><span id="es-cost" class="small"></span></p>
-<div id="es-vis" class="es-vis" role="img" aria-label="Inspection status by category"></div>
-<label>Notes: <input type="text" id="es-notes" style="width:70%" placeholder="Seller claims, serial number, asking price..." aria-label="Inspection notes"></label><br>
-<button id="es-print">Print checklist</button>
-<button id="es-reset" class="plain">Reset</button>
-<p class="small">Repair ranges are rough ballparks for budgeting &mdash; get a technician quote before negotiating.</p>
-</div>
-<p class="small" style="margin-top:1rem"><strong>Inspecting a specific brand?</strong> <a href="../../products/cremacheck/index.html">CremaCheck</a>'s brand checklists score the machine's risk for you.</p>
-<p class="small">Free tool by <a href="../../index.html">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Free vs. full version</h3>
-<table><tbody>
-<tr><td><strong>Free tool on this page</strong></td><td><strong>CremaCheck &mdash; $29 one-time</strong></td></tr>
-<tr><td>One generic checklist for any machine</td><td>Brand-specific checklists: La Marzocco, Synesso, Nuova Simonelli, Victoria Arduino</td></tr>
-<tr><td>Simple repair-cost tally</td><td>Weighted risk scoring with a clear low / medium / high verdict and printable report</td></tr>
-</tbody></table>
-<p><a class="btn" href="https://glenerds.gumroad.com/l/cremacheck">Get CremaCheck &mdash; $29 one-time</a></p>
-<p class="small">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
-</div>
-
-
-
-
-
-<script>
-(function(){
-  var KEY='glenerds-espresso-v1';
-  var ITEMS=[
-    ['Boiler & heating','Pressure holds steady at temperature, no leaks around boiler fittings',120,400],
-    ['Boiler & heating','Heats to temperature in a reasonable time, no error codes',80,250],
-    ['Group head(s)','Water flows evenly from all groups, no channeling or sputtering',60,200],
-    ['Group head(s)','Gaskets and shower screens intact, not crusted or torn',20,80],
-    ['Steam & hot water','Steam wand produces dry steam, no leaks at the valve',40,150],
-    ['Steam & hot water','Hot water tap flows cleanly, boiler auto-refills',40,150],
-    ['Grinder (if included)','Burrs not visibly worn, grinds consistently, motor runs smooth',60,300],
-    ['Pump','Pump runs quietly and builds pressure to ~9 bar, no loud knocking',80,350],
-    ['Electrics','All switches, PID/display, and lights work; no burnt smell',50,250],
-    ['Electrics','Power cord and plug undamaged, machine properly grounded',30,120],
-    ['Body & frame','No major dents, rust, or water damage under the drip tray',0,200],
-    ['General','Seller can show it pulling a real shot, not just powering on',0,0]
-  ];
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
-  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
-  var data=load();
-  function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
-  function render(){
-    var wrap=document.getElementById('es-list');wrap.innerHTML='';
-    var flags=0,fails=0,lo=0,hi=0,done=0;
-    ITEMS.forEach(function(it,i){
-      var st=data[i]||'';
-      if(st==='flag'){flags++;lo+=it[2];hi+=it[3];done++;}
-      if(st==='fail'){fails++;lo+=it[2];hi+=it[3];done++;}
-      if(st==='pass'){done++;}
-      var div=document.createElement('div');
-      div.style.cssText='border-bottom:1px solid var(--border);padding:.5rem 0;';
-      div.innerHTML='<strong>'+it[0]+':</strong> '+it[1]
-        +'<br><span class="small">Typical repair: '+money(it[2])+'&ndash;'+money(it[3])+'</span><br>';
-      ['pass','flag','fail'].forEach(function(s){
-        var lab=document.createElement('label');lab.style.marginRight='1rem';
-        var r=document.createElement('input');r.type='radio';r.name='es'+i;r.value=s;
-        if(st===s)r.checked=true;
-        r.onchange=function(){data[i]=s;save(data);render();
-          if(s==='pass')Sound.click();else if(s==='flag')Sound.select();else Sound.error();};
-        lab.appendChild(r);lab.appendChild(document.createTextNode(' '+s.charAt(0).toUpperCase()+s.slice(1)));
-        div.appendChild(lab);
-      });
-      wrap.appendChild(div);
-    });
-    document.getElementById('es-tally').textContent=
-      'Checked '+done+'/'+ITEMS.length+' — '+flags+' flagged, '+fails+' failed';
-    document.getElementById('es-cost').textContent=
-      (flags+fails)>0?('Rough repair exposure: '+money(lo)+' – '+money(hi)+' (midpoints of flagged items)'):'No issues flagged yet.';
-    /* per-category pass/flag/fail stacked bars (visual representation) */
-    var evis=document.getElementById('es-vis');evis.innerHTML='';
-    /* interactive category bars: click/keyboard spotlights the flagged and failed items */
-    var esSel=null;
-    var edet=document.getElementById('es-detail');
-    if(!edet){edet=document.createElement('div');edet.id='es-detail';edet.setAttribute('aria-live','polite');evis.parentNode.insertBefore(edet,evis.nextSibling);}
-    edet.textContent='';
-    function esSpot(c,row){
-      var rows=evis.querySelectorAll('.es-row');
-      for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
-      if(esSel===c){esSel=null;edet.textContent='';Sound.click();return;}
-      esSel=c;row.classList.add('sel');
-      var bad=[];
-      ITEMS.forEach(function(it,i){var st=data[i]||'';
-        if(it[0]===c&&(st==='flag'||st==='fail'))
-          bad.push((st==='fail'?'FAIL: ':'Flagged: ')+it[1]+' ('+money(it[2])+'–'+money(it[3])+')');});
-      edet.innerHTML='<strong>'+c+':</strong> '+(bad.length?bad.join('<br>'):'All clear — no flagged or failed items in this category.');
-      Sound.select();
-    }
-    var ecats={},eorder=[];
-    ITEMS.forEach(function(it,i){
-      var c=it[0];
-      if(!ecats[c]){ecats[c]={pass:0,flag:0,fail:0,tot:0};eorder.push(c);}
-      var st=data[i]||'';
-      if(st==='pass')ecats[c].pass++;else if(st==='flag')ecats[c].flag++;else if(st==='fail')ecats[c].fail++;
-      ecats[c].tot++;
-    });
-    var ebaria=[];
-    eorder.forEach(function(c){
-      var s=ecats[c],chk=s.pass+s.flag+s.fail;
-      ebaria.push(c+': '+chk+' of '+s.tot+' checked'+(s.flag?', '+s.flag+' flagged':'')+(s.fail?', '+s.fail+' failed':''));
-      var row=document.createElement('div');row.className='es-row';
-      row.tabIndex=0;row.setAttribute('role','button');
-      row.setAttribute('aria-label',c+': '+chk+' of '+s.tot+' checked. Activate to show flagged and failed items.');
-      row.addEventListener('click',function(){esSpot(c,row);});
-      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();esSpot(c,row);}});
-      var nm=document.createElement('div');nm.className='es-name';nm.textContent=c;
-      var ct=document.createElement('div');ct.className='es-count';ct.textContent=chk+'/'+s.tot+' checked';
-      var tr=document.createElement('div');tr.className='es-track';
-      [['es-seg-p',s.pass],['es-seg-f',s.flag],['es-seg-x',s.fail]].forEach(function(seg){
-        var d=document.createElement('div');d.className=seg[0];
-        d.style.width=(s.tot>0?(seg[1]/s.tot*100):0).toFixed(1)+'%';
-        tr.appendChild(d);
-      });
-      row.appendChild(nm);row.appendChild(ct);row.appendChild(tr);evis.appendChild(row);
-    });
-    evis.setAttribute('aria-label','Inspection status by category: '+ebaria.join('; '));
-    document.getElementById('es-notes').value=data.notes||'';
-  }
-  document.getElementById('es-notes').addEventListener('input',function(e){data.notes=e.target.value;save(data);});
-  document.getElementById('es-print').onclick=function(){Sound.click();window.print();};
-  document.getElementById('es-reset').onclick=function(){if(confirm('Reset the whole checklist?')){data={};save(data);render();Sound.success();}};
-  render();
-  /* ---------- sample data toggle: snapshot checklist, fill realistic demo inspection, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  var SAMPLE={0:'pass',1:'pass',2:'flag',3:'pass',4:'pass',5:'pass',6:'pass',7:'fail',8:'flag',9:'pass',10:'pass',11:'pass',
-    notes:'2018 La Marzocco Linea 2-group, asking $6,500 — seller claims it was serviced last year.'};
-  var sbtn=document.getElementById('sample-toggle');
-  function paintSample(){
-    var lbl=sampleOn?'Clear sample data':'Try sample data';
-    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
-    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
-  }
-  if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){
-      sampleSnap=JSON.stringify(data);sampleOn=true;
-      data=Object.assign({},SAMPLE);render();
-    }else{
-      sampleOn=false;
-      try{data=JSON.parse(sampleSnap)||{};}catch(e){data={};}
-      sampleSnap=null;save(data);render();
-    }
-    paintSample();Sound.click();
-  });paintSample();}
-})();
-</script>
-<section class="block prose">
-
-<h2 class="sec">How to inspect a used espresso machine</h2>
-<p>Always see the machine run a real shot &mdash; powering on proves almost nothing. Work the checklist
-top to bottom: boiler behavior first (leaks and heat-up tell you the most), then water flow through
-each group, steam quality, the pump under load, and finally electrics and cosmetics. Mark anything
-that is not right as a flag or fail; the tally at the bottom converts your findings into a rough
-repair-cost range you can take into negotiation.</p>
-<h2 class="sec">What the price should tell you</h2>
-<p>A used commercial machine at 30&ndash;40% of new is normal; below 20%, assume hidden work. Add your
-rough repair exposure to the asking price &mdash; that sum is the real price. If it lands near the
-cost of a new machine with a warranty, walk away. And never skip the serial number: it lets you (or
-a technician) check service history and whether the machine was reported stolen.</p>
-<h2 class="sec">Worked example</h2>
-<p>Flag two issues on a used 2-group: boiler pressure problems (typical repair $120&ndash;$400) and uneven
-group flow ($60&ndash;$200). The tally reads 2 flagged with a rough repair exposure of
-<strong>$180&ndash;$600</strong> &mdash; real numbers to take into the negotiation, or a reason to walk away.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Should I bring a technician to the inspection?</dt>
-<dd>For machines over a few thousand dollars, yes &mdash; a paid pre-purchase inspection is cheap
-insurance. Use this checklist to screen machines first, so you only pay a technician for the ones
-worth a closer look.</dd>
-<dt>What is the most expensive thing to go wrong?</dt>
-<dd>Boiler and heat-exchanger work, followed by pumps and control boards. That is why the checklist
-starts at the boiler: a bad boiler can exceed the machine&rsquo;s value.</dd>
-<dt>Are the repair ranges accurate?</dt>
-<dd>They are ballparks for budgeting and negotiation, varying by brand and region. Treat them as
-&ldquo;order of magnitude&rdquo; numbers, not quotes.</dd>
-<dt>Does this cover home machines too?</dt>
-<dd>The inspection logic applies to any pump-driven machine, but the checklist is tuned for commercial
-units &mdash; groups, steam boilers, and the price points where mistakes get expensive.</dd>
-<dt>What about brand-specific weak points?</dt>
-<dd>That is the paid upgrade. <strong>CremaCheck</strong> adds brand-specific checklists for La
-Marzocco, Synesso, Nuova Simonelli, and Victoria Arduino, with weighted risk scoring and a printable
-report &mdash; $29 one-time, offline.</dd>
-</dl>
+<section class="hero">
+  <h1>Free Used Espresso Machine Inspection Checklist</h1>
+  <p class="lead">Buying a used commercial espresso machine? A bad one is a five-figure mistake. Work through the inspection points that matter &mdash; boiler, group heads, steam, pump, electrics &mdash; mark each pass, flag, or fail, and get an issue tally with a rough repair-cost exposure range. Designed for use at the seller&rsquo;s location, offline, on your phone.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related tools</h2>
-<div class="grid">
-<div class="card"><h3>CremaCheck &mdash; $29 one-time</h3><p>Brand-specific checklists, a scored low/medium/high risk verdict, and a printable inspection report.</p><a class="btn" href="../../products/cremacheck/index.html">Learn more</a></div>
-<div class="card"><h3>Free Used Boat Inspection Checklist</h3><p>The same pass/flag/fail inspection method, tuned for boats.</p><a class="btn" href="../used-boat-inspection-checklist/index.html">Open the free tool</a></div>
-</div>
+<section class="card" aria-label="Inspection checklist">
+  <h2>Run the inspection</h2>
+  <div id="es-list"></div>
+  <p class="tally"><strong id="es-tally"></strong><br><span id="es-cost"></span></p>
+  <div id="es-vis" class="es-vis" role="img" aria-label="Inspection status by category"></div>
+  <p id="es-detail" aria-live="polite"></p>
+  <label class="field">Notes<input type="text" id="es-notes" placeholder="Seller claims, serial number, asking price..." aria-label="Inspection notes"></label>
+  <div class="btn-row">
+    <button class="btn" id="es-print">Print checklist</button>
+    <button class="btn ghost" id="es-reset">Reset</button>
+  </div>
+  <p class="small">Repair ranges are rough ballparks for budgeting &mdash; get a technician quote before negotiating.</p>
 </section>
 
+<section class="card">
+  <h2>Free vs. full version</h2>
+  <table class="cmp"><tbody>
+  <tr><td>Free tool on this page</td><td>CremaCheck &mdash; $29 one-time</td></tr>
+  <tr><td>One generic checklist for any machine</td><td>Brand-specific checklists: La Marzocco, Synesso, Nuova Simonelli, Victoria Arduino</td></tr>
+  <tr><td>Simple repair-cost tally</td><td>Weighted risk scoring with a clear low / medium / high verdict and printable report</td></tr>
+  </tbody></table>
+  <p><a class="btn" href="https://glenerds.gumroad.com/l/cremacheck">Get CremaCheck &mdash; $29 one-time</a></p>
+  <p class="small">No subscription. No account. The full tool runs offline in your browser, just like this one.</p>
+</section>
 
-<div class="cta-band">
-<h2>Need the full version?</h2>
-<p><strong>CremaCheck</strong> is the offline inspection tool for used commercial espresso machine buyers: brand-specific checklists, a scored risk verdict, repair-cost estimates, and a printable report. $29 one-time, no subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/cremacheck">Get CremaCheck &mdash; $29 one-time</a>
-<p class="small"><a href="../../products/cremacheck/index.html">Learn more about CremaCheck</a>
-&middot; <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+<section class="prose">
+  <h2>How to inspect a used espresso machine</h2>
+  <p>Always see the machine run a real shot &mdash; powering on proves almost nothing. Work the checklist top to bottom: boiler behavior first (leaks and heat-up tell you the most), then water flow through each group, steam quality, the pump under load, and finally electrics and cosmetics. Mark anything that is not right as a flag or fail; the tally above converts your findings into a rough repair-cost range you can take into negotiation.</p>
+  <h2>What the price should tell you</h2>
+  <p>A used commercial machine at 30&ndash;40% of new is normal; below 20%, assume hidden work. Add your rough repair exposure to the asking price &mdash; that sum is the real price. If it lands near the cost of a new machine with a warranty, walk away. And never skip the serial number: it lets you (or a technician) check service history and whether the machine was reported stolen.</p>
+  <h2>Worked example</h2>
+  <p>Flag two issues on a used 2-group: boiler pressure problems (typical repair $120&ndash;$400) and uneven group flow ($60&ndash;$200). The tally reads 2 flagged with a rough repair exposure of <strong>$180&ndash;$600</strong> &mdash; real numbers to take into the negotiation, or a reason to walk away.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>Should I bring a technician to the inspection?</summary><p>For machines over a few thousand dollars, yes &mdash; a paid pre-purchase inspection is cheap insurance. Use this checklist to screen machines first, so you only pay a technician for the ones worth a closer look.</p></details>
+  <details><summary>What is the most expensive thing to go wrong?</summary><p>Boiler and heat-exchanger work, followed by pumps and control boards. That is why the checklist starts at the boiler: a bad boiler can exceed the machine&rsquo;s value.</p></details>
+  <details><summary>Are the repair ranges accurate?</summary><p>They are ballparks for budgeting and negotiation, varying by brand and region. Treat them as &ldquo;order of magnitude&rdquo; numbers, not quotes.</p></details>
+  <details><summary>Does this cover home machines too?</summary><p>The inspection logic applies to any pump-driven machine, but the checklist is tuned for commercial units &mdash; groups, steam boilers, and the price points where mistakes get expensive.</p></details>
+  <details><summary>What about brand-specific weak points?</summary><p>That is the paid upgrade. <strong>CremaCheck</strong> adds brand-specific checklists for La Marzocco, Synesso, Nuova Simonelli, and Victoria Arduino, with weighted risk scoring and a printable report &mdash; <a href="https://glenerds.gumroad.com/l/cremacheck">$29 one-time, offline</a>.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Inspecting a specific brand?</h2>
+  <p><strong>CremaCheck</strong> adds brand-specific checklists, a scored low / medium / high risk verdict, and a printable inspection report. $29 one-time, no subscription.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/cremacheck">Get CremaCheck &mdash; $29</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
-<p class="cross-promo"><a href="https://glenerds.gumroad.com">Like this tool? Check out our other apps &rarr;</a></p>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>Espresso Inspector</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();Sound.toggleTheme();});}
-  paint();
-})();
-/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+var KEY='glenerds-espresso-v1';
+var ITEMS=[
+  ['Boiler & heating','Pressure holds steady at temperature, no leaks around boiler fittings',120,400],
+  ['Boiler & heating','Heats to temperature in a reasonable time, no error codes',80,250],
+  ['Group head(s)','Water flows evenly from all groups, no channeling or sputtering',60,200],
+  ['Group head(s)','Gaskets and shower screens intact, not crusted or torn',20,80],
+  ['Steam & hot water','Steam wand produces dry steam, no leaks at the valve',40,150],
+  ['Steam & hot water','Hot water tap flows cleanly, boiler auto-refills',40,150],
+  ['Grinder (if included)','Burrs not visibly worn, grinds consistently, motor runs smooth',60,300],
+  ['Pump','Pump runs quietly and builds pressure to ~9 bar, no loud knocking',80,350],
+  ['Electrics','All switches, PID/display, and lights work; no burnt smell',50,250],
+  ['Electrics','Power cord and plug undamaged, machine properly grounded',30,120],
+  ['Body & frame','No major dents, rust, or water damage under the drip tray',0,200],
+  ['General','Seller can show it pulling a real shot, not just powering on',0,0]
+];
+var sampleOn=false;
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{};}catch(e){return{};}}
+function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+var data=load();
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+var esSel=null;
+function render(){
+  var wrap=$('es-list');wrap.innerHTML='';
+  var flags=0,fails=0,lo=0,hi=0,done=0;
+  ITEMS.forEach(function(it,i){
+    var st=data[i]||'';
+    if(st==='flag'){flags++;lo+=it[2];hi+=it[3];done++;}
+    if(st==='fail'){fails++;lo+=it[2];hi+=it[3];done++;}
+    if(st==='pass'){done++;}
+    var div=document.createElement('div');div.className='es-item';
+    div.innerHTML='<div class="lbl"><strong>'+esc(it[0])+':</strong> '+esc(it[1])+'</div>'
+      +'<div class="cost">Typical repair: '+money(it[2])+'&ndash;'+money(it[3])+'</div>';
+    var rg=document.createElement('div');rg.className='es-radios';
+    ['pass','flag','fail'].forEach(function(s){
+      var lab=document.createElement('label');
+      var r=document.createElement('input');r.type='radio';r.name='es'+i;r.value=s;
+      if(st===s)r.checked=true;
+      r.setAttribute('aria-label',it[0]+' — '+s);
+      r.addEventListener('change',function(){data[i]=s;save(data);render();
+        if(s==='pass')Sound.click();else if(s==='flag')Sound.select();else Sound.error();});
+      lab.appendChild(r);lab.appendChild(document.createTextNode(' '+s.charAt(0).toUpperCase()+s.slice(1)));
+      rg.appendChild(lab);
+    });
+    div.appendChild(rg);wrap.appendChild(div);
+  });
+  $('es-tally').textContent='Checked '+done+'/'+ITEMS.length+' — '+flags+' flagged, '+fails+' failed';
+  $('es-cost').textContent=(flags+fails)>0
+    ?('Rough repair exposure: '+money(lo)+' – '+money(hi)+' (midpoints of flagged items)')
+    :'No issues flagged yet.';
+  var evis=$('es-vis');evis.innerHTML='';
+  var edet=$('es-detail');edet.innerHTML='';
+  function esSpot(c,row){
+    var rows=evis.querySelectorAll('.es-row');
+    for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
+    if(esSel===c){esSel=null;edet.innerHTML='';Sound.click();return;}
+    esSel=c;row.classList.add('sel');
+    var bad=[];
+    ITEMS.forEach(function(it,i){var st=data[i]||'';
+      if(it[0]===c&&(st==='flag'||st==='fail'))
+        bad.push((st==='fail'?'FAIL: ':'Flagged: ')+it[1]+' ('+money(it[2])+'–'+money(it[3])+')');});
+    edet.innerHTML='<strong>'+esc(c)+':</strong> '+(bad.length?bad.map(esc).join('<br>'):'All clear — no flagged or failed items in this category.');
+    Sound.select();
+  }
+  var ecats={},eorder=[];
+  ITEMS.forEach(function(it,i){
+    var c=it[0];
+    if(!ecats[c]){ecats[c]={pass:0,flag:0,fail:0,tot:0};eorder.push(c);}
+    var st=data[i]||'';
+    if(st==='pass')ecats[c].pass++;else if(st==='flag')ecats[c].flag++;else if(st==='fail')ecats[c].fail++;
+    ecats[c].tot++;
+  });
+  var ebaria=[];
+  eorder.forEach(function(c){
+    var s=ecats[c],chk=s.pass+s.flag+s.fail;
+    ebaria.push(c+': '+chk+' of '+s.tot+' checked'+(s.flag?', '+s.flag+' flagged':'')+(s.fail?', '+s.fail+' failed':''));
+    var row=document.createElement('button');row.type='button';row.className='es-row';
+    row.setAttribute('aria-label',c+': '+chk+' of '+s.tot+' checked. Activate to show flagged and failed items.');
+    row.addEventListener('click',function(){esSpot(c,row);});
+    var nm=document.createElement('div');nm.className='es-name';nm.textContent=c;
+    var ct=document.createElement('div');ct.className='es-count';ct.textContent=chk+'/'+s.tot+' checked';
+    var tr=document.createElement('div');tr.className='es-track';tr.setAttribute('aria-hidden','true');
+    [['es-seg-p',s.pass],['es-seg-f',s.flag],['es-seg-x',s.fail]].forEach(function(seg){
+      var d=document.createElement('div');d.className=seg[0];
+      d.style.width=(s.tot>0?(seg[1]/s.tot*100):0).toFixed(1)+'%';
+      tr.appendChild(d);
+    });
+    row.appendChild(nm);row.appendChild(ct);row.appendChild(tr);evis.appendChild(row);
+  });
+  evis.setAttribute('aria-label','Inspection status by category: '+ebaria.join('; '));
+  $('es-notes').value=data.notes||'';
+}
+$('es-notes').addEventListener('input',function(e){data.notes=e.target.value;save(data);});
+$('es-print').addEventListener('click',function(){Sound.click();window.print();});
+$('es-reset').addEventListener('click',function(){if(confirm('Reset the whole checklist?')){data={};esSel=null;save(data);render();Sound.success();}});
+
+/* ---------- sample data toggle ---------- */
+var sampleSnap=null;
+var SAMPLE={0:'pass',1:'pass',2:'flag',3:'pass',4:'pass',5:'pass',6:'pass',7:'fail',8:'flag',9:'pass',10:'pass',11:'pass',
+  notes:'2018 La Marzocco Linea 2-group, asking $6,500 — seller claims it was serviced last year.'};
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    sampleSnap=JSON.stringify(data);sampleOn=true;
+    data=Object.assign({},SAMPLE);render();
+  }else{
+    sampleOn=false;
+    try{data=JSON.parse(sampleSnap)||{};}catch(e){data={};}
+    sampleSnap=null;save(data);render();
+  }
+  paintSample();Sound.click();
+});
+paintSample();
+render();
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){esSel=null;
+    document.querySelectorAll('.es-row.sel').forEach(function(r){r.classList.remove('sel');});
+    $('es-detail').innerHTML='';}
+});
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
 var Sound=(function(){
-  var KEY='espresso-machine-inspection-checklist.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  var SKEY='espresso-machine-inspection-checklist.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
   function ac(){try{
     if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
     return ctx;}catch(e){return null;}}
   function tone(freq,dur,type,vol,delay){
-    var c=ac();if(!c)return;
+    if(!on)return;var c=ac();if(!c)return;
     function play(){try{
       var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
       o.type=type||'sine';o.frequency.value=freq;
       g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
       g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
       o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
-    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
   }
   return{
     isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
-    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
   };
 })();
-(function(){
-  var btn=document.getElementById('sound-toggle');if(!btn)return;
-  function paint(){var on=Sound.isOn();
-    btn.innerHTML=on?'&#128266;':'&#128263;';
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
-    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
