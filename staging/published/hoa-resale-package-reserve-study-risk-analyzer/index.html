@@ -5,174 +5,419 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HOA Financial Health Checker — Reserve Study &amp; Special Assessment Risk Analyzer | Glenerds</title>
 <meta name="description" content="Offline risk analyzer for condo and townhome buyers: score HOA financial health from resale-package figures, flag special-assessment risk. $9 one-time, no subscription.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/hoa-resale-package-reserve-study-risk-analyzer/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="HOA Financial Health Checker — Reserve Study &amp; Special Assessment Risk Analyzer | Glenerds">
-<meta property="og:description" content="Offline risk analyzer for condo and townhome buyers: score HOA financial health from resale-package figures, flag special-assessment risk. $9 one-time, no subscription.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/hoa-resale-package-reserve-study-risk-analyzer/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/hoa-resale-package-reserve-study-risk-analyzer/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "HOA ReserveCheck",
-  "description": "Offline risk analyzer for condo and townhome buyers: score HOA financial health from resale-package figures, flag special-assessment risk. $9 one-time, no subscription.",
-  "url": "https://glenerds.github.io/glenerds/products/hoa-resale-package-reserve-study-risk-analyzer/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "9",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer"
-  }
+<style>
+:root{
+  --bg:#f6f8fb; --card:#ffffff; --ink:#1d2433; --muted:#5b6577; --border:#dfe6f0;
+  --accent:#1d4ed8; --accent-ink:#1e40af; --accent-soft:#e3ecfd;
+  --low:#16a34a; --mod:#d97706; --high:#dc2626; --sev:#7f1d1d; --shadow:0 2px 10px rgba(30,64,160,.08);
 }
+html[data-theme="dark"]{
+  --bg:#11151d; --card:#1a2029; --ink:#eceff5; --muted:#a3adbf; --border:#2c3542;
+  --accent:#7aa5f8; --accent-ink:#a9c4fb; --accent-soft:#222b3a;
+  --low:#4ade80; --mod:#fbbf24; --high:#f87171; --sev:#fca5a5; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#3b82f6,#1e3a8a);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.25rem;font-weight:800;background:var(--accent-soft);
+  border:1px solid var(--border);border-radius:12px;padding:.5rem 1rem;margin-right:.8rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start;margin-top:1rem}
+@media (max-width:640px){.demo-grid{grid-template-columns:1fr}}
+.donut-wrap{display:flex;flex-direction:column;align-items:center}
+.donut-wrap svg{width:210px;height:210px}
+.donut-seg{cursor:pointer;transition:opacity .15s}
+.donut-seg:hover{opacity:.82}
+.donut-seg.sel{stroke:var(--ink);stroke-width:2}
+.band{font-size:1.25rem;font-weight:800;margin:.4rem 0 .1rem}
+.band small{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.factors{display:grid;gap:.5rem;margin-top:.4rem}
+.factor{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center;
+  cursor:pointer;border-radius:10px;padding:.45rem .6rem;border:1px solid transparent;background:none;
+  font:inherit;color:inherit;text-align:left;width:100%}
+.factor:hover{background:var(--accent-soft)}
+.factor:focus-visible{outline:2px solid var(--accent)}
+.factor.sel{border-color:var(--accent);background:var(--accent-soft)}
+.factor .fname{font-weight:600;font-size:15px}
+.factor .fval{font-variant-numeric:tabular-nums;font-size:15px;font-weight:800;white-space:nowrap}
+.factor .ftrack{grid-column:1/-1;height:12px;border-radius:999px;background:var(--border);overflow:hidden}
+.factor .ftrack>div{height:100%;border-radius:999px}
+#demo-detail{margin-top:.7rem;font-size:15px;color:var(--muted);min-height:1.2em}
+#demo-detail strong{color:var(--ink)}
+.flags{margin:.6rem 0 0;padding-left:1.2rem;font-size:15px}
+.flags li{margin:.3rem 0}
+.flags .warn{color:var(--high);font-weight:700}
+.feat{font-size:16px;padding-left:1.3rem}
+.feat li{margin:.35rem 0}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"HOA ReserveCheck",
+"description":"Offline risk analyzer for condo and townhome buyers: score HOA financial health from resale-package figures, flag special-assessment risk. $9 one-time, no subscription.",
+"url":"https://glenerds.github.io/glenerds/staging/published/hoa-resale-package-reserve-study-risk-analyzer/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"9","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What documents do I need?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The HOA resale package and reserve study \u2014 the 12-item checklist tells you exactly what to request if anything is missing."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a special assessment?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "A one-time charge HOA members pay when reserves can't cover a major repair. The gauge estimates how likely one is based on funding levels."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Why do Fannie Mae flags matter?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "If a condo project isn't warrantable, conventional financing gets harder. The tool flags the warning signs early."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this legal or financial advice?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. It's a record-keeping and analysis tool that organizes the documents' figures into a clear risk picture \u2014 your agent, lender, or attorney makes the call."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What documents do I need?","acceptedAnswer":{"@type":"Answer","text":"The HOA resale package and reserve study — the 12-item checklist tells you exactly what to request if anything is missing."}},
+{"@type":"Question","name":"What is a special assessment?","acceptedAnswer":{"@type":"Answer","text":"A one-time charge HOA members pay when reserves can't cover a major repair. The gauge estimates how likely one is based on funding levels."}},
+{"@type":"Question","name":"Why do Fannie Mae flags matter?","acceptedAnswer":{"@type":"Answer","text":"If a condo project isn't warrantable, conventional financing gets harder. The tool flags the warning signs early."}},
+{"@type":"Question","name":"Is this legal or financial advice?","acceptedAnswer":{"@type":"Answer","text":"No. It's a record-keeping and analysis tool that organizes the documents' figures into a clear risk picture — your agent, lender, or attorney makes the call."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; HOA ReserveCheck</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="HOA ReserveCheck — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 11.5L12 4l8.5 7.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10.5V20h12v-9.5" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 13.2l1.5 1.5 2.6-2.9" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span><span class="bname">HOA ReserveCheck</span><span class="bsub">HOA financial health analyzer</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>HOA Financial Health Checker — Reserve Study &amp; Special Assessment Risk Analyzer</h1>
-<p class="lead">The condo looks perfect; the HOA&#x27;s finances are the part that can blindside you. This analyzer takes the figures straight from the resale package and reserve study and produces a weighted financial-risk score, a special-assessment likelihood gauge, and Fannie Mae warrantability warning flags — plus a 12-item document-request checklist and a printable due-diligence report for your file.</p>
-<span class="pricebox">$9 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/hoa-special-assessment-calculator/index.html"><strong>Free HOA Special Assessment Calculator</strong></a> &mdash; Estimate your personal share of a special assessment from project cost, units, and reserves.</p>
-<p class="small">Free forever, runs offline in your browser. HOA ReserveCheck is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>Weighted HOA financial-risk score from resale-package figures you key in</li>
-<li>Special-assessment likelihood gauge based on reserve funding levels</li>
-<li>Fannie Mae warrantability warning flags that can affect your mortgage</li>
-<li>12-item document-request checklist so nothing is missing from the package</li>
-<li>Printable due-diligence report for your records or your agent</li>
-<li>Guidance only — not professional financial or legal advice</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>First-time condo and townhome buyers in their due-diligence window</li>
-<li>Buyers comparing two HOAs and wanting an apples-to-apples risk read</li>
-<li>Anyone who has heard a special-assessment horror story and wants to avoid one</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You&#x27;re an HOA board member who needs management software</li>
-<li>You want professional financial or legal advice about a purchase</li>
-<li>You&#x27;re analyzing a commercial or mixed-use association</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>What documents do I need?</dt>
-<dd>The HOA resale package and reserve study — the 12-item checklist tells you exactly what to request if anything is missing.</dd>
-<dt>What is a special assessment?</dt>
-<dd>A one-time charge HOA members pay when reserves can&#x27;t cover a major repair. The gauge estimates how likely one is based on funding levels.</dd>
-<dt>Why do Fannie Mae flags matter?</dt>
-<dd>If a condo project isn&#x27;t warrantable, conventional financing gets harder. The tool flags the warning signs early.</dd>
-<dt>Is this legal or financial advice?</dt>
-<dd>No. It&#x27;s a record-keeping and analysis tool that organizes the documents&#x27; figures into a clear risk picture — your agent, lender, or attorney makes the call.</dd>
-</dl>
+<section class="hero">
+  <h1>HOA Financial Health Checker &mdash; Reserve Study &amp; Special Assessment Risk Analyzer</h1>
+  <p class="lead">The condo looks perfect; the HOA&rsquo;s finances are the part that can blindside you. This analyzer takes the figures straight from the resale package and reserve study and produces a weighted financial-risk score, a special-assessment likelihood gauge, and Fannie Mae warrantability warning flags &mdash; plus a 12-item document-request checklist and a printable due-diligence report for your file.</p>
+  <p><span class="pricebox">$9 one-time</span>
+  <a class="btn" href="https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer">Get it on Gumroad</a></p>
+  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related free tools</h2>
-<div class="grid">
-<div class="card"><h3>Free Security Deposit Deduction Calculator</h3><p>Renting while you house-hunt? Keep the deposit math clean.</p><a class="btn" href="../../tools/security-deposit-deduction-calculator/index.html">Open the free tool</a></div>
-<div class="card"><h3>HOA Management Software Alternative</h3><p>An honest comparison: when the one-time offline tool wins, and when the subscription alternative is the better call.</p><a class="btn" href="../../alternatives/hoa-management-software-alternative/index.html">Read the comparison</a></div>
-</div>
+<section class="card" aria-label="Risk analyzer demo">
+  <h2>Try the risk math</h2>
+  <p class="small" style="margin-top:0">Key in the headline figures from any resale package and reserve study to get the same style of risk read HOA ReserveCheck produces: a weighted risk score, a special-assessment likelihood gauge, and warning flags. Tap any donut segment or factor bar to see what drives the score.</p>
+  <div class="demo-grid">
+    <div>
+      <div class="field-row">
+        <label class="field">Reserve funds ($)<input type="number" id="ha-res" value="180000" min="0" step="1000" inputmode="numeric"></label>
+        <label class="field">Annual reserve contribution ($)<input type="number" id="ha-con" value="36000" min="0" step="1000" inputmode="numeric"></label>
+      </div>
+      <div class="field-row">
+        <label class="field">Total units<input type="number" id="ha-units" value="40" min="1" step="1" inputmode="numeric"></label>
+        <label class="field">Monthly dues per unit ($)<input type="number" id="ha-dues" value="350" min="0" step="5" inputmode="numeric"></label>
+      </div>
+      <div class="field-row">
+        <label class="field">Reserve study % funded<input type="number" id="ha-pct" value="55" min="0" max="200" step="1" inputmode="numeric"></label>
+        <label class="field">Special assessments, last 5 yrs<input type="number" id="ha-hist" value="1" min="0" step="1" inputmode="numeric"></label>
+      </div>
+    </div>
+    <div class="donut-wrap">
+      <svg id="ha-donut" viewBox="0 0 210 210" role="img" aria-label="Risk score donut"></svg>
+      <p class="band" id="ha-band" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="factors" id="ha-factors"></div>
+  <ul class="flags" id="ha-flags"></ul>
+  <p id="demo-detail" aria-live="polite"></p>
+  <p class="small">Guidance only &mdash; not professional financial or legal advice. Your agent, lender, or attorney makes the call.</p>
 </section>
-<div class="cta-band">
-<h2>Get HOA ReserveCheck today</h2>
-<p>$9 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul class="feat">
+    <li>Weighted HOA financial-risk score from resale-package figures you key in</li>
+    <li>Special-assessment likelihood gauge based on reserve funding levels</li>
+    <li>Fannie Mae warrantability warning flags that can affect your mortgage</li>
+    <li>12-item document-request checklist so nothing is missing from the package</li>
+    <li>Printable due-diligence report for your records or your agent</li>
+    <li>Guidance only &mdash; not professional financial or legal advice</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul class="feat">
+    <li>First-time condo and townhome buyers in their due-diligence window</li>
+    <li>Buyers comparing two HOAs and wanting an apples-to-apples risk read</li>
+    <li>Anyone who has heard a special-assessment horror story and wants to avoid one</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul class="feat">
+    <li>You&rsquo;re an HOA board member who needs management software</li>
+    <li>You want professional financial or legal advice about a purchase</li>
+    <li>You&rsquo;re analyzing a commercial or mixed-use association</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>What documents do I need?</summary><p>The HOA resale package and reserve study &mdash; the 12-item checklist tells you exactly what to request if anything is missing.</p></details>
+  <details><summary>What is a special assessment?</summary><p>A one-time charge HOA members pay when reserves can&rsquo;t cover a major repair. The gauge estimates how likely one is based on funding levels.</p></details>
+  <details><summary>Why do Fannie Mae flags matter?</summary><p>If a condo project isn&rsquo;t warrantable, conventional financing gets harder. The tool flags the warning signs early.</p></details>
+  <details><summary>Is this legal or financial advice?</summary><p>No. It&rsquo;s a record-keeping and analysis tool that organizes the documents&rsquo; figures into a clear risk picture &mdash; your agent, lender, or attorney makes the call.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get HOA ReserveCheck today</h2>
+  <p>$9 one-time &mdash; yours forever. No subscription. The full version adds the document checklist, Fannie Mae flags, and a printable due-diligence report.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/hoa-resale-package-reserve-study-risk-analyzer">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>HOA ReserveCheck</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
-  paint();
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function num(id){var v=parseFloat($(id).value);return isNaN(v)||v<0?0:v;}
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+var NS='http://www.w3.org/2000/svg';
+var segSel=null,lastBand=null;
+var FACTORS=[
+  {key:'funding',name:'Reserve funding level',desc:'The reserve study percent-funded is the single biggest predictor of a special assessment. Below 70% the cushion thins; below 30% the HOA is one big repair away from billing owners directly.'},
+  {key:'contrib',name:'Reserve contribution share',desc:'How much of each dues dollar actually goes into reserves. Under 10% means the HOA is funding today\'s operations, not tomorrow\'s roof — dues hikes or assessments usually follow.'},
+  {key:'history',name:'Assessment history',desc:'Past special assessments are the best predictor of future ones. Two or more in five years usually signals chronic underfunding, not bad luck.'}
+];
+function calc(){
+  var res=num('ha-res'),con=num('ha-con'),units=Math.max(num('ha-units'),1),
+      dues=num('ha-dues'),pct=num('ha-pct'),hist=num('ha-hist');
+  var fundingPts=Math.max(0,100-Math.min(pct,100))*0.5;
+  var ratio=dues*12*units>0?con/(dues*12*units):0;
+  var contribPts=ratio<0.10?15:(ratio<0.25?5:0);
+  var histPts=Math.min(hist,3)*8;
+  var score=Math.min(Math.round(fundingPts+contribPts+histPts),100);
+  var band,bandCls;
+  if(score<25){band='Low';bandCls='var(--low)';}
+  else if(score<45){band='Moderate';bandCls='var(--mod)';}
+  else if(score<65){band='High';bandCls='var(--high)';}
+  else{band='Severe';bandCls='var(--sev)';}
+  /* donut */
+  var svg=$('ha-donut');svg.innerHTML='';
+  var R=80,C=105,cx=2*Math.PI*R;
+  var vals=[fundingPts,contribPts,histPts];
+  var cols=['var(--high)','var(--mod)','var(--low)'];
+  var bg=document.createElementNS(NS,'circle');
+  bg.setAttribute('cx',C);bg.setAttribute('cy',C);bg.setAttribute('r',R);
+  bg.setAttribute('fill','none');bg.setAttribute('stroke','var(--border)');bg.setAttribute('stroke-width','26');
+  svg.appendChild(bg);
+  var acc=0,total=Math.max(fundingPts+contribPts+histPts,0.001);
+  vals.forEach(function(v,i){
+    var frac=v/total;
+    var seg=document.createElementNS(NS,'circle');
+    seg.setAttribute('cx',C);seg.setAttribute('cy',C);seg.setAttribute('r',R);
+    seg.setAttribute('fill','none');seg.setAttribute('stroke',cols[i]);seg.setAttribute('stroke-width','26');
+    seg.setAttribute('stroke-dasharray',(frac*cx).toFixed(1)+' '+cx.toFixed(1));
+    seg.setAttribute('stroke-dashoffset',(-acc*cx+cx/4).toFixed(1));
+    seg.setAttribute('class','donut-seg'+(segSel===i?' sel':''));
+    seg.setAttribute('tabindex','0');seg.setAttribute('role','button');
+    seg.setAttribute('aria-label',FACTORS[i].name+': '+Math.round(v)+' risk points. Activate to see details.');
+    (function(idx){seg.addEventListener('click',function(){spot(idx);});
+      seg.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();spot(idx);}});})(i);
+    svg.appendChild(seg);acc+=frac;
+  });
+  var t1=document.createElementNS(NS,'text');
+  t1.setAttribute('x',C);t1.setAttribute('y',C-2);t1.setAttribute('text-anchor','middle');
+  t1.setAttribute('font-size','44');t1.setAttribute('font-weight','800');t1.setAttribute('fill','var(--ink)');
+  t1.setAttribute('font-variant-numeric','tabular-nums');t1.textContent=score;
+  var t2=document.createElementNS(NS,'text');
+  t2.setAttribute('x',C);t2.setAttribute('y',C+26);t2.setAttribute('text-anchor','middle');
+  t2.setAttribute('font-size','16');t2.setAttribute('fill','var(--muted)');t2.textContent='risk score';
+  svg.appendChild(t1);svg.appendChild(t2);
+  svg.setAttribute('aria-label','HOA risk score '+score+' of 100: '+band+' special-assessment likelihood.');
+  var hb=$('ha-band');
+  hb.innerHTML='<span style="color:'+bandCls+'">'+band+' special-assessment likelihood</span><small>risk score '+score+' / 100</small>';
+  /* factor bars */
+  var mx=Math.max(fundingPts,contribPts,histPts,1);
+  var fc=$('ha-factors');fc.innerHTML='';
+  var fpts=[fundingPts,contribPts,histPts];
+  fpts.forEach(function(v,i){
+    var b=document.createElement('button');b.type='button';b.className='factor'+(segSel===i?' sel':'');
+    b.setAttribute('aria-label',FACTORS[i].name+': '+Math.round(v)+' risk points. Activate to see details.');
+    b.innerHTML='<span class="fname">'+esc(FACTORS[i].name)+'</span><span class="fval">'+Math.round(v)+' pts</span>'
+      +'<span class="ftrack" aria-hidden="true"><div style="width:'+(v/mx*100).toFixed(1)+'%;background:'+cols[i]+'"></div></span>';
+    (function(idx){b.addEventListener('click',function(){spot(idx);});})(i);
+    fc.appendChild(b);
+  });
+  /* flags */
+  var flags=[];
+  if(pct<30)flags.push('Critically underfunded reserve study ('+Math.round(pct)+'% funded) — one big repair away from billing owners directly.');
+  else if(pct<70)flags.push('Reserve study below 70% funded — the cushion is thin.');
+  if(hist>=2)flags.push(hist+' special assessments in 5 years — a pattern of underfunding, not bad luck.');
+  if(ratio<0.10)flags.push('Only '+Math.round(ratio*100)+'% of dues goes to reserves — dues hikes or assessments usually follow.');
+  if(res/units<2000)flags.push('Reserves of '+money(res/units)+' per unit — a thin cushion for surprises.');
+  var fl=$('ha-flags');fl.innerHTML='';
+  flags.forEach(function(f){
+    var li=document.createElement('li');
+    li.innerHTML='<span class="warn">⚠</span> '+esc(f);
+    fl.appendChild(li);
+  });
+  if(!flags.length){
+    var ok=document.createElement('li');ok.textContent='No warning flags on these figures — this is the kind of package buyers hope for.';
+    fl.appendChild(ok);
+  }
+  if(segSel!==null){
+    $('demo-detail').innerHTML='<strong>'+esc(FACTORS[segSel].name)+':</strong> '+esc(FACTORS[segSel].desc);
+  }else{
+    $('demo-detail').innerHTML='';
+  }
+  if(lastBand!==null&&lastBand!==band){
+    if(band==='Low')Sound.success();else if(band==='Severe')Sound.error();else Sound.select();
+  }
+  lastBand=band;
+}
+function spot(i){
+  if(segSel===i){segSel=null;}else{segSel=i;Sound.select();}
+  calc();
+  if(segSel===null)Sound.click();
+}
+['ha-res','ha-con','ha-units','ha-dues','ha-pct','ha-hist'].forEach(function(id){
+  $(id).addEventListener('input',function(){segSel=null;calc();});
+  $(id).addEventListener('change',function(){Sound.click();});
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){segSel=null;calc();}
+});
+calc();
+
+/* ---------- sample data: fills a risky-HOA scenario, restores on off ---------- */
+var sampleOn=false,sampleSnap=null;
+var FIELDS=['ha-res','ha-con','ha-units','ha-dues','ha-pct','ha-hist'];
+var RISKY=['45000','12000','60','400','22','2'];
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    sampleSnap=FIELDS.map(function(id){return $(id).value;});
+    sampleOn=true;
+    FIELDS.forEach(function(id,i){$(id).value=RISKY[i];});
+  }else{
+    sampleOn=false;
+    if(sampleSnap)FIELDS.forEach(function(id,i){$(id).value=sampleSnap[i];});
+    sampleSnap=null;
+  }
+  segSel=null;calc();paintSample();Sound.select();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
+var Sound=(function(){
+  var SKEY='hoa-resale-package-reserve-study-risk-analyzer.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
+  };
+})();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
