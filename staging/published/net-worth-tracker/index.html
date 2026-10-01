@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free Net Worth Tracker — Calculate Your Net Worth Offline | Glenerds</title>
+<meta name="description" content="Free net worth tracker: list assets and debts, see your net worth instantly, track it over time. Runs offline in your browser; your financial data never leaves your device.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/net-worth-tracker/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Glenerds">
+<meta property="og:title" content="Free Net Worth Tracker — Calculate Your Net Worth Offline | Glenerds">
+<meta property="og:description" content="Free net worth tracker: list assets and debts, see your net worth instantly, track it over time. Runs offline in your browser; your financial data never leaves your device.">
+<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/net-worth-tracker/">
+<script>
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+<link rel="stylesheet" href="../../style.css">
+<style>
+/* net worth visual: assets vs debts bars (visual representation) */
+.nw-vis{display:grid;gap:8px;margin:14px 0 4px}
+.nw-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.nw-name{font-weight:600}
+.nw-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
+.nw-track{grid-column:1/-1;height:14px;border-radius:999px;background:var(--border);overflow:hidden}
+.nw-fill-a{height:100%;border-radius:999px;background:var(--accent)}
+.nw-fill-d{height:100%;border-radius:999px;background:#c0392b}
+html[data-theme="dark"] .nw-fill-d{background:#e57373}
+/* ---------- sweep baseline: standard header cluster + sounds ---------- */
+.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:1.1rem}
+.g-store-btn{display:inline-block;padding:8px 15px;font-size:.88rem;font-weight:700;border-radius:999px;background:var(--accent);color:var(--accent-fg,#fff);text-decoration:none;white-space:nowrap}
+.g-store-btn:hover{filter:brightness(1.08)}
+#theme-toggle.theme-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin-left:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
+#theme-toggle.theme-toggle svg{width:18px;height:18px}
+#theme-toggle.theme-toggle .ic-sun{display:none}
+html[data-theme="dark"] #theme-toggle.theme-toggle .ic-sun{display:inline}
+html[data-theme="dark"] #theme-toggle.theme-toggle .ic-moon{display:none}
+#sound-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+#sound-toggle:hover{color:var(--fg);border-color:var(--muted)}
+#theme-toggle.theme-toggle:focus-visible,#sound-toggle:focus-visible,#sample-toggle:focus-visible,.g-store-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* ---------- shared round icon-button class ---------- */
+.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+/* ---------- sample data toggle: icon-only flask button in header cluster ---------- */
+.sample-toggle{border:1px solid var(--border);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted)}
+.sample-toggle svg{width:18px;height:18px;flex:none}
+.sample-toggle:hover{color:var(--fg);border-color:var(--muted)}
+.sample-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+@media (max-width:600px){
+header.site .wrap{flex-wrap:wrap;gap:.6rem}
+nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
+nav.main a{margin-left:.6rem}
+.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+}
+@media print{.g-header-actions{display:none!important}}
+/* ---------- interactive net-worth bars ---------- */
+.nw-row[role="button"]{cursor:pointer;border-radius:10px}
+.nw-row[role="button"]:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
+.nw-row[role="button"].sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.nw-detail{margin:6px 0 10px;font-size:.88rem;color:var(--muted)}
+.nw-detail strong{color:var(--fg)}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Should my home count in net worth?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, at a realistic market value, minus the remaining mortgage. Just remember that home equity is illiquid \u2014 it counts, but you cannot spend it without selling or borrowing."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about my car?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Include it at private-sale value, not what you paid. Cars depreciate, so revisit the number yearly rather than letting an old figure flatter the total."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is a negative net worth bad?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It is common, especially early in a career with student loans. What matters is the direction: steady upward movement means the plan is working."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does my data go?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Nowhere. It is stored in your browser's local storage on your device. Export a JSON backup before clearing browser data or switching devices."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "My biggest asset is my home \u2014 how do I protect that investment?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Before buying a condo or townhome, the HOA's finances matter as much as the unit itself. The paid analyzer below scores HOA financial health from resale-package figures and flags special-assessment risk."
+      }
+    }
+  ]
+}
+</script>
+</head><body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../index.html">Glenerds</a>
+<nav class="main">
+<a href="../../index.html">Home</a>
+<a href="../../index.html#free-tools">Free Tools</a>
+<a href="../../index.html#products">Products</a>
+<a href="https://glenerds.gumroad.com">Store</a>
+<div class="g-header-actions">
+<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+<button id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+<button id="sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
+</div>
+</nav></div></header>
+<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Free Tools &rsaquo; Net Worth Tracker</p>
+<main>
+<div class="hero">
+<h1>Free Net Worth Tracker &mdash; What You Own Minus What You Owe</h1>
+<p class="lead">What's your net worth right now &mdash; really? List what you own (bank accounts, investments, home,
+car) and what you owe (credit cards, loans, mortgage), and this free tracker subtracts one from the other
+live as you type. No bank connections, no account, no sign-up: everything stays in your browser, nothing is
+uploaded. Update it monthly and watch the number move.</p>
+</div>
+
+<div class="toolbox" role="region" aria-label="Net worth tracker">
+<h3>Assets (what you own)</h3>
+<input type="text" id="nw-aname" placeholder="e.g. Checking account" aria-label="Asset name">
+<input type="number" id="nw-avalue" placeholder="0.00" step="0.01" aria-label="Asset value">
+<button id="nw-add-asset">Add asset</button>
+<table><thead><tr><th>Asset</th><th>Value</th><th></th></tr></thead><tbody id="nw-assets"></tbody></table>
+<h3>Debts (what you owe)</h3>
+<input type="text" id="nw-dname" placeholder="e.g. Credit card" aria-label="Debt name">
+<input type="number" id="nw-dvalue" placeholder="0.00" step="0.01" aria-label="Debt value">
+<button id="nw-add-debt">Add debt</button>
+<table><thead><tr><th>Debt</th><th>Balance</th><th></th></tr></thead><tbody id="nw-debts"></tbody></table>
+<div id="nw-vis" class="nw-vis" role="group" aria-label="Assets versus debts chart — activate a bar for details"></div>
+<p id="nw-result" style="font-size:1.15rem"></p>
+<button id="nw-export" class="plain">Export backup</button>
+<p class="small">Use round numbers or exact figures &mdash; whatever you are comfortable typing. It never leaves this device.</p>
+</div>
+
+<script>
+(function(){
+  var KEY='glenerds-networth-v1';
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{assets:[],debts:[]}}catch(e){return{assets:[],debts:[]}}}
+  function save(d){if(sampleOn)return;localStorage.setItem(KEY,JSON.stringify(d))}
+  var data=load();
+  function uid(){return 'n'+Date.now().toString(36)+Math.floor(Math.random()*999)}
+  function money(v){return '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+  function render(){
+    function rows(list,el,btnId){
+      var t=document.getElementById(el);t.innerHTML='';
+      var sum=0;
+      list.forEach(function(it){
+        sum+=parseFloat(it.value)||0;
+        var tr=document.createElement('tr');
+        var td1=document.createElement('td');td1.textContent=it.name;
+        var td2=document.createElement('td');td2.textContent=money(it.value);
+        var td3=document.createElement('td');
+        var b=document.createElement('button');b.textContent='Remove';b.className='plain';
+        b.onclick=function(){var i=list.indexOf(it);list.splice(i,1);save(data);render();Sound.click();};
+        td3.appendChild(b);tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);t.appendChild(tr);
+      });
+      return sum;
+    }
+    var aSum=rows(data.assets,'nw-assets');
+    var dSum=rows(data.debts,'nw-debts');
+    var nw=aSum-dSum;
+    /* assets-vs-debts bars (visual representation) */
+    var vis=document.getElementById('nw-vis');vis.innerHTML='';
+    vis.style.display=(aSum||dSum)?'':'none';
+    var mx=Math.max(aSum,dSum);
+    var nwDetail=document.getElementById('nw-detail');
+    if(!nwDetail){nwDetail=document.createElement('div');nwDetail.id='nw-detail';nwDetail.className='nw-detail';nwDetail.setAttribute('aria-live','polite');vis.parentNode.insertBefore(nwDetail,vis.nextSibling);}
+    nwDetail.textContent='';
+    function nwBar(name,val,cls,list){
+      var row=document.createElement('div');row.className='nw-row';
+      row.setAttribute('role','button');row.setAttribute('tabindex','0');row.setAttribute('aria-pressed','false');
+      row.setAttribute('aria-label',name+': '+money(val)+'. Activate to spotlight.');
+      var n=document.createElement('div');n.className='nw-name';n.textContent=name;
+      var v=document.createElement('div');v.className='nw-val';v.textContent=money(val);
+      var t=document.createElement('div');t.className='nw-track';t.setAttribute('role','progressbar');
+      t.setAttribute('aria-label',name+' bar');t.setAttribute('aria-valuemin','0');t.setAttribute('aria-valuemax','100');
+      t.setAttribute('aria-valuenow',String(mx>0?Math.round(val/mx*100):0));
+      var f=document.createElement('div');f.className=cls;
+      f.style.width=(mx>0?(val/mx*100):0).toFixed(1)+'%';
+      t.appendChild(f);row.appendChild(n);row.appendChild(v);row.appendChild(t);vis.appendChild(row);
+      function act(){
+        var was=row.classList.contains('sel');
+        var sels=vis.querySelectorAll('.nw-row.sel');
+        for(var k=0;k<sels.length;k++){sels[k].classList.remove('sel');sels[k].setAttribute('aria-pressed','false');}
+        nwDetail.textContent='';
+        if(!was){
+          row.classList.add('sel');row.setAttribute('aria-pressed','true');
+          var st=document.createElement('strong');st.textContent=name+': ';nwDetail.appendChild(st);
+          nwDetail.appendChild(document.createTextNode(list.length
+            ? money(val)+' across '+list.length+' item'+(list.length===1?'':'s')+' — '+list.map(function(it){return it.name+' ('+money(it.value)+')';}).join(', ')+'.'
+            : 'no items yet.'));
+          Sound.select();
+        }else{Sound.click();}
+      }
+      row.addEventListener('click',act);
+      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}});
+    }
+    nwBar('Assets',aSum,'nw-fill-a',data.assets);nwBar('Debts',dSum,'nw-fill-d',data.debts);
+    vis.setAttribute('aria-label','Assets '+money(aSum)+', debts '+money(dSum)+', net worth '+money(nw));
+    var el=document.getElementById('nw-result');
+    el.innerHTML='Assets: '+money(aSum)+' &nbsp;|&nbsp; Debts: '+money(dSum)
+      +'<br><strong>Net worth: '+money(nw)+'</strong>';
+    el.style.color=nw>=0?'':'#c0392b';
+  }
+  document.getElementById('nw-add-asset').onclick=function(){
+    var n=document.getElementById('nw-aname').value.trim(),v=parseFloat(document.getElementById('nw-avalue').value);
+    if(!n||isNaN(v)){Sound.error();return;}data.assets.push({id:uid(),name:n,value:v});save(data);render();Sound.success();
+    document.getElementById('nw-aname').value='';document.getElementById('nw-avalue').value='';
+  };
+  document.getElementById('nw-add-debt').onclick=function(){
+    var n=document.getElementById('nw-dname').value.trim(),v=parseFloat(document.getElementById('nw-dvalue').value);
+    if(!n||isNaN(v)){Sound.error();return;}data.debts.push({id:uid(),name:n,value:v});save(data);render();Sound.success();
+    document.getElementById('nw-dname').value='';document.getElementById('nw-dvalue').value='';
+  };
+  document.getElementById('nw-export').onclick=function(){
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var aEl=document.createElement('a');aEl.href=URL.createObjectURL(blob);aEl.download='net-worth-backup.json';aEl.click();
+    Sound.success();
+  };
+  render();
+
+  /* ---------- sample data toggle: snapshot, fill realistic demo, restore ---------- */
+  var sampleOn=false,sampleSnap=null;
+  function sampleNWData(){
+    return {assets:[
+      {id:uid(),name:'Checking account',value:8500},
+      {id:uid(),name:'Emergency fund',value:22000},
+      {id:uid(),name:'401(k)',value:47500},
+      {id:uid(),name:'Car (private sale)',value:14000}],
+      debts:[
+      {id:uid(),name:'Mortgage',value:182000},
+      {id:uid(),name:'Student loan',value:14500},
+      {id:uid(),name:'Credit card',value:2300}]};
+  }
+  var sbtn=document.getElementById('sample-toggle');
+  function paintSample(){
+    var lbl=sampleOn?'Clear sample data':'Try sample data';
+    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+  }
+  if(sbtn){sbtn.addEventListener('click',function(){
+    if(!sampleOn){sampleOn=true;sampleSnap=JSON.stringify(data);data=sampleNWData();render();}
+    else{sampleOn=false;try{data=JSON.parse(sampleSnap)||{assets:[],debts:[]};}catch(e){data={assets:[],debts:[]};}sampleSnap=null;save(data);render();}
+    paintSample();Sound.click();
+  });paintSample();}
+})();
+</script>
+<div class="toolbox">
+<h3 style="margin-top:0">Free forever &mdash; no paid version</h3>
+<p>This net worth tracker is complete as-is: unlimited assets and debts, live totals, JSON export &mdash; free forever.</p>
+<p><strong>Buying a condo?</strong> Your home may be your biggest asset &mdash; <a href="../../products/hoa-resale-package-reserve-study-risk-analyzer/index.html"><strong>HOA ReserveCheck &mdash; $9 one-time</strong></a> scores the HOA's finances from the resale-package figures and flags special-assessment risk before you buy. No subscription. No account.</p>
+</div>
+
+<section class="block prose">
+<h2 class="sec">How to calculate your net worth</h2>
+<p>Net worth is simply everything you own minus everything you owe. List bank balances, investment
+accounts, your home's estimated value, vehicles, and anything else of meaningful value under assets.
+List credit card balances, student loans, auto loans, mortgages, and any other debts under debts.
+The tracker does the subtraction and shows the result live as you add items. Most people are
+surprised the first time &mdash; in either direction &mdash; which is exactly why the number is worth
+knowing: you cannot improve what you do not measure.</p>
+<h2 class="sec">What to include (and what to skip)</h2>
+<p>Include anything with real monetary value: cash, savings, brokerage and retirement accounts, home
+equity (market value minus mortgage), cars at realistic resale value. Skip small household items;
+tracking every coffee mug adds noise without insight. Update the numbers monthly or quarterly &mdash;
+more often than that and you are mostly watching market noise. The trend over six to twelve months
+is what matters: is the number climbing, flat, or sliding? A climbing number means your financial
+system is working, whatever the starting point.</p>
+<h2 class="sec">Why track it offline</h2>
+<p>Net worth is the single most sensitive number in personal finance, and account-aggregator apps ask
+you to hand it &mdash; along with your bank logins &mdash; to a third party. This tracker inverts that:
+the math happens on your device, the data lives in your browser, and there is no company on the
+other end. You give up automatic syncing; you keep complete privacy. For a number you check a few
+times a year, that is a trade worth making.</p>
+<h2 class="sec">Worked example</h2>
+<p>Assets: $8,000 in savings and a $12,000 car &mdash; $20,000 total. Debts: a $3,500 credit card balance and
+an $18,000 student loan &mdash; $21,500 total. Net worth: <strong>&minus;$1,500</strong>, shown in red. It
+stings, but now it's a number instead of a feeling: pay $1,500 off the card and the tracker crosses into
+positive territory the moment you update it.</p>
+<h2 class="sec">Frequently asked questions</h2>
+<dl class="faq">
+<dt>Should my home count in net worth?</dt>
+<dd>Yes, at a realistic market value, minus the remaining mortgage. Just remember that home equity
+is illiquid &mdash; it counts, but you cannot spend it without selling or borrowing.</dd>
+<dt>What about my car?</dt>
+<dd>Include it at private-sale value, not what you paid. Cars depreciate, so revisit the number
+yearly rather than letting an old figure flatter the total.</dd>
+<dt>Is a negative net worth bad?</dt>
+<dd>It is common, especially early in a career with student loans. What matters is the direction:
+steady upward movement means the plan is working.</dd>
+<dt>Where does my data go?</dt>
+<dd>Nowhere. It is stored in your browser's local storage on your device. Export a JSON backup
+before clearing browser data or switching devices.</dd>
+<dt>My biggest asset is my home &mdash; how do I protect that investment?</dt>
+<dd>Before buying a condo or townhome, the HOA's finances matter as much as the unit itself. The
+paid analyzer below scores HOA financial health from resale-package figures and flags
+special-assessment risk.</dd>
+</dl>
+</section>
+
+<section class="block">
+<h2 class="sec">Related tools</h2>
+<div class="grid">
+<div class="card"><h3>Free 52-Week Savings Challenge Calculator</h3><p>Grow the asset side with weekly savings math done for you.</p><a class="btn" href="../savings-challenge/index.html">Open the free tool</a></div>
+<div class="card"><h3>Free Offline Habit Tracker</h3><p>The daily habits that move the number, tracked free.</p><a class="btn" href="../habit-tracker/index.html">Open the free tool</a></div>
+</div>
+</section>
+
+<div class="cta-band">
+<h2>Buying a condo? Check the HOA's finances first.</h2>
+<p>HOA ReserveCheck is the offline risk analyzer for condo and townhome buyers: key in the figures
+from the HOA documents and get a weighted financial-risk score, a special-assessment likelihood
+gauge, and a printable due-diligence report. One-time purchase, no subscription.</p>
+<a class="btn" href="../../products/hoa-resale-package-reserve-study-risk-analyzer/index.html">See HOA ReserveCheck &mdash; $9 one-time</a>
+<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+</div>
+</main>
+</div>
+<footer class="site"><div class="wrap">
+<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
+inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
+<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
+<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
+<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
+</div></footer>
+<script>
+(function(){
+  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
+  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+  function paint(){var t=cur();root.setAttribute('data-theme',t);
+    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
+      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
+  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();Sound.toggleTheme();});}
+  paint();
+})();
+/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+var Sound=(function(){
+  var KEY='net-worth-tracker.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    if(ctx.state==='suspended')ctx.resume();return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){var c=ac();if(!c)return;try{
+    var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+    o.type=type||'sine';o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){if(on)tone(520,0.06,'sine',0.045);},
+    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
+    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
+    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
+  };
+})();
+function bindSoundToggle(){
+  var btn=document.getElementById('sound-toggle');if(!btn)return;
+  function paint(){var on=Sound.isOn();
+    btn.innerHTML=on?'&#128266;':'&#128263;';
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
+  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
+  paint();
+}
+bindSoundToggle();
+</script>
+</body>
+</html>

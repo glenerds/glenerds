@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DepositCheck — Security Deposit Deduction Auditor</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f9d58'/%3E%3Cpath d='M9 22l4-9 3 5 2-3 5 7H9z' fill='none' stroke='white' stroke-width='2.2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f3f6f4; --card:#ffffff; --ink:#16211c; --muted:#5c6f66;
+  --line:#d9e3dd; --accent:#0f9d58; --accent-ink:#ffffff;
+  --good:#18794e; --warn:#9a6a00; --bad:#b3261e;
+  --good-bg:#e3f3ea; --warn-bg:#fdf0d3; --bad-bg:#fbe4e1;
+  --tab-active:#e6f4ec; --shadow:0 1px 3px rgba(20,60,40,.08);
+  --toggle-bg:#c4cfdb;
+}
+[data-theme="dark"]{
+  --bg:#0f1412; --card:#17201b; --ink:#e8efe9; --muted:#9fb3a8;
+  --line:#2a372f; --accent:#4fd18a; --accent-ink:#06281a;
+  --good:#7dd8a4; --warn:#f2c14e; --bad:#f28b82;
+  --good-bg:#123326; --warn-bg:#3a2d0d; --bad-bg:#421d19;
+  --tab-active:#1d2f24; --shadow:0 1px 3px rgba(0,0,0,.4);
+  --toggle-bg:#3a4a5f;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{position:sticky;top:0;z-index:10;background:var(--card);border-bottom:1px solid var(--line);box-shadow:var(--shadow)}
+.hwrap{max-width:980px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;gap:.8rem}
+.brand{display:flex;align-items:center;gap:.55rem;font-weight:700;font-size:1.15rem}
+.brand svg{width:30px;height:30px}
+.tag{font-size:.78rem;color:var(--muted)}
+.spacer{flex:1}
+#btnTheme{background:var(--toggle-bg);border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:.42rem .9rem;cursor:pointer;font-size:.85rem}
+#btnTheme:hover{filter:brightness(1.08)}
+/* ---------- standard header cluster: More Apps, sample flask, theme, sound ---------- */
+.more-apps{display:inline-flex;align-items:center;height:44px;padding:0 1.1rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:.9rem;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.hbtn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer}
+.hbtn:hover{color:var(--ink);border-color:var(--muted)}
+.hbtn svg{width:18px;height:18px}
+.hbtn .ic-sun{display:none}
+html[data-theme="dark"] .hbtn .ic-sun{display:inline}
+html[data-theme="dark"] .hbtn .ic-moon{display:none}
+.hbtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.hbtn:focus-visible,.more-apps:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:640px){.tag{display:none}.hwrap{gap:.5rem}.brand span{display:none}.more-apps{height:40px;padding:0 .8rem;font-size:.82rem}}
+main{max-width:980px;margin:0 auto;padding:1rem}
+nav.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:.55rem .95rem;border-radius:.55rem;cursor:pointer;font-size:.92rem}
+nav.tabs button[aria-selected="true"]{background:var(--tab-active);border-color:var(--accent);font-weight:600}
+.panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:.8rem;padding:1.1rem;box-shadow:var(--shadow)}
+.panel.active{display:block}
+h2{margin-top:0}
+.group{margin-bottom:1.3rem}
+.group>h3{margin:.2rem 0 .5rem;font-size:1rem;border-bottom:1px solid var(--line);padding-bottom:.35rem}
+.item-row{border:1px solid var(--line);border-radius:.6rem;padding:.8rem;margin-bottom:.7rem;background:var(--bg)}
+.item-row .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.55rem}
+.item-row label{display:block;font-size:.78rem;color:var(--muted);margin-bottom:.15rem}
+.row-result{margin-top:.5rem;font-size:.88rem;font-weight:600}
+.row-result .over{color:var(--bad)}
+.row-result .ok{color:var(--good)}
+.scorebar{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:.8rem 1rem;display:flex;gap:1rem;align-items:center;max-width:980px;margin:1rem auto 0;border-left:1px solid var(--line);border-right:1px solid var(--line);border-radius:.6rem .6rem 0 0;flex-wrap:wrap}
+#scoreNum{font-size:1.3rem;font-weight:700;white-space:nowrap}
+#stakePill{font-weight:700;padding:.4rem .9rem;border-radius:999px;font-size:.9rem}
+.p-fair{background:var(--good-bg);color:var(--good)}
+.p-over{background:var(--bad-bg);color:var(--bad)}
+.meter{flex:1;min-width:120px;height:14px;background:var(--line);border-radius:999px;overflow:hidden}
+.meter>div{height:100%;width:0;background:var(--bad);transition:width .25s}
+.checklist .sig label{flex:1}
+.sig{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem .4rem;border-radius:.4rem}
+.sig:hover{background:var(--tab-active)}
+.sig input{margin-top:.25rem;flex:none}
+.progress{font-size:.85rem;color:var(--muted)}
+.saved-item{display:flex;gap:.6rem;align-items:center;border:1px solid var(--line);border-radius:.5rem;padding:.5rem .7rem;margin-bottom:.5rem}
+.saved-item .nm{flex:1;font-weight:600}
+.saved-item small{color:var(--muted);display:block;font-weight:400}
+.saved-item button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:.4rem;padding:.3rem .7rem;cursor:pointer}
+.saved-item button.del{color:var(--bad);border-color:var(--bad)}
+input[type=text],input[type=number],select,textarea{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:.45rem;padding:.5rem .7rem;font-size:.95rem;width:100%}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:.5rem;padding:.6rem 1.1rem;font-size:.95rem;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--accent)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--bad)}
+footer{max-width:980px;margin:1.5rem auto 3rem;padding:0 1rem;color:var(--muted);font-size:.82rem}
+footer .disc{border:1px solid var(--line);border-radius:.6rem;padding:.8rem 1rem;background:var(--card)}
+.report{background:var(--card);border:1px solid var(--line);border-radius:.8rem;padding:1.2rem}
+.report table{width:100%;border-collapse:collapse;margin:.6rem 0}
+.report td,.report th{border:1px solid var(--line);padding:.4rem .6rem;font-size:.85rem;text-align:left}
+.rowflex{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin:.7rem 0}
+details.guide{border:1px solid var(--line);border-radius:.6rem;padding:.7rem 1rem;margin:1rem 0}
+details.guide summary{cursor:pointer;font-weight:600}
+details.guide table{width:100%;border-collapse:collapse;margin-top:.6rem}
+details.guide td,details.guide th{border:1px solid var(--line);padding:.4rem .6rem;font-size:.83rem;text-align:left;vertical-align:top}
+.sumcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.6rem;margin:.8rem 0}
+.sumcard{border:1px solid var(--line);border-radius:.6rem;padding:.7rem .9rem}
+.sumcard .k{font-size:.78rem;color:var(--muted)}
+.sumcard .v{font-size:1.35rem;font-weight:700}
+.sumcard .v.over{color:var(--bad)}
+.sumcard .v.ok{color:var(--good)}
+.letter{border:1px solid var(--line);border-radius:.6rem;padding:1.2rem 1.4rem;margin-top:1rem;font-size:.92rem}
+.letter p{margin:.55rem 0}
+@media print{
+  header,nav.tabs,.scorebar,footer .nav-note,.noprint{display:none!important}
+  body{background:#fff;color:#000}
+  .panel{display:block;border:0;box-shadow:none}
+  .letter{border:0}
+  input,select,textarea{border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#0f9d58"/><path d="M9 22l4-9 3 5 2-3 5 7H9z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/></svg>
+      <span>DepositCheck</span>
+    </div>
+    <span class="tag">Security Deposit Deduction Auditor &middot; offline, no subscription</span>
+    <div class="spacer"></div>
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="btnSample" class="hbtn" type="button" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="btnTheme" class="hbtn" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+    <button id="btnSound" class="hbtn" type="button" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
+  </div>
+</header>
+<main>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="tabbtn-audit" aria-selected="true" aria-controls="tab-audit" data-tab="tab-audit">1 &middot; Deduction Audit</button>
+    <button role="tab" id="tabbtn-results" aria-selected="false" aria-controls="tab-results" data-tab="tab-results">2 &middot; Results &amp; Report</button>
+    <button role="tab" id="tabbtn-letter" aria-selected="false" aria-controls="tab-letter" data-tab="tab-letter">3 &middot; Dispute Letter</button>
+    <button role="tab" id="tabbtn-law" aria-selected="false" aria-controls="tab-law" data-tab="tab-law">4 &middot; Legal Checklist</button>
+    <button role="tab" id="tabbtn-saved" aria-selected="false" aria-controls="tab-saved" data-tab="tab-saved">5 &middot; Saved</button>
+  </nav>
+
+  <section class="panel active" id="tab-audit" role="tabpanel" aria-labelledby="tabbtn-audit">
+    <h2>Audit your deductions</h2>
+    <p style="color:var(--muted)">Enter your deposit, then add each line item from your landlord's itemized deduction list. DepositCheck applies useful-life depreciation math to every charge and totals the estimated fair share versus what was withheld.</p>
+    <div class="group">
+      <h3>Your deposit</h3>
+      <div class="item-row"><div class="grid">
+        <div><label for="inDeposit">Security deposit ($)</label><input type="number" id="inDeposit" min="0" step="0.01" value="0"></div>
+        <div><label for="inWithheld">Amount withheld by landlord ($)</label><input type="number" id="inWithheld" min="0" step="0.01" value="0"></div>
+        <div><label for="inReturned">Amount returned to you ($)</label><input type="number" id="inReturned" min="0" step="0.01" value="0"></div>
+      </div></div>
+    </div>
+    <div class="group">
+      <h3>Landlord's itemized charges</h3>
+      <div id="itemRows"></div>
+      <button class="btn ghost" id="btnAddItem" type="button">+ Add line item</button>
+    </div>
+    <details class="guide">
+      <summary>Wear vs. damage guide (per category)</summary>
+      <table>
+        <thead><tr><th>Category</th><th>Usually normal wear</th><th>Usually damage</th></tr></thead>
+        <tbody>
+          <tr><td>Interior paint</td><td>Small nail holes, fading, scuffs behind furniture</td><td>Large holes in drywall, smoke stains, unapproved paint colors</td></tr>
+          <tr><td>Carpet</td><td>Light traffic paths, matting in high-traffic areas</td><td>Burns, pet stains, bleach spots, tears</td></tr>
+          <tr><td>Vinyl / linoleum</td><td>Surface scuffs, slight dulling</td><td>Cuts, burns, torn seams, warping</td></tr>
+          <tr><td>Hardwood floors</td><td>Light scratches, finish dulling</td><td>Deep gouges, water damage, pet urine stains</td></tr>
+          <tr><td>Window blinds</td><td>Sun fading</td><td>Broken slats, missing cords or wands</td></tr>
+          <tr><td>Refrigerator / stove</td><td>Age-related wear, minor shelf marks</td><td>Broken shelves, burn damage, missing parts</td></tr>
+          <tr><td>Dishwasher</td><td>Age-related wear</td><td>Broken racks, damage from misuse</td></tr>
+          <tr><td>Light fixtures</td><td>Age-related wear</td><td>Broken globes, missing fixtures</td></tr>
+          <tr><td>Bathroom fixtures</td><td>Mineral deposits, aging caulk</td><td>Cracked porcelain, broken fixtures</td></tr>
+          <tr><td>Countertops</td><td>Light scratches</td><td>Burns, deep cuts, cracks</td></tr>
+          <tr><td>Cleaning</td><td colspan="2">Not subject to depreciation &mdash; charges should be reasonable and documented.</td></tr>
+        </tbody>
+      </table>
+    </details>
+    <details class="guide">
+      <summary>Useful-life assumptions (years) &mdash; edit to match your state's guidance</summary>
+      <p class="progress">These lifespans are common reference values, not legal rules. Depreciation treatment varies by state, lease terms, and the facts of each charge &mdash; adjust any value to match the guidance that applies to you. Changes apply immediately and are saved on this device.</p>
+      <div id="lifeEditor" class="grid"></div>
+      <div class="rowflex" style="margin-top:.5rem">
+        <button class="btn ghost" id="btnLifeReset" type="button">Reset to defaults</button>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel" id="tab-results" role="tabpanel" aria-labelledby="tabbtn-results">
+    <h2>Results</h2>
+    <div class="report">
+      <div class="sumcards">
+        <div class="sumcard"><div class="k">Deposit</div><div class="v" id="sumDeposit">$0.00</div></div>
+        <div class="sumcard"><div class="k">Withheld by landlord</div><div class="v" id="sumWithheld">$0.00</div></div>
+        <div class="sumcard"><div class="k">Est. fair share</div><div class="v ok" id="sumFair">$0.00</div></div>
+        <div class="sumcard"><div class="k">Overcharged</div><div class="v over" id="sumOver">$0.00</div></div>
+        <div class="sumcard"><div class="k">% of deposit at stake</div><div class="v over" id="sumStake">0%</div></div>
+      </div>
+      <h3>Line-item audit</h3>
+      <table id="auditTable"><thead><tr><th>Item</th><th>Category</th><th>Age / life</th><th>Landlord charged</th><th>Est. fair share</th><th>Overcharge</th></tr></thead><tbody><tr><td colspan="6" class="progress">No line items yet — add them on the audit tab.</td></tr></tbody></table>
+      <p class="progress" id="mathNote">Depreciation math: tenant share = replacement cost &times; remaining useful life. If an item is past its useful life, the tenant owes nothing for it.</p>
+      <div class="rowflex noprint">
+        <button class="btn" id="btnPrintReport" type="button">Print / save report</button>
+        <button class="btn ghost" id="btnGoLetter" type="button">Build dispute letter</button>
+      </div>
+      <div class="disc" style="margin-top:1rem"><strong>Disclaimer.</strong> Guidance only &mdash; not legal advice. Deposit rules and deadlines vary by state; consult a tenant-rights organization or attorney for your situation.</div>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-letter" role="tabpanel" aria-labelledby="tabbtn-letter">
+    <h2>Dispute letter builder</h2>
+    <p style="color:var(--muted)">Fill in the parties. The letter is pre-filled with your line-item audit math &mdash; then print it and send it via a trackable method.</p>
+    <div class="item-row"><div class="grid">
+      <div><label for="lrName">Your full name</label><input type="text" id="lrName" maxlength="80"></div>
+      <div><label for="lrAddr">Your forwarding address</label><input type="text" id="lrAddr" maxlength="120"></div>
+      <div><label for="lrUnit">Rental unit address</label><input type="text" id="lrUnit" maxlength="120"></div>
+      <div><label for="lrLandlord">Landlord / manager name</label><input type="text" id="lrLandlord" maxlength="80"></div>
+      <div><label for="lrMoveout">Move-out date</label><input type="text" id="lrMoveout" maxlength="40" placeholder="e.g. 2026-07-31"></div>
+    </div></div>
+    <div class="letter" id="letterBody"></div>
+    <div class="rowflex noprint" style="margin-top:1rem">
+      <button class="btn" id="btnPrintLetter" type="button">Print letter</button>
+    </div>
+  </section>
+
+  <section class="panel" id="tab-law" role="tabpanel" aria-labelledby="tabbtn-law">
+    <h2>Legal checklist</h2>
+    <p style="color:var(--muted)">Deposit rules, deadlines, and remedies vary by state &mdash; work through these before you escalate. <span class="progress" id="lawProgress">0 of 8 complete</span></p>
+    <div class="group checklist" id="lawList"></div>
+    <p class="progress">This is a general reminder list, not legal advice. When in doubt, talk to a tenant-rights organization or an attorney in your state.</p>
+  </section>
+
+  <section class="panel" id="tab-saved" role="tabpanel" aria-labelledby="tabbtn-saved">
+    <h2>Saved audits</h2>
+    <p style="color:var(--muted)">Snapshots live in this browser only &mdash; nothing is uploaded.</p>
+    <div class="rowflex noprint">
+      <input type="text" id="saveName" maxlength="60" placeholder="Name this audit (e.g. 123 Main St, Apt 2B)" aria-label="Audit name">
+      <button class="btn" id="btnSave" type="button">Save current</button>
+      <button class="btn ghost" id="btnExport" type="button">Export all (JSON)</button>
+      <button class="btn ghost" id="btnImport" type="button">Import JSON</button>
+      <input type="file" id="fileImport" accept="application/json,.json" style="display:none" aria-label="Import audits from JSON file">
+    </div>
+    <p class="progress noprint" id="importMsg" role="status"></p>
+    <div id="savedList"></div>
+  </section>
+</main>
+
+<div class="scorebar" role="status" aria-live="polite">
+  <div class="meter" aria-hidden="true"><div id="meterFill"></div></div>
+  <div id="scoreNum">Overcharged: $0.00</div>
+  <span id="stakePill" class="p-fair">0% of deposit</span>
+</div>
+
+<footer>
+  <div class="disc"><strong>Disclaimer.</strong> Guidance only &mdash; not legal advice. Deposit rules and deadlines vary by state; consult a tenant-rights organization or attorney for your situation.</div>
+  <p class="nav-note">DepositCheck 1.0.1 &middot; runs fully offline &middot; your data never leaves this device.</p>
+</footer>
+
+<script>
+"use strict";
+/* ---------- sound: WebAudio oscillator tones, on by default, persists ---------- */
+var Sound=(function(){
+ var KEY="dc-sound",on=true,ctx=null;
+ try{on=localStorage.getItem(KEY)!=="off";}catch(e){}
+ function ac(){if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}if(ctx.state==="suspended")ctx.resume();return ctx;}
+ function tone(f,d){if(!on)return;var c=ac();if(!c)return;try{var o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);}catch(e){}}
+ return{click:function(){tone(660,0.07);},isOn:function(){return on;},toggle:function(){on=!on;try{localStorage.setItem(KEY,on?"on":"off");}catch(e){}return on;}};
+})();
+
+/* ---------- theme ---------- */
+const THEME_KEY="dc-theme";
+function setTheme(t){document.documentElement.setAttribute("data-theme",t);var b=document.getElementById("btnTheme");var dark=t==="dark";b.setAttribute("aria-pressed",dark?"true":"false");var lbl=dark?"Switch to light mode":"Switch to dark mode";b.setAttribute("aria-label",lbl);b.title=lbl;try{localStorage.setItem(THEME_KEY,t);}catch(e){}}
+(function initTheme(){let t=null;try{t=localStorage.getItem(THEME_KEY);}catch(e){}if(!t){t=(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}setTheme(t);})();
+document.getElementById("btnTheme").addEventListener("click",function(){Sound.click();setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");});
+
+/* ---------- sound toggle ---------- */
+var btnSound=document.getElementById("btnSound");
+function paintSound(){var on=Sound.isOn();btnSound.setAttribute("aria-pressed",on?"true":"false");var lbl=on?"Sound: on":"Sound: off";btnSound.setAttribute("aria-label",lbl);btnSound.title=lbl;btnSound.innerHTML=on?"&#128266;":"&#128263;";}
+btnSound.addEventListener("click",function(){var on=Sound.toggle();paintSound();if(on)Sound.click();});
+paintSound();
+
+/* ---------- sample data: snapshot current audit, fill realistic demo, restore ---------- */
+var SAMPLE={
+ deposit:2000,withheld:1000,returned:0,
+ items:[
+  {desc:"Living room carpet",cat:"carpet",kind:"damage",age:6,charge:1200,repl:1000},
+  {desc:"Move-out clean",cat:"clean",kind:"fixed",age:0,charge:200},
+  {desc:"Hallway paint",cat:"paint",kind:"wear",age:0,charge:100}
+ ],
+ letter:["Jane Renter","789 Old Ave","Apt 2B","Acme Properties","2026-08-31"]
+};
+var sampleOn=false,sampleSnap=null;
+var btnSample=document.getElementById("btnSample");
+function paintSample(){var lbl=sampleOn?"Clear sample data":"Try sample data";btnSample.setAttribute("aria-pressed",sampleOn?"true":"false");btnSample.setAttribute("aria-label",lbl);btnSample.title=lbl;}
+btnSample.addEventListener("click",function(){
+ if(!sampleOn){
+  sampleSnap=snapshot();
+  var s={deposit:SAMPLE.deposit,withheld:SAMPLE.withheld,returned:SAMPLE.returned,
+   items:SAMPLE.items.map(function(p){return{desc:p.desc,cat:p.cat,kind:p.kind,age:p.age,charge:p.charge,repl:p.repl||null};}),
+   laws:sampleSnap.laws,letter:SAMPLE.letter.slice()};
+  applySnap(s);sampleOn=true;
+ }else{applySnap(sampleSnap);sampleSnap=null;sampleOn=false;}
+ paintSample();Sound.click();
+});
+paintSample();
+
+/* ---------- tabs ---------- */
+const tabBtns=Array.from(document.querySelectorAll('nav.tabs button'));
+function showTab(id){tabBtns.forEach(b=>{const on=b.dataset.tab===id;b.setAttribute("aria-selected",on?"true":"false");document.getElementById(b.dataset.tab).classList.toggle("active",on);});}
+tabBtns.forEach(b=>b.addEventListener("click",()=>{Sound.click();showTab(b.dataset.tab);}));
+document.getElementById("btnGoLetter").addEventListener("click",()=>showTab("tab-letter"));
+
+/* ---------- useful-life table (years) — judgment calls, see build log ---------- */
+const CATEGORIES=[
+ {id:"paint",    name:"Interior paint",      life:4,  dep:true},
+ {id:"carpet",   name:"Carpet",              life:8,  dep:true},
+ {id:"vinyl",    name:"Vinyl / linoleum",    life:10, dep:true},
+ {id:"hardwood", name:"Hardwood floors",     life:20, dep:true},
+ {id:"blinds",   name:"Window blinds",       life:5,  dep:true},
+ {id:"fridge",   name:"Refrigerator / stove",life:15, dep:true},
+ {id:"dish",     name:"Dishwasher",          life:10, dep:true},
+ {id:"light",    name:"Light fixtures",      life:15, dep:true},
+ {id:"bath",     name:"Bathroom fixtures",   life:20, dep:true},
+ {id:"counter",  name:"Countertops",         life:20, dep:true},
+ {id:"clean",    name:"Cleaning",            life:0,  dep:false},
+ {id:"other",    name:"Other (not depreciable)", life:0, dep:false}
+];
+const CAT={};CATEGORIES.forEach(c=>{CAT[c.id]=c;});
+/* Shipped default useful-life values (Reset to defaults restores these). */
+const DEFAULT_LIFE={};CATEGORIES.forEach(c=>{if(c.dep)DEFAULT_LIFE[c.id]=c.life;});
+/* Useful-life overrides: user-editable, persisted on this device. */
+try{
+ const saved=JSON.parse(localStorage.getItem("dc_life")||"{}");
+ CATEGORIES.forEach(c=>{if(c.dep&&saved[c.id]>0)c.life=+saved[c.id];});
+}catch(e){}
+function renderLifeEditor(){
+ const host=document.getElementById("lifeEditor");if(!host)return;
+ host.innerHTML="";
+ CATEGORIES.filter(c=>c.dep).forEach(c=>{
+  const d=document.createElement("div");
+  d.innerHTML='<label for="life-'+c.id+'">'+esc(c.name)+' — useful life (years)</label>'+
+   '<input type="number" id="life-'+c.id+'" min="1" max="60" step="1" value="'+c.life+'">';
+  const inp=d.querySelector("input");
+  inp.addEventListener("input",()=>{
+   const v=parseInt(inp.value,10);
+   if(v>0&&v<=60){
+    c.life=v;
+    try{
+     const cur=JSON.parse(localStorage.getItem("dc_life")||"{}");
+     cur[c.id]=v;localStorage.setItem("dc_life",JSON.stringify(cur));
+    }catch(e){}
+    refreshCatOptions();update();
+   }
+  });
+  host.appendChild(d);
+ });
+}
+function refreshCatOptions(){
+ document.querySelectorAll("#itemRows .f-cat").forEach(sel=>{
+  const cur=sel.value;
+  sel.innerHTML=catOptions();
+  sel.value=cur;
+ });
+}
+document.addEventListener("DOMContentLoaded",renderLifeEditor);
+document.getElementById("btnLifeReset").addEventListener("click",()=>{
+ CATEGORIES.forEach(c=>{if(c.dep)c.life=DEFAULT_LIFE[c.id];});
+ try{localStorage.removeItem("dc_life");}catch(e){}
+ renderLifeEditor();refreshCatOptions();update();
+});
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function money(n){n=Math.round((+n||0)*100)/100;return "$"+n.toFixed(2);}
+function num(id){const v=parseFloat(document.getElementById(id).value);return isNaN(v)?0:v;}
+
+/* ---------- item rows ---------- */
+let rowSeq=0;
+function catOptions(){return CATEGORIES.map(c=>'<option value="'+c.id+'">'+esc(c.name)+(c.dep?" ("+c.life+"-yr life)":"")+'</option>').join("");}
+function addItemRow(preset){
+ rowSeq++;
+ const d=document.createElement("div");d.className="item-row";d.dataset.row=rowSeq;
+ d.innerHTML=
+  '<div class="grid">'+
+   '<div><label>Description</label><input type="text" class="f-desc" maxlength="80" placeholder="e.g. Living room carpet"></div>'+
+   '<div><label>Category</label><select class="f-cat">'+catOptions()+'</select></div>'+
+   '<div><label>Classification</label><select class="f-kind"><option value="damage">Damage beyond wear</option><option value="wear">Normal wear &amp; tear</option><option value="fixed">Cleaning / non-depreciable</option></select></div>'+
+   '<div><label>Item age (years)</label><input type="number" class="f-age" min="0" step="0.5" value="0"></div>'+
+   '<div><label>Landlord charged ($)</label><input type="number" class="f-charge" min="0" step="0.01" value="0"></div>'+
+   '<div><label>Replacement cost ($, blank = charged)</label><input type="number" class="f-repl" min="0" step="0.01" placeholder=""></div>'+
+  '</div>'+
+  '<div class="rowflex noprint"><button type="button" class="btn danger f-del">Remove item</button></div>'+
+  '<div class="row-result" aria-live="polite"></div>';
+ d.querySelector(".f-del").addEventListener("click",()=>{d.remove();update();});
+ d.querySelectorAll("input,select").forEach(el=>el.addEventListener("input",update));
+ if(preset){
+  if(preset.desc!==undefined)d.querySelector(".f-desc").value=preset.desc;
+  if(preset.cat)d.querySelector(".f-cat").value=preset.cat;
+  if(preset.kind)d.querySelector(".f-kind").value=preset.kind;
+  if(preset.age!==undefined)d.querySelector(".f-age").value=preset.age;
+  if(preset.charge!==undefined)d.querySelector(".f-charge").value=preset.charge;
+  if(preset.repl!==undefined)d.querySelector(".f-repl").value=preset.repl;
+ }
+ document.getElementById("itemRows").appendChild(d);
+ update();
+ return d;
+}
+function readItems(){
+ return Array.from(document.querySelectorAll("#itemRows .item-row")).map(d=>{
+  const v=(s,pf)=>{const x=parseFloat(d.querySelector(s).value);return isNaN(x)?0:x;};
+  return{
+   el:d,
+   desc:d.querySelector(".f-desc").value.trim(),
+   cat:d.querySelector(".f-cat").value,
+   kind:d.querySelector(".f-kind").value,
+   age:Math.max(0,v(".f-age")),
+   charge:Math.max(0,v(".f-charge")),
+   repl:v(".f-repl")
+  };
+ });
+}
+/* Per-item depreciation math. If replacement cost is blank, the landlord's
+   charge is assumed to be the full replacement price. */
+function computeItem(it){
+ const c=CAT[it.cat]||CAT.other;
+ const repl=it.repl>0?it.repl:it.charge;
+ /* Non-depreciable categories (cleaning, other) are never depreciated — even a
+    "wear" classification leaves the charge as the fair share. */
+ if(!c.dep)return{fair:it.charge,over:0,pct:0,depreciable:false,note:"Not subject to depreciation."};
+ if(it.kind==="wear")return{fair:0,over:it.charge,pct:0,depreciable:true,note:"Normal wear & tear is the landlord's cost — estimated fair share $0."};
+ const rem=Math.max(0,Math.min(1,(c.life-it.age)/c.life));
+ const pct=Math.round(rem*100);
+ const fair=Math.round(repl*rem*100)/100;
+ const over=Math.max(0,Math.round((it.charge-fair)*100)/100);
+ return{fair,over,pct,depreciable:true,note:"Tenant share = "+money(repl)+" x "+pct+"% remaining of "+c.life+"-yr life."};
+}
+
+/* ---------- totals & results ---------- */
+function totals(){
+ const items=readItems().map(it=>({it,r:computeItem(it)}));
+ const fair=items.reduce((a,x)=>a+x.r.fair,0);
+ const over=items.reduce((a,x)=>a+x.r.over,0);
+ const charged=items.reduce((a,x)=>a+x.it.charge,0);
+ return{items,fair,over,charged};
+}
+function update(){
+ const t=totals();
+ t.items.forEach(x=>{
+  const box=x.it.el.querySelector(".row-result");
+  const r=x.r;
+  box.innerHTML=esc(r.note)+' Est. fair share: <strong>'+money(r.fair)+'</strong>. '+
+   (r.over>0?'<span class="over">Overcharge: '+money(r.over)+'</span>':'<span class="ok">No overcharge.</span>');
+ });
+ const dep=num("inDeposit"),wh=num("inWithheld");
+ const stake=dep>0?Math.round(t.over/dep*1000)/10:0;
+ document.getElementById("sumDeposit").textContent=money(dep);
+ document.getElementById("sumWithheld").textContent=money(wh);
+ document.getElementById("sumFair").textContent=money(t.fair);
+ document.getElementById("sumOver").textContent=money(t.over);
+ const sumStakeEl=document.getElementById("sumStake");
+ sumStakeEl.textContent=stake+"%";
+ sumStakeEl.className="v "+(t.over>0?"over":"ok");
+ const tb=document.querySelector("#auditTable tbody");
+ if(t.items.length){
+  tb.innerHTML=t.items.map(x=>{
+   const c=CAT[x.it.cat]||CAT.other;
+   const ageLife=x.r.depreciable?x.it.age+" / "+c.life+" yr":"n/a";
+   return "<tr><td>"+esc(x.it.desc||"(unnamed item)")+"</td><td>"+esc(c.name)+"</td><td>"+esc(ageLife)+"</td><td>"+money(x.it.charge)+"</td><td>"+money(x.r.fair)+"</td><td>"+(x.r.over>0?"<strong>"+money(x.r.over)+"</strong>":"$0.00")+"</td></tr>";
+  }).join("");
+ }else tb.innerHTML='<tr><td colspan="6" class="progress">No line items yet — add them on the audit tab.</td></tr>';
+ document.getElementById("scoreNum").textContent="Overcharged: "+money(t.over);
+ const pill=document.getElementById("stakePill");
+ pill.textContent=stake+"% of deposit";
+ pill.className=t.over>0?"p-over":"p-fair";
+ pill.id="stakePill";
+ document.getElementById("meterFill").style.width=Math.min(100,stake)+"%";
+ renderLetter();
+}
+["inDeposit","inWithheld","inReturned"].forEach(id=>document.getElementById(id).addEventListener("input",update));
+document.getElementById("btnAddItem").addEventListener("click",()=>addItemRow());
+document.getElementById("btnPrintReport").addEventListener("click",()=>{showTab("tab-results");window.print();});
+document.getElementById("btnPrintLetter").addEventListener("click",()=>{showTab("tab-letter");window.print();});
+["lrName","lrAddr","lrUnit","lrLandlord","lrMoveout"].forEach(id=>document.getElementById(id).addEventListener("input",renderLetter));
+
+/* ---------- dispute letter ---------- */
+function renderLetter(){
+ const host=document.getElementById("letterBody");if(!host)return;
+ const t=totals();
+ const g=id=>esc(document.getElementById(id).value.trim());
+ const today=new Date().toLocaleDateString();
+ const disputed=t.items.filter(x=>x.r.over>0);
+ const itemParas=disputed.map(x=>{
+  const c=CAT[x.it.cat]||CAT.other;
+  const math=x.it.kind==="wear"
+   ?" This is normal wear and tear, which is the landlord's cost of doing business — the estimated fair share is $0."
+   :(x.r.depreciable
+    ?" The item is "+x.it.age+" years old with a "+c.life+"-year expected life, leaving "+x.r.pct+"% of its life; my share of a "+money(x.it.repl>0?x.it.repl:x.it.charge)+" replacement is therefore "+money(x.r.fair)+", not "+money(x.it.charge)+"."
+    :"");
+  return "<p><strong>"+esc(x.it.desc||"Unnamed item")+"</strong> ("+esc(c.name)+"): you deducted "+money(x.it.charge)+"; the estimated fair share is "+money(x.r.fair)+", an overcharge of <strong>"+money(x.r.over)+"</strong>."+math+"</p>";
+ }).join("");
+ host.innerHTML=
+  "<p>"+g("lrName")+"<br>"+g("lrAddr")+"</p>"+
+  "<p>"+today+"</p>"+
+  "<p>"+g("lrLandlord")+"</p>"+
+  "<p><strong>Re: Security deposit dispute &mdash; "+g("lrUnit")+", move-out "+g("lrMoveout")+"</strong></p>"+
+  "<p>Dear "+g("lrLandlord")+",</p>"+
+  "<p>I am writing to dispute deductions totaling <strong>"+money(t.over)+"</strong> from my security deposit of "+money(num("inDeposit"))+", of which you withheld "+money(num("inWithheld"))+". I have audited each line item against the item's age and its expected useful life; my analysis is itemized below.</p>"+
+  (itemParas||"<p>No overcharged items are currently recorded in the audit. Add and audit line items first.</p>")+
+  "<p>Based on this audit, the estimated fair total of deductions is "+money(t.fair)+", and I am owed an additional <strong>"+money(t.over)+"</strong>. Please send a corrected itemized statement and return the overcharged amount.</p>"+
+  "<p>Sincerely,<br>"+g("lrName")+"</p>"+
+  "<p style=\"font-size:.8rem;color:var(--muted)\"><em>This letter was prepared with DepositCheck for guidance only &mdash; it is not legal advice. Security-deposit rules, useful-life treatment, and deadlines vary by state and lease; consider having a tenant-rights organization or attorney review this letter before sending.</em></p>";
+}
+
+/* ---------- legal checklist ---------- */
+const LAWS=[
+ "I looked up my state's security-deposit return deadline and confirmed it against my move-out date",
+ "I requested an itemized statement of deductions in writing",
+ "I saved my move-in and move-out photos / videos",
+ "I kept copies of my lease, the itemization, and all correspondence",
+ "I sent my dispute letter by a trackable method (e.g. certified mail)",
+ "I checked a tenant-rights organization or legal-aid resource in my state",
+ "I confirmed whether small claims court handles deposit disputes in my state",
+ "I understand this app is guidance only — not legal advice — and will get professional help if the dispute escalates"
+];
+function renderLaws(){
+ const host=document.getElementById("lawList");host.innerHTML="";
+ LAWS.forEach((t,i)=>{
+  const row=document.createElement("div");row.className="sig";
+  const cb=document.createElement("input");cb.type="checkbox";cb.id="law-"+i;cb.dataset.idx=i;
+  cb.addEventListener("change",updateLaws);
+  const lb=document.createElement("label");lb.htmlFor=cb.id;lb.textContent=t;
+  row.appendChild(cb);row.appendChild(lb);host.appendChild(row);
+ });
+ updateLaws();
+}
+function lawState(){return LAWS.map((t,i)=>({t,done:document.getElementById("law-"+i).checked}));}
+function updateLaws(){
+ const n=lawState().filter(d=>d.done).length;
+ document.getElementById("lawProgress").textContent=n+" of "+LAWS.length+" complete";
+}
+
+/* ---------- saved audits ---------- */
+const SAVE_KEY="dc-saves-v1";
+function loadSaves(){try{return JSON.parse(localStorage.getItem(SAVE_KEY))||[];}catch(e){return[];}}
+function storeSaves(a){try{localStorage.setItem(SAVE_KEY,JSON.stringify(a));}catch(e){}}
+function snapshot(){return{name:"",at:new Date().toISOString(),deposit:num("inDeposit"),withheld:num("inWithheld"),returned:num("inReturned"),items:readItems().map(x=>({desc:x.desc,cat:x.cat,kind:x.kind,age:x.age,charge:x.charge,repl:x.repl||null})),laws:lawState().map(d=>d.done),letter:["lrName","lrAddr","lrUnit","lrLandlord","lrMoveout"].map(id=>document.getElementById(id).value)};}
+function applySnap(s){
+ document.getElementById("inDeposit").value=s.deposit||0;
+ document.getElementById("inWithheld").value=s.withheld||0;
+ document.getElementById("inReturned").value=s.returned||0;
+ document.getElementById("itemRows").innerHTML="";
+ (s.items||[]).forEach(p=>addItemRow({desc:p.desc,cat:p.cat,kind:p.kind,age:p.age,charge:p.charge,repl:p.repl===null?undefined:p.repl}));
+ LAWS.forEach((t,i)=>{document.getElementById("law-"+i).checked=!!(s.laws&&s.laws[i]);});
+ ["lrName","lrAddr","lrUnit","lrLandlord","lrMoveout"].forEach((id,i)=>{document.getElementById(id).value=(s.letter&&s.letter[i])||"";});
+ updateLaws();update();
+}
+function renderSaved(){
+ const host=document.getElementById("savedList");const arr=loadSaves();host.innerHTML="";
+ if(!arr.length){host.innerHTML='<p class="progress">No saved audits yet.</p>';return;}
+ arr.forEach((s,i)=>{
+  const d=document.createElement("div");d.className="saved-item";
+  const nm=document.createElement("div");nm.className="nm";
+  const b=document.createElement("b");b.textContent=s.name||"Untitled";nm.appendChild(b);
+  const sm=document.createElement("small");sm.textContent="Overcharged "+money(totalsFor(s).over)+" · "+(s.items||[]).length+" items · "+new Date(s.at).toLocaleString();nm.appendChild(sm);
+  const open=document.createElement("button");open.type="button";open.textContent="Open";
+  open.addEventListener("click",()=>{applySnap(s);showTab("tab-results");});
+  const del=document.createElement("button");del.type="button";del.textContent="Delete";del.className="del";
+  del.addEventListener("click",()=>{const a=loadSaves();a.splice(i,1);storeSaves(a);renderSaved();});
+  d.appendChild(nm);d.appendChild(open);d.appendChild(del);host.appendChild(d);
+ });
+}
+function totalsFor(s){
+ let fair=0,over=0;
+ (s.items||[]).forEach(p=>{const r=computeItem({desc:p.desc,cat:p.cat,kind:p.kind,age:p.age,charge:p.charge,repl:p.repl||0});fair+=r.fair;over+=r.over;});
+ return{fair,over};
+}
+document.getElementById("btnSave").addEventListener("click",()=>{
+ const inp=document.getElementById("saveName");const name=inp.value.trim()||"Untitled audit";
+ const s=snapshot();s.name=name;
+ const a=loadSaves();a.unshift(s);storeSaves(a);inp.value="";renderSaved();
+});
+/* JSON export / import of saved audits */
+function downloadFile(name,content){
+ const b=new Blob([content],{type:"application/json"});
+ const u=URL.createObjectURL(b);const a=document.createElement("a");
+ a.href=u;a.download=name;document.body.appendChild(a);a.click();
+ setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},100);
+}
+document.getElementById("btnExport").addEventListener("click",()=>{
+ const stamp=new Date().toISOString().slice(0,10);
+ downloadFile("depositcheck-audits-"+stamp+".json",JSON.stringify({app:"DepositCheck",version:1,exportedAt:new Date().toISOString(),audits:loadSaves()},null,2));
+});
+document.getElementById("btnImport").addEventListener("click",()=>document.getElementById("fileImport").click());
+/* Normalize an imported snapshot so malformed/hand-crafted JSON can never
+   crash renderSaved / totalsFor / applySnap. Returns null for junk. */
+function sanitizeSnap(s){
+ if(!s||typeof s!=="object"||!Array.isArray(s.items))return null;
+ const fin=n=>(typeof n==="number"&&isFinite(n))?n:0;
+ const items=s.items.filter(p=>p&&typeof p==="object").map(p=>({
+  desc:String(p.desc||""),
+  cat:String(p.cat||"other"),
+  kind:(["wear","fixed","damage"].indexOf(p.kind)>=0)?p.kind:"damage",
+  age:Math.max(0,fin(+p.age)),charge:Math.max(0,fin(+p.charge)),
+  repl:(typeof p.repl==="number"&&isFinite(p.repl)&&p.repl>0)?p.repl:null
+ }));
+ const laws=Array.isArray(s.laws)?s.laws.map(d=>!!d).slice(0,8):[];
+ const letter=Array.isArray(s.letter)?s.letter.slice(0,5).map(x=>String(x||"")):[];
+ return{name:String(s.name||"Untitled audit"),at:(typeof s.at==="string"&&s.at)||new Date().toISOString(),
+  deposit:Math.max(0,fin(+s.deposit)),withheld:Math.max(0,fin(+s.withheld)),returned:Math.max(0,fin(+s.returned)),
+  items,laws,letter};
+}
+document.getElementById("fileImport").addEventListener("change",e=>{
+ const msg=document.getElementById("importMsg");
+ const f=e.target.files&&e.target.files[0];
+ if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{
+  try{
+   const data=JSON.parse(r.result);
+   const list=Array.isArray(data)?data:data.audits;
+   if(!Array.isArray(list))throw new Error("no audits array");
+   const valid=list.map(sanitizeSnap).filter(s=>s!==null);
+   if(!valid.length)throw new Error("no valid audits found");
+   const a=loadSaves();
+   valid.forEach(s=>{a.unshift(s);});
+   storeSaves(a);renderSaved();
+   msg.textContent="Imported "+valid.length+" audit"+(valid.length===1?"":"s")+(valid.length<list.length?" ("+(list.length-valid.length)+" skipped)":"")+".";
+  }catch(err){
+   msg.textContent="Import failed: not a valid DepositCheck export ("+err.message+"). Nothing was changed.";
+  }
+  e.target.value="";
+ };
+ r.readAsText(f);
+});
+
+renderLaws();renderSaved();update();
+</script>
+</body>
+</html>
