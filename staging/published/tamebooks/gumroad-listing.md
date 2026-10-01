@@ -21,15 +21,19 @@ SaveTrail format. Source: `~/workspace/app-pipeline/bench/tamebooks/copy_seo/pro
 - Uploaded to the Gumroad Thumbnail field only — NOT in the gallery.
 
 ## Gallery (7 screenshots, 1280×800, all captured from exact final bytes MD5 `0dd5f195`)
-1. shot-dashboard.png
-2. shot-invoices.png
-3. shot-pl.png
-4. shot-bs.png
-5. shot-cf.png
-6. shot-ar.png
-7. shot-tax.png
-All 7 verified byte-identical to the image-gate-approved set (re-captured from final bytes;
-the only transient diff during capture was a welcome toast, re-captured clean).
+Live on the listing, in order:
+1. shot-dashboard.png (light)
+2. shot-invoices.png (light)
+3. shot-pl.png (light)
+4. shot-bs.png (light)
+5. shot-cf.png (light)
+6. shot-dashboard-dark.png (dark mode)
+7. shot-pl-dark.png (dark mode)
+Dark-mode shots added 2026-10-01 per Glen ("you did not add any dark mode
+pictures") — same bytes, same demo data, theme toggled via #btn-theme;
+visually verified (contrast, no clipping, charts render). The ledger keeps
+the superseded shot-ar.png and shot-tax.png for the record; they are no
+longer on the live listing.
 
 ## Product file
 `tamebooks-1.0.0.zip` (contains only `index.html`; extracted MD5 matches `0dd5f195`).
