@@ -99,9 +99,11 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent)}
 @media(max-width:640px){.frow{grid-template-columns:1fr}}
 /* ---------- modal ---------- */
 .mback{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;z-index:100;overflow-y:auto}
-.modal{background:var(--panel);color:var(--ink);border-radius:16px;max-width:760px;width:100%;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.3);border:1px solid var(--line)}
+.modal{background:var(--panel);color:var(--ink);border-radius:16px;max-width:760px;width:100%;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.3);border:1px solid var(--line);position:relative}
 .modal.wide{max-width:1020px}
-.modal h2{margin-top:0}
+.modal h2{margin-top:0;padding-right:48px}
+.mx{position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-size:24px;line-height:1;cursor:pointer;padding:0}
+.mx:hover{border-color:var(--accent);color:var(--accent)}
 .mfoot{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
 /* ---------- toast ---------- */
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 22px;border-radius:999px;font-size:16px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:200}
@@ -1219,19 +1221,20 @@ function openModal(title, bodyHTML, opts) {
   back.className = 'mback';
   const titleH = opts.titleHTML ? opts.titleHTML : esc(title);
   back.innerHTML = '<div class="modal' + (opts.wide ? ' wide' : '') + '" role="dialog" aria-label="' + esc(title) + '">'
-    + '<h2>' + titleH + '</h2><div class="mbody"></div></div>';
+    + '<button type="button" class="mx" aria-label="Close">\u00d7</button><h2>' + titleH + '</h2><div class="mbody"></div></div>';
   back.querySelector('.mbody').innerHTML = bodyHTML;
   const close = () => { document.removeEventListener('keydown', onKey); back.remove(); };
   function onKey(e) {
     if (e.key !== 'Escape') return;
     const backs = document.querySelectorAll('.mback');
-    if (backs[backs.length - 1] === back) close();
+    if (backs[backs.length - 1] === back) { close(); clearChartSels(); }
   }
   document.addEventListener('keydown', onKey);
-  back.addEventListener('mousedown', e => { if (e.target === back) close(); });
+  back.addEventListener('mousedown', e => { if (e.target === back) { close(); clearChartSels(); } });
+  back.querySelector('.mx').onclick = close;
   root.appendChild(back);
   if (opts.onMount) opts.onMount(back, close);
-  const f = back.querySelector('input,select,textarea,button');
+  const f = back.querySelector('input,select,textarea,button:not(.mx)');
   if (f) f.focus();
   return { el: back, close };
 }
@@ -1455,6 +1458,26 @@ function svgBars(series, opts) {
   s += '</svg>';
   return s;
 }
+/* ---------- chart selection: shared helpers ---------- */
+function restoreDonut(svg) {
+  const dcv = svg.querySelector('.dcv');
+  if (dcv && svg.dataset.ctv) {
+    dcv.textContent = svg.dataset.ctv;
+    const dcl = svg.querySelector('.dcl');
+    if (dcl) dcl.textContent = svg.dataset.ctl || 'total';
+  }
+}
+function clearChartSels() {
+  document.querySelectorAll('svg.chart').forEach(svg => {
+    svg.querySelectorAll('.bar.sel').forEach(x => { x.classList.remove('sel'); x.removeAttribute('transform'); if (x.tagName === 'circle') x.setAttribute('r', '7'); });
+    restoreDonut(svg);
+  });
+}
+// clicking anywhere off a chart releases the selection (and restores donut totals)
+document.addEventListener('click', e => {
+  if (e.target.closest && e.target.closest('svg.chart')) return;
+  clearChartSels();
+});
 function shortMoney(c) {
   const d = (c || 0) / 100; // values are cents — convert to dollars first
   const a = Math.abs(d);
@@ -1477,15 +1500,15 @@ function svgDonut(segs, opts) {
     const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
     const col = g.color || PALETTE[i % PALETTE.length];
     if (g.value > 0) {
-      s += '<path class="bar" data-k="' + esc(g.key || g.label) + '" data-mid="' + mid.toFixed(3) + '" d="M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1)
+      s += '<path class="bar" data-k="' + esc(g.key || g.label) + '" data-mid="' + mid.toFixed(3) + '" data-v="' + g.value + '" data-label="' + esc(g.label) + '" d="M' + cx + ' ' + cy + ' L' + x0.toFixed(1) + ' ' + y0.toFixed(1)
         + ' A' + r + ' ' + r + ' 0 ' + large + ' 1 ' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' Z" fill="' + col + '" stroke="var(--panel)" stroke-width="2">'
         + '<title>' + esc(g.label + ': ' + money(g.value)) + '</title></path>';
     }
     a0 = a1;
   });
   s += '<circle cx="' + cx + '" cy="' + cy + '" r="72" fill="var(--panel)"/>';
-  s += '<text x="' + cx + '" y="' + (cy - 2) + '" text-anchor="middle" style="font-size:17px;font-weight:800;fill:var(--ink)">' + esc(shortMoney(total)) + '</text>';
-  s += '<text x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle">total</text>';
+  s += '<text class="dcv" x="' + cx + '" y="' + (cy - 2) + '" text-anchor="middle" style="font-size:17px;font-weight:800;fill:var(--ink)">' + esc(shortMoney(total)) + '</text>';
+  s += '<text class="dcl" x="' + cx + '" y="' + (cy + 18) + '" text-anchor="middle">total</text>';
   s += '</svg>';
   s += '<div class="legend">' + segs.map((g, i) =>
     '<span><i style="background:' + (g.color || PALETTE[i % PALETTE.length]) + '"></i>' + esc(g.label) + ' — ' + esc(money(g.value)) + '</span>').join('') + '</div>';
@@ -1494,7 +1517,7 @@ function svgDonut(segs, opts) {
 function svgLine(points, opts) {
   // points: [{label, value, key}]
   opts = opts || {};
-  const W = 640, H = 240, padL = 64, padB = 34, padT = 14;
+  const W = 640, H = 340, padL = 64, padB = 34, padT = 14;
   const vals = points.map(p => p.value);
   let max = Math.max(0, ...vals), min = Math.min(0, ...vals);
   if (max === min) max = min + 1;
@@ -2109,12 +2132,19 @@ Screens['dash'].mount = function (view) {
       const key = bar.dataset.k, s2 = bar.dataset.s;
       // visible selection: pull-out / lift + outline; click again to release
       const was = bar.classList.contains('sel');
-      svg.querySelectorAll('.bar.sel').forEach(x => { x.classList.remove('sel'); x.removeAttribute('transform'); if (x.tagName === 'circle') x.setAttribute('r', '7'); });
+      clearChartSels();
       if (!was) {
         bar.classList.add('sel');
         if (bar.tagName === 'path' && bar.dataset.mid) {
           const m = parseFloat(bar.dataset.mid);
           bar.setAttribute('transform', 'translate(' + (Math.cos(m) * 13).toFixed(1) + ' ' + (Math.sin(m) * 13).toFixed(1) + ')');
+          // donut: show the selected slice's value in the center while selected
+          const dcv = svg.querySelector('.dcv'), dcl = svg.querySelector('.dcl');
+          if (dcv && dcl) {
+            if (!svg.dataset.ctv) { svg.dataset.ctv = dcv.textContent; svg.dataset.ctl = dcl.textContent; }
+            dcv.textContent = shortMoney(parseFloat(bar.dataset.v) || 0);
+            dcl.textContent = bar.dataset.label || '';
+          }
         } else if (bar.tagName === 'rect') {
           bar.setAttribute('transform', 'translate(0 -7)');
         } else if (bar.tagName === 'circle') {
