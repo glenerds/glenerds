@@ -3,385 +3,502 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Contractor Bid Comparison Worksheet | Glenerds</title>
-<meta name="description" content="Free contractor bid comparison worksheet: line up two contractor bids side by side, flag price gaps, and spot missing scope. Offline, no account.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/contractor-bid-comparison/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Free Contractor Bid Comparison Worksheet | Glenerds">
-<meta property="og:description" content="Free contractor bid comparison worksheet: line up two contractor bids side by side, flag price gaps, and spot missing scope. Offline, no account.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/contractor-bid-comparison/">
+<title>BidCompare — Contractor Bid Comparison Worksheet | Glenerds</title>
+<meta name="description" content="BidCompare: free contractor bid comparison worksheet. Line up two contractor bids side by side, flag price gaps, and spot missing scope. Offline, no account.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/contractor-bid-comparison/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script><link rel="stylesheet" href="../../style.css">
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <style>
-/* bid visual: paired per-item bars (A vs B), biggest gap first */
-.cb-vis{display:grid;gap:12px;margin:14px 0 4px}
-.cb-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:baseline}
-.cb-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cb-gap{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap;color:var(--muted)}
-.cb-pair{display:grid;grid-template-columns:1.4rem minmax(0,1fr) auto;gap:6px;align-items:center;margin-top:3px}
-.cb-lbl{font-weight:700;font-size:.85rem;text-align:center}
-.cb-track{height:12px;border-radius:999px;background:var(--border);overflow:hidden}
-.cb-fill{height:100%}
-.cb-fill.a{background:var(--accent)}
-.cb-fill.b{background:#f59e0b}
-.cb-val{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
-/* ---------- sweep baseline: standard header cluster + sounds ---------- */
-.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:1.1rem}
-.g-store-btn{display:inline-block;padding:8px 15px;font-size:.88rem;font-weight:700;border-radius:999px;background:var(--accent);color:var(--accent-fg,#fff);text-decoration:none;white-space:nowrap}
-.g-store-btn:hover{filter:brightness(1.08)}
-#theme-toggle.theme-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin-left:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-#theme-toggle.theme-toggle svg{width:18px;height:18px}
-#theme-toggle.theme-toggle .ic-sun{display:none}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-sun{display:inline}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-moon{display:none}
-#sound-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-#sound-toggle:hover{color:var(--fg);border-color:var(--muted)}
-#theme-toggle.theme-toggle:focus-visible,#sound-toggle:focus-visible,#sample-toggle:focus-visible,.g-store-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* ---------- shared round icon-button class ---------- */
-.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-/* ---------- sample data toggle: icon-only flask button in header cluster ---------- */
-.sample-toggle{border:1px solid var(--border);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted)}
-.sample-toggle svg{width:18px;height:18px;flex:none}
-.sample-toggle:hover{color:var(--fg);border-color:var(--muted)}
-.sample-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
-@media (max-width:600px){
-header.site .wrap{flex-wrap:wrap;gap:.6rem}
-nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
-nav.main a{margin-left:.6rem}
-.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+:root{
+  --bg:#f6f8fb; --card:#ffffff; --ink:#1a2333; --muted:#5d6b82; --border:#dfe6f0;
+  --accent:#1d5fc2; --accent-ink:#1d5fc2; --accent-soft:#e3edfb;
+  --b:#f59e0b; --flag:#c0392b; --shadow:0 2px 10px rgba(30,60,120,.08);
 }
-@media print{.g-header-actions{display:none!important}}
+html[data-theme="dark"]{
+  --bg:#10141c; --card:#1a2130; --ink:#e9eef7; --muted:#9aa7bf; --border:#2c3648;
+  --accent:#7aa5f0; --accent-ink:#9dbdf7; --accent-soft:#22304a;
+  --b:#f5b942; --flag:#e57373; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#2f7de1,#174a94);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem .9rem;align-items:end}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field.wide{grid-column:1/-1}
+.btn-row{display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.25rem 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);
+  padding:.9rem 1rem;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.stat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stat.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.stat .k{font-size:15px;color:var(--muted);font-weight:600}
+.stat .v{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+@media(max-width:560px){.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+/* paired bars */
+.pair-group{border:1px solid transparent;border-radius:12px;padding:.55rem .6rem;margin:.15rem 0;
+  cursor:pointer;background:none;font:inherit;color:inherit;text-align:left;width:100%;display:block}
+.pair-group:hover{background:var(--accent-soft)}
+.pair-group:focus-visible{outline:2px solid var(--accent)}
+.pair-group.sel{border-color:var(--accent);background:var(--accent-soft)}
+.pg-head{display:flex;justify-content:space-between;gap:.8rem;align-items:baseline}
+.pg-name{font-weight:700;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pg-gap{font-variant-numeric:tabular-nums;font-size:15px;color:var(--muted);white-space:nowrap;font-weight:600}
+.pg-gap.flag{color:var(--flag);font-weight:800}
+.pg-row{display:grid;grid-template-columns:1.6rem minmax(0,1fr) auto;gap:.5rem;align-items:center;margin-top:.3rem}
+.pg-lbl{font-weight:800;font-size:15px;text-align:center;color:var(--muted)}
+.pg-track{height:14px;border-radius:999px;background:var(--border);overflow:hidden}
+.pg-fill{height:100%;border-radius:999px}
+.pg-fill.a{background:var(--accent)} .pg-fill.b{background:var(--b)}
+.pg-val{font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;white-space:nowrap}
+#detail{margin:.9rem 0 0;font-size:15px;color:var(--muted);min-height:1.4em}
+#detail strong{color:var(--ink)}
+table.log{width:100%;border-collapse:collapse;font-size:15px;margin-top:.4rem}
+table.log th,table.log td{text-align:left;padding:.65rem .6rem;border-bottom:1px solid var(--border)}
+table.log th{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+table.log tbody tr{cursor:pointer}
+table.log tbody tr:hover{background:var(--accent-soft)}
+table.log tbody tr.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+td.num{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.flagpill{display:inline-block;background:var(--flag);color:#fff;font-size:15px;font-weight:700;
+  border-radius:999px;padding:.1rem .6rem;margin-left:.4rem;white-space:nowrap}
+.onebid{color:var(--flag);font-weight:700;font-size:15px;white-space:nowrap}
+.rm{background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;
+  padding:.35rem .7rem;font-size:15px;cursor:pointer}
+.rm:hover{color:var(--flag);border-color:var(--flag)}
+.empty{padding:2rem 1rem;text-align:center;color:var(--muted);font-size:16px}
+.empty strong{display:block;color:var(--ink);font-size:17px;margin-bottom:.3rem}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.compare td{padding:.6rem .7rem;border-bottom:1px solid var(--border);font-size:15px;vertical-align:top}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+@media print{.actions,.cta-strip{display:none!important}}
 </style>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Why only two bids?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The free worksheet covers the classic head-to-head. Most investors collect three bids, which is where the paid tool takes over."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What if the bids use completely different line items?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Normalize them: break both bids into the same item list (the phases of the job), splitting lump sums where you have to. Comparison is only meaningful on matching scope."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Should I just take the lowest total?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Not without reading the gaps. The lowest total with three \u201conly one bid\u201d flags is often the most expensive bid once the missing scope gets added back as change orders."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is a reasonable gap between bids?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Ten to fifteen percent on a line item is normal market variance. Past 20%, something structural differs \u2014 materials, assumptions, or missing work."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about a third bid, or judging bids against my ARV?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "FlipBid Reconciler normalizes up to 3 bids into one scope matrix, flags price gaps and scope holes automatically, and projects profit against your ARV with a negotiation-ready report \u2014 $29 one-time, offline."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Why only two bids?","acceptedAnswer":{"@type":"Answer","text":"The free worksheet covers the classic head-to-head. Most investors collect three bids, which is where the paid tool takes over."}},
+{"@type":"Question","name":"What if the bids use completely different line items?","acceptedAnswer":{"@type":"Answer","text":"Normalize them: break both bids into the same item list (the phases of the job), splitting lump sums where you have to. Comparison is only meaningful on matching scope."}},
+{"@type":"Question","name":"Should I just take the lowest total?","acceptedAnswer":{"@type":"Answer","text":"Not without reading the gaps. The lowest total with three \u201conly one bid\u201d flags is often the most expensive bid once the missing scope gets added back as change orders."}},
+{"@type":"Question","name":"What is a reasonable gap between bids?","acceptedAnswer":{"@type":"Answer","text":"Ten to fifteen percent on a line item is normal market variance. Past 20%, something structural differs \u2014 materials, assumptions, or missing work."}},
+{"@type":"Question","name":"What about a third bid, or judging bids against my ARV?","acceptedAnswer":{"@type":"Answer","text":"FlipBid Reconciler normalizes up to 3 bids into one scope matrix, flags price gaps and scope holes automatically, and projects profit against your ARV with a negotiation-ready report \u2014 $29 one-time, offline."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<div class="g-header-actions">
-<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-<button id="theme-toggle" class="theme-toggle round-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
-<button id="sound-toggle" class="round-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
-</div>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Free Tools</a> &rsaquo; Bid Comparison Worksheet</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="BidCompare — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="6" width="18" height="4.6" rx="2.3" fill="#fff" opacity=".95"/><rect x="3" y="13.4" width="12" height="4.6" rx="2.3" fill="#ffd9a8"/><rect x="17.5" y="13.4" width="3.5" height="4.6" rx="1.7" fill="#fff" opacity=".55"/></svg></span>
+    <span><span class="bname">BidCompare</span><span class="bsub">Contractor bid comparison</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Free Contractor Bid Comparison Worksheet</h1>
-<p class="lead">Two contractor bids, two different formats, no honest way to compare them &mdash; until now. Line up
-two bids item by item in this free worksheet: it flags every line where the prices diverge by more than 15%
-and calls out anything only one contractor bid. Free, offline, no account; your project numbers stay on your
-device.</p>
-</div>
-
-<div class="toolbox" role="region" aria-label="Contractor bid comparison worksheet">
-
-<label>Contractor A: <input type="text" id="cb-na" placeholder="e.g. Smith Remodeling" aria-label="Contractor A name"></label>
-<label>Contractor B: <input type="text" id="cb-nb" placeholder="e.g. Jones &amp; Co" aria-label="Contractor B name"></label>
-<button id="cb-add">Add line item</button>
-<table><thead><tr><th>Item</th><th id="cb-ha">Bid A</th><th id="cb-hb">Bid B</th><th>Gap</th><th></th></tr></thead>
-<tbody id="cb-rows"></tbody></table>
-<p id="cb-totals" style="font-size:1.1rem"></p>
-<div id="cb-vis" class="cb-vis" role="img" aria-label="Bid comparison chart"></div>
-<p class="small">A gap over 15% gets flagged &mdash; that is the line item to question on the call. Everything stays in your browser.</p>
-</div>
-<p class="small" style="margin-top:1rem"><strong>Adding a third bid, or judging bids against your ARV?</strong> <a href="../../products/flipbid-reconciler/index.html">FlipBid Reconciler</a> normalizes up to 3 bids and projects profit against your deal.</p>
-<p class="small">Free tool by <a href="../../index.html">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Free vs. full version</h3>
-<table><tbody>
-<tr><td><strong>Free tool on this page</strong></td><td><strong>FlipBid Reconciler &mdash; $29 one-time</strong></td></tr>
-<tr><td>2 bids, line-item comparison</td><td>Up to 3 bids normalized into one scope-of-work matrix</td></tr>
-<tr><td>You spot what's missing yourself</td><td>Automatic scope-hole detection: items a contractor didn't bid at all</td></tr>
-<tr><td>Totals only</td><td>Negotiation-ready variance report with talking points and projected profit vs. ARV</td></tr>
-</tbody></table>
-<p><a class="btn" href="https://glenerds.gumroad.com/l/flipbid-reconciler">Get FlipBid Reconciler &mdash; $29 one-time</a></p>
-<p class="small">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
-</div>
-
-
-
-
-
-<script>
-(function(){
-  var KEY='glenerds-bidcomp-v1';
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{na:'',nb:'',items:[]}}catch(e){return{na:'',nb:'',items:[]}}}
-  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
-  var data=load();
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function money(n){return n==null||isNaN(n)?'—':'$'+Number(n).toLocaleString('en-US',{maximumFractionDigits:0});}
-  function render(){
-    var tb=document.getElementById('cb-rows');tb.innerHTML='';
-    var ta=0,tb2=0;
-    document.getElementById('cb-ha').textContent='Bid A'+(data.na?' — '+data.na:'');
-    document.getElementById('cb-hb').textContent='Bid B'+(data.nb?' — '+data.nb:'');
-    data.items.forEach(function(it){
-      ta+=it.a||0;tb2+=it.b||0;
-      var gap='';
-      if(it.a&&it.b){var p=Math.abs(it.a-it.b)/Math.max(it.a,it.b)*100;
-        gap=p.toFixed(0)+'%'+(p>15?' ⚠':'');}
-      else if(it.a||it.b){gap='only one bid';}
-      var tr=document.createElement('tr');
-      tr.innerHTML='<td>'+esc(it.desc||'(no description)')+'</td><td>'+money(it.a)+'</td><td>'+money(it.b)+'</td><td>'+gap+'</td>';
-      var td=document.createElement('td');var b=document.createElement('button');
-      b.textContent='Remove';b.className='plain';
-      b.onclick=function(){data.items=data.items.filter(function(x){return x.id!==it.id;});save(data);render();};
-      td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
-    });
-    document.getElementById('cb-totals').innerHTML=
-      '<strong>Total A: '+money(ta)+'</strong> &nbsp;|&nbsp; <strong>Total B: '+money(tb2)+'</strong>';
-    document.getElementById('cb-na').value=data.na||'';
-    document.getElementById('cb-nb').value=data.nb||'';
-    /* paired bid bars, biggest gap first (visual representation) */
-    var cvis=document.getElementById('cb-vis');cvis.innerHTML='';
-    cvis.style.display=data.items.length?'':'none';
-    cvis.setAttribute('aria-label','Bid comparison chart');
-    if(data.items.length){
-      var citems=data.items.map(function(it){
-        var a=it.a||0,b=it.b||0;
-        var gap=(a&&b)?Math.abs(a-b)/Math.max(a,b)*100:((a||b)?100:0);
-        return {desc:it.desc||'(no description)',a:a,b:b,gap:gap};
-      });
-      var cmx=Math.max.apply(null,citems.map(function(x){return Math.max(x.a,x.b);}).concat([ta,tb2,1]));
-      var pairRow=function(name,a,b,clsA,clsB){
-        var h=document.createElement('div');h.className='cb-head';
-        var nm=document.createElement('div');nm.className='cb-name';nm.textContent=name;
-        h.appendChild(nm);cvis.appendChild(h);
-        [['A',a,'a'],['B',b,'b']].forEach(function(p){
-          var pr=document.createElement('div');pr.className='cb-pair';
-          var lb=document.createElement('div');lb.className='cb-lbl';lb.textContent=p[0];
-          var tr=document.createElement('div');tr.className='cb-track';
-          var fl=document.createElement('div');fl.className='cb-fill '+p[2];
-          fl.style.width=(cmx>0?(p[1]/cmx*100):0).toFixed(1)+'%';
-          tr.appendChild(fl);
-          var vl=document.createElement('div');vl.className='cb-val';vl.textContent=money(p[1]);
-          pr.appendChild(lb);pr.appendChild(tr);pr.appendChild(vl);cvis.appendChild(pr);
-        });
-      };
-      pairRow('Totals — A '+(data.na||'')+' vs B '+(data.nb||''),ta,tb2);
-      var hd=document.createElement('div');hd.className='cb-head';
-      hd.innerHTML='<div class="cb-gap">line items, biggest gap first:</div>';cvis.appendChild(hd);
-      citems.sort(function(x,y){return y.gap-x.gap;}).forEach(function(x){
-        var head=document.createElement('div');head.className='cb-head';
-        var nm=document.createElement('div');nm.className='cb-name';nm.textContent=x.desc;
-        var gp=document.createElement('div');gp.className='cb-gap';
-        gp.textContent=x.gap.toFixed(0)+'% gap'+(x.gap>15?' ⚠':'');
-        head.appendChild(nm);head.appendChild(gp);cvis.appendChild(head);
-        [['A',x.a,'a'],['B',x.b,'b']].forEach(function(p){
-          var pr=document.createElement('div');pr.className='cb-pair';
-          var lb=document.createElement('div');lb.className='cb-lbl';lb.textContent=p[0];
-          var tr=document.createElement('div');tr.className='cb-track';
-          var fl=document.createElement('div');fl.className='cb-fill '+p[2];
-          fl.style.width=(cmx>0?(p[1]/cmx*100):0).toFixed(1)+'%';
-          tr.appendChild(fl);
-          var vl=document.createElement('div');vl.className='cb-val';vl.textContent=money(p[1]);
-          pr.appendChild(lb);pr.appendChild(tr);pr.appendChild(vl);cvis.appendChild(pr);
-        });
-      });
-      cvis.setAttribute('aria-label','Bid comparison: Total A '+money(ta)+', Total B '+money(tb2)+
-        '; items by gap: '+citems.map(function(x){return x.desc+' '+x.gap.toFixed(0)+'%';}).join(', '));
-    }
-  }
-  document.getElementById('cb-add').onclick=function(){
-    var desc=prompt('Line item description (e.g. Kitchen demo):');
-    if(desc===null)return;
-    var a=parseFloat(prompt('Contractor A price for "'+desc+'" (blank if not bid):',''));
-    var b=parseFloat(prompt('Contractor B price for "'+desc+'" (blank if not bid):',''));
-    data.items.push({id:'i'+Date.now().toString(36),desc:desc,a:isNaN(a)?null:a,b:isNaN(b)?null:b});
-    save(data);render();Sound.success();
-  };
-  document.getElementById('cb-na').addEventListener('input',function(e){data.na=e.target.value;save(data);render();});
-  document.getElementById('cb-nb').addEventListener('input',function(e){data.nb=e.target.value;save(data);render();});
-  render();
-
-  /* ---------- sample data toggle: snapshot, fill realistic demo, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  function sampleCBData(){
-    return {na:'Acme Builders',nb:'Cornerstone Renovations',items:[
-      {id:'sb1',desc:'Kitchen demo & haul-away',a:1200,b:1800},
-      {id:'sb2',desc:'Electrical rough-in',a:2400,b:2250},
-      {id:'sb3',desc:'Drywall hang & finish',a:1800,b:2100},
-      {id:'sb4',desc:'Permit fees',a:150,b:null},
-      {id:'sb5',desc:'Plumbing rough-in',a:3100,b:2950}]};
-  }
-  var sbtn=document.getElementById('sample-toggle');
-  function paintSample(){
-    var lbl=sampleOn?'Clear sample data':'Try sample data';
-    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
-    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
-  }
-  if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){sampleOn=true;sampleSnap=JSON.stringify(data);data=sampleCBData();render();}
-    else{sampleOn=false;try{data=JSON.parse(sampleSnap)||{na:'',nb:'',items:[]};}catch(e){data={na:'',nb:'',items:[]};}sampleSnap=null;save(data);render();}
-    paintSample();Sound.click();
-  });paintSample();}
-})();
-</script>
-<section class="block prose">
-
-<h2 class="sec">How to compare contractor bids</h2>
-<p>Add each line item both contractors bid &mdash; demolition, electrical, plumbing, drywall, and so
-on &mdash; with each contractor&rsquo;s price. The worksheet lines them up side by side, computes
-the percentage gap per item, and flags anything diverging more than 15%. An item priced by only one
-contractor is flagged too: that is either missing scope or scope the other contractor buried
-elsewhere. Totals at the bottom keep the big picture in view.</p>
-<h2 class="sec">What the gaps are telling you</h2>
-<p>A big gap on one line rarely means one contractor is dishonest &mdash; it usually means they are
-not bidding the same thing. Different material grades, different assumptions about existing
-conditions, or one contractor missing the item entirely. The flagged lines are your negotiation
-script: ask each contractor to explain that specific number. Bids that survive those questions are
-bids you can trust.</p>
-<h2 class="sec">Worked example</h2>
-<p>Kitchen demo: Contractor A bids $1,200, Contractor B bids $1,800. The gap is 33%, so the worksheet flags it
-with a warning. One line &mdash; "permit fees" &mdash; appears only in Bid A and is marked <strong>only one
-bid</strong>, so you know to ask Bidder B why it's missing instead of discovering it mid-project.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Why only two bids?</dt>
-<dd>The free worksheet covers the classic head-to-head. Most investors collect three bids, which is
-where the paid tool takes over.</dd>
-<dt>What if the bids use completely different line items?</dt>
-<dd>Normalize them: break both bids into the same item list (the phases of the job), splitting lump
-sums where you have to. Comparison is only meaningful on matching scope.</dd>
-<dt>Should I just take the lowest total?</dt>
-<dd>Not without reading the gaps. The lowest total with three &ldquo;only one bid&rdquo; flags is
-often the most expensive bid once the missing scope gets added back as change orders.</dd>
-<dt>What is a reasonable gap between bids?</dt>
-<dd>Ten to fifteen percent on a line item is normal market variance. Past 20%, something structural
-differs &mdash; materials, assumptions, or missing work.</dd>
-<dt>What about a third bid, or judging bids against my ARV?</dt>
-<dd><strong>FlipBid Reconciler</strong> normalizes up to 3 bids into one scope matrix, flags price
-gaps and scope holes automatically, and projects profit against your ARV with a negotiation-ready
-report &mdash; $29 one-time, offline.</dd>
-</dl>
+<section class="hero">
+  <h1>Line up two contractor bids, spot the gaps</h1>
+  <p class="lead">Two contractor bids, two different formats, no honest way to compare them &mdash; until now. Line up two bids item by item: BidCompare flags every line where the prices diverge by more than 15% and calls out anything only one contractor bid. Free, offline, no account.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related tools</h2>
-<div class="grid">
-<div class="card"><h3>FlipBid Reconciler &mdash; $29 one-time</h3><p>Normalizes up to 3 bids into one scope matrix with a negotiation-ready variance report.</p><a class="btn" href="../../products/flipbid-reconciler/index.html">Learn more</a></div>
-<div class="card"><h3>Free HOA Special Assessment Calculator</h3><p>Rehabbing a condo? Estimate what a special assessment would cost you.</p><a class="btn" href="../hoa-special-assessment-calculator/index.html">Open the free tool</a></div>
-<div class="card"><h3>Free Moving Cost Calculator</h3><p>Post-renovation move? Budget it first.</p><a class="btn" href="../moving-cost-calculator/index.html">Open the free tool</a></div>
-<div class="card"><h3>ServiceTitan Alternative</h3><p>An honest comparison: when the one-time offline tool wins, and when the subscription alternative is the better call.</p><a class="btn" href="../../alternatives/servicetitan-alternative/index.html">Read the comparison</a></div>
-</div>
+<section class="card" aria-label="Bidders">
+  <h2>The bidders</h2>
+  <div class="form-grid">
+    <label class="field">Contractor A<input type="text" id="cb-na" placeholder="e.g. Smith Remodeling" autocomplete="off"></label>
+    <label class="field">Contractor B<input type="text" id="cb-nb" placeholder="e.g. Jones &amp; Co" autocomplete="off"></label>
+  </div>
 </section>
 
+<section class="card" aria-label="Add a line item">
+  <h2>Add a line item</h2>
+  <div class="form-grid">
+    <label class="field wide">Description<input type="text" id="cb-desc" placeholder="e.g. Kitchen demo &amp; haul-away" autocomplete="off"></label>
+    <label class="field">Contractor A price $<input type="number" id="cb-pa" min="0" step="1" inputmode="numeric" placeholder="blank if not bid"></label>
+    <label class="field">Contractor B price $<input type="number" id="cb-pb" min="0" step="1" inputmode="numeric" placeholder="blank if not bid"></label>
+  </div>
+  <div class="btn-row"><button class="btn" id="cb-add">Add line item</button></div>
+</section>
 
-<div class="cta-band">
-<h2>Need the full version?</h2>
-<p><strong>FlipBid Reconciler</strong> normalizes up to 3 contractor bids into one scope-of-work matrix, flags price gaps and missing items, and builds a negotiation-ready variance report with profit vs. ARV. $29 one-time, no subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/flipbid-reconciler">Get FlipBid Reconciler &mdash; $29 one-time</a>
-<p class="small"><a href="../../products/flipbid-reconciler/index.html">Learn more about FlipBid Reconciler</a>
-&middot; <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+<section aria-label="Bid totals">
+  <div class="stats" id="stats" role="group" aria-label="Bid totals — activate for the breakdown">
+    <button class="stat" data-stat="a"><span class="k" id="st-ka">Total A</span><span class="v" id="st-a">$0</span></button>
+    <button class="stat" data-stat="b"><span class="k" id="st-kb">Total B</span><span class="v" id="st-b">$0</span></button>
+    <button class="stat" data-stat="d"><span class="k">Difference</span><span class="v" id="st-d">$0</span></button>
+  </div>
+</section>
+
+<section class="card" aria-label="Bid comparison chart">
+  <h2>Head to head &mdash; biggest gaps first</h2>
+  <div id="cb-vis" role="img" aria-label="Bid comparison chart"></div>
+  <p id="detail" aria-live="polite"></p>
+  <p style="font-size:15px;color:var(--muted);margin:.6rem 0 0">A gap over 15% gets flagged &mdash; that is the line item to question on the call. Everything stays in your browser.</p>
+</section>
+
+<section class="card" aria-label="Line items">
+  <h2>Line items</h2>
+  <div id="table-wrap"></div>
+</section>
+
+<section class="prose">
+  <h2>How to compare contractor bids</h2>
+  <p>Add each line item both contractors bid &mdash; demolition, electrical, plumbing, drywall, and so on &mdash; with each contractor&rsquo;s price. BidCompare lines them up side by side, computes the percentage gap per item, and flags anything diverging more than 15%. An item priced by only one contractor is flagged too: that is either missing scope or scope the other contractor buried elsewhere. Totals at the bottom keep the big picture in view.</p>
+  <h2>What the gaps are telling you</h2>
+  <p>A big gap on one line rarely means one contractor is dishonest &mdash; it usually means they are not bidding the same thing. Different material grades, different assumptions about existing conditions, or one contractor missing the item entirely. The flagged lines are your negotiation script: ask each contractor to explain that specific number. Bids that survive those questions are bids you can trust.</p>
+  <h2>Worked example</h2>
+  <p>Kitchen demo: Contractor A bids $1,200, Contractor B bids $1,800. The gap is 33%, so the worksheet flags it. One line &mdash; &ldquo;permit fees&rdquo; &mdash; appears only in Bid A and is marked <strong>only one bid</strong>, so you know to ask Bidder B why it&rsquo;s missing instead of discovering it mid-project.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>Why only two bids?</summary><p>The free worksheet covers the classic head-to-head. Most investors collect three bids, which is where the paid tool takes over.</p></details>
+  <details><summary>What if the bids use completely different line items?</summary><p>Normalize them: break both bids into the same item list (the phases of the job), splitting lump sums where you have to. Comparison is only meaningful on matching scope.</p></details>
+  <details><summary>Should I just take the lowest total?</summary><p>Not without reading the gaps. The lowest total with three &ldquo;only one bid&rdquo; flags is often the most expensive bid once the missing scope gets added back as change orders.</p></details>
+  <details><summary>What is a reasonable gap between bids?</summary><p>Ten to fifteen percent on a line item is normal market variance. Past 20%, something structural differs &mdash; materials, assumptions, or missing work.</p></details>
+  <details><summary>What about a third bid, or judging bids against my ARV?</summary><p><strong>FlipBid Reconciler</strong> normalizes up to 3 bids into one scope matrix, flags price gaps and scope holes automatically, and projects profit against your ARV with a negotiation-ready report &mdash; $29 one-time, offline.</p></details>
+</section>
+
+<section class="card" aria-label="Free versus full version">
+  <h2>Free vs. full version</h2>
+  <table class="compare"><tbody>
+    <tr><td><strong>This free tool</strong></td><td><strong>FlipBid Reconciler &mdash; $29 one-time</strong></td></tr>
+    <tr><td>2 bids, line-item comparison</td><td>Up to 3 bids normalized into one scope-of-work matrix</td></tr>
+    <tr><td>You spot what&rsquo;s missing yourself</td><td>Automatic scope-hole detection: items a contractor didn&rsquo;t bid at all</td></tr>
+    <tr><td>Totals only</td><td>Negotiation-ready variance report with talking points and projected profit vs. ARV</td></tr>
+  </tbody></table>
+  <p style="margin:1rem 0 0"><a class="btn" href="https://glenerds.gumroad.com/l/flipbid-reconciler">Get FlipBid Reconciler &mdash; $29 one-time</a></p>
+  <p style="font-size:15px;color:var(--muted)">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
+</section>
+
+<div class="cta-strip">
+  <h2>Adding a third bid, or judging bids against your ARV?</h2>
+  <p><strong>FlipBid Reconciler</strong> normalizes up to 3 contractor bids into one scope-of-work matrix, flags price gaps and missing items, and builds a negotiation-ready variance report with profit vs. ARV. $29 one-time, no subscription.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/flipbid-reconciler">Get FlipBid Reconciler &mdash; $29 one-time</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>BidCompare</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere. <a href="../">All apps</a></p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();Sound.toggleTheme();});}
-  paint();
-})();
-/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+"use strict";
+var KEY='glenerds-bidcomp-v1';
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));return(d&&d.items)?d:{na:'',nb:'',items:[]};}catch(e){return{na:'',nb:'',items:[]};}}
+var sampleOn=false;
+function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+var data=load();
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function money(n){return(n==null||isNaN(n))?'\u2014':'$'+Number(n).toLocaleString('en-US',{maximumFractionDigits:0});}
+function gapPct(a,b){
+  if(a&&b)return Math.abs(a-b)/Math.max(a,b)*100;
+  if(a||b)return 100;
+  return 0;
+}
+var selId=null, totSel=false;
+function detail(html){$('detail').innerHTML=html||'';}
+function clearSel(){
+  selId=null;totSel=false;
+  var s=document.querySelectorAll('.pair-group.sel,.stat.sel,table.log tbody tr.sel');
+  for(var i=0;i<s.length;i++)s[i].classList.remove('sel');
+  detail('');
+}
+
+function render(){
+  /* name headers */
+  $('cb-ha')&&($('cb-ha').textContent='Bid A'+(data.na?' \u2014 '+data.na:''));
+  $('cb-hb')&&($('cb-hb').textContent='Bid B'+(data.nb?' \u2014 '+data.nb:''));
+  $('st-ka').textContent='Total A'+(data.na?' \u2014 '+data.na:'');
+  $('st-kb').textContent='Total B'+(data.nb?' \u2014 '+data.nb:'');
+  if(document.activeElement!==$('cb-na'))$('cb-na').value=data.na||'';
+  if(document.activeElement!==$('cb-nb'))$('cb-nb').value=data.nb||'';
+  var ta=0,tb=0;
+  data.items.forEach(function(it){ta+=it.a||0;tb+=it.b||0;});
+  /* table */
+  var wrap=$('table-wrap');wrap.innerHTML='';
+  if(!data.items.length){
+    wrap.innerHTML='<div class="empty"><strong>No line items yet.</strong>Add your first line item above, or tap the flask to try sample data.</div>';
+  }else{
+    var t=document.createElement('table');t.className='log';
+    t.innerHTML='<thead><tr><th>Item</th><th id="cb-ha">Bid A</th><th id="cb-hb">Bid B</th><th>Gap</th><th></th></tr></thead>';
+    var tb2=document.createElement('tbody');
+    data.items.forEach(function(it){
+      var tr=document.createElement('tr');tr.setAttribute('data-iid',it.id);tr.tabIndex=0;tr.setAttribute('role','button');
+      var g=gapPct(it.a,it.b),gapHtml;
+      if(it.a&&it.b){gapHtml=g.toFixed(0)+'%'+(g>15?'<span class="flagpill">flagged</span>':'');}
+      else if(it.a||it.b){gapHtml='<span class="onebid">only one bid</span>';}
+      else{gapHtml='\u2014';}
+      tr.setAttribute('aria-label',(it.desc||'(no description)')+': activate to spotlight in the chart.');
+      var c0=document.createElement('td');c0.innerHTML='<strong>'+esc(it.desc||'(no description)')+'</strong>';
+      var c1=document.createElement('td');c1.className='num';c1.textContent=money(it.a);
+      var c2=document.createElement('td');c2.className='num';c2.textContent=money(it.b);
+      var c3=document.createElement('td');c3.innerHTML=gapHtml;
+      var c4=document.createElement('td');
+      var b=document.createElement('button');b.className='rm';b.textContent='Remove';
+      b.setAttribute('aria-label','Remove '+(it.desc||'line item'));
+      b.addEventListener('click',function(e){e.stopPropagation();
+        data.items=data.items.filter(function(x){return x.id!==it.id;});
+        save(data);clearSel();render();Sound.click();});
+      c4.appendChild(b);
+      tr.appendChild(c0);tr.appendChild(c1);tr.appendChild(c2);tr.appendChild(c3);tr.appendChild(c4);
+      function act(e){if(e&&e.target&&e.target.closest('button'))return;spotItem(it.id);}
+      tr.addEventListener('click',act);
+      tr.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target===tr){e.preventDefault();act(null);}});
+      tb2.appendChild(tr);
+    });
+    t.appendChild(tb2);wrap.appendChild(t);
+    $('cb-ha').textContent='Bid A'+(data.na?' \u2014 '+data.na:'');
+    $('cb-hb').textContent='Bid B'+(data.nb?' \u2014 '+data.nb:'');
+  }
+  /* stats */
+  $('st-a').textContent=money(ta);
+  $('st-b').textContent=money(tb);
+  var d=ta-tb;
+  $('st-d').textContent=(d===0?'$0':(d>0?'+':'\u2212')+money(Math.abs(d)).slice(0));
+  /* chart */
+  var vis=$('cb-vis');vis.innerHTML='';
+  if(data.items.length){
+    var items=data.items.map(function(it){return{id:it.id,desc:it.desc||'(no description)',a:it.a||0,b:it.b||0,gap:gapPct(it.a,it.b),ra:it.a,rb:it.b};});
+    var mx=Math.max.apply(null,items.map(function(x){return Math.max(x.a,x.b);}).concat([ta,tb,1]));
+    /* totals group */
+    vis.appendChild(pairGroup('totals','Totals'+(data.na||data.nb?(' \u2014 '+(data.na||'A')+' vs '+(data.nb||'B')):''),ta,tb,mx,null));
+    var hd=document.createElement('div');
+    hd.innerHTML='<div style="font-size:15px;color:var(--muted);font-weight:600;margin:.9rem 0 .2rem">Line items, biggest gap first:</div>';
+    vis.appendChild(hd);
+    items.sort(function(x,y){return y.gap-x.gap;}).forEach(function(x){
+      vis.appendChild(pairGroup(x.id,x.desc,x.a,x.b,mx,x));
+    });
+    vis.setAttribute('aria-label','Bid comparison: Total A '+money(ta)+', Total B '+money(tb)+
+      '; items by gap: '+items.map(function(x){return x.desc+' '+x.gap.toFixed(0)+'%';}).join(', '));
+  }else{
+    vis.innerHTML='<div class="empty"><strong>Nothing to chart yet.</strong>Paired A-vs-B bars will appear here once you add line items.</div>';
+  }
+}
+
+function pairGroup(id,name,a,b,mx,meta){
+  var g=document.createElement('button');g.className='pair-group';g.type='button';
+  if(id)g.setAttribute('data-iid',id);
+  var gapTxt,flag=false;
+  if(meta){
+    if(meta.ra&&meta.rb){gapTxt=meta.gap.toFixed(0)+'% gap';flag=meta.gap>15;}
+    else if(meta.ra||meta.rb){gapTxt='only one bid';flag=true;}
+    else{gapTxt='\u2014';}
+  }else{
+    var d=a-b;gapTxt=(d===0?'even':(d>0?'A higher by ':'B higher by ')+money(Math.abs(d)));
+  }
+  g.setAttribute('aria-label',name+': A '+money(a)+', B '+money(b)+', '+gapTxt+'. Activate to spotlight.');
+  var head=document.createElement('div');head.className='pg-head';
+  var nm=document.createElement('span');nm.className='pg-name';nm.textContent=name;
+  var gp=document.createElement('span');gp.className='pg-gap'+(flag?' flag':'');gp.textContent=gapTxt;
+  head.appendChild(nm);head.appendChild(gp);g.appendChild(head);
+  [['A',a,'a',data.na||'A'],['B',b,'b',data.nb||'B']].forEach(function(p){
+    var row=document.createElement('div');row.className='pg-row';
+    var lb=document.createElement('div');lb.className='pg-lbl';lb.textContent=p[0];
+    var tr=document.createElement('div');tr.className='pg-track';
+    var fl=document.createElement('div');fl.className='pg-fill '+p[2];
+    fl.style.width=(mx>0?(p[1]/mx*100):0).toFixed(1)+'%';
+    tr.appendChild(fl);
+    var vl=document.createElement('div');vl.className='pg-val';vl.textContent=money(p[1]);
+    vl.title=p[3]+': '+money(p[1]);
+    row.appendChild(lb);row.appendChild(tr);row.appendChild(vl);g.appendChild(row);
+  });
+  g.addEventListener('click',function(){
+    if(id==='totals')totalsSpot();else spotItem(id);
+  });
+  return g;
+}
+
+function spotItem(iid){
+  clearSelKeep(null);
+  if(selId===iid){selId=null;detail('');Sound.click();return;}
+  selId=iid;
+  var it=null;for(var i=0;i<data.items.length;i++){if(data.items[i].id===iid)it=data.items[i];}
+  if(!it)return;
+  var gEl=document.querySelector('.pair-group[data-iid="'+iid+'"]');if(gEl)gEl.classList.add('sel');
+  var tr=document.querySelector('table.log tr[data-iid="'+iid+'"]');if(tr)tr.classList.add('sel');
+  var g=gapPct(it.a,it.b),msg;
+  if(it.a&&it.b){
+    msg='<strong>'+esc(it.desc||'(no description)')+':</strong> A '+money(it.a)+' vs B '+money(it.b)+
+      ' &mdash; gap '+g.toFixed(0)+'%'+(g>15?'. <strong>Flagged:</strong> over the 15% threshold &mdash; ask both contractors to explain this specific line.':'. Within normal variance.');
+  }else if(it.a||it.b){
+    var who=it.a?('A ('+esc(data.na||'Contractor A')+')'):('B ('+esc(data.nb||'Contractor B')+')');
+    msg='<strong>'+esc(it.desc||'(no description)')+':</strong> only bid by '+who+' at '+money(it.a||it.b)+
+      '. <strong>Missing scope?</strong> Ask the other contractor why it isn&rsquo;t in their bid.';
+  }else{msg='<strong>'+esc(it.desc||'(no description)')+':</strong> no prices entered yet.';}
+  detail(msg);Sound.select();
+}
+function clearSelKeep(){clearSel();}
+function totalsSpot(){
+  var was=totSel;
+  var stats=document.querySelectorAll('.stat');
+  clearSel();
+  if(was){detail('');Sound.click();return;}
+  totSel=true;for(var i=0;i<stats.length;i++)stats[i].classList.add('sel');
+  var ta=0,tb=0,flagged=0,onebid=0;
+  data.items.forEach(function(it){ta+=it.a||0;tb+=it.b||0;
+    if(it.a&&it.b){if(gapPct(it.a,it.b)>15)flagged++;}else if(it.a||it.b){onebid++;}});
+  if(!data.items.length){detail('No line items yet.');Sound.select();return;}
+  var d=ta-tb;
+  detail('<strong>Bid totals:</strong> '+(data.na||'A')+' '+money(ta)+' vs '+(data.nb||'B')+' '+money(tb)+
+    ' &mdash; difference <strong>'+(d===0?'even':(d>0?(data.na||'A')+' higher by ':(data.nb||'B')+' higher by ')+money(Math.abs(d)))+'</strong>. '+
+    flagged+' line'+(flagged===1?'':'s')+' flagged over 15%, '+onebid+' with only one bid.');
+  Sound.select();
+}
+document.querySelectorAll('.stat').forEach(function(st){st.addEventListener('click',function(){totalsSpot();});});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')clearSel();});
+
+$('cb-add').addEventListener('click',function(){
+  var desc=$('cb-desc').value.trim();
+  var pa=parseFloat($('cb-pa').value),pb=parseFloat($('cb-pb').value);
+  if(!desc){Sound.error();alert('Describe the line item first.');return;}
+  data.items.push({id:'i'+Date.now().toString(36),desc:desc,a:isNaN(pa)?null:pa,b:isNaN(pb)?null:pb});
+  $('cb-desc').value='';$('cb-pa').value='';$('cb-pb').value='';
+  save(data);clearSel();render();Sound.success();$('cb-desc').focus();
+});
+$('cb-na').addEventListener('input',function(e){data.na=e.target.value;save(data);
+  $('st-ka').textContent='Total A'+(data.na?' \u2014 '+data.na:'');});
+$('cb-nb').addEventListener('input',function(e){data.nb=e.target.value;save(data);
+  $('st-kb').textContent='Total B'+(data.nb?' \u2014 '+data.nb:'');});
+
+/* ---------- sample data toggle ---------- */
+var sampleSnap=null;
+function sampleData(){
+  return{na:'Acme Builders',nb:'Cornerstone Renovations',items:[
+    {id:'sb1',desc:'Kitchen demo & haul-away',a:1200,b:1800},
+    {id:'sb2',desc:'Electrical rough-in',a:2400,b:2250},
+    {id:'sb3',desc:'Drywall hang & finish',a:1800,b:2100},
+    {id:'sb4',desc:'Permit fees',a:150,b:null},
+    {id:'sb5',desc:'Plumbing rough-in',a:3100,b:2950}]};
+}
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    try{sampleSnap=localStorage.getItem(KEY);}catch(e){sampleSnap=null;}
+    sampleOn=true;data=sampleData();
+  }else{
+    sampleOn=false;
+    try{if(sampleSnap===null||typeof sampleSnap==='undefined'){localStorage.removeItem(KEY);}else{localStorage.setItem(KEY,sampleSnap);}}catch(e){}
+    sampleSnap=null;data=load();
+  }
+  clearSel();render();paintSample();Sound.click();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
 var Sound=(function(){
-  var KEY='contractor-bid-comparison.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  var SKEY='contractor-bid-comparison.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
   function ac(){try{
     if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
-    if(ctx.state==='suspended')ctx.resume();return ctx;}catch(e){return null;}}
-  function tone(freq,dur,type,vol,delay){var c=ac();if(!c)return;try{
-    var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
-    o.type=type||'sine';o.frequency.value=freq;
-    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
   return{
     isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
-    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
   };
 })();
-(function(){
-  var btn=document.getElementById('sound-toggle');if(!btn)return;
-  function paint(){var on=Sound.isOn();
-    btn.innerHTML=on?'&#128266;':'&#128263;';
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
-    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
+
+render();
 })();
 </script>
 </body>
