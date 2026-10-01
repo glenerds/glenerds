@@ -3,443 +3,587 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free BBQ Contest Cost Tracker | Glenerds</title>
-<meta name="description" content="Free BBQ competition cost tracker: log contest expenses and payouts to see your true profit per contest. Offline, no account.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/bbq-contest-cost-tracker/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Free BBQ Contest Cost Tracker | Glenerds">
-<meta property="og:description" content="Free BBQ competition cost tracker: log contest expenses and payouts to see your true profit per contest. Offline, no account.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/bbq-contest-cost-tracker/">
+<title>PitLedger — BBQ Contest Cost Tracker | Glenerds</title>
+<meta name="description" content="PitLedger: free BBQ competition cost tracker. Log contest expenses and payouts to see your true profit per contest. Offline, no account.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/bbq-contest-cost-tracker/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script><link rel="stylesheet" href="../../style.css">
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
+</script>
 <style>
-/* contest visual: profit/loss diverging bars, zero-centered */
-.bq-vis{display:grid;gap:8px;margin:14px 0 4px}
-.bq-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
-.bq-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bq-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
-.bq-track{grid-column:1/-1;position:relative;height:14px;border-radius:999px;background:var(--border);overflow:hidden}
-.bq-zero{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink);opacity:.35;transform:translateX(-1px)}
-.bq-fill{position:absolute;top:0;bottom:0}
-.bq-fill.pos{background:var(--accent);left:50%}
-.bq-fill.neg{background:#c0392b;right:50%}
-html[data-theme="dark"] .bq-fill.neg{background:#e57373}
-.bq-row{cursor:pointer;border-radius:8px;padding:4px 6px}
-.bq-row:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
-.bq-row.sel{box-shadow:inset 0 0 0 2px var(--accent)}
-#bq-detail{margin:8px 0 4px;font-size:.88rem;color:var(--muted)}
-#bq-detail strong{color:var(--fg)}
-#bq-rows tr.bq-trow{cursor:pointer}
-#bq-rows tr.bq-trow:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
-#bq-rows tr.bq-trow.sel{box-shadow:inset 0 0 0 2px var(--accent)}
-#bq-totals{cursor:pointer;border-radius:8px;padding:4px 6px;display:inline-block}
-#bq-totals:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
-#bq-totals.sel{box-shadow:inset 0 0 0 2px var(--accent)}
-/* ---------- standard header cluster (HenTrack reference spec, 2026-09-21) ---------- */
-.g-header-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;row-gap:6px;justify-content:flex-end;
-  --line:var(--border);--ink:var(--fg);--accent-soft:color-mix(in srgb,var(--accent) 14%,transparent)}
-.g-store-btn{display:inline-flex;align-items:center;background:var(--g-accent,#4f46e5);color:#fff;border-radius:999px;padding:8px 15px;font-size:.88rem;font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.g-store-btn:hover{background:var(--g-accent-hover,#4338ca)}
-.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.10);flex:none;font-size:1.1rem}
-.round-btn svg{width:26px;height:26px;flex:none}
-.round-btn.theme-toggle,.round-btn.sound-toggle{font-size:1.65rem;line-height:1}
-.round-btn.theme-toggle{margin-left:0}
-.round-btn:hover{border-color:var(--accent)}
-.round-btn:focus{outline:none}
-.round-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.round-btn.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
-@media print{.g-store-btn,.g-header-actions,.g-cta-strip{display:none!important}}
-@media (max-width:600px){
-header.site .wrap{flex-wrap:wrap;gap:.6rem}
-nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
-nav.main a{margin-left:.6rem}
-.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+:root{
+  --bg:#faf7f2; --card:#ffffff; --ink:#221a12; --muted:#6b6156; --border:#e7ddcd;
+  --accent:#b3541e; --accent-ink:#8f3f12; --accent-soft:#f7e8d8;
+  --good:#2e7d4f; --bad:#c0392b; --shadow:0 2px 10px rgba(60,40,20,.08);
 }
-/* ---------- bottom cross-promo ---------- */
-.cross-promo{margin:2rem 0 0;padding:1.25rem;border-top:1px solid var(--border);text-align:center}
-@media print{.g-store-btn,.g-header-actions,.g-cta-strip,.cross-promo{display:none!important}}
+html[data-theme="dark"]{
+  --bg:#16110d; --card:#211a14; --ink:#f1e9dc; --muted:#ab9f8e; --border:#3b3128;
+  --accent:#e08a3c; --accent-ink:#f0a95e; --accent-soft:#3a2a18;
+  --good:#7cc79a; --bad:#e57373; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+/* ---------- header: clean title + buttons on page background ---------- */
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#d2691e,#8f3f12);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+/* ---------- hero ---------- */
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0}
+/* ---------- cards ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+/* ---------- form ---------- */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem .9rem;align-items:end}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.btn-row{display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.btn.ghost:hover{border-color:var(--accent)}
+/* ---------- stat cards ---------- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:1.25rem 0}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);
+  padding:.9rem 1rem;cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%}
+.stat:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.stat.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+.stat .k{font-size:15px;color:var(--muted);font-weight:600}
+.stat .v{font-size:1.6rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat .v.pos{color:var(--good)} .stat .v.neg{color:var(--bad)}
+@media(max-width:560px){.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+/* ---------- diverging bars ---------- */
+.bars{display:grid;gap:.35rem;margin:.4rem 0}
+.barrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center;
+  cursor:pointer;border-radius:10px;padding:.45rem .6rem;border:1px solid transparent;background:none;
+  font:inherit;color:inherit;text-align:left;width:100%}
+.barrow:hover{background:var(--accent-soft)}
+.barrow:focus-visible{outline:2px solid var(--accent)}
+.barrow.sel{border-color:var(--accent);background:var(--accent-soft)}
+.bar-name{font-weight:600;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-val{font-variant-numeric:tabular-nums;font-weight:800;font-size:15px;white-space:nowrap}
+.bar-val.pos{color:var(--good)} .bar-val.neg{color:var(--bad)}
+.bar-track{grid-column:1/-1;position:relative;height:18px;border-radius:999px;background:var(--border);overflow:hidden}
+.bar-zero{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink);opacity:.4}
+.bar-fill{position:absolute;top:0;bottom:0;border-radius:999px}
+.bar-fill.pos{background:var(--good);left:50%}
+.bar-fill.neg{background:var(--bad);right:50%}
+/* ---------- donut ---------- */
+.donut-wrap{display:flex;gap:1.4rem;align-items:center;flex-wrap:wrap}
+.donut-box{position:relative;width:220px;height:220px;flex:none;margin:0 auto}
+.donut-box svg{width:220px;height:220px;transform:rotate(-90deg)}
+.donut-seg{cursor:pointer;transition:opacity .15s}
+.donut-seg.dim{opacity:.28}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;pointer-events:none;padding:0 52px}
+.donut-center .dk{font-size:15px;color:var(--muted);font-weight:600;line-height:1.3}
+.donut-center .dv{font-size:1.5rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.25}
+.legend{display:grid;gap:.4rem;font-size:15px;min-width:200px;flex:1}
+.leg{display:flex;align-items:center;gap:.55rem;cursor:pointer;background:none;border:1px solid transparent;
+  border-radius:8px;padding:.3rem .5rem;font:inherit;color:inherit;text-align:left}
+.leg:hover{background:var(--accent-soft)}
+.leg:focus-visible{outline:2px solid var(--accent)}
+.leg.sel{border-color:var(--accent)}
+.leg .sw{width:14px;height:14px;border-radius:4px;flex:none}
+.leg .lv{margin-left:auto;font-variant-numeric:tabular-nums;font-weight:700}
+/* ---------- detail line ---------- */
+#detail{margin:.9rem 0 0;font-size:15px;color:var(--muted);min-height:1.4em}
+#detail strong{color:var(--ink)}
+/* ---------- table ---------- */
+table.log{width:100%;border-collapse:collapse;font-size:15px;margin-top:.4rem}
+table.log th,table.log td{text-align:left;padding:.65rem .6rem;border-bottom:1px solid var(--border)}
+table.log th{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+table.log tbody tr{cursor:pointer}
+table.log tbody tr:hover{background:var(--accent-soft)}
+table.log tbody tr.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+td.num{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+td .dt{color:var(--muted);font-size:15px}
+.rm{background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;
+  padding:.35rem .7rem;font-size:15px;cursor:pointer}
+.rm:hover{color:var(--bad);border-color:var(--bad)}
+.empty{padding:2rem 1rem;text-align:center;color:var(--muted);font-size:16px}
+.empty strong{display:block;color:var(--ink);font-size:17px;margin-bottom:.3rem}
+/* ---------- prose ---------- */
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p,.prose dd{font-size:16px}
+.prose .faq{margin:.6rem 0}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.compare td{padding:.6rem .7rem;border-bottom:1px solid var(--border);font-size:15px;vertical-align:top}
+/* ---------- CTA strip ---------- */
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+/* ---------- footer ---------- */
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+@media print{.actions,.cta-strip{display:none!important}}
 </style>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What should I count as a cost?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables, and a share of equipment wear if you want to be thorough. If you would not have spent it without the contest, it counts."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Do I count my time?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "For \u201cwas it worth it\u201d decisions, yes \u2014 at least note the days. Most teams track cash here and treat time as the known cost of the hobby."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about practice cooks?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Log them as their own entries or fold them into the contest they prepared for. Either way, practice meat is real money."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Can I compare contests?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The table keeps every contest with its net, so best and worst are visible at a glance. Sort mentally by the net column when planning next season."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about a full season view with cost per call?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "PitProfit tracks whole seasons: per-contest P&L, best/worst rankings, cost-per-call for every stage walk, multi-season support, and CSV export \u2014 $29 one-time, offline."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What should I count as a cost?","acceptedAnswer":{"@type":"Answer","text":"Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables, and a share of equipment wear if you want to be thorough. If you would not have spent it without the contest, it counts."}},
+{"@type":"Question","name":"Do I count my time?","acceptedAnswer":{"@type":"Answer","text":"For \u201cwas it worth it\u201d decisions, yes \u2014 at least note the days. Most teams track cash here and treat time as the known cost of the hobby."}},
+{"@type":"Question","name":"What about practice cooks?","acceptedAnswer":{"@type":"Answer","text":"Log them as their own entries or fold them into the contest they prepared for. Either way, practice meat is real money."}},
+{"@type":"Question","name":"Can I compare contests?","acceptedAnswer":{"@type":"Answer","text":"The table keeps every contest with its net, so best and worst are visible at a glance. Sort mentally by the net column when planning next season."}},
+{"@type":"Question","name":"What about a full season view with cost per call?","acceptedAnswer":{"@type":"Answer","text":"PitProfit tracks whole seasons: per-contest P&L, best/worst rankings, cost-per-call for every stage walk, multi-season support, and CSV export \u2014 $29 one-time, offline."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<div class="g-header-actions">
-<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-<button id="theme-toggle" class="theme-toggle round-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
-<button id="sound-toggle" class="round-btn sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)">🔊</button>
-</div>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Free Tools</a> &rsaquo; BBQ Contest Cost Tracker</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="PitLedger — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2.5c1.2 3.2-.4 5.4-2.3 7.2C7.9 11.4 6.5 13 6.5 15.5a5.5 5.5 0 0 0 11 0c0-1.5-.5-2.7-1.2-3.9-.5 1-1.2 1.7-2.3 2.1.4-2.7-.6-6.4-2-8.6-.6 1.2-1.4 2-2.4 2.6.5-1.9.3-3.7.4-5.2z" fill="#fff" opacity=".95"/><path d="M12 21.5a3.4 3.4 0 0 1-3.4-3.4c0-1.9 1.6-3 3.4-4.9 1.8 1.9 3.4 3 3.4 4.9a3.4 3.4 0 0 1-3.4 3.4z" fill="#ffd9a8"/></svg></span>
+    <span><span class="bname">PitLedger</span><span class="bsub">BBQ contest cost tracker</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Free BBQ Contest Cost Tracker &mdash; What Did That Contest Really Cost?</h1>
-<p class="lead">Did that BBQ contest actually make money? Entry fees, meat, fuel, lodging, supplies, payouts &mdash;
-log one contest weekend's real numbers and see instantly whether it made or lost money. Built for competition
-BBQ teams who suspect the trophies cost more than they pay. Free, offline, no account.</p>
-</div>
-
-<div class="toolbox" role="region" aria-label="BBQ contest cost tracker">
-
-<label>Contest: <input type="text" id="bq-name" placeholder="e.g. Spring Smoke-Off" aria-label="Contest name"></label>
-<label>Date: <input type="date" id="bq-date" aria-label="Contest date"></label><br>
-<label>Entry fee: $<input type="number" id="bq-entry" min="0" step="1" style="width:6rem" aria-label="Entry fee"></label>
-<label>Meat: $<input type="number" id="bq-meat" min="0" step="1" style="width:6rem" aria-label="Meat cost"></label>
-<label>Fuel: $<input type="number" id="bq-fuel" min="0" step="1" style="width:6rem" aria-label="Fuel cost"></label><br>
-<label>Lodging: $<input type="number" id="bq-lodge" min="0" step="1" style="width:6rem" aria-label="Lodging cost"></label>
-<label>Supplies &amp; rubs: $<input type="number" id="bq-sup" min="0" step="1" style="width:6rem" aria-label="Supplies cost"></label>
-<label>Payout won: $<input type="number" id="bq-pay" min="0" step="1" style="width:6rem" aria-label="Payout won"></label>
-<button id="bq-add">Log contest</button>
-<button id="bq-export" class="plain">Export backup</button>
-<table><thead><tr><th>Contest</th><th>Spent</th><th>Won</th><th>Net</th><th></th></tr></thead>
-<tbody id="bq-rows"></tbody></table>
-<p id="bq-totals" style="font-size:1.1rem"></p>
-<div id="bq-vis" class="bq-vis" role="img" aria-label="Contest net results chart"></div>
-<p class="small">Everything is stored in this browser only. Multi-season tracking and CSV export live in the paid version.</p>
-</div>
-<p class="small" style="margin-top:1rem"><strong>Tracking a whole season?</strong> <a href="../../products/pitprofit/index.html">PitProfit</a> ranks every contest by true profit.</p>
-<p class="small">Free tool by <a href="../../index.html">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Free vs. full version</h3>
-<table><tbody>
-<tr><td><strong>Free tool on this page</strong></td><td><strong>PitProfit &mdash; $29 one-time</strong></td></tr>
-<tr><td>One contest at a time</td><td>Full season tracking across every contest you enter</td></tr>
-<tr><td>Manual totals</td><td>Best and worst contests ranked with cost-per-call stats and multi-season history</td></tr>
-</tbody></table>
-<p><a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a></p>
-<p class="small">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
-</div>
-
-
-
-
-
-<script>
-(function(){
-  var KEY='glenerds-bbq-v1';
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{contests:[]}}catch(e){return{contests:[]}}}
-  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
-  var data=load();
-  /* spotlight state (hoisted so Esc + totals can share it) */
-  var bqSel=null,totSel=false,bqDetailEl=null,xById={};
-  function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
-  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function gv(id){return parseFloat(document.getElementById(id).value)||0;}
-  function render(){
-    var tb=document.getElementById('bq-rows');tb.innerHTML='';
-    var spent=0,won=0;
-    data.contests.forEach(function(c){
-      var s=c.entry+c.meat+c.fuel+c.lodge+c.sup,net=c.pay-s;
-      spent+=s;won+=c.pay;
-      var tr=document.createElement('tr');
-      tr.className='bq-trow';
-      tr.innerHTML='<td>'+esc(c.name||'(unnamed)')+'<br><span class="small">'+esc(c.date||'')+'</span></td><td>'
-        +money(s)+'</td><td>'+money(c.pay)+'</td><td><strong>'+(net>=0?'+':'')+money(net).replace('$-','-$')+'</strong></td>';
-      var td=document.createElement('td');var b=document.createElement('button');
-      b.textContent='Remove';b.className='plain';
-      b.onclick=function(e){if(e)e.stopPropagation();data.contests=data.contests.filter(function(x){return x.id!==c.id;});save(data);render();Sound.click();};
-      td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
-      /* clickable contest row: spotlights the matching chart bar + full cost breakdown */
-      tr.setAttribute('data-cid',c.id);tr.tabIndex=0;tr.setAttribute('role','button');
-      tr.setAttribute('aria-label',(c.name||'(unnamed)')+': net '+(net>=0?'+':'−')+money(Math.abs(net))+'. Activate to show the full cost breakdown.');
-      function trowAct(e){
-        if(e&&e.target&&e.target.closest&&e.target.closest('button'))return;
-        var x=xById[c.id];if(!x)return;
-        var crow=bvis.querySelector('.bq-row[data-cid="'+x.id+'"]');
-        bqSpot(x,crow||null);
-      }
-      tr.addEventListener('click',trowAct);
-      tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){if(e.target!==tr)return;e.preventDefault();trowAct(null);}});
-    });
-    var netT=won-spent;
-    document.getElementById('bq-totals').innerHTML='<strong>Total spent: '+money(spent)+'</strong> &nbsp;|&nbsp; '
-      +'<strong>Total won: '+money(won)+'</strong> &nbsp;|&nbsp; <strong>Net: '
-      +(netT>=0?'+':'−')+money(Math.abs(netT))+'</strong>';
-    if(!data.contests.length){tb.innerHTML='<tr><td colspan="5" class="small">No contests logged yet.</td></tr>';}
-    /* net profit/loss diverging bars, zero-centered (visual representation) */
-    var bvis=document.getElementById('bq-vis');bvis.innerHTML='';
-    bvis.style.display=data.contests.length?'':'none';
-    /* interactive contest bars: click/keyboard spotlights the full cost breakdown, toggle back */
-    var bdet=document.getElementById('bq-detail');
-    if(!bdet){bdet=document.createElement('div');bdet.id='bq-detail';bdet.setAttribute('aria-live','polite');bvis.parentNode.insertBefore(bdet,bvis.nextSibling);}
-    bqDetailEl=bdet;
-    bdet.textContent='';
-    function bqSpot(x,row){
-      var rows=bvis.querySelectorAll('.bq-row');
-      for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
-      totSel=false;var tp1=document.getElementById('bq-totals');if(tp1)tp1.classList.remove('sel');
-      if(bqSel===x.id){bqSel=null;bdet.textContent='';Sound.click();return;}
-      bqSel=x.id;if(row)row.classList.add('sel');
-      bdet.innerHTML='<strong>'+esc(x.ename)+':</strong> Entry '+money(x.entry)+', meat '+money(x.meat)+', fuel '+money(x.fuel)+', lodging '+money(x.lodge)+', supplies '+money(x.sup)+'. Total spent '+money(x.spent)+', payout '+money(x.pay)+' — net '+(x.net>=0?'+':'−')+money(Math.abs(x.net))+'.';
-      Sound.select();
-    }
-    if(data.contests.length){
-      var bnets=data.contests.map(function(c){
-        var s=c.entry+c.meat+c.fuel+c.lodge+c.sup;
-        return {id:c.id,name:c.name||'(unnamed)',net:c.pay-s,entry:c.entry,meat:c.meat,fuel:c.fuel,lodge:c.lodge,sup:c.sup,pay:c.pay,spent:s,ename:c.name||'(unnamed)'};
-      }).sort(function(a,b){return b.net-a.net;});
-      var bmx=Math.max.apply(null,bnets.map(function(x){return Math.abs(x.net);}).concat([1]));
-      bnets.forEach(function(x){
-        xById[x.id]=x;
-        var row=document.createElement('div');row.className='bq-row';
-        row.tabIndex=0;row.setAttribute('role','button');row.setAttribute('data-cid',x.id);
-        row.setAttribute('aria-label',x.name+': net '+(x.net>=0?'+':'−')+money(Math.abs(x.net))+'. Activate to show the full cost breakdown.');
-        var nm=document.createElement('div');nm.className='bq-name';nm.textContent=x.name;
-        var vl=document.createElement('div');vl.className='bq-val';
-        vl.textContent=(x.net>=0?'+':'−')+money(Math.abs(x.net));
-        vl.style.color=x.net>=0?'var(--accent)':'';
-        var tr=document.createElement('div');tr.className='bq-track';
-        var fl=document.createElement('div');fl.className='bq-fill '+(x.net>=0?'pos':'neg');
-        fl.style.width=(Math.abs(x.net)/bmx*50).toFixed(1)+'%';
-        var z=document.createElement('div');z.className='bq-zero';
-        tr.appendChild(fl);tr.appendChild(z);row.appendChild(nm);row.appendChild(vl);row.appendChild(tr);
-        row.title=x.name+': net '+(x.net>=0?'+':'−')+money(Math.abs(x.net));
-        row.addEventListener('click',function(){bqSpot(x,row);});
-        row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();bqSpot(x,row);}});
-        bvis.appendChild(row);
-      });
-      bvis.setAttribute('aria-label','Contest net results, best to worst: '+
-        bnets.map(function(x){return x.name+' '+(x.net>=0?'+':'−')+money(Math.abs(x.net));}).join('; '));
-    }
-  }
-  document.getElementById('bq-add').onclick=function(){
-    var name=document.getElementById('bq-name').value.trim();
-    if(!name){Sound.error();alert('Name the contest first.');return;}
-    data.contests.push({id:'c'+Date.now().toString(36),name:name,date:document.getElementById('bq-date').value,
-      entry:gv('bq-entry'),meat:gv('bq-meat'),fuel:gv('bq-fuel'),lodge:gv('bq-lodge'),sup:gv('bq-sup'),pay:gv('bq-pay')});
-    ['bq-name','bq-entry','bq-meat','bq-fuel','bq-lodge','bq-sup','bq-pay'].forEach(function(id){document.getElementById(id).value='';});
-    save(data);render();Sound.success();
-  };
-  document.getElementById('bq-export').onclick=function(){
-    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bbq-contests-backup.json';a.click();Sound.success();};
-  document.getElementById('bq-date').value=new Date().toISOString().slice(0,10);
-  /* totals line: keyboard-accessible button — shows per-contest breakdown, click again/Esc restores */
-  function totalsSpot(){
-    var rows=document.querySelectorAll('#bq-vis .bq-row');
-    for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
-    bqSel=null;
-    var tp=document.getElementById('bq-totals');
-    var bdetEl=bqDetailEl||document.getElementById('bq-detail');
-    if(totSel){totSel=false;if(tp)tp.classList.remove('sel');if(bdetEl)bdetEl.textContent='';Sound.click();return;}
-    totSel=true;if(tp)tp.classList.add('sel');
-    if(!data.contests.length){if(bdetEl)bdetEl.textContent='No contests logged yet.';Sound.select();return;}
-    var spent=0,won=0;
-    var parts=data.contests.map(function(c){var s=c.entry+c.meat+c.fuel+c.lodge+c.sup,net=c.pay-s;
-      spent+=s;won+=c.pay;
-      return esc(c.name||'(unnamed)')+' '+(net>=0?'+':'−')+money(Math.abs(net));});
-    var netT=won-spent;
-    if(bdetEl)bdetEl.innerHTML='<strong>Season breakdown:</strong> '+parts.join('; ')+'. Total spent '+money(spent)+', total won '+money(won)+', net '+(netT>=0?'+':'−')+money(Math.abs(netT))+'.';
-    Sound.select();
-  }
-  var tp0=document.getElementById('bq-totals');
-  if(tp0){tp0.tabIndex=0;tp0.setAttribute('role','button');tp0.setAttribute('aria-label','Season totals. Activate to see the per-contest breakdown.');
-    tp0.addEventListener('click',function(){totalsSpot();});
-    tp0.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();totalsSpot();}});}
-  /* Esc restores any spotlight */
-  document.addEventListener('keydown',function(e){
-    if(e.key!=='Escape')return;
-    bqSel=null;totSel=false;
-    if(bqDetailEl)bqDetailEl.textContent='';
-    var rs=document.querySelectorAll('#bq-vis .bq-row.sel,#bq-rows tr.sel');
-    for(var i=0;i<rs.length;i++)rs[i].classList.remove('sel');
-    var tp=document.getElementById('bq-totals');if(tp)tp.classList.remove('sel');
-  });
-  render();
-  /* ---------- sample data toggle: snapshot contests, fill realistic demo season, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  var SAMPLE=[
-    {id:'sample-1',name:'Smoky Mountain Showdown',date:'2026-05-16',entry:350,meat:280,fuel:90,lodge:160,sup:70,pay:1200},
-    {id:'sample-2',name:'Rib Rumble',date:'2026-06-20',entry:300,meat:250,fuel:60,lodge:120,sup:60,pay:500},
-    {id:'sample-3',name:'Prairie Smoke Classic',date:'2026-07-25',entry:400,meat:320,fuel:150,lodge:200,sup:80,pay:0}
-  ];
-  var sbtn=document.getElementById('sample-toggle');
-  function paintSample(){
-    var lbl=sampleOn?'Clear sample data':'Try sample data';
-    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
-    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
-  }
-  if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){
-      try{sampleSnap=localStorage.getItem(KEY);}catch(e){sampleSnap=null;}
-      sampleOn=true;
-      data.contests=SAMPLE.map(function(c){return Object.assign({},c);});render();
-    }else{
-      sampleOn=false;
-      try{if(sampleSnap===null||typeof sampleSnap==='undefined'){localStorage.removeItem(KEY);}else{localStorage.setItem(KEY,sampleSnap);}}catch(e){}
-      sampleSnap=null;data=load();render();
-    }
-    paintSample();Sound.click();
-  });paintSample();}
-})();
-</script>
-<section class="block prose">
-
-<h2 class="sec">How to track a contest weekend</h2>
-<p>Log every dollar the weekend actually consumed: the entry fee, meat, fuel to get there, lodging,
-and the rubs, injections, and disposables nobody remembers to count. Then log what came back in
-payouts. The net column is the truth serum &mdash; most teams are surprised by their first honest
-tally, in one direction or the other.</p>
-<h2 class="sec">What the numbers are for</h2>
-<p>This is not about sucking the fun out of competing. It is about deciding which contests deserve
-next year&rsquo;s calendar: the $400 weekend an hour away that paid $600 beats the prestige event
-that cost $1,800 and paid a ribbon. Run a full season through the tracker and the &ldquo;worth
-it&rdquo; ranking writes itself. Teams that split costs get a bonus use &mdash; clean, timestamped
-numbers end every settlement argument.</p>
-<h2 class="sec">Worked example</h2>
-<p>Entry $350, meat $280, fuel $90, lodging $160, supplies $70 &mdash; <strong>$950</strong> spent. A $1,200
-payout leaves a net of <strong>+$250</strong>. Log a second contest with no payout and the season math turns
-honest fast &mdash; which is the point.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>What should I count as a cost?</dt>
-<dd>Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables,
-and a share of equipment wear if you want to be thorough. If you would not have spent it without
-the contest, it counts.</dd>
-<dt>Do I count my time?</dt>
-<dd>For &ldquo;was it worth it&rdquo; decisions, yes &mdash; at least note the days. Most teams
-track cash here and treat time as the known cost of the hobby.</dd>
-<dt>What about practice cooks?</dt>
-<dd>Log them as their own entries or fold them into the contest they prepared for. Either way,
-practice meat is real money.</dd>
-<dt>Can I compare contests?</dt>
-<dd>The table keeps every contest with its net, so best and worst are visible at a glance. Sort
-mentally by the net column when planning next season.</dd>
-<dt>What about a full season view with cost per call?</dt>
-<dd><strong>PitProfit</strong> tracks whole seasons: per-contest P&amp;L, best/worst rankings,
-cost-per-call for every stage walk, multi-season support, and CSV export &mdash; $29 one-time, offline.</dd>
-</dl>
+<section class="hero">
+  <h1>What did that contest really cost?</h1>
+  <p class="lead">Did that BBQ contest actually make money? Entry fees, meat, fuel, lodging, supplies, payouts &mdash; log one contest weekend&rsquo;s real numbers and see instantly whether it made or lost money. Free, offline, no account.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related tools</h2>
-<div class="grid">
-<div class="card"><h3>PitProfit &mdash; $29 one-time</h3><p>Full season tracking: every contest's true P&amp;L, best and worst contests ranked.</p><a class="btn" href="../../products/pitprofit/index.html">Learn more</a></div>
-<div class="card"><h3>Free Craft Pricing Calculator</h3><p>Sell rubs or sauces on the side? Price them to actually profit.</p><a class="btn" href="../craft-pricing-calculator/index.html">Open the free tool</a></div>
-</div>
+<section class="card" aria-label="Log a contest">
+  <h2>Log a contest</h2>
+  <div class="form-grid">
+    <label class="field">Contest<input type="text" id="bq-name" placeholder="e.g. Spring Smoke-Off" autocomplete="off"></label>
+    <label class="field">Date<input type="date" id="bq-date"></label>
+    <label class="field">Entry fee $<input type="number" id="bq-entry" min="0" step="1" inputmode="numeric"></label>
+    <label class="field">Meat $<input type="number" id="bq-meat" min="0" step="1" inputmode="numeric"></label>
+    <label class="field">Fuel $<input type="number" id="bq-fuel" min="0" step="1" inputmode="numeric"></label>
+    <label class="field">Lodging $<input type="number" id="bq-lodge" min="0" step="1" inputmode="numeric"></label>
+    <label class="field">Supplies &amp; rubs $<input type="number" id="bq-sup" min="0" step="1" inputmode="numeric"></label>
+    <label class="field">Payout won $<input type="number" id="bq-pay" min="0" step="1" inputmode="numeric"></label>
+  </div>
+  <div class="btn-row">
+    <button class="btn" id="bq-add">Log contest</button>
+    <button class="btn ghost" id="bq-export">Export backup</button>
+  </div>
 </section>
 
+<section aria-label="Season totals">
+  <div class="stats" id="stats" role="group" aria-label="Season totals — activate for the per-contest breakdown">
+    <button class="stat" data-stat="spent"><span class="k">Total spent</span><span class="v" id="st-spent">$0</span></button>
+    <button class="stat" data-stat="won"><span class="k">Total won</span><span class="v" id="st-won">$0</span></button>
+    <button class="stat" data-stat="net"><span class="k">Season net</span><span class="v" id="st-net">$0</span></button>
+  </div>
+</section>
 
-<div class="cta-band">
-<h2>Need the full version?</h2>
-<p><strong>PitProfit</strong> is the offline season tracker for competition BBQ teams: every contest&rsquo;s true P&amp;L, best and worst contests, cost per call, multi-season support, and CSV export. $29 one-time, no subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a>
-<p class="small"><a href="../../products/pitprofit/index.html">Learn more about PitProfit</a>
-&middot; <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+<section class="card" aria-label="Net per contest">
+  <h2>Net per contest &mdash; best to worst</h2>
+  <div class="bars" id="bq-vis" role="img" aria-label="Contest net results chart"></div>
+  <p id="detail" aria-live="polite"></p>
+</section>
+
+<section class="card" aria-label="Where the money went">
+  <h2>Where the money went</h2>
+  <div class="donut-wrap">
+    <div class="donut-box">
+      <svg viewBox="0 0 220 220" id="donut" role="img" aria-label="Cost breakdown by category"></svg>
+      <div class="donut-center"><span class="dk">Total spent</span><span class="dv" id="donut-total">$0</span></div>
+    </div>
+    <div class="legend" id="legend"></div>
+  </div>
+</section>
+
+<section class="card" aria-label="Contest log">
+  <h2>Contest log</h2>
+  <div id="table-wrap"></div>
+  <p style="font-size:15px;color:var(--muted);margin:.8rem 0 0">Everything is stored in this browser only. Multi-season tracking and CSV export live in the paid version.</p>
+</section>
+
+<section class="prose">
+  <h2>How to track a contest weekend</h2>
+  <p>Log every dollar the weekend actually consumed: the entry fee, meat, fuel to get there, lodging, and the rubs, injections, and disposables nobody remembers to count. Then log what came back in payouts. The net column is the truth serum &mdash; most teams are surprised by their first honest tally, in one direction or the other.</p>
+  <h2>What the numbers are for</h2>
+  <p>This is not about sucking the fun out of competing. It is about deciding which contests deserve next year&rsquo;s calendar: the $400 weekend an hour away that paid $600 beats the prestige event that cost $1,800 and paid a ribbon. Run a full season through the tracker and the &ldquo;worth it&rdquo; ranking writes itself. Teams that split costs get a bonus use &mdash; clean, timestamped numbers end every settlement argument.</p>
+  <h2>Worked example</h2>
+  <p>Entry $350, meat $280, fuel $90, lodging $160, supplies $70 &mdash; <strong>$950</strong> spent. A $1,200 payout leaves a net of <strong>+$250</strong>. Log a second contest with no payout and the season math turns honest fast &mdash; which is the point.</p>
+  <h2>Frequently asked questions</h2>
+  <div class="faq">
+    <details><summary>What should I count as a cost?</summary><p>Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables, and a share of equipment wear if you want to be thorough. If you would not have spent it without the contest, it counts.</p></details>
+    <details><summary>Do I count my time?</summary><p>For &ldquo;was it worth it&rdquo; decisions, yes &mdash; at least note the days. Most teams track cash here and treat time as the known cost of the hobby.</p></details>
+    <details><summary>What about practice cooks?</summary><p>Log them as their own entries or fold them into the contest they prepared for. Either way, practice meat is real money.</p></details>
+    <details><summary>Can I compare contests?</summary><p>The table keeps every contest with its net, so best and worst are visible at a glance. Sort mentally by the net column when planning next season.</p></details>
+    <details><summary>What about a full season view with cost per call?</summary><p><strong>PitProfit</strong> tracks whole seasons: per-contest P&amp;L, best/worst rankings, cost-per-call for every stage walk, multi-season support, and CSV export &mdash; $29 one-time, offline.</p></details>
+  </div>
+</section>
+
+<section class="card" aria-label="Free versus full version">
+  <h2>Free vs. full version</h2>
+  <table class="compare"><tbody>
+    <tr><td><strong>This free tool</strong></td><td><strong>PitProfit &mdash; $29 one-time</strong></td></tr>
+    <tr><td>One contest at a time</td><td>Full season tracking across every contest you enter</td></tr>
+    <tr><td>Manual totals</td><td>Best and worst contests ranked with cost-per-call stats and multi-season history</td></tr>
+  </tbody></table>
+  <p style="margin:1rem 0 0"><a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a></p>
+  <p style="font-size:15px;color:var(--muted)">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
+</section>
+
+<div class="cta-strip">
+  <h2>Tracking a whole season?</h2>
+  <p><strong>PitProfit</strong> is the offline season tracker for competition BBQ teams: every contest&rsquo;s true P&amp;L, best and worst contests, cost per call, multi-season support, and CSV export. $29 one-time, no subscription.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
-<p class="cross-promo"><a href="https://glenerds.gumroad.com">Like this tool? Check out our other apps &rarr;</a></p>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>PitLedger</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere. <a href="../">All apps</a></p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');
-      btn.textContent=t==='dark'?'☀️':'🌙';}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.toggleTheme();});}
-  paint();
-})();
-/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+"use strict";
+var KEY='glenerds-bbq-v1';
+function load(){try{var d=JSON.parse(localStorage.getItem(KEY));return(d&&d.contests)?d:{contests:[]};}catch(e){return{contests:[]};}}
+var sampleOn=false;
+function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+var data=load();
+function $(id){return document.getElementById(id);}
+function money(n){n=Math.round(n);return(n<0?'-$':'$')+Math.abs(n).toLocaleString('en-US');}
+function sgn(n){return(n>=0?'+':'\u2212')+money(Math.abs(n));}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function gv(id){var el=$(id);return el?(parseFloat(el.value)||0):0;}
+function cost(c){return c.entry+c.meat+c.fuel+c.lodge+c.sup;}
+function net(c){return c.pay-cost(c);}
+
+var selBar=null, selSeg=null, totSel=false;
+var CATS=[['entry','Entry','#e08a3c'],['meat','Meat','#b3541e'],['fuel','Fuel','#7c9a4e'],['lodge','Lodging','#5b8dd9'],['sup','Supplies','#9a6bc4']];
+
+function detail(html){$('detail').innerHTML=html||'';}
+function clearSel(){
+  selBar=null;selSeg=null;totSel=false;
+  var s=document.querySelectorAll('.barrow.sel,.leg.sel,.stat.sel');
+  for(var i=0;i<s.length;i++)s[i].classList.remove('sel');
+  var segs=document.querySelectorAll('.donut-seg');
+  for(var j=0;j<segs.length;j++)segs[j].classList.remove('dim');
+  var rows=document.querySelectorAll('table.log tbody tr.sel');
+  for(var k=0;k<rows.length;k++)rows[k].classList.remove('sel');
+  detail('');
+}
+
+function render(){
+  /* ---- table ---- */
+  var wrap=$('table-wrap');wrap.innerHTML='';
+  var spent=0,won=0;
+  if(!data.contests.length){
+    wrap.innerHTML='<div class="empty"><strong>No contests logged yet.</strong>Log your first contest above, or tap the flask to try sample data.</div>';
+  }else{
+    var t=document.createElement('table');t.className='log';
+    t.innerHTML='<thead><tr><th>Contest</th><th>Spent</th><th>Won</th><th>Net</th><th></th></tr></thead>';
+    var tb=document.createElement('tbody');
+    data.contests.forEach(function(c){
+      var s=cost(c),n=net(c);spent+=s;won+=c.pay;
+      var tr=document.createElement('tr');tr.setAttribute('data-cid',c.id);tr.tabIndex=0;
+      tr.setAttribute('role','button');
+      tr.setAttribute('aria-label',(c.name||'(unnamed)')+': net '+sgn(n)+'. Activate to show the full cost breakdown.');
+      var td0=document.createElement('td');
+      td0.innerHTML='<strong>'+esc(c.name||'(unnamed)')+'</strong><br><span class="dt">'+esc(c.date||'')+'</span>';
+      var td1=document.createElement('td');td1.className='num';td1.textContent=money(s);
+      var td2=document.createElement('td');td2.className='num';td2.textContent=money(c.pay);
+      var td3=document.createElement('td');td3.className='num';
+      td3.innerHTML='<strong style="color:'+(n>=0?'var(--good)':'var(--bad)')+'">'+sgn(n)+'</strong>';
+      var td4=document.createElement('td');
+      var b=document.createElement('button');b.className='rm';b.textContent='Remove';
+      b.setAttribute('aria-label','Remove '+(c.name||'contest'));
+      b.addEventListener('click',function(e){e.stopPropagation();
+        data.contests=data.contests.filter(function(x){return x.id!==c.id;});
+        save(data);clearSel();render();Sound.click();});
+      td4.appendChild(b);
+      tr.appendChild(td0);tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);tr.appendChild(td4);
+      function act(e){if(e&&e.target&&e.target.closest('button'))return;spotBar(c.id);}
+      tr.addEventListener('click',act);
+      tr.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target===tr){e.preventDefault();act(null);}});
+      tb.appendChild(tr);
+    });
+    t.appendChild(tb);wrap.appendChild(t);
+  }
+  /* ---- stat cards ---- */
+  var netT=won-spent;
+  $('st-spent').textContent=money(spent);
+  $('st-won').textContent=money(won);
+  var ne=$('st-net');ne.textContent=sgn(netT);
+  ne.className='v '+(netT>=0?'pos':'neg');
+  /* ---- diverging bars ---- */
+  var vis=$('bq-vis');vis.innerHTML='';
+  if(data.contests.length){
+    var nets=data.contests.map(function(c){return{id:c.id,name:c.name||'(unnamed)',n:net(c),c:c};})
+      .sort(function(a,b){return b.n-a.n;});
+    var mx=Math.max.apply(null,nets.map(function(x){return Math.abs(x.n);}).concat([1]));
+    nets.forEach(function(x){
+      var row=document.createElement('button');row.className='barrow';row.setAttribute('data-cid',x.id);
+      row.setAttribute('aria-label',x.name+': net '+sgn(x.n)+'. Activate to show the full cost breakdown.');
+      var nm=document.createElement('span');nm.className='bar-name';nm.textContent=x.name;
+      var vl=document.createElement('span');vl.className='bar-val '+(x.n>=0?'pos':'neg');vl.textContent=sgn(x.n);
+      var tr=document.createElement('span');tr.className='bar-track';tr.setAttribute('aria-hidden','true');
+      var fl=document.createElement('span');fl.className='bar-fill '+(x.n>=0?'pos':'neg');
+      fl.style.width=(Math.abs(x.n)/mx*50).toFixed(1)+'%';
+      var z=document.createElement('span');z.className='bar-zero';
+      tr.appendChild(fl);tr.appendChild(z);
+      row.appendChild(nm);row.appendChild(vl);row.appendChild(tr);
+      row.addEventListener('click',function(){spotBar(x.id);});
+      vis.appendChild(row);
+    });
+    vis.setAttribute('aria-label','Contest net results, best to worst: '+
+      nets.map(function(x){return x.name+' '+sgn(x.n);}).join('; '));
+  }else{
+    vis.innerHTML='<div class="empty"><strong>Nothing to chart yet.</strong>Your contest nets will appear here as diverging bars once you log a contest.</div>';
+  }
+  renderDonut(spent);
+}
+
+function spotBar(cid){
+  var rows=document.querySelectorAll('.barrow');
+  for(var i=0;i<rows.length;i++)rows[i].classList.remove('sel');
+  var trows=document.querySelectorAll('table.log tbody tr.sel');
+  for(var j=0;j<trows.length;j++)trows[j].classList.remove('sel');
+  selSeg=null;totSel=false;
+  var segs=document.querySelectorAll('.donut-seg');
+  for(var k=0;k<segs.length;k++)segs[k].classList.remove('dim');
+  var legs=document.querySelectorAll('.leg.sel,.stat.sel');
+  for(var m=0;m<legs.length;m++)legs[m].classList.remove('sel');
+  if(selBar===cid){selBar=null;detail('');Sound.click();return;}
+  selBar=cid;
+  var c=null;for(var q=0;q<data.contests.length;q++){if(data.contests[q].id===cid)c=data.contests[q];}
+  if(!c){detail('');return;}
+  var row=document.querySelector('.barrow[data-cid="'+cid+'"]');if(row)row.classList.add('sel');
+  var tr=document.querySelector('table.log tr[data-cid="'+cid+'"]');if(tr)tr.classList.add('sel');
+  var s=cost(c),n=net(c);
+  detail('<strong>'+esc(c.name||'(unnamed)')+':</strong> entry '+money(c.entry)+', meat '+money(c.meat)+
+    ', fuel '+money(c.fuel)+', lodging '+money(c.lodge)+', supplies '+money(c.sup)+
+    '. Total spent '+money(s)+', payout '+money(c.pay)+' &mdash; net <strong>'+sgn(n)+'</strong>.');
+  Sound.select();
+}
+
+function renderDonut(spentTotal){
+  var svg=$('donut'),leg=$('legend');svg.innerHTML='';leg.innerHTML='';
+  $('donut-total').textContent=money(spentTotal);
+  if(!data.contests.length){
+    svg.innerHTML='<circle cx="110" cy="110" r="70" fill="none" stroke="var(--border)" stroke-width="30"/>';
+    leg.innerHTML='<div class="empty" style="padding:1rem">Cost categories will appear here once you log a contest.</div>';
+    return;
+  }
+  var totals=CATS.map(function(ct){
+    var t=0;data.contests.forEach(function(c){t+=c[ct[0]]||0;});
+    return{key:ct[0],label:ct[1],color:ct[2],total:t};
+  });
+  var grand=totals.reduce(function(a,x){return a+x.total;},0)||1;
+  var R=70,C=2*Math.PI*R,off=0;
+  totals.forEach(function(x){
+    var frac=x.total/grand,len=frac*C;
+    var cEl=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    cEl.setAttribute('cx','110');cEl.setAttribute('cy','110');cEl.setAttribute('r',String(R));
+    cEl.setAttribute('fill','none');cEl.setAttribute('stroke',x.color);cEl.setAttribute('stroke-width','30');
+    cEl.setAttribute('stroke-dasharray',len.toFixed(2)+' '+C.toFixed(2));
+    cEl.setAttribute('stroke-dashoffset',(-off).toFixed(2));
+    cEl.setAttribute('class','donut-seg');cEl.setAttribute('data-cat',x.key);
+    cEl.setAttribute('tabindex','0');cEl.setAttribute('role','button');
+    cEl.setAttribute('aria-label',x.label+': '+money(x.total)+'. Activate to spotlight.');
+    cEl.addEventListener('click',function(){spotSeg(x.key);});
+    cEl.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();spotSeg(x.key);}});
+    svg.appendChild(cEl);
+    off+=len;
+    var li=document.createElement('button');li.className='leg';li.setAttribute('data-cat',x.key);
+    li.setAttribute('aria-label',x.label+': '+money(x.total)+'. Activate to spotlight.');
+    li.innerHTML='<span class="sw" style="background:'+x.color+'"></span><span>'+esc(x.label)+'</span><span class="lv">'+money(x.total)+'</span>';
+    li.addEventListener('click',function(){spotSeg(x.key);});
+    leg.appendChild(li);
+  });
+  svg.setAttribute('aria-label','Cost breakdown: '+totals.map(function(x){return x.label+' '+money(x.total);}).join(', '));
+}
+
+function spotSeg(key){
+  var segs=document.querySelectorAll('.donut-seg');
+  var legs=document.querySelectorAll('.leg');
+  selBar=null;totSel=false;
+  var rows=document.querySelectorAll('.barrow.sel,table.log tbody tr.sel,.stat.sel');
+  for(var i=0;i<rows.length;i++)rows[i].classList.remove('sel');
+  if(selSeg===key){
+    selSeg=null;
+    for(var a=0;a<segs.length;a++)segs[a].classList.remove('dim');
+    for(var b=0;b<legs.length;b++)legs[b].classList.remove('sel');
+    detail('');Sound.click();return;
+  }
+  selSeg=key;
+  var meta=null;for(var m=0;m<CATS.length;m++){if(CATS[m][0]===key)meta=CATS[m];}
+  for(var c=0;c<segs.length;c++){segs[c].classList.toggle('dim',segs[c].getAttribute('data-cat')!==key);}
+  for(var d=0;d<legs.length;d++){legs[d].classList.toggle('sel',legs[d].getAttribute('data-cat')===key);}
+  var total=0,n=0,vals=[];
+  data.contests.forEach(function(ct){var v=ct[key]||0;total+=v;if(v>0){n++;vals.push(v);}});
+  var avg=n?total/n:0;
+  detail('<strong>'+esc(meta[1])+':</strong> '+money(total)+' total across '+data.contests.length+
+    ' contest'+(data.contests.length===1?'':'s')+(n?' ('+n+' with spending here, avg '+money(avg)+' each)':'')+'.');
+  Sound.select();
+}
+
+function totalsSpot(){
+  clearSelOnly();
+  var stats=document.querySelectorAll('.stat');
+  if(totSel){totSel=false;for(var i=0;i<stats.length;i++)stats[i].classList.remove('sel');detail('');Sound.click();return;}
+  totSel=true;for(var j=0;j<stats.length;j++)stats[j].classList.add('sel');
+  if(!data.contests.length){detail('No contests logged yet.');Sound.select();return;}
+  var spent=0,won=0;
+  var parts=data.contests.map(function(c){var s=cost(c),n=net(c);spent+=s;won+=c.pay;
+    return esc(c.name||'(unnamed)')+' '+sgn(n);});
+  var netT=won-spent;
+  detail('<strong>Season breakdown:</strong> '+parts.join('; ')+'. Total spent '+money(spent)+
+    ', total won '+money(won)+', net <strong>'+sgn(netT)+'</strong>.');
+  Sound.select();
+}
+function clearSelOnly(){
+  selBar=null;selSeg=null;
+  var s=document.querySelectorAll('.barrow.sel,.leg.sel,table.log tbody tr.sel');
+  for(var i=0;i<s.length;i++)s[i].classList.remove('sel');
+  var segs=document.querySelectorAll('.donut-seg');
+  for(var j=0;j<segs.length;j++)segs[j].classList.remove('dim');
+}
+
+document.querySelectorAll('.stat').forEach(function(st){
+  st.addEventListener('click',function(){totalsSpot();});
+});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')clearSel();});
+
+$('bq-add').addEventListener('click',function(){
+  var name=$('bq-name').value.trim();
+  if(!name){Sound.error();alert('Name the contest first.');return;}
+  data.contests.push({id:'c'+Date.now().toString(36),name:name,date:$('bq-date').value,
+    entry:gv('bq-entry'),meat:gv('bq-meat'),fuel:gv('bq-fuel'),lodge:gv('bq-lodge'),sup:gv('bq-sup'),pay:gv('bq-pay')});
+  ['bq-name','bq-entry','bq-meat','bq-fuel','bq-lodge','bq-sup','bq-pay'].forEach(function(id){$(id).value='';});
+  save(data);clearSel();render();Sound.success();
+});
+$('bq-export').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bbq-contests-backup.json';
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+  Sound.success();
+});
+$('bq-date').value=new Date().toISOString().slice(0,10);
+
+/* ---------- sample data toggle ---------- */
+var sampleSnap=null;
+var SAMPLE=[
+  {id:'sample-1',name:'Smoky Mountain Showdown',date:'2026-05-16',entry:350,meat:280,fuel:90,lodge:160,sup:70,pay:1200},
+  {id:'sample-2',name:'Rib Rumble',date:'2026-06-20',entry:300,meat:250,fuel:60,lodge:120,sup:60,pay:500},
+  {id:'sample-3',name:'Prairie Smoke Classic',date:'2026-07-25',entry:400,meat:320,fuel:150,lodge:200,sup:80,pay:0}
+];
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    try{sampleSnap=localStorage.getItem(KEY);}catch(e){sampleSnap=null;}
+    sampleOn=true;
+    data.contests=SAMPLE.map(function(c){var o={};for(var k in c)o[k]=c[k];return o;});
+  }else{
+    sampleOn=false;
+    try{if(sampleSnap===null||typeof sampleSnap==='undefined'){localStorage.removeItem(KEY);}else{localStorage.setItem(KEY,sampleSnap);}}catch(e){}
+    sampleSnap=null;data=load();
+  }
+  clearSel();render();paintSample();Sound.click();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds: WebAudio only, on by default, persists per app ---------- */
 var Sound=(function(){
-  var KEY='bbq-contest-cost-tracker.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  var SKEY='bbq-contest-cost-tracker.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
   function ac(){try{
     if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
     return ctx;}catch(e){return null;}}
   function tone(freq,dur,type,vol,delay){
-    var c=ac();if(!c)return;
+    if(!on)return;var c=ac();if(!c)return;
     function play(){try{
       var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
       o.type=type||'sine';o.frequency.value=freq;
       g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
       g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
       o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
-    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
   }
   return{
     isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
-    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
   };
 })();
-(function(){
-  var btn=document.getElementById('sound-toggle');if(!btn)return;
-  function paint(){var on=Sound.isOn();
-    btn.innerHTML=on?'&#128266;':'&#128263;';
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
-    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
+
+render();
 })();
 </script>
 </body>
