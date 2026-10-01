@@ -5,174 +5,367 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Online Fitness Coach Check-In Tracker — Client Check-Ins, Comparisons &amp; Feedback Drafts | Glenerds</title>
 <meta name="description" content="Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/online-fitness-coach-check-in-tracker/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Online Fitness Coach Check-In Tracker — Client Check-Ins, Comparisons &amp; Feedback Drafts | Glenerds">
-<meta property="og:description" content="Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/online-fitness-coach-check-in-tracker/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/online-fitness-coach-check-in-tracker/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "FitnessCheckIn",
-  "description": "Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.",
-  "url": "https://glenerds.github.io/glenerds/products/online-fitness-coach-check-in-tracker/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "29",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker"
-  }
+<style>
+:root{
+  --bg:#faf6f1; --card:#ffffff; --ink:#231a12; --muted:#6b5d4f; --border:#e9ddcd;
+  --accent:#ea580c; --accent-ink:#c2410c; --accent-soft:#fdeadb;
+  --good:#15803d; --bad:#b91c1c;
+  --shadow:0 2px 10px rgba(234,88,12,.08);
 }
+html[data-theme="dark"]{
+  --bg:#14100c; --card:#1e1813; --ink:#f3ece2; --muted:#b3a48f; --border:#382c20;
+  --accent:#fb923c; --accent-ink:#fdba74; --accent-soft:#2c1f14;
+  --good:#4ade80; --bad:#f87171;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#fb923c,#9a3412);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.15rem;font-weight:800;color:var(--accent-ink);
+  background:var(--accent-soft);border:1px solid var(--border);border-radius:12px;padding:.45rem .9rem;margin:.4rem 0 .8rem}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.demo-head{display:flex;gap:1rem;flex-wrap:wrap;align-items:end;margin-bottom:.6rem}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600}
+.field select{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);min-height:44px}
+.field select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+table.cmp{width:100%;border-collapse:collapse;font-size:15px;margin:.4rem 0}
+table.cmp th,table.cmp td{padding:.55rem .6rem;border-bottom:1px solid var(--border);text-align:left}
+table.cmp th{color:var(--muted);font-size:15px}
+table.cmp td.num,table.cmp th.num{text-align:right;font-variant-numeric:tabular-nums}
+table.cmp tr.mrow{cursor:pointer}
+table.cmp tr.mrow:hover td{background:var(--accent-soft)}
+table.cmp tr.mrow.sel td{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
+table.cmp tr.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.d-up{color:var(--bad);font-weight:700}.d-dn{color:var(--good);font-weight:700}.d-eq{color:var(--muted)}
+#cb-detail{margin:.7rem 0;font-size:15px;color:var(--muted);min-height:1.2em}
+#cb-detail strong{color:var(--ink)}
+#cb-draft{width:100%;min-height:170px;font-size:15px;line-height:1.55;padding:.8rem;border-radius:12px;
+  border:1px solid var(--border);background:var(--bg);color:var(--ink);margin-top:.6rem;resize:vertical}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p,.prose li{font-size:16px}
+.prose ul{padding-left:1.3rem}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"Coach Board",
+"description":"Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.",
+"url":"https://glenerds.github.io/glenerds/staging/published/online-fitness-coach-check-in-tracker/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"29","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Do my clients need accounts too?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. This is your coaching dashboard \u2014 clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Where is client data stored?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee \u2014 but keep your own backups."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does it replace my coaching app?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is it really a one-time purchase?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Do my clients need accounts too?","acceptedAnswer":{"@type":"Answer","text":"No. This is your coaching dashboard — clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for."}},
+{"@type":"Question","name":"Where is client data stored?","acceptedAnswer":{"@type":"Answer","text":"On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee — but keep your own backups."}},
+{"@type":"Question","name":"Does it replace my coaching app?","acceptedAnswer":{"@type":"Answer","text":"It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live."}},
+{"@type":"Question","name":"Is it really a one-time purchase?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; FitnessCheckIn</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="Coach Board — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#fff" stroke-width="1.8"/><path d="M9 4a3 3 0 0 1 6 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 13l2.2 2.2 4.8-5" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    <span><span class="bname">Coach Board</span><span class="bsub">Fitness coach check-in tracker</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Online Fitness Coach Check-In Tracker — Client Check-Ins, Comparisons &amp; Feedback Drafts</h1>
-<p class="lead">Online coaches lose hours every week to messy check-ins scattered across DMs, spreadsheets, and screenshots. This tracker gives you one offline home for your whole roster: log each client&#x27;s weekly check-in, compare any two weeks side by side, and turn the numbers into a feedback message draft with a single click.</p>
-<span class="pricebox">$29 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/fitness-client-check-in/index.html"><strong>Free Fitness Client Check-In Tracker</strong></a> &mdash; Log one client&#x27;s weekly check-ins — weight, measurements, adherence — free forever.</p>
-<p class="small">Free forever, runs offline in your browser. FitnessCheckIn is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>Client roster with per-client weekly check-in history, stored locally on your device</li>
-<li>Photo protocol checklists so clients submit the right shots every week</li>
-<li>Weight, measurements, macros vs. actuals, and 1–10 adherence scores per check-in</li>
-<li>Side-by-side week comparison to spot trends at a glance</li>
-<li>One-click client feedback message draft built from the week&#x27;s data</li>
-<li>Runs offline in any modern browser — no account, no subscription, no uploads</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>Physique and prep coaches managing weekly client check-ins</li>
-<li>Online coaches who want macros-vs-actuals tracking without a spreadsheet</li>
-<li>Coaches tired of digging through chat history for last week&#x27;s numbers</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You need client data synced automatically across your phone and laptop</li>
-<li>Multiple coaches share one client roster</li>
-<li>You want programming, billing, or messaging built into the same app</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Do my clients need accounts too?</dt>
-<dd>No. This is your coaching dashboard — clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for.</dd>
-<dt>Where is client data stored?</dt>
-<dd>On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee — but keep your own backups.</dd>
-<dt>Does it replace my coaching app?</dt>
-<dd>It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live.</dd>
-<dt>Is it really a one-time purchase?</dt>
-<dd>Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing.</dd>
-</dl>
+<section class="hero">
+  <h1>Online Fitness Coach Check-In Tracker &mdash; Client Check-Ins, Comparisons &amp; Feedback Drafts</h1>
+  <p class="lead">Online coaches lose hours every week to messy check-ins scattered across DMs, spreadsheets, and screenshots. Coach Board gives you one offline home for your whole roster: log each client&rsquo;s weekly check-in, compare any two weeks side by side, and turn the numbers into a feedback message draft with a single click.</p>
+  <p><span class="pricebox">$29 one-time</span></p>
+  <p><a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a></p>
+  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related free tools</h2>
-<div class="grid">
-<div class="card"><h3>Free Offline Habit Tracker</h3><p>Daily adherence habits are what move client check-ins; track them free.</p><a class="btn" href="../../tools/habit-tracker/index.html">Open the free tool</a></div>
-<div class="card"><h3>Trainerize / TrueCoach Alternative</h3><p>An honest comparison: when the one-time offline tool wins, and when the subscription alternative is the better call.</p><a class="btn" href="../../alternatives/trainerize-truecoach-alternative/index.html">Read the comparison</a></div>
-</div>
+<section class="card" role="region" aria-label="Interactive demo: week comparison">
+  <h2>Try it: week-over-week comparison</h2>
+  <p class="small">A taste of the real thing &mdash; pick any two check-in weeks for a sample client, tap a metric row for the coach&rsquo;s read, then generate the feedback draft.</p>
+  <div class="demo-head">
+    <label class="field">Week A<select id="cb-wa" aria-label="Week A"></select></label>
+    <label class="field">Week B<select id="cb-wb" aria-label="Week B"></select></label>
+    <button class="btn ghost" id="cb-swap" type="button">Swap weeks</button>
+  </div>
+  <div id="cb-table"></div>
+  <div id="cb-detail" aria-live="polite"></div>
+  <p><button class="btn" id="cb-draft-btn" type="button">Generate feedback draft</button></p>
+  <textarea id="cb-draft" aria-label="Generated feedback draft" placeholder="Your feedback draft will appear here…" readonly></textarea>
 </section>
-<div class="cta-band">
-<h2>Get FitnessCheckIn today</h2>
-<p>$29 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul>
+    <li>Client roster with per-client weekly check-in history, stored locally on your device</li>
+    <li>Photo protocol checklists so clients submit the right shots every week</li>
+    <li>Weight, measurements, macros vs. actuals, and 1–10 adherence scores per check-in</li>
+    <li>Side-by-side week comparison to spot trends at a glance</li>
+    <li>One-click client feedback message draft built from the week&rsquo;s data</li>
+    <li>Runs offline in any modern browser &mdash; no account, no subscription, no uploads</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul>
+    <li>Physique and prep coaches managing weekly client check-ins</li>
+    <li>Online coaches who want macros-vs-actuals tracking without a spreadsheet</li>
+    <li>Coaches tired of digging through chat history for last week&rsquo;s numbers</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul>
+    <li>You need client data synced automatically across your phone and laptop</li>
+    <li>Multiple coaches share one client roster</li>
+    <li>You want programming, billing, or messaging built into the same app</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>Do my clients need accounts too?</summary><p>No. This is your coaching dashboard &mdash; clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for.</p></details>
+  <details><summary>Where is client data stored?</summary><p>On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee &mdash; but keep your own backups.</p></details>
+  <details><summary>Does it replace my coaching app?</summary><p>It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live.</p></details>
+  <details><summary>Is it really a one-time purchase?</summary><p>Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get Coach Board today</h2>
+  <p><strong>$29 one-time</strong> &mdash; yours forever. No subscription. Client roster, weekly check-ins, week-over-week comparisons, and one-click feedback drafts, all offline.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>Coach Board</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
+/* ---------- theme toggle ---------- */
 (function(){
   var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
+  var SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+  var MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
   function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
   function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
+    if(btn){btn.innerHTML=t==='dark'?SUN:MOON;
+      var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
+      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
+  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();});}
   paint();
+})();
+/* ---------- sounds (Web Audio oscillator, on user interaction only) ---------- */
+var Sound=(function(){
+  var KEY='online-fitness-coach-check-in-tracker.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){if(on)tone(520,0.06,'sine',0.045);},
+    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
+    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
+    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);}
+  };
+})();
+(function(){
+  var btn=document.getElementById('sound-toggle');
+  var ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+  var OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
+  function paint(){var on=Sound.isOn();btn.innerHTML=on?ON:OFF;
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    var lbl='Sound: '+(on?'on':'off');btn.setAttribute('aria-label',lbl);btn.title='Toggle sounds ('+(on?'on':'off')+')';}
+  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
+  paint();
+})();
+/* ---------- Coach Board demo: week comparison + feedback draft ---------- */
+(function(){
+  var CLIENT='Alex Rivera';
+  var EMPTY_WEEKS=[
+    {w:'Week 1',wt:null,waist:null,prot:null,carb:null,adh:null},
+    {w:'Week 2',wt:null,waist:null,prot:null,carb:null,adh:null},
+    {w:'Week 3',wt:null,waist:null,prot:null,carb:null,adh:null},
+    {w:'Week 4',wt:null,waist:null,prot:null,carb:null,adh:null}
+  ];
+  var SAMPLE_WEEKS=[
+    {w:'Week 1',wt:184.2,waist:33.5,prot:165,carb:210,adh:8},
+    {w:'Week 2',wt:183.0,waist:33.2,prot:172,carb:198,adh:9},
+    {w:'Week 3',wt:181.8,waist:32.9,prot:158,carb:225,adh:6},
+    {w:'Week 4',wt:180.6,waist:32.6,prot:170,carb:205,adh:9}
+  ];
+  var weeks=JSON.parse(JSON.stringify(EMPTY_WEEKS));
+  var METRICS=[
+    {k:'wt',label:'Weight (lbs)',fmt:function(v){return v.toFixed(1);},downGood:true,
+     note:function(d){if(d<-2)return 'Down more than 2 lbs in a week — fast for most clients; check whether intake actually matched the plan.';if(d<0)return 'Down a bit — a healthy weekly rate for a cut.';if(d>0)return 'Up this week — flag it in the check-in reply and look at adherence below.';return 'Unchanged — weight alone never tells the story; check waist and adherence.';}},
+    {k:'waist',label:'Waist (in)',fmt:function(v){return v.toFixed(1);},downGood:true,
+     note:function(d){if(d<0)return 'Waist trending down while weight moves — real fat loss, not just water.';if(d>0)return 'Waist up — worth a closer look at the weekend intake.';return 'Waist steady — consistent with the weight trend.';}},
+    {k:'prot',label:'Protein (g, avg)',fmt:function(v){return Math.round(v);},downGood:false,
+     note:function(d){if(d>0)return 'Protein up — good: it protects muscle during a deficit.';if(d<0)return 'Protein slipped — the first thing to fix next week.';return 'Protein steady — hold the line.';}},
+    {k:'carb',label:'Carbs (g, avg)',fmt:function(v){return Math.round(v);},downGood:false,
+     note:function(d){if(d>25)return 'Carbs jumped — likely the weekend; ask, don\u2019t accuse.';if(d<-25)return 'Carbs dropped hard — fine if planned, flag if it wasn\u2019t.';return 'Carbs in the usual band.';}},
+    {k:'adh',label:'Adherence (1–10)',fmt:function(v){return v;},downGood:false,
+     note:function(d){if(d>=2)return 'Adherence jumped — momentum is building; reinforce it by name.';if(d<=-2)return 'Adherence fell — lead with curiosity: what got in the way?';return 'Adherence steady.';}}
+  ];
+  function $(id){return document.getElementById(id);}
+  var wa=$('cb-wa'),wb=$('cb-wb'),table=$('cb-table'),detail=$('cb-detail'),draft=$('cb-draft'),selMetric=-1;
+  function opts(){
+    [wa,wb].forEach(function(s){s.innerHTML='';});
+    weeks.forEach(function(wk,i){
+      [wa,wb].forEach(function(s){
+        var o=document.createElement('option');o.value=i;o.textContent=wk.w;s.appendChild(o);
+      });
+    });
+    wa.value=Math.max(0,weeks.length-2);wb.value=weeks.length-1;
+  }
+  function val(wk,k){return wk[k];}
+  function render(){
+    var a=parseInt(wa.value,10),b=parseInt(wb.value,10);
+    var html='<table class="cmp"><thead><tr><th>Metric</th><th class="num">'+weeks[a].w+'</th><th class="num">'+weeks[b].w+'</th><th class="num">Change</th></tr></thead><tbody>';
+    METRICS.forEach(function(m,i){
+      var va=val(weeks[a],m.k),vb=val(weeks[b],m.k),cell;
+      if(va==null||vb==null){cell='<td class="num d-eq">—</td>';}
+      else{
+        var d=vb-va,arrow=d>0?'▲':d<0?'▼':'•',cls=d===0?'d-eq':(m.downGood?d<0:d>0)?'d-dn':'d-up';
+        var mag=Math.abs(d)<0.05?0:d;
+        cell='<td class="num"><span class="'+cls+'">'+arrow+' '+(m.k==='wt'||m.k==='waist'?mag.toFixed(1):Math.abs(Math.round(d)))+'</span></td>';
+      }
+      var sa=va==null?'—':m.fmt(va),sb=vb==null?'—':m.fmt(vb);
+      html+='<tr class="mrow'+(i===selMetric?' sel':'')+'" data-m="'+i+'" tabindex="0" role="button" aria-label="'+m.label+': activate for the coach\u2019s read."><td>'+m.label+'</td><td class="num">'+sa+'</td><td class="num">'+sb+'</td>'+cell+'</tr>';
+    });
+    html+='</tbody></table>';
+    table.innerHTML=html;
+    detail.textContent='';
+    var rows=table.querySelectorAll('.mrow');
+    for(var ri=0;ri<rows.length;ri++){
+      (function(tr,i){
+        function act(){
+          if(i===selMetric){selMetric=-1;detail.textContent='';tr.classList.remove('sel');Sound.click();return;}
+          selMetric=i;Sound.select();
+          for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
+          tr.classList.add('sel');
+          var m=METRICS[i],a2=parseInt(wa.value,10),b2=parseInt(wb.value,10);
+          var va=weeks[a2][m.k],vb=weeks[b2][m.k];
+          var txt=va==null||vb==null?'No data logged for one of these weeks — log a check-in first.':m.note(vb-va);
+          detail.innerHTML='<strong>'+m.label+' — '+weeks[a2].w+' → '+weeks[b2].w+':</strong> '+txt;
+        }
+        tr.addEventListener('click',act);
+        tr.addEventListener('keydown',function(e){
+          if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}
+          if(e.key==='Escape'){selMetric=-1;detail.textContent='';for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');}
+        });
+      })(rows[ri],ri);
+    }
+  }
+  function makeDraft(){
+    var b=parseInt(wb.value,10),wk=weeks[b];
+    if(wk.wt==null){draft.value='Log a check-in for '+wk.w+' first — the draft writes itself from the week\u2019s data.';return;}
+    var dAdh=b>0&&weeks[b-1].adh!=null?wk.adh-weeks[b-1].adh:0;
+    var dWt=b>0&&weeks[b-1].wt!=null?wk.wt-weeks[b-1].wt:0;
+    var lines=['Hey '+CLIENT.split(' ')[0]+' — '+wk.w+' check-in review:',''];
+    lines.push('• Weight: '+wk.wt.toFixed(1)+' lbs'+(b>0&&weeks[b-1].wt!=null?' ('+(dWt<=0?'down ':'up ')+Math.abs(dWt).toFixed(1)+' from last week)':'')+'.');
+    lines.push('• Waist: '+wk.waist.toFixed(1)+' in — '+(dWt<0?'trending the right way.':'holding; let\u2019s see next week.'));
+    lines.push('• Protein averaged '+Math.round(wk.prot)+'g — '+(wk.prot>=165?'right where it should be.':'a touch low; make this the one fix.'));
+    lines.push('• Adherence '+wk.adh+'/10'+(dAdh!==0?' ('+(dAdh>0?'up':'down')+' '+Math.abs(dAdh)+' from last week)':'')+'.');
+    lines.push('');
+    lines.push(wk.adh>=8?'Keep doing exactly what you\u2019re doing — consistency is the whole program.':'One priority for next week: tell me the single biggest thing that got in the way, and we\u2019ll plan around it.');
+    lines.push('');
+    lines.push('— Coach');
+    draft.value=lines.join('\n');
+    Sound.success();
+  }
+  wa.addEventListener('change',function(){render();Sound.click();});
+  wb.addEventListener('change',function(){render();Sound.click();});
+  $('cb-swap').addEventListener('click',function(){var t=wa.value;wa.value=wb.value;wb.value=t;render();Sound.click();});
+  $('cb-draft-btn').addEventListener('click',makeDraft);
+  /* ---------- sample data toggle: snapshot demo state, fill, restore ---------- */
+  var sampleOn=false,sampleSnap=null;
+  var sbtn=$('sample-toggle');
+  function paintSample(){
+    var lbl=sampleOn?'Clear sample data':'Try sample data';
+    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+  }
+  if(sbtn){sbtn.addEventListener('click',function(){
+    if(!sampleOn){
+      sampleSnap={weeks:JSON.parse(JSON.stringify(weeks)),wa:wa.value,wb:wb.value,draft:draft.value};
+      sampleOn=true;weeks=JSON.parse(JSON.stringify(SAMPLE_WEEKS));
+    }else{
+      sampleOn=false;
+      var s=sampleSnap||{weeks:JSON.parse(JSON.stringify(EMPTY_WEEKS)),wa:'0',wb:'1',draft:''};
+      weeks=s.weeks;draft.value=s.draft;
+    }
+    selMetric=-1;opts();
+    if(sampleOn){wa.value=weeks.length-2;wb.value=weeks.length-1;}
+    else{wa.value=sampleSnap?sampleSnap.wa:'0';wb.value=sampleSnap?sampleSnap.wb:'1';}
+    sampleSnap=sampleOn?sampleSnap:null;
+    render();paintSample();Sound.click();
+  });paintSample();}
+  opts();render();
 })();
 </script>
 </body>
