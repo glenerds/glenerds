@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="skyb" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f9fd8"/>
+      <stop offset="1" stop-color="#7cc7e8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#skyb)"/>
+  <text x="640" y="128" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="92" fill="#ffffff">GradeTrail</text>
+  <rect x="592" y="150" width="96" height="8" rx="4" fill="#ffcf3f"/>
+  <!-- winding trail -->
+  <path d="M 150 580 C 350 540, 400 440, 600 460 S 850 380, 1010 400" fill="none" stroke="#ffffff" stroke-width="10" stroke-dasharray="26 20" stroke-linecap="round" opacity="0.9"/>
+  <!-- small books on trail -->
+  <g>
+    <g transform="translate(330,520)">
+      <rect x="-30" y="-40" width="60" height="80" rx="8" fill="#ffffff"/>
+      <rect x="-21" y="-40" width="9" height="80" fill="#e8653a"/>
+      <text x="11" y="12" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="30" fill="#2f9fd8">A</text>
+    </g>
+    <g transform="translate(600,455)">
+      <rect x="-30" y="-40" width="60" height="80" rx="8" fill="#ffffff"/>
+      <rect x="-21" y="-40" width="9" height="80" fill="#3f9e4d"/>
+      <text x="11" y="12" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="30" fill="#2f9fd8">B</text>
+    </g>
+  </g>
+  <!-- big pencil riding the trail -->
+  <g transform="translate(975,365) rotate(-18)">
+    <rect x="-215" y="-26" width="250" height="52" rx="8" fill="#ffcf3f"/>
+    <rect x="-215" y="-26" width="250" height="18" rx="8" fill="#ffd95e"/>
+    <polygon points="35,-26 105,0 35,26" fill="#f5d7a1"/>
+    <polygon points="83,-9 105,0 83,9" fill="#3a3a3a"/>
+    <rect x="-240" y="-26" width="25" height="52" fill="#b9c4cc"/>
+    <rect x="-272" y="-26" width="34" height="52" rx="10" fill="#ef7d9b"/>
+  </g>
+  <!-- stars -->
+  <g fill="#ffdf5e">
+    <path d="M250 240 l13 26 28 4 -20 19 5 28 -26 -14 -26 14 5 -28 -20 -19 28 -4 z"/>
+    <path d="M1050 200 l11 22 24 4 -17 16 4 24 -22 -12 -22 12 4 -24 -17 -16 24 -4 z"/>
+    <path d="M640 250 l10 20 22 3 -16 15 4 22 -20 -11 -20 11 4 -22 -16 -15 22 -3 z"/>
+    <path d="M420 600 l9 18 20 3 -15 14 4 20 -18 -10 -18 10 4 -20 -15 -14 20 -3 z"/>
+  </g>
+  <text x="640" y="662" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="44" fill="#ffffff">Lessons, attendance, grades &amp; reading logs</text>
+</svg>

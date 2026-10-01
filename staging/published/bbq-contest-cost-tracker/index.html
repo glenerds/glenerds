@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Free BBQ Contest Cost Tracker | Glenerds</title>
+<meta name="description" content="Free BBQ competition cost tracker: log contest expenses and payouts to see your true profit per contest. Offline, no account.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/bbq-contest-cost-tracker/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Glenerds">
+<meta property="og:title" content="Free BBQ Contest Cost Tracker | Glenerds">
+<meta property="og:description" content="Free BBQ competition cost tracker: log contest expenses and payouts to see your true profit per contest. Offline, no account.">
+<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/bbq-contest-cost-tracker/">
+<script>
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script><link rel="stylesheet" href="../../style.css">
+<style>
+/* contest visual: profit/loss diverging bars, zero-centered */
+.bq-vis{display:grid;gap:8px;margin:14px 0 4px}
+.bq-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
+.bq-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bq-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
+.bq-track{grid-column:1/-1;position:relative;height:14px;border-radius:999px;background:var(--border);overflow:hidden}
+.bq-zero{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--ink);opacity:.35;transform:translateX(-1px)}
+.bq-fill{position:absolute;top:0;bottom:0}
+.bq-fill.pos{background:var(--accent);left:50%}
+.bq-fill.neg{background:#c0392b;right:50%}
+html[data-theme="dark"] .bq-fill.neg{background:#e57373}
+.bq-row{cursor:pointer;border-radius:8px;padding:4px 6px}
+.bq-row:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
+.bq-row.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+#bq-detail{margin:8px 0 4px;font-size:.88rem;color:var(--muted)}
+#bq-detail strong{color:var(--fg)}
+#bq-rows tr.bq-trow{cursor:pointer}
+#bq-rows tr.bq-trow:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
+#bq-rows tr.bq-trow.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+#bq-totals{cursor:pointer;border-radius:8px;padding:4px 6px;display:inline-block}
+#bq-totals:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
+#bq-totals.sel{box-shadow:inset 0 0 0 2px var(--accent)}
+/* ---------- standard header cluster (HenTrack reference spec, 2026-09-21) ---------- */
+.g-header-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;row-gap:6px;justify-content:flex-end;
+  --line:var(--border);--ink:var(--fg);--accent-soft:color-mix(in srgb,var(--accent) 14%,transparent)}
+.g-store-btn{display:inline-flex;align-items:center;background:var(--g-accent,#4f46e5);color:#fff;border-radius:999px;padding:8px 15px;font-size:.88rem;font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.g-store-btn:hover{background:var(--g-accent-hover,#4338ca)}
+.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,.10);flex:none;font-size:1.1rem}
+.round-btn svg{width:26px;height:26px;flex:none}
+.round-btn.theme-toggle,.round-btn.sound-toggle{font-size:1.65rem;line-height:1}
+.round-btn.theme-toggle{margin-left:0}
+.round-btn:hover{border-color:var(--accent)}
+.round-btn:focus{outline:none}
+.round-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.round-btn.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+@media print{.g-store-btn,.g-header-actions,.g-cta-strip{display:none!important}}
+@media (max-width:600px){
+header.site .wrap{flex-wrap:wrap;gap:.6rem}
+nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
+nav.main a{margin-left:.6rem}
+.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+}
+/* ---------- bottom cross-promo ---------- */
+.cross-promo{margin:2rem 0 0;padding:1.25rem;border-top:1px solid var(--border);text-align:center}
+@media print{.g-store-btn,.g-header-actions,.g-cta-strip,.cross-promo{display:none!important}}
+</style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What should I count as a cost?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables, and a share of equipment wear if you want to be thorough. If you would not have spent it without the contest, it counts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I count my time?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For \u201cwas it worth it\u201d decisions, yes \u2014 at least note the days. Most teams track cash here and treat time as the known cost of the hobby."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about practice cooks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Log them as their own entries or fold them into the contest they prepared for. Either way, practice meat is real money."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I compare contests?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The table keeps every contest with its net, so best and worst are visible at a glance. Sort mentally by the net column when planning next season."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What about a full season view with cost per call?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "PitProfit tracks whole seasons: per-contest P&L, best/worst rankings, cost-per-call for every stage walk, multi-season support, and CSV export \u2014 $29 one-time, offline."
+      }
+    }
+  ]
+}
+</script>
+</head><body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../index.html">Glenerds</a>
+<nav class="main">
+<a href="../../index.html">Home</a>
+<a href="../../index.html#free-tools">Free Tools</a>
+<a href="../../index.html#products">Products</a>
+<a href="https://glenerds.gumroad.com">Store</a>
+<div class="g-header-actions">
+<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+<button id="theme-toggle" class="theme-toggle round-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode">🌙</button>
+<button id="sound-toggle" class="round-btn sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)">🔊</button>
+</div>
+</nav></div></header>
+<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Free Tools</a> &rsaquo; BBQ Contest Cost Tracker</p>
+<main>
+<div class="hero">
+<h1>Free BBQ Contest Cost Tracker &mdash; What Did That Contest Really Cost?</h1>
+<p class="lead">Did that BBQ contest actually make money? Entry fees, meat, fuel, lodging, supplies, payouts &mdash;
+log one contest weekend's real numbers and see instantly whether it made or lost money. Built for competition
+BBQ teams who suspect the trophies cost more than they pay. Free, offline, no account.</p>
+</div>
+
+<div class="toolbox" role="region" aria-label="BBQ contest cost tracker">
+
+<label>Contest: <input type="text" id="bq-name" placeholder="e.g. Spring Smoke-Off" aria-label="Contest name"></label>
+<label>Date: <input type="date" id="bq-date" aria-label="Contest date"></label><br>
+<label>Entry fee: $<input type="number" id="bq-entry" min="0" step="1" style="width:6rem" aria-label="Entry fee"></label>
+<label>Meat: $<input type="number" id="bq-meat" min="0" step="1" style="width:6rem" aria-label="Meat cost"></label>
+<label>Fuel: $<input type="number" id="bq-fuel" min="0" step="1" style="width:6rem" aria-label="Fuel cost"></label><br>
+<label>Lodging: $<input type="number" id="bq-lodge" min="0" step="1" style="width:6rem" aria-label="Lodging cost"></label>
+<label>Supplies &amp; rubs: $<input type="number" id="bq-sup" min="0" step="1" style="width:6rem" aria-label="Supplies cost"></label>
+<label>Payout won: $<input type="number" id="bq-pay" min="0" step="1" style="width:6rem" aria-label="Payout won"></label>
+<button id="bq-add">Log contest</button>
+<button id="bq-export" class="plain">Export backup</button>
+<table><thead><tr><th>Contest</th><th>Spent</th><th>Won</th><th>Net</th><th></th></tr></thead>
+<tbody id="bq-rows"></tbody></table>
+<p id="bq-totals" style="font-size:1.1rem"></p>
+<div id="bq-vis" class="bq-vis" role="img" aria-label="Contest net results chart"></div>
+<p class="small">Everything is stored in this browser only. Multi-season tracking and CSV export live in the paid version.</p>
+</div>
+<p class="small" style="margin-top:1rem"><strong>Tracking a whole season?</strong> <a href="../../products/pitprofit/index.html">PitProfit</a> ranks every contest by true profit.</p>
+<p class="small">Free tool by <a href="../../index.html">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+
+<div class="toolbox">
+<h3 style="margin-top:0">Free vs. full version</h3>
+<table><tbody>
+<tr><td><strong>Free tool on this page</strong></td><td><strong>PitProfit &mdash; $29 one-time</strong></td></tr>
+<tr><td>One contest at a time</td><td>Full season tracking across every contest you enter</td></tr>
+<tr><td>Manual totals</td><td>Best and worst contests ranked with cost-per-call stats and multi-season history</td></tr>
+</tbody></table>
+<p><a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a></p>
+<p class="small">No subscription. No account. The full tool runs offline in your browser, just like this free one.</p>
+</div>
+
+
+
+
+
+<script>
+(function(){
+  var KEY='glenerds-bbq-v1';
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{contests:[]}}catch(e){return{contests:[]}}}
+  function save(d){if(sampleOn)return;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+  var data=load();
+  /* spotlight state (hoisted so Esc + totals can share it) */
+  var bqSel=null,totSel=false,bqDetailEl=null,xById={};
+  function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function gv(id){return parseFloat(document.getElementById(id).value)||0;}
+  function render(){
+    var tb=document.getElementById('bq-rows');tb.innerHTML='';
+    var spent=0,won=0;
+    data.contests.forEach(function(c){
+      var s=c.entry+c.meat+c.fuel+c.lodge+c.sup,net=c.pay-s;
+      spent+=s;won+=c.pay;
+      var tr=document.createElement('tr');
+      tr.className='bq-trow';
+      tr.innerHTML='<td>'+esc(c.name||'(unnamed)')+'<br><span class="small">'+esc(c.date||'')+'</span></td><td>'
+        +money(s)+'</td><td>'+money(c.pay)+'</td><td><strong>'+(net>=0?'+':'')+money(net).replace('$-','-$')+'</strong></td>';
+      var td=document.createElement('td');var b=document.createElement('button');
+      b.textContent='Remove';b.className='plain';
+      b.onclick=function(e){if(e)e.stopPropagation();data.contests=data.contests.filter(function(x){return x.id!==c.id;});save(data);render();Sound.click();};
+      td.appendChild(b);tr.appendChild(td);tb.appendChild(tr);
+      /* clickable contest row: spotlights the matching chart bar + full cost breakdown */
+      tr.setAttribute('data-cid',c.id);tr.tabIndex=0;tr.setAttribute('role','button');
+      tr.setAttribute('aria-label',(c.name||'(unnamed)')+': net '+(net>=0?'+':'−')+money(Math.abs(net))+'. Activate to show the full cost breakdown.');
+      function trowAct(e){
+        if(e&&e.target&&e.target.closest&&e.target.closest('button'))return;
+        var x=xById[c.id];if(!x)return;
+        var crow=bvis.querySelector('.bq-row[data-cid="'+x.id+'"]');
+        bqSpot(x,crow||null);
+      }
+      tr.addEventListener('click',trowAct);
+      tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){if(e.target!==tr)return;e.preventDefault();trowAct(null);}});
+    });
+    var netT=won-spent;
+    document.getElementById('bq-totals').innerHTML='<strong>Total spent: '+money(spent)+'</strong> &nbsp;|&nbsp; '
+      +'<strong>Total won: '+money(won)+'</strong> &nbsp;|&nbsp; <strong>Net: '
+      +(netT>=0?'+':'−')+money(Math.abs(netT))+'</strong>';
+    if(!data.contests.length){tb.innerHTML='<tr><td colspan="5" class="small">No contests logged yet.</td></tr>';}
+    /* net profit/loss diverging bars, zero-centered (visual representation) */
+    var bvis=document.getElementById('bq-vis');bvis.innerHTML='';
+    bvis.style.display=data.contests.length?'':'none';
+    /* interactive contest bars: click/keyboard spotlights the full cost breakdown, toggle back */
+    var bdet=document.getElementById('bq-detail');
+    if(!bdet){bdet=document.createElement('div');bdet.id='bq-detail';bdet.setAttribute('aria-live','polite');bvis.parentNode.insertBefore(bdet,bvis.nextSibling);}
+    bqDetailEl=bdet;
+    bdet.textContent='';
+    function bqSpot(x,row){
+      var rows=bvis.querySelectorAll('.bq-row');
+      for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
+      totSel=false;var tp1=document.getElementById('bq-totals');if(tp1)tp1.classList.remove('sel');
+      if(bqSel===x.id){bqSel=null;bdet.textContent='';Sound.click();return;}
+      bqSel=x.id;if(row)row.classList.add('sel');
+      bdet.innerHTML='<strong>'+esc(x.ename)+':</strong> Entry '+money(x.entry)+', meat '+money(x.meat)+', fuel '+money(x.fuel)+', lodging '+money(x.lodge)+', supplies '+money(x.sup)+'. Total spent '+money(x.spent)+', payout '+money(x.pay)+' — net '+(x.net>=0?'+':'−')+money(Math.abs(x.net))+'.';
+      Sound.select();
+    }
+    if(data.contests.length){
+      var bnets=data.contests.map(function(c){
+        var s=c.entry+c.meat+c.fuel+c.lodge+c.sup;
+        return {id:c.id,name:c.name||'(unnamed)',net:c.pay-s,entry:c.entry,meat:c.meat,fuel:c.fuel,lodge:c.lodge,sup:c.sup,pay:c.pay,spent:s,ename:c.name||'(unnamed)'};
+      }).sort(function(a,b){return b.net-a.net;});
+      var bmx=Math.max.apply(null,bnets.map(function(x){return Math.abs(x.net);}).concat([1]));
+      bnets.forEach(function(x){
+        xById[x.id]=x;
+        var row=document.createElement('div');row.className='bq-row';
+        row.tabIndex=0;row.setAttribute('role','button');row.setAttribute('data-cid',x.id);
+        row.setAttribute('aria-label',x.name+': net '+(x.net>=0?'+':'−')+money(Math.abs(x.net))+'. Activate to show the full cost breakdown.');
+        var nm=document.createElement('div');nm.className='bq-name';nm.textContent=x.name;
+        var vl=document.createElement('div');vl.className='bq-val';
+        vl.textContent=(x.net>=0?'+':'−')+money(Math.abs(x.net));
+        vl.style.color=x.net>=0?'var(--accent)':'';
+        var tr=document.createElement('div');tr.className='bq-track';
+        var fl=document.createElement('div');fl.className='bq-fill '+(x.net>=0?'pos':'neg');
+        fl.style.width=(Math.abs(x.net)/bmx*50).toFixed(1)+'%';
+        var z=document.createElement('div');z.className='bq-zero';
+        tr.appendChild(fl);tr.appendChild(z);row.appendChild(nm);row.appendChild(vl);row.appendChild(tr);
+        row.title=x.name+': net '+(x.net>=0?'+':'−')+money(Math.abs(x.net));
+        row.addEventListener('click',function(){bqSpot(x,row);});
+        row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();bqSpot(x,row);}});
+        bvis.appendChild(row);
+      });
+      bvis.setAttribute('aria-label','Contest net results, best to worst: '+
+        bnets.map(function(x){return x.name+' '+(x.net>=0?'+':'−')+money(Math.abs(x.net));}).join('; '));
+    }
+  }
+  document.getElementById('bq-add').onclick=function(){
+    var name=document.getElementById('bq-name').value.trim();
+    if(!name){Sound.error();alert('Name the contest first.');return;}
+    data.contests.push({id:'c'+Date.now().toString(36),name:name,date:document.getElementById('bq-date').value,
+      entry:gv('bq-entry'),meat:gv('bq-meat'),fuel:gv('bq-fuel'),lodge:gv('bq-lodge'),sup:gv('bq-sup'),pay:gv('bq-pay')});
+    ['bq-name','bq-entry','bq-meat','bq-fuel','bq-lodge','bq-sup','bq-pay'].forEach(function(id){document.getElementById(id).value='';});
+    save(data);render();Sound.success();
+  };
+  document.getElementById('bq-export').onclick=function(){
+    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bbq-contests-backup.json';a.click();Sound.success();};
+  document.getElementById('bq-date').value=new Date().toISOString().slice(0,10);
+  /* totals line: keyboard-accessible button — shows per-contest breakdown, click again/Esc restores */
+  function totalsSpot(){
+    var rows=document.querySelectorAll('#bq-vis .bq-row');
+    for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
+    bqSel=null;
+    var tp=document.getElementById('bq-totals');
+    var bdetEl=bqDetailEl||document.getElementById('bq-detail');
+    if(totSel){totSel=false;if(tp)tp.classList.remove('sel');if(bdetEl)bdetEl.textContent='';Sound.click();return;}
+    totSel=true;if(tp)tp.classList.add('sel');
+    if(!data.contests.length){if(bdetEl)bdetEl.textContent='No contests logged yet.';Sound.select();return;}
+    var spent=0,won=0;
+    var parts=data.contests.map(function(c){var s=c.entry+c.meat+c.fuel+c.lodge+c.sup,net=c.pay-s;
+      spent+=s;won+=c.pay;
+      return esc(c.name||'(unnamed)')+' '+(net>=0?'+':'−')+money(Math.abs(net));});
+    var netT=won-spent;
+    if(bdetEl)bdetEl.innerHTML='<strong>Season breakdown:</strong> '+parts.join('; ')+'. Total spent '+money(spent)+', total won '+money(won)+', net '+(netT>=0?'+':'−')+money(Math.abs(netT))+'.';
+    Sound.select();
+  }
+  var tp0=document.getElementById('bq-totals');
+  if(tp0){tp0.tabIndex=0;tp0.setAttribute('role','button');tp0.setAttribute('aria-label','Season totals. Activate to see the per-contest breakdown.');
+    tp0.addEventListener('click',function(){totalsSpot();});
+    tp0.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();totalsSpot();}});}
+  /* Esc restores any spotlight */
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    bqSel=null;totSel=false;
+    if(bqDetailEl)bqDetailEl.textContent='';
+    var rs=document.querySelectorAll('#bq-vis .bq-row.sel,#bq-rows tr.sel');
+    for(var i=0;i<rs.length;i++)rs[i].classList.remove('sel');
+    var tp=document.getElementById('bq-totals');if(tp)tp.classList.remove('sel');
+  });
+  render();
+  /* ---------- sample data toggle: snapshot contests, fill realistic demo season, restore ---------- */
+  var sampleOn=false,sampleSnap=null;
+  var SAMPLE=[
+    {id:'sample-1',name:'Smoky Mountain Showdown',date:'2026-05-16',entry:350,meat:280,fuel:90,lodge:160,sup:70,pay:1200},
+    {id:'sample-2',name:'Rib Rumble',date:'2026-06-20',entry:300,meat:250,fuel:60,lodge:120,sup:60,pay:500},
+    {id:'sample-3',name:'Prairie Smoke Classic',date:'2026-07-25',entry:400,meat:320,fuel:150,lodge:200,sup:80,pay:0}
+  ];
+  var sbtn=document.getElementById('sample-toggle');
+  function paintSample(){
+    var lbl=sampleOn?'Clear sample data':'Try sample data';
+    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+  }
+  if(sbtn){sbtn.addEventListener('click',function(){
+    if(!sampleOn){
+      try{sampleSnap=localStorage.getItem(KEY);}catch(e){sampleSnap=null;}
+      sampleOn=true;
+      data.contests=SAMPLE.map(function(c){return Object.assign({},c);});render();
+    }else{
+      sampleOn=false;
+      try{if(sampleSnap===null||typeof sampleSnap==='undefined'){localStorage.removeItem(KEY);}else{localStorage.setItem(KEY,sampleSnap);}}catch(e){}
+      sampleSnap=null;data=load();render();
+    }
+    paintSample();Sound.click();
+  });paintSample();}
+})();
+</script>
+<section class="block prose">
+
+<h2 class="sec">How to track a contest weekend</h2>
+<p>Log every dollar the weekend actually consumed: the entry fee, meat, fuel to get there, lodging,
+and the rubs, injections, and disposables nobody remembers to count. Then log what came back in
+payouts. The net column is the truth serum &mdash; most teams are surprised by their first honest
+tally, in one direction or the other.</p>
+<h2 class="sec">What the numbers are for</h2>
+<p>This is not about sucking the fun out of competing. It is about deciding which contests deserve
+next year&rsquo;s calendar: the $400 weekend an hour away that paid $600 beats the prestige event
+that cost $1,800 and paid a ribbon. Run a full season through the tracker and the &ldquo;worth
+it&rdquo; ranking writes itself. Teams that split costs get a bonus use &mdash; clean, timestamped
+numbers end every settlement argument.</p>
+<h2 class="sec">Worked example</h2>
+<p>Entry $350, meat $280, fuel $90, lodging $160, supplies $70 &mdash; <strong>$950</strong> spent. A $1,200
+payout leaves a net of <strong>+$250</strong>. Log a second contest with no payout and the season math turns
+honest fast &mdash; which is the point.</p>
+<h2 class="sec">Frequently asked questions</h2>
+<dl class="faq">
+<dt>What should I count as a cost?</dt>
+<dd>Everything the contest caused you to spend: entry, meat, fuel, lodging, ice, rubs, disposables,
+and a share of equipment wear if you want to be thorough. If you would not have spent it without
+the contest, it counts.</dd>
+<dt>Do I count my time?</dt>
+<dd>For &ldquo;was it worth it&rdquo; decisions, yes &mdash; at least note the days. Most teams
+track cash here and treat time as the known cost of the hobby.</dd>
+<dt>What about practice cooks?</dt>
+<dd>Log them as their own entries or fold them into the contest they prepared for. Either way,
+practice meat is real money.</dd>
+<dt>Can I compare contests?</dt>
+<dd>The table keeps every contest with its net, so best and worst are visible at a glance. Sort
+mentally by the net column when planning next season.</dd>
+<dt>What about a full season view with cost per call?</dt>
+<dd><strong>PitProfit</strong> tracks whole seasons: per-contest P&amp;L, best/worst rankings,
+cost-per-call for every stage walk, multi-season support, and CSV export &mdash; $29 one-time, offline.</dd>
+</dl>
+</section>
+
+<section class="block">
+<h2 class="sec">Related tools</h2>
+<div class="grid">
+<div class="card"><h3>PitProfit &mdash; $29 one-time</h3><p>Full season tracking: every contest's true P&amp;L, best and worst contests ranked.</p><a class="btn" href="../../products/pitprofit/index.html">Learn more</a></div>
+<div class="card"><h3>Free Craft Pricing Calculator</h3><p>Sell rubs or sauces on the side? Price them to actually profit.</p><a class="btn" href="../craft-pricing-calculator/index.html">Open the free tool</a></div>
+</div>
+</section>
+
+
+<div class="cta-band">
+<h2>Need the full version?</h2>
+<p><strong>PitProfit</strong> is the offline season tracker for competition BBQ teams: every contest&rsquo;s true P&amp;L, best and worst contests, cost per call, multi-season support, and CSV export. $29 one-time, no subscription.</p>
+<a class="btn" href="https://glenerds.gumroad.com/l/pitprofit">Get PitProfit &mdash; $29 one-time</a>
+<p class="small"><a href="../../products/pitprofit/index.html">Learn more about PitProfit</a>
+&middot; <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+</div>
+<p class="cross-promo"><a href="https://glenerds.gumroad.com">Like this tool? Check out our other apps &rarr;</a></p>
+</main>
+</div>
+<footer class="site"><div class="wrap">
+<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
+inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
+<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
+<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
+<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
+</div></footer>
+<script>
+(function(){
+  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
+  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+  function paint(){var t=cur();root.setAttribute('data-theme',t);
+    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
+      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+      btn.textContent=t==='dark'?'☀️':'🌙';}}
+  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.toggleTheme();});}
+  paint();
+})();
+/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+var Sound=(function(){
+  var KEY='bbq-contest-cost-tracker.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){if(on)tone(520,0.06,'sine',0.045);},
+    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
+    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
+    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
+  };
+})();
+(function(){
+  var btn=document.getElementById('sound-toggle');if(!btn)return;
+  function paint(){var on=Sound.isOn();
+    btn.innerHTML=on?'&#128266;':'&#128263;';
+    btn.setAttribute('aria-pressed',on?'true':'false');
+    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
+  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
+  paint();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="space" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241b4d"/>
+      <stop offset="1" stop-color="#4a3190"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#space)"/>
+  <!-- tiny background stars -->
+  <g fill="#ffffff" opacity="0.7">
+    <circle cx="120" cy="200" r="4"/><circle cx="220" cy="420" r="3"/><circle cx="340" cy="300" r="4"/>
+    <circle cx="520" cy="200" r="3"/><circle cx="760" cy="180" r="4"/><circle cx="980" cy="330" r="3"/>
+    <circle cx="1140" cy="470" r="4"/><circle cx="880" cy="540" r="3"/><circle cx="180" cy="560" r="3"/>
+    <circle cx="1140" cy="140" r="3"/><circle cx="60" cy="330" r="3"/>
+  </g>
+  <text x="640" y="128" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="92" fill="#ffffff">GradeTrail</text>
+  <rect x="592" y="150" width="96" height="8" rx="4" fill="#ffdf5e"/>
+  <!-- flight trail -->
+  <path d="M 180 580 C 400 540, 500 400, 720 390 S 950 300, 1060 260" fill="none" stroke="#ffdf5e" stroke-width="9" stroke-dasharray="24 20" stroke-linecap="round"/>
+  <!-- rocket -->
+  <g transform="translate(680,400) rotate(28)">
+    <polygon points="-55,60 -30,110 30,110 55,60" fill="#ef7d9b"/>
+    <polygon points="-18,95 0,140 18,95" fill="#ff9f2e"/>
+    <polygon points="-8,105 0,128 8,105" fill="#ffdf5e"/>
+    <rect x="-34" y="-70" width="68" height="135" rx="30" fill="#ffffff"/>
+    <polygon points="-34,-70 34,-70 0,-125" fill="#d94f4f"/>
+    <circle cx="0" cy="-25" r="17" fill="#2f9fd8"/>
+    <circle cx="0" cy="-25" r="17" fill="none" stroke="#9db8cc" stroke-width="5"/>
+    <polygon points="-34,20 -62,70 -34,60" fill="#d94f4f"/>
+    <polygon points="34,20 62,70 34,60" fill="#d94f4f"/>
+  </g>
+  <!-- graduation cap at the end of the trail -->
+  <g transform="translate(1075,245)">
+    <polygon points="0,-38 95,0 0,38 -95,0" fill="#1c1c26"/>
+    <polygon points="0,-38 95,0 0,38 -95,0" fill="none" stroke="#ffdf5e" stroke-width="5"/>
+    <path d="M -48 12 L -48 42 Q 0 62 48 42 L 48 12 Q 0 32 -48 12" fill="#2b2b38"/>
+    <line x1="95" y1="0" x2="95" y2="52" stroke="#ffdf5e" stroke-width="6"/>
+    <circle cx="95" cy="60" r="10" fill="#ffdf5e"/>
+  </g>
+  <!-- big stars -->
+  <g fill="#ffdf5e">
+    <path d="M420 250 l13 26 28 4 -20 19 5 28 -26 -14 -26 14 5 -28 -20 -19 28 -4 z"/>
+    <path d="M900 480 l11 22 24 4 -17 16 4 24 -22 -12 -22 12 4 -24 -17 -16 24 -4 z"/>
+    <path d="M250 470 l9 18 20 3 -15 14 4 20 -18 -10 -18 10 4 -20 -15 -14 20 -3 z"/>
+  </g>
+  <text x="640" y="662" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="44" fill="#ffffff">Lessons, attendance, grades &amp; reading logs</text>
+</svg>

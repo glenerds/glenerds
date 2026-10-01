@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#101f3c"/>
+      <stop offset="1" stop-color="#1b3160"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd76a"/>
+      <stop offset="1" stop-color="#f0a832"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <text x="640" y="112" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="76" fill="#ffffff">GradeTrail</text>
+  <rect x="600" y="132" width="80" height="6" rx="3" fill="#f0a832"/>
+  <!-- grade bars -->
+  <g font-family="DejaVu Sans">
+    <!-- Math 94 -->
+    <rect x="295" y="256" width="90" height="244" rx="10" fill="url(#bar)"/>
+    <text x="340" y="236" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffffff">94</text>
+    <text x="340" y="536" text-anchor="middle" font-size="26" fill="#b9c8e8">Math</text>
+    <!-- Reading 88 -->
+    <rect x="445" y="271" width="90" height="229" rx="10" fill="url(#bar)"/>
+    <text x="490" y="251" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffffff">88</text>
+    <text x="490" y="536" text-anchor="middle" font-size="26" fill="#b9c8e8">Reading</text>
+    <!-- Science 91 -->
+    <rect x="595" y="263" width="90" height="237" rx="10" fill="url(#bar)"/>
+    <text x="640" y="243" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffffff">91</text>
+    <text x="640" y="536" text-anchor="middle" font-size="26" fill="#b9c8e8">Science</text>
+    <!-- History 86 -->
+    <rect x="745" y="276" width="90" height="224" rx="10" fill="url(#bar)"/>
+    <text x="790" y="256" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffffff">86</text>
+    <text x="790" y="536" text-anchor="middle" font-size="26" fill="#b9c8e8">History</text>
+    <!-- Art 96 -->
+    <rect x="895" y="250" width="90" height="250" rx="10" fill="url(#bar)"/>
+    <text x="940" y="230" text-anchor="middle" font-size="30" font-weight="bold" fill="#ffffff">96</text>
+    <text x="940" y="536" text-anchor="middle" font-size="26" fill="#b9c8e8">Art</text>
+    <line x1="270" y1="500" x2="1010" y2="500" stroke="#3d5488" stroke-width="3"/>
+  </g>
+  <text x="640" y="646" text-anchor="middle" font-family="DejaVu Sans" font-size="36" fill="#cfe0ff">Homeschool lessons, attendance, grades &amp; reading logs</text>
+</svg>

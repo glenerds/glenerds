@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="coral" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e8653a"/>
+      <stop offset="1" stop-color="#f5916a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#coral)"/>
+  <text x="640" y="128" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="92" fill="#ffffff">GradeTrail</text>
+  <rect x="592" y="150" width="96" height="8" rx="4" fill="#ffdf5e"/>
+  <!-- dotted path weaving under blocks -->
+  <path d="M 220 540 C 420 500, 500 560, 640 520 S 900 480, 1060 520" fill="none" stroke="#ffffff" stroke-width="10" stroke-dasharray="26 20" stroke-linecap="round" opacity="0.85"/>
+  <!-- ABC blocks -->
+  <g font-family="DejaVu Sans" font-weight="bold" font-size="84" text-anchor="middle">
+    <g transform="translate(430,400) rotate(-8)">
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="#ffffff"/>
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="none" stroke="#d94f4f" stroke-width="10"/>
+      <text x="0" y="30" fill="#d94f4f">A</text>
+    </g>
+    <g transform="translate(640,360) rotate(5)">
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="#ffffff"/>
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="none" stroke="#2f9fd8" stroke-width="10"/>
+      <text x="0" y="30" fill="#2f9fd8">B</text>
+    </g>
+    <g transform="translate(850,400) rotate(-5)">
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="#ffffff"/>
+      <rect x="-75" y="-75" width="150" height="150" rx="20" fill="none" stroke="#3f9e4d" stroke-width="10"/>
+      <text x="0" y="30" fill="#3f9e4d">C</text>
+    </g>
+  </g>
+  <!-- stars -->
+  <g fill="#ffdf5e">
+    <path d="M250 250 l13 26 28 4 -20 19 5 28 -26 -14 -26 14 5 -28 -20 -19 28 -4 z"/>
+    <path d="M1030 240 l11 22 24 4 -17 16 4 24 -22 -12 -22 12 4 -24 -17 -16 24 -4 z"/>
+    <path d="M640 220 l10 20 22 3 -16 15 4 22 -20 -11 -20 11 4 -22 -16 -15 22 -3 z"/>
+    <path d="M180 420 l9 18 20 3 -15 14 4 20 -18 -10 -18 10 4 -20 -15 -14 20 -3 z"/>
+    <path d="M1100 430 l9 18 20 3 -15 14 4 20 -18 -10 -18 10 4 -20 -15 -14 20 -3 z"/>
+  </g>
+  <text x="640" y="662" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="44" fill="#ffffff">Lessons, attendance, grades &amp; reading logs</text>
+</svg>

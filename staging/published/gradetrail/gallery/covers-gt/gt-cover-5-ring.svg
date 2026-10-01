@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="bg5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b1b21"/>
+      <stop offset="1" stop-color="#2c2c36"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg5)"/>
+  <text x="640" y="112" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="76" fill="#ffffff">GradeTrail</text>
+  <rect x="600" y="132" width="80" height="6" rx="3" fill="#4ade80"/>
+  <!-- attendance ring: center (640,370), outer r=150, stroke 46 -> hole r=127 -->
+  <circle cx="640" cy="370" r="127" fill="none" stroke="#3a3a46" stroke-width="46"/>
+  <circle cx="640" cy="370" r="127" fill="none" stroke="#4ade80" stroke-width="46"
+          stroke-dasharray="782.3" stroke-dashoffset="15.6" stroke-linecap="butt"
+          transform="rotate(-90 640 370)"/>
+  <!-- clear-zone text: hole diameter 254, text width ~150 -->
+  <text x="640" y="392" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="88" fill="#ffffff">98%</text>
+  <text x="640" y="432" text-anchor="middle" font-family="DejaVu Sans" font-size="30" fill="#a7b0c2">attendance</text>
+  <text x="640" y="646" text-anchor="middle" font-family="DejaVu Sans" font-size="36" fill="#c9d2e4">Homeschool lessons, attendance, grades &amp; reading logs</text>
+</svg>

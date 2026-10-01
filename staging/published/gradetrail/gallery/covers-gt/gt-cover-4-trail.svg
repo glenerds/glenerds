@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0e5e6f"/>
+      <stop offset="1" stop-color="#1290a8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#sky)"/>
+  <text x="640" y="112" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="76" fill="#ffffff">GradeTrail</text>
+  <rect x="600" y="132" width="80" height="6" rx="3" fill="#ffd76a"/>
+  <!-- winding trail -->
+  <path d="M 180 560 C 380 520, 420 420, 620 440 S 860 340, 1100 380" fill="none" stroke="#ffd76a" stroke-width="10" stroke-dasharray="26 20" stroke-linecap="round"/>
+  <!-- book milestone markers -->
+  <g>
+    <g transform="translate(300,505)">
+      <rect x="-34" y="-46" width="68" height="92" rx="8" fill="#ffffff"/>
+      <rect x="-24" y="-46" width="10" height="92" fill="#1290a8"/>
+      <text x="12" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="34" fill="#0e5e6f">1</text>
+    </g>
+    <g transform="translate(520,430)">
+      <rect x="-34" y="-46" width="68" height="92" rx="8" fill="#ffffff"/>
+      <rect x="-24" y="-46" width="10" height="92" fill="#0e5e6f"/>
+      <text x="12" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="34" fill="#0e5e6f">2</text>
+    </g>
+    <g transform="translate(760,400)">
+      <rect x="-34" y="-46" width="68" height="92" rx="8" fill="#ffffff"/>
+      <rect x="-24" y="-46" width="10" height="92" fill="#f0a832"/>
+      <text x="12" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="34" fill="#0e5e6f">3</text>
+    </g>
+    <g transform="translate(1000,365)">
+      <rect x="-34" y="-46" width="68" height="92" rx="8" fill="#ffffff"/>
+      <rect x="-24" y="-46" width="10" height="92" fill="#d94f4f"/>
+      <text x="12" y="14" text-anchor="middle" font-family="DejaVu Sans" font-weight="bold" font-size="34" fill="#0e5e6f">4</text>
+    </g>
+  </g>
+  <!-- stars -->
+  <g fill="#ffd76a">
+    <path d="M410 250 l12 24 26 4 -19 18 5 26 -24 -13 -24 13 5 -26 -19 -18 26 -4 z"/>
+    <path d="M880 240 l10 20 22 3 -16 15 4 22 -20 -11 -20 11 4 -22 -16 -15 22 -3 z"/>
+    <path d="M640 560 l9 18 20 3 -15 14 4 20 -18 -10 -18 10 4 -20 -15 -14 20 -3 z"/>
+  </g>
+  <text x="640" y="646" text-anchor="middle" font-family="DejaVu Sans" font-size="36" fill="#eaf7fa">Homeschool lessons, attendance, grades &amp; reading logs</text>
+</svg>
