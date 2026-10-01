@@ -5,178 +5,377 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Handmade Pricing Calculator for Etsy &amp; Craft Sellers — Supplies, Labor &amp; Fees | Glenerds</title>
 <meta name="description" content="Offline pricing calculator for handmade sellers: turn supplies, labor, and marketplace fees into suggested prices per sales channel. $14 one-time, no subscription.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/handmade-pricing-calculator-etsy-craft-sellers/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Handmade Pricing Calculator for Etsy &amp; Craft Sellers — Supplies, Labor &amp; Fees | Glenerds">
-<meta property="og:description" content="Offline pricing calculator for handmade sellers: turn supplies, labor, and marketplace fees into suggested prices per sales channel. $14 one-time, no subscription.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/handmade-pricing-calculator-etsy-craft-sellers/">
-<meta property="og:image" content="https://glenerds.github.io/glenerds/assets/craftcost.png">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/handmade-pricing-calculator-etsy-craft-sellers/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "CraftCost",
-  "description": "Offline pricing calculator for handmade sellers: turn supplies, labor, and marketplace fees into suggested prices per sales channel. $14 one-time, no subscription.",
-  "url": "https://glenerds.github.io/glenerds/products/handmade-pricing-calculator-etsy-craft-sellers/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "14",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers"
-  }
+<style>
+:root{
+  --bg:#faf7f4; --card:#ffffff; --ink:#2a1f18; --muted:#6f5f52; --border:#e7dccf;
+  --accent:#c2410c; --accent-ink:#9a3412; --accent-soft:#f9e8da;
+  --ok:#16a34a; --thin:#d97706; --uw:#c0392b; --shadow:0 2px 10px rgba(140,70,20,.08);
 }
+html[data-theme="dark"]{
+  --bg:#171210; --card:#221a16; --ink:#f3ece4; --muted:#b3a291; --border:#3b3027;
+  --accent:#fb923c; --accent-ink:#fdba74; --accent-soft:#2f231a;
+  --ok:#4ade80; --thin:#fbbf24; --uw:#e57373; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#f97316,#9a3412);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.25rem;font-weight:800;background:var(--accent-soft);
+  border:1px solid var(--border);border-radius:12px;padding:.5rem 1rem;margin-right:.8rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.demo-out{margin-top:1rem}
+.verdict{display:inline-block;font-size:1.15rem;font-weight:800;border-radius:12px;padding:.5rem 1rem;margin:.4rem 0}
+.verdict.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok)}
+.verdict.thin{background:color-mix(in srgb,var(--thin) 16%,transparent);color:var(--thin)}
+.verdict.uw{background:color-mix(in srgb,var(--uw) 14%,transparent);color:var(--uw)}
+.price-line{font-size:1.35rem;font-weight:800;margin:.4rem 0;font-variant-numeric:tabular-nums}
+.price-line small{font-size:15px;font-weight:500;color:var(--muted)}
+.stack{display:flex;height:22px;border-radius:999px;overflow:hidden;background:var(--border);margin:.7rem 0 .3rem}
+.stack>div{height:100%}
+.st-mat{background:var(--accent)} .st-lab{background:#8b5cf6} .st-fee{background:#64748b} .st-mar{background:var(--ok)}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1.1rem;font-size:15px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:4px;margin-right:.3rem}
+.legend b{color:var(--ink);font-variant-numeric:tabular-nums}
+#demo-detail{margin-top:.6rem;font-size:15px;color:var(--muted)}
+#demo-detail strong{color:var(--ink)}
+#demo-detail code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);
+  padding:.1rem .4rem;border-radius:6px;font-size:15px}
+table.spec{border-collapse:collapse;font-size:15px;margin:.6rem 0;min-width:min(100%,420px)}
+table.spec td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
+table.spec td:last-child{font-variant-numeric:tabular-nums;font-weight:700;text-align:right}
+.feat{font-size:16px;padding-left:1.3rem}
+.feat li{margin:.35rem 0}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"CraftCost",
+"description":"Offline pricing calculator for handmade sellers: turn supplies, labor, and marketplace fees into suggested prices per sales channel. $14 one-time, no subscription.",
+"url":"https://glenerds.github.io/glenerds/staging/published/handmade-pricing-calculator-etsy-craft-sellers/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"14","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What does the Healthy / Thin / Underwater verdict mean?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It rates your current price against your true cost: Healthy leaves real margin, Thin barely covers costs, Underwater loses money on every sale."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How does the labor timer work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Time a production batch and the tool spreads those minutes across each unit's recipe cost \u2014 no more guessing your labor rate per item."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does it handle marketplace fees?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes \u2014 fees per sales channel factor into the suggested price, so Etsy, craft fair, and wholesale prices each stand on their own."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is this accounting software?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. It's a pricing and record-keeping tool, not tax or accounting advice \u2014 but it gives your accountant much better numbers to work with."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What does the Healthy / Thin / Underwater verdict mean?","acceptedAnswer":{"@type":"Answer","text":"It rates your current price against your true cost: Healthy leaves real margin, Thin barely covers costs, Underwater loses money on every sale."}},
+{"@type":"Question","name":"How does the labor timer work?","acceptedAnswer":{"@type":"Answer","text":"Time a production batch and the tool spreads those minutes across each unit's recipe cost — no more guessing your labor rate per item."}},
+{"@type":"Question","name":"Does it handle marketplace fees?","acceptedAnswer":{"@type":"Answer","text":"Yes — fees per sales channel factor into the suggested price, so Etsy, craft fair, and wholesale prices each stand on their own."}},
+{"@type":"Question","name":"Is this accounting software?","acceptedAnswer":{"@type":"Answer","text":"No. It's a pricing and record-keeping tool, not tax or accounting advice — but it gives your accountant much better numbers to work with."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; CraftCost</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="CraftCost — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3.5 12V6.2A1.7 1.7 0 0 1 5.2 4.5h4.6l8.9 8.9a2.3 2.3 0 0 1 0 3.3l-1.3 1.3a2.3 2.3 0 0 1-3.3 0L3.5 12z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.2" cy="9.2" r="1.5" fill="#ffd9a8"/><path d="M14.5 3.5l6 6" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <span><span class="bname">CraftCost</span><span class="bsub">Pricing calculator for makers</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Handmade Pricing Calculator for Etsy &amp; Craft Sellers — Supplies, Labor &amp; Fees</h1>
-<p class="lead">Most handmade sellers underprice — not from generosity, but because the real cost was never added up. Enter your supplies, build a recipe per product, and get a suggested price for every sales channel, each with a Healthy / Thin / Underwater verdict on your current price. A built-in batch labor timer feeds your real minutes into each recipe&#x27;s cost, so labor stops being a guess.</p>
-<span class="pricebox">$14 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-<h2 class="sec">Screenshots</h2>
-<figure class="shots"><div>
-<img src="../../assets/craftcost.png" alt="CraftCost product page showing the tool interface" loading="lazy">
-<figcaption>CraftCost — live product page</figcaption></div></figure>
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/craft-pricing-calculator/index.html"><strong>Free Craft Pricing Calculator</strong></a> &mdash; The same true-cost formula — materials, labor, fees, margin — with the Healthy / Thin / Underwater verdict.</p>
-<p class="small">Free forever, runs offline in your browser. CraftCost is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>Per-product recipes: supplies, quantities, and costs in one place</li>
-<li>Batch labor timer so real minutes flow into each recipe&#x27;s cost</li>
-<li>Suggested prices for every sales channel you sell on</li>
-<li>Healthy / Thin / Underwater verdict on your current pricing</li>
-<li>Built for candles, soap, jewelry, pottery, sewn goods, baked goods, and more</li>
-<li>Offline single file — pricing and record-keeping only, not tax or accounting advice</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>Etsy sellers wondering if their prices actually cover costs</li>
-<li>Craft fair vendors setting prices across retail and wholesale</li>
-<li>Makers adding a new product line and needing a sane starting price</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You need inventory management across many SKUs</li>
-<li>You want stock levels synced across sales channels</li>
-<li>You need accounting or payroll features</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>What does the Healthy / Thin / Underwater verdict mean?</dt>
-<dd>It rates your current price against your true cost: Healthy leaves real margin, Thin barely covers costs, Underwater loses money on every sale.</dd>
-<dt>How does the labor timer work?</dt>
-<dd>Time a production batch and the tool spreads those minutes across each unit&#x27;s recipe cost — no more guessing your labor rate per item.</dd>
-<dt>Does it handle marketplace fees?</dt>
-<dd>Yes — fees per sales channel factor into the suggested price, so Etsy, craft fair, and wholesale prices each stand on their own.</dd>
-<dt>Is this accounting software?</dt>
-<dd>No. It&#x27;s a pricing and record-keeping tool, not tax or accounting advice — but it gives your accountant much better numbers to work with.</dd>
-</dl>
+<section class="hero">
+  <h1>Handmade Pricing Calculator for Etsy &amp; Craft Sellers &mdash; Supplies, Labor &amp; Fees</h1>
+  <p class="lead">Most handmade sellers underprice &mdash; not from generosity, but because the real cost was never added up. Enter your supplies, build a recipe per product, and get a suggested price for every sales channel, each with a Healthy / Thin / Underwater verdict on your current price. A built-in batch labor timer feeds your real minutes into each recipe&rsquo;s cost, so labor stops being a guess.</p>
+  <p><span class="pricebox">$14 one-time</span>
+  <a class="btn" href="https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers">Get it on Gumroad</a></p>
+  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related free tools</h2>
-<div class="grid">
-<div class="card"><h3>Free BBQ Contest Cost Tracker</h3><p>Sell at events too? Track whether a show weekend actually paid.</p><a class="btn" href="../../tools/bbq-contest-cost-tracker/index.html">Open the free tool</a></div>
-<div class="card"><h3>Craftybase Alternative</h3><p>An honest comparison: when the one-time offline tool wins, and when the subscription alternative is the better call.</p><a class="btn" href="../../alternatives/craftybase-alternative/index.html">Read the comparison</a></div>
-</div>
+<section class="card" aria-label="Pricing demo">
+  <h2>Try the true-cost formula</h2>
+  <p class="small" style="margin-top:0">This is the exact math CraftCost runs on every product: materials, labor, fees, margin &mdash; then a Healthy / Thin / Underwater verdict on your current price. Tap a bar segment to see its dollars.</p>
+  <div class="field-row">
+    <label class="field">Materials cost per item ($)<input type="number" id="pd-mat" value="8.50" min="0" step="0.01" inputmode="decimal"></label>
+    <label class="field">Labor minutes per item<input type="number" id="pd-min" value="45" min="0" step="1" inputmode="numeric"></label>
+  </div>
+  <div class="field-row">
+    <label class="field">Hourly labor rate ($)<input type="number" id="pd-rate" value="18" min="0" step="0.50" inputmode="decimal"></label>
+    <label class="field">Marketplace fee (%)<input type="number" id="pd-fee" value="8" min="0" max="90" step="0.5" inputmode="decimal"></label>
+  </div>
+  <div class="field-row">
+    <label class="field">Desired margin (%)<input type="number" id="pd-mar" value="30" min="0" max="90" step="1" inputmode="numeric"></label>
+    <label class="field">Your current price ($)<input type="number" id="pd-cur" value="32" min="0" step="0.01" inputmode="decimal"></label>
+  </div>
+  <div class="demo-out" aria-live="polite">
+    <p class="price-line" id="pd-sug"></p>
+    <p><span class="verdict" id="pd-verdict"></span></p>
+    <div class="stack" id="pd-stack" role="img" aria-label="Cost breakdown"></div>
+    <div class="legend" id="pd-legend"></div>
+    <table class="spec"><tbody id="pd-table"></tbody></table>
+    <p id="demo-detail" aria-live="polite"></p>
+  </div>
 </section>
-<div class="cta-band">
-<h2>Get CraftCost today</h2>
-<p>$14 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul class="feat">
+    <li>Per-product recipes: supplies, quantities, and costs in one place</li>
+    <li>Batch labor timer so real minutes flow into each recipe&rsquo;s cost</li>
+    <li>Suggested prices for every sales channel you sell on</li>
+    <li>Healthy / Thin / Underwater verdict on your current pricing</li>
+    <li>Built for candles, soap, jewelry, pottery, sewn goods, baked goods, and more</li>
+    <li>Offline single file &mdash; pricing and record-keeping only, not tax or accounting advice</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul class="feat">
+    <li>Etsy sellers wondering if their prices actually cover costs</li>
+    <li>Craft fair vendors setting prices across retail and wholesale</li>
+    <li>Makers adding a new product line and needing a sane starting price</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul class="feat">
+    <li>You need inventory management across many SKUs</li>
+    <li>You want stock levels synced across sales channels</li>
+    <li>You need accounting or payroll features</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>What does the Healthy / Thin / Underwater verdict mean?</summary><p>It rates your current price against your true cost: Healthy leaves real margin, Thin barely covers costs, Underwater loses money on every sale.</p></details>
+  <details><summary>How does the labor timer work?</summary><p>Time a production batch and the tool spreads those minutes across each unit&rsquo;s recipe cost &mdash; no more guessing your labor rate per item.</p></details>
+  <details><summary>Does it handle marketplace fees?</summary><p>Yes &mdash; fees per sales channel factor into the suggested price, so Etsy, craft fair, and wholesale prices each stand on their own.</p></details>
+  <details><summary>Is this accounting software?</summary><p>No. It&rsquo;s a pricing and record-keeping tool, not tax or accounting advice &mdash; but it gives your accountant much better numbers to work with.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get CraftCost today</h2>
+  <p>$14 one-time &mdash; yours forever. No subscription. Recipes, labor timer, per-channel prices, and the verdict on every price you set.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/handmade-pricing-calculator-etsy-craft-sellers">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>CraftCost</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
-  paint();
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function num(id){var v=parseFloat($(id).value);return isNaN(v)||v<0?0:v;}
+function money(n){return '$'+(Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+var segSel=null;
+function calc(){
+  var mat=num('pd-mat'),min=num('pd-min'),rate=num('pd-rate');
+  var f=Math.min(num('pd-fee'),95)/100,m=Math.min(num('pd-mar'),95)/100,cur=num('pd-cur');
+  var labor=min/60*rate,trueCost=mat+labor;
+  var sug=(1-f)*(1-m)>0?trueCost/((1-f)*(1-m)):0;
+  var net=cur*(1-f);
+  var vCls='',vTxt='';
+  if(cur>0&&cur>=sug){v='ok';vCls='ok';vTxt='Healthy — your price leaves real margin.';}
+  else if(net>=trueCost&&cur>0){v='thin';vCls='thin';vTxt='Thin — your price barely covers costs.';}
+  else{v='uw';vCls='uw';vTxt='Underwater — you lose money on every sale.';}
+  $('pd-sug').innerHTML='Suggested price: '+money(sug)+' <small>(true cost '+money(trueCost)+' + fees + '+Math.round(m*100)+'% margin)</small>';
+  var vd=$('pd-verdict');vd.className='verdict '+vCls;vd.textContent=vTxt.split(' — ')[0];
+  var feeD=sug*f,marD=sug*m,tot=Math.max(sug,0.01);
+  var segs=[
+    ['Materials','st-mat',mat,'The supplies that go into one item.'],
+    ['Labor','st-lab',labor,'Your real minutes × your hourly rate — the part sellers most often underestimate.'],
+    ['Marketplace fees','st-fee',feeD,'What the sales channel takes from the suggested price.'],
+    ['Margin','st-mar',marD,'What stays in your pocket as profit at the suggested price.']
+  ];
+  var st=$('pd-stack');st.innerHTML='';
+  st.setAttribute('aria-label','Cost breakdown at the suggested price: '+segs.map(function(s){return s[0]+' '+money(s[2]);}).join(', '));
+  segs.forEach(function(s,i){
+    var d=document.createElement('div');d.className=s[1];
+    d.style.width=(s[2]/tot*100).toFixed(1)+'%';
+    d.title=s[0]+': '+money(s[2]);
+    st.appendChild(d);
+  });
+  var lg=$('pd-legend');lg.innerHTML='';
+  segs.forEach(function(s,i){
+    var span=document.createElement('span');
+    span.innerHTML='<i class="'+s[1]+'"></i>'+esc(s[0])+': <b>'+money(s[2])+'</b>';
+    span.style.cursor='pointer';span.tabIndex=0;
+    span.setAttribute('role','button');
+    span.setAttribute('aria-label','Show details for '+s[0]);
+    (function(idx){
+      function spot(){
+        if(segSel===idx){segSel=null;$('demo-detail').innerHTML='';Sound.click();paintLegend();return;}
+        segSel=idx;$('demo-detail').innerHTML='<strong>'+esc(segs[idx][0])+':</strong> '+money(segs[idx][2])+' — '+esc(segs[idx][3]);
+        Sound.select();paintLegend();
+      }
+      span.addEventListener('click',spot);
+      span.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();spot();}});
+    })(i);
+    lg.appendChild(span);
+  });
+  function paintLegend(){
+    Array.prototype.forEach.call(lg.children,function(c,i){
+      c.style.outline=segSel===i?'2px solid var(--accent)':'none';
+      c.style.borderRadius='6px';
+    });
+  }
+  paintLegend();
+  if(segSel!==null&&segs[segSel]){
+    $('demo-detail').innerHTML='<strong>'+esc(segs[segSel][0])+':</strong> '+money(segs[segSel][2])+' — '+esc(segs[segSel][3]);
+  }else{
+    $('demo-detail').innerHTML=vTxt;
+  }
+  var tb=$('pd-table');
+  tb.innerHTML='<tr><td>Materials</td><td>'+money(mat)+'</td></tr>'
+    +'<tr><td>Labor ('+min+' min @ '+money(rate)+'/hr)</td><td>'+money(labor)+'</td></tr>'
+    +'<tr><td>True cost</td><td>'+money(trueCost)+'</td></tr>'
+    +'<tr><td>Break-even at '+Math.round(f*100)+'% fees</td><td>'+money(trueCost/(1-f||1))+'</td></tr>'
+    +'<tr><td>Suggested price</td><td>'+money(sug)+'</td></tr>';
+}
+['pd-mat','pd-min','pd-rate','pd-fee','pd-mar','pd-cur'].forEach(function(id){
+  $(id).addEventListener('input',function(){segSel=null;calc();});
+  $(id).addEventListener('change',function(){Sound.click();});
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){segSel=null;$('demo-detail').innerHTML='';calc();}
+});
+calc();
+
+/* ---------- sample data: fills a losing-price scenario, restores on off ---------- */
+var sampleOn=false,sampleSnap=null;
+var SAMPLE={mat:'3.00',min:'20',rate:'20',fee:'8',mar:'30',cur:'10'};
+var FIELDS=['pd-mat','pd-min','pd-rate','pd-fee','pd-mar','pd-cur'];
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    sampleSnap=FIELDS.map(function(id){return $(id).value;});
+    sampleOn=true;
+    $('pd-mat').value=SAMPLE.mat;$('pd-min').value=SAMPLE.min;$('pd-rate').value=SAMPLE.rate;
+    $('pd-fee').value=SAMPLE.fee;$('pd-mar').value=SAMPLE.mar;$('pd-cur').value=SAMPLE.cur;
+  }else{
+    sampleOn=false;
+    if(sampleSnap)FIELDS.forEach(function(id,i){$(id).value=sampleSnap[i];});
+    sampleSnap=null;
+  }
+  segSel=null;calc();paintSample();Sound.select();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
+var Sound=(function(){
+  var SKEY='handmade-pricing-calculator-etsy-craft-sellers.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
+  };
+})();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
