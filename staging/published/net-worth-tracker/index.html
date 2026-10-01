@@ -1,390 +1,794 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Free Net Worth Tracker — Calculate Your Net Worth Offline | Glenerds</title>
-<meta name="description" content="Free net worth tracker: list assets and debts, see your net worth instantly, track it over time. Runs offline in your browser; your financial data never leaves your device.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/tools/net-worth-tracker/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Free Net Worth Tracker — Calculate Your Net Worth Offline | Glenerds">
-<meta property="og:description" content="Free net worth tracker: list assets and debts, see your net worth instantly, track it over time. Runs offline in your browser; your financial data never leaves your device.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/tools/net-worth-tracker/">
-<script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
-</script>
-<link rel="stylesheet" href="../../style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WorthAudit — Offline Net Worth Tracker</title>
 <style>
-/* net worth visual: assets vs debts bars (visual representation) */
-.nw-vis{display:grid;gap:8px;margin:14px 0 4px}
-.nw-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
-.nw-name{font-weight:600}
-.nw-val{font-variant-numeric:tabular-nums;font-weight:700;text-align:right;white-space:nowrap}
-.nw-track{grid-column:1/-1;height:14px;border-radius:999px;background:var(--border);overflow:hidden}
-.nw-fill-a{height:100%;border-radius:999px;background:var(--accent)}
-.nw-fill-d{height:100%;border-radius:999px;background:#c0392b}
-html[data-theme="dark"] .nw-fill-d{background:#e57373}
-/* ---------- sweep baseline: standard header cluster + sounds ---------- */
-.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto;margin-left:1.1rem}
-.g-store-btn{display:inline-block;padding:8px 15px;font-size:.88rem;font-weight:700;border-radius:999px;background:var(--accent);color:var(--accent-fg,#fff);text-decoration:none;white-space:nowrap}
-.g-store-btn:hover{filter:brightness(1.08)}
-#theme-toggle.theme-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;margin-left:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center}
-#theme-toggle.theme-toggle svg{width:18px;height:18px}
-#theme-toggle.theme-toggle .ic-sun{display:none}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-sun{display:inline}
-html[data-theme="dark"] #theme-toggle.theme-toggle .ic-moon{display:none}
-#sound-toggle{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;background:var(--card);border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
-#sound-toggle:hover{color:var(--fg);border-color:var(--muted)}
-#theme-toggle.theme-toggle:focus-visible,#sound-toggle:focus-visible,#sample-toggle:focus-visible,.g-store-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-/* ---------- shared round icon-button class ---------- */
-.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-/* ---------- sample data toggle: icon-only flask button in header cluster ---------- */
-.sample-toggle{border:1px solid var(--border);background:var(--card);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--muted)}
-.sample-toggle svg{width:18px;height:18px;flex:none}
-.sample-toggle:hover{color:var(--fg);border-color:var(--muted)}
-.sample-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
-@media (max-width:600px){
-header.site .wrap{flex-wrap:wrap;gap:.6rem}
-nav.main{display:flex;flex-wrap:wrap;align-items:center;row-gap:.4rem}
-nav.main a{margin-left:.6rem}
-.g-header-actions{margin-left:.6rem;gap:6px;flex-wrap:wrap}
+:root{
+  --bg:#f6f7f9; --card:#ffffff; --ink:#1b2430; --muted:#68707d;
+  --line:#e3e7ee; --accent:#2563eb; --accent-ink:#ffffff;
+  --good:#15803d; --bad:#b91c1c; --chip:#eef2f7;
+  --shadow:0 1px 3px rgba(16,24,40,.08);
 }
-@media print{.g-header-actions{display:none!important}}
-/* ---------- interactive net-worth bars ---------- */
-.nw-row[role="button"]{cursor:pointer;border-radius:10px}
-.nw-row[role="button"]:focus{outline:none;filter:drop-shadow(0 0 3px var(--accent))}
-.nw-row[role="button"].sel{box-shadow:inset 0 0 0 2px var(--accent)}
-.nw-detail{margin:6px 0 10px;font-size:.88rem;color:var(--muted)}
-.nw-detail strong{color:var(--fg)}
+html[data-theme="dark"]{
+  --bg:#0f141b; --card:#182029; --ink:#e8edf3; --muted:#9aa4b2;
+  --line:#2a3542; --accent:#5b8cff; --accent-ink:#0b1220;
+  --good:#4ade80; --bad:#f87171; --chip:#232f3d;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px 64px}
+header.site{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--bg);z-index:5}
+.brand{font-weight:800;font-size:1.25rem;letter-spacing:.2px;display:flex;align-items:center}
+.logo-badge{width:1.7em;height:1.7em;margin-right:.5em;flex:none}
+.brand-text{line-height:1.15}
+.brand small{display:block;font-weight:400;font-size:.72rem;color:var(--muted)}
+.spacer{flex:1}
+button{cursor:pointer}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);
+  padding:9px 14px;border-radius:10px;font-size:.95rem;box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{padding:5px 10px;font-size:.85rem;border-radius:8px;box-shadow:none}
+.btn.ghost{box-shadow:none;background:transparent}
+nav.tabs{display:flex;gap:6px;margin:14px 0;flex-wrap:wrap}
+nav.tabs button{border:1px solid var(--line);background:var(--card);color:var(--muted);
+  padding:9px 16px;border-radius:999px;font-size:.95rem}
+nav.tabs button[aria-current="page"]{background:var(--accent);border-color:var(--accent);
+  color:var(--accent-ink);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:1.1rem}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:14px;box-shadow:var(--shadow)}
+.kpi .lbl{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.kpi .val{font-size:1.5rem;font-weight:800;margin-top:4px}
+.kpi .sub{font-size:.82rem;color:var(--muted);margin-top:2px}
+.up{color:var(--good)} .down{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .grow{flex:1;min-width:0}
+.row .nm{font-weight:600}
+.row .tp{font-size:.78rem;color:var(--muted);background:var(--chip);border-radius:999px;
+  padding:2px 10px;display:inline-block;margin-top:3px}
+.row .note{font-size:.82rem;color:var(--muted);margin-top:2px}
+.row .amt{font-weight:700;white-space:nowrap}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--muted)}
+.empty .btn{margin:6px 4px}
+details.archived{margin-top:12px}
+details.archived summary{cursor:pointer;color:var(--muted);font-size:.9rem;padding:6px 0}
+form.field{display:grid;gap:10px;margin-top:8px}
+label{font-size:.88rem;font-weight:600}
+input[type=text],input[type=number],select,input[type=month]{
+  width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--bg);color:var(--ink);font-size:1rem}
+.formbar{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.hidden{display:none!important}
+table.plain{width:100%;border-collapse:collapse;font-size:.95rem}
+table.plain th{text-align:left;color:var(--muted);font-weight:600;font-size:.82rem;
+  text-transform:uppercase;letter-spacing:.4px;padding:8px 6px;border-bottom:1px solid var(--line)}
+table.plain td{padding:9px 6px;border-bottom:1px solid var(--line)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:.88rem}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+footer.site{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);
+  color:var(--muted);font-size:.85rem}
+footer.site .attribution a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+.dangerzone{border:1px solid var(--bad);border-radius:12px;padding:16px;margin-top:18px}
+.dangerzone h3{margin:0 0 8px;color:var(--bad);font-size:1rem}
+svg{display:block;max-width:100%;height:auto}
+.tip{font-size:.85rem;color:var(--muted)}
+
+/* ---------- standard header cluster ---------- */
+.hwrap{display:flex;align-items:center;gap:.75rem}
+.more-apps{display:inline-flex;align-items:center;height:44px;padding:0 1.1rem;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:.9rem;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.hbtn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;background:var(--card);border:1px solid var(--line);color:var(--muted);font-size:1.05rem;line-height:1;cursor:pointer}
+.hbtn:hover{color:var(--ink);border-color:var(--muted)}
+.hbtn svg{width:18px;height:18px}
+.hbtn .ic-sun{display:none}
+html[data-theme="dark"] .hbtn .ic-sun{display:inline}
+html[data-theme="dark"] .hbtn .ic-moon{display:none}
+.hbtn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent)}
+.hbtn:focus-visible,.more-apps:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:640px){header.site{gap:8px}.hwrap{gap:6px}.more-apps{height:40px;padding:0 .6rem;font-size:.78rem}.brand{font-size:1.1rem}.brand small{display:none}}
 </style>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Should my home count in net worth?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes, at a realistic market value, minus the remaining mortgage. Just remember that home equity is illiquid \u2014 it counts, but you cannot spend it without selling or borrowing."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What about my car?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Include it at private-sale value, not what you paid. Cars depreciate, so revisit the number yearly rather than letting an old figure flatter the total."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is a negative net worth bad?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "It is common, especially early in a career with student loans. What matters is the direction: steady upward movement means the plan is working."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Where does my data go?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Nowhere. It is stored in your browser's local storage on your device. Export a JSON backup before clearing browser data or switching devices."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "My biggest asset is my home \u2014 how do I protect that investment?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Before buying a condo or townhome, the HOA's finances matter as much as the unit itself. The paid analyzer below scores HOA financial health from resale-package figures and flags special-assessment risk."
-      }
-    }
-  ]
+</head>
+<body>
+<div class="wrap">
+  <header class="site">
+    <div class="brand"><svg class="logo-badge" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#2563eb"/><path d="M9 22l4-9 3 5 2-3 5 7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 22h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg><span class="brand-text">WorthAudit<small>offline net-worth tracker</small></span></div>
+    <div class="spacer"></div>
+    <div class="hwrap">
+      <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="btnSample" class="hbtn" type="button" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+      <button id="btnTheme" class="hbtn" type="button" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
+      <button id="btnSound" class="hbtn" type="button" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <button type="button" data-tab="dashboard" aria-current="page">Dashboard</button>
+    <button type="button" data-tab="trends">Trends</button>
+    <button type="button" data-tab="cashflow">Cash Flow</button>
+    <button type="button" data-tab="data">Data</button>
+  </nav>
+
+  <main>
+    <section id="tab-dashboard"></section>
+    <section id="tab-trends" class="hidden"></section>
+    <section id="tab-cashflow" class="hidden"></section>
+    <section id="tab-data" class="hidden"></section>
+  </main>
+
+  <footer class="site">
+    WorthAudit stores everything in this browser on this device only.
+    Back up your data with JSON export. WorthAudit is a tracking tool,
+    not financial advice.<br>
+    <span class="attribution">Made by <a href="https://glenerds.gumroad.com" target="_blank" rel="noopener">Glenerds</a></span>
+  </footer>
+</div>
+<script>
+"use strict";
+/* WorthAudit — original code. Single-file offline net-worth tracker. */
+const LS_KEY = "worthaudit.v1";
+const ASSET_TYPES = ["cash","savings","investments","real estate","vehicle","crypto","other asset"];
+const LIAB_TYPES = ["credit card","loan","mortgage","other debt"];
+const DONUT_COLORS = ["#2563eb","#16a34a","#d97706","#7c3aed","#0891b2","#db2777","#65a30d"];
+
+/* ---------- utilities ---------- */
+function esc(s){
+  return String(s == null ? "" : s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
 }
-</script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<div class="g-header-actions">
-<a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-<button id="sample-toggle" class="round-btn sample-toggle" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-<button id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg class="ic-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg><svg class="ic-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
-<button id="sound-toggle" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds">&#128266;</button>
-</div>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Free Tools &rsaquo; Net Worth Tracker</p>
-<main>
-<div class="hero">
-<h1>Free Net Worth Tracker &mdash; What You Own Minus What You Owe</h1>
-<p class="lead">What's your net worth right now &mdash; really? List what you own (bank accounts, investments, home,
-car) and what you owe (credit cards, loans, mortgage), and this free tracker subtracts one from the other
-live as you type. No bank connections, no account, no sign-up: everything stays in your browser, nothing is
-uploaded. Update it monthly and watch the number move.</p>
-</div>
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+const usdWhole = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0});
+const usdExact = new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2});
+function fmtCents(c){ return (c % 100 === 0) ? usdWhole.format(c/100) : usdExact.format(c/100); }
+function parseMoney(str){
+  const t = String(str == null ? "" : str).trim().replace(/[$,\s]/g,"");
+  if (t === "") return 0;
+  const n = Number(t);
+  if (!isFinite(n)) return NaN;
+  return Math.round(n * 100);
+}
+function thisMonth(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function monthLabel(ym){
+  const [y,m] = ym.split("-").map(Number);
+  const names = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  return names[m-1] + " " + y;
+}
+function monthShift(ym, delta){
+  const [y,m] = ym.split("-").map(Number);
+  const d = new Date(y, m-1+delta, 1);
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
 
-<div class="toolbox" role="region" aria-label="Net worth tracker">
-<h3>Assets (what you own)</h3>
-<input type="text" id="nw-aname" placeholder="e.g. Checking account" aria-label="Asset name">
-<input type="number" id="nw-avalue" placeholder="0.00" step="0.01" aria-label="Asset value">
-<button id="nw-add-asset">Add asset</button>
-<table><thead><tr><th>Asset</th><th>Value</th><th></th></tr></thead><tbody id="nw-assets"></tbody></table>
-<h3>Debts (what you owe)</h3>
-<input type="text" id="nw-dname" placeholder="e.g. Credit card" aria-label="Debt name">
-<input type="number" id="nw-dvalue" placeholder="0.00" step="0.01" aria-label="Debt value">
-<button id="nw-add-debt">Add debt</button>
-<table><thead><tr><th>Debt</th><th>Balance</th><th></th></tr></thead><tbody id="nw-debts"></tbody></table>
-<div id="nw-vis" class="nw-vis" role="group" aria-label="Assets versus debts chart — activate a bar for details"></div>
-<p id="nw-result" style="font-size:1.15rem"></p>
-<button id="nw-export" class="plain">Export backup</button>
-<p class="small">Use round numbers or exact figures &mdash; whatever you are comfortable typing. It never leaves this device.</p>
-</div>
-
-<script>
-(function(){
-  var KEY='glenerds-networth-v1';
-  function load(){try{return JSON.parse(localStorage.getItem(KEY))||{assets:[],debts:[]}}catch(e){return{assets:[],debts:[]}}}
-  function save(d){if(sampleOn)return;localStorage.setItem(KEY,JSON.stringify(d))}
-  var data=load();
-  function uid(){return 'n'+Date.now().toString(36)+Math.floor(Math.random()*999)}
-  function money(v){return '$'+Number(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
-  function render(){
-    function rows(list,el,btnId){
-      var t=document.getElementById(el);t.innerHTML='';
-      var sum=0;
-      list.forEach(function(it){
-        sum+=parseFloat(it.value)||0;
-        var tr=document.createElement('tr');
-        var td1=document.createElement('td');td1.textContent=it.name;
-        var td2=document.createElement('td');td2.textContent=money(it.value);
-        var td3=document.createElement('td');
-        var b=document.createElement('button');b.textContent='Remove';b.className='plain';
-        b.onclick=function(){var i=list.indexOf(it);list.splice(i,1);save(data);render();Sound.click();};
-        td3.appendChild(b);tr.appendChild(td1);tr.appendChild(td2);tr.appendChild(td3);t.appendChild(tr);
-      });
-      return sum;
-    }
-    var aSum=rows(data.assets,'nw-assets');
-    var dSum=rows(data.debts,'nw-debts');
-    var nw=aSum-dSum;
-    /* assets-vs-debts bars (visual representation) */
-    var vis=document.getElementById('nw-vis');vis.innerHTML='';
-    vis.style.display=(aSum||dSum)?'':'none';
-    var mx=Math.max(aSum,dSum);
-    var nwDetail=document.getElementById('nw-detail');
-    if(!nwDetail){nwDetail=document.createElement('div');nwDetail.id='nw-detail';nwDetail.className='nw-detail';nwDetail.setAttribute('aria-live','polite');vis.parentNode.insertBefore(nwDetail,vis.nextSibling);}
-    nwDetail.textContent='';
-    function nwBar(name,val,cls,list){
-      var row=document.createElement('div');row.className='nw-row';
-      row.setAttribute('role','button');row.setAttribute('tabindex','0');row.setAttribute('aria-pressed','false');
-      row.setAttribute('aria-label',name+': '+money(val)+'. Activate to spotlight.');
-      var n=document.createElement('div');n.className='nw-name';n.textContent=name;
-      var v=document.createElement('div');v.className='nw-val';v.textContent=money(val);
-      var t=document.createElement('div');t.className='nw-track';t.setAttribute('role','progressbar');
-      t.setAttribute('aria-label',name+' bar');t.setAttribute('aria-valuemin','0');t.setAttribute('aria-valuemax','100');
-      t.setAttribute('aria-valuenow',String(mx>0?Math.round(val/mx*100):0));
-      var f=document.createElement('div');f.className=cls;
-      f.style.width=(mx>0?(val/mx*100):0).toFixed(1)+'%';
-      t.appendChild(f);row.appendChild(n);row.appendChild(v);row.appendChild(t);vis.appendChild(row);
-      function act(){
-        var was=row.classList.contains('sel');
-        var sels=vis.querySelectorAll('.nw-row.sel');
-        for(var k=0;k<sels.length;k++){sels[k].classList.remove('sel');sels[k].setAttribute('aria-pressed','false');}
-        nwDetail.textContent='';
-        if(!was){
-          row.classList.add('sel');row.setAttribute('aria-pressed','true');
-          var st=document.createElement('strong');st.textContent=name+': ';nwDetail.appendChild(st);
-          nwDetail.appendChild(document.createTextNode(list.length
-            ? money(val)+' across '+list.length+' item'+(list.length===1?'':'s')+' — '+list.map(function(it){return it.name+' ('+money(it.value)+')';}).join(', ')+'.'
-            : 'no items yet.'));
-          Sound.select();
-        }else{Sound.click();}
-      }
-      row.addEventListener('click',act);
-      row.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}});
-    }
-    nwBar('Assets',aSum,'nw-fill-a',data.assets);nwBar('Debts',dSum,'nw-fill-d',data.debts);
-    vis.setAttribute('aria-label','Assets '+money(aSum)+', debts '+money(dSum)+', net worth '+money(nw));
-    var el=document.getElementById('nw-result');
-    el.innerHTML='Assets: '+money(aSum)+' &nbsp;|&nbsp; Debts: '+money(dSum)
-      +'<br><strong>Net worth: '+money(nw)+'</strong>';
-    el.style.color=nw>=0?'':'#c0392b';
-  }
-  document.getElementById('nw-add-asset').onclick=function(){
-    var n=document.getElementById('nw-aname').value.trim(),v=parseFloat(document.getElementById('nw-avalue').value);
-    if(!n||isNaN(v)){Sound.error();return;}data.assets.push({id:uid(),name:n,value:v});save(data);render();Sound.success();
-    document.getElementById('nw-aname').value='';document.getElementById('nw-avalue').value='';
-  };
-  document.getElementById('nw-add-debt').onclick=function(){
-    var n=document.getElementById('nw-dname').value.trim(),v=parseFloat(document.getElementById('nw-dvalue').value);
-    if(!n||isNaN(v)){Sound.error();return;}data.debts.push({id:uid(),name:n,value:v});save(data);render();Sound.success();
-    document.getElementById('nw-dname').value='';document.getElementById('nw-dvalue').value='';
-  };
-  document.getElementById('nw-export').onclick=function(){
-    var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
-    var aEl=document.createElement('a');aEl.href=URL.createObjectURL(blob);aEl.download='net-worth-backup.json';aEl.click();
-    Sound.success();
-  };
-  render();
-
-  /* ---------- sample data toggle: snapshot, fill realistic demo, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  function sampleNWData(){
-    return {assets:[
-      {id:uid(),name:'Checking account',value:8500},
-      {id:uid(),name:'Emergency fund',value:22000},
-      {id:uid(),name:'401(k)',value:47500},
-      {id:uid(),name:'Car (private sale)',value:14000}],
-      debts:[
-      {id:uid(),name:'Mortgage',value:182000},
-      {id:uid(),name:'Student loan',value:14500},
-      {id:uid(),name:'Credit card',value:2300}]};
-  }
-  var sbtn=document.getElementById('sample-toggle');
-  function paintSample(){
-    var lbl=sampleOn?'Clear sample data':'Try sample data';
-    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
-    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
-  }
-  if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){sampleOn=true;sampleSnap=JSON.stringify(data);data=sampleNWData();render();}
-    else{sampleOn=false;try{data=JSON.parse(sampleSnap)||{assets:[],debts:[]};}catch(e){data={assets:[],debts:[]};}sampleSnap=null;save(data);render();}
-    paintSample();Sound.click();
-  });paintSample();}
-})();
-</script>
-<div class="toolbox">
-<h3 style="margin-top:0">Free forever &mdash; no paid version</h3>
-<p>This net worth tracker is complete as-is: unlimited assets and debts, live totals, JSON export &mdash; free forever.</p>
-<p><strong>Buying a condo?</strong> Your home may be your biggest asset &mdash; <a href="../../products/hoa-resale-package-reserve-study-risk-analyzer/index.html"><strong>HOA ReserveCheck &mdash; $9 one-time</strong></a> scores the HOA's finances from the resale-package figures and flags special-assessment risk before you buy. No subscription. No account.</p>
-</div>
-
-<section class="block prose">
-<h2 class="sec">How to calculate your net worth</h2>
-<p>Net worth is simply everything you own minus everything you owe. List bank balances, investment
-accounts, your home's estimated value, vehicles, and anything else of meaningful value under assets.
-List credit card balances, student loans, auto loans, mortgages, and any other debts under debts.
-The tracker does the subtraction and shows the result live as you add items. Most people are
-surprised the first time &mdash; in either direction &mdash; which is exactly why the number is worth
-knowing: you cannot improve what you do not measure.</p>
-<h2 class="sec">What to include (and what to skip)</h2>
-<p>Include anything with real monetary value: cash, savings, brokerage and retirement accounts, home
-equity (market value minus mortgage), cars at realistic resale value. Skip small household items;
-tracking every coffee mug adds noise without insight. Update the numbers monthly or quarterly &mdash;
-more often than that and you are mostly watching market noise. The trend over six to twelve months
-is what matters: is the number climbing, flat, or sliding? A climbing number means your financial
-system is working, whatever the starting point.</p>
-<h2 class="sec">Why track it offline</h2>
-<p>Net worth is the single most sensitive number in personal finance, and account-aggregator apps ask
-you to hand it &mdash; along with your bank logins &mdash; to a third party. This tracker inverts that:
-the math happens on your device, the data lives in your browser, and there is no company on the
-other end. You give up automatic syncing; you keep complete privacy. For a number you check a few
-times a year, that is a trade worth making.</p>
-<h2 class="sec">Worked example</h2>
-<p>Assets: $8,000 in savings and a $12,000 car &mdash; $20,000 total. Debts: a $3,500 credit card balance and
-an $18,000 student loan &mdash; $21,500 total. Net worth: <strong>&minus;$1,500</strong>, shown in red. It
-stings, but now it's a number instead of a feeling: pay $1,500 off the card and the tracker crosses into
-positive territory the moment you update it.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Should my home count in net worth?</dt>
-<dd>Yes, at a realistic market value, minus the remaining mortgage. Just remember that home equity
-is illiquid &mdash; it counts, but you cannot spend it without selling or borrowing.</dd>
-<dt>What about my car?</dt>
-<dd>Include it at private-sale value, not what you paid. Cars depreciate, so revisit the number
-yearly rather than letting an old figure flatter the total.</dd>
-<dt>Is a negative net worth bad?</dt>
-<dd>It is common, especially early in a career with student loans. What matters is the direction:
-steady upward movement means the plan is working.</dd>
-<dt>Where does my data go?</dt>
-<dd>Nowhere. It is stored in your browser's local storage on your device. Export a JSON backup
-before clearing browser data or switching devices.</dd>
-<dt>My biggest asset is my home &mdash; how do I protect that investment?</dt>
-<dd>Before buying a condo or townhome, the HOA's finances matter as much as the unit itself. The
-paid analyzer below scores HOA financial health from resale-package figures and flags
-special-assessment risk.</dd>
-</dl>
-</section>
-
-<section class="block">
-<h2 class="sec">Related tools</h2>
-<div class="grid">
-<div class="card"><h3>Free 52-Week Savings Challenge Calculator</h3><p>Grow the asset side with weekly savings math done for you.</p><a class="btn" href="../savings-challenge/index.html">Open the free tool</a></div>
-<div class="card"><h3>Free Offline Habit Tracker</h3><p>The daily habits that move the number, tracked free.</p><a class="btn" href="../habit-tracker/index.html">Open the free tool</a></div>
-</div>
-</section>
-
-<div class="cta-band">
-<h2>Buying a condo? Check the HOA's finances first.</h2>
-<p>HOA ReserveCheck is the offline risk analyzer for condo and townhome buyers: key in the figures
-from the HOA documents and get a weighted financial-risk score, a special-assessment likelihood
-gauge, and a printable due-diligence report. One-time purchase, no subscription.</p>
-<a class="btn" href="../../products/hoa-resale-package-reserve-study-risk-analyzer/index.html">See HOA ReserveCheck &mdash; $9 one-time</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
-</div>
-</main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
-<script>
-(function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();Sound.toggleTheme();});}
-  paint();
-})();
-/* ---------- subtle sounds (Web Audio, no files, offline) ---------- */
+/* ---------- state ---------- */
+function blankState(){ return {accounts:[],snapshots:[],income:[],expenses:[],theme:null}; }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw);
+    if (!s || typeof s !== "object") return null;
+    s.accounts = Array.isArray(s.accounts) ? s.accounts : [];
+    s.snapshots = Array.isArray(s.snapshots) ? s.snapshots : [];
+    s.income = Array.isArray(s.income) ? s.income : [];
+    s.expenses = Array.isArray(s.expenses) ? s.expenses : [];
+    return s;
+  }catch(e){ return null; }
+}
+let state = load() || blankState();
+/* ---------- sound: WebAudio oscillator tones, on by default, persists ---------- */
 var Sound=(function(){
-  var KEY='net-worth-tracker.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
-  function ac(){try{
-    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
-    if(ctx.state==='suspended')ctx.resume();return ctx;}catch(e){return null;}}
-  function tone(freq,dur,type,vol,delay){var c=ac();if(!c)return;try{
-    var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
-    o.type=type||'sine';o.frequency.value=freq;
-    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-    o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
-  return{
-    isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);},
-    toggleTheme:function(){if(on)tone(440,0.06,'triangle',0.05);}
-  };
+ var KEY="wa-sound",on=true,ctx=null;
+ try{on=localStorage.getItem(KEY)!=="off";}catch(e){}
+ function ac(){if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}if(ctx.state==="suspended")ctx.resume();return ctx;}
+ function tone(f,d){if(!on)return;var c=ac();if(!c)return;try{var o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.08,c.currentTime);g.gain.exponentialRampToValueAtTime(0.0001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d);}catch(e){}}
+ return{click:function(){tone(660,0.07);},success:function(){tone(520,0.09);var self=this;setTimeout(function(){tone(780,0.12);},90);},error:function(){tone(220,0.15);},isOn:function(){return on;},toggle:function(){on=!on;try{localStorage.setItem(KEY,on?"on":"off");}catch(e){}return on;}};
 })();
-function bindSoundToggle(){
-  var btn=document.getElementById('sound-toggle');if(!btn)return;
-  function paint(){var on=Sound.isOn();
-    btn.innerHTML=on?'&#128266;':'&#128263;';
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    btn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
-    btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
+
+/* ---------- theme ---------- */
+function setTheme(t){
+  document.documentElement.setAttribute("data-theme", t);
+  var b=document.getElementById("btnTheme"),dark=t==="dark";
+  b.setAttribute("aria-pressed",dark?"true":"false");
+  var lbl=dark?"Switch to light mode":"Switch to dark mode";
+  b.setAttribute("aria-label",lbl);b.title=lbl;
+  state.theme=t;state._uiTheme=t;save();
 }
-bindSoundToggle();
+(function initTheme(){
+  var t=state.theme;
+  if(t!=="dark"&&t!=="light"){t=(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
+  document.documentElement.setAttribute("data-theme",t);
+  var b=document.getElementById("btnTheme"),dark=t==="dark";
+  b.setAttribute("aria-pressed",dark?"true":"false");
+  var lbl=dark?"Switch to light mode":"Switch to dark mode";
+  b.setAttribute("aria-label",lbl);b.title=lbl;
+  state._uiTheme=t;
+})();
+document.getElementById("btnTheme").addEventListener("click",function(){Sound.click();setTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");});
+
+/* ---------- sound toggle ---------- */
+var btnSound=document.getElementById("btnSound");
+function paintSound(){var on=Sound.isOn();btnSound.setAttribute("aria-pressed",on?"true":"false");var lbl=on?"Sound: on":"Sound: off";btnSound.setAttribute("aria-label",lbl);btnSound.title=lbl;btnSound.innerHTML=on?"&#128266;":"&#128263;";}
+btnSound.addEventListener("click",function(){var on=Sound.toggle();paintSound();if(on)Sound.click();});
+paintSound();
+
+/* ---------- sample data: snapshot current state, fill realistic demo, restore ---------- */
+var sampleOn=false,sampleSnap=null;
+var btnSample=document.getElementById("btnSample");
+function paintSample(){var lbl=sampleOn?"Clear sample data":"Try sample data";btnSample.setAttribute("aria-pressed",sampleOn?"true":"false");btnSample.setAttribute("aria-label",lbl);btnSample.title=lbl;}
+function setSample(on){
+  if(on&&!sampleOn){
+    try{sampleSnap=JSON.parse(JSON.stringify(state));}catch(e){sampleSnap=null;}
+    state=loadSampleData();save();renderAll();sampleOn=true;Sound.success();
+  }else if(!on&&sampleOn){
+    if(sampleSnap){state=sampleSnap;save();renderAll();}
+    sampleSnap=null;sampleOn=false;Sound.click();
+  }
+  paintSample();
+}
+btnSample.addEventListener("click",function(){setSample(!sampleOn);});
+paintSample();
+function totals(){
+  let a = 0, l = 0;
+  for (const ac of state.accounts){
+    if (ac.archived) continue;
+    if (ac.kind === "liability") l += ac.balanceCents; else a += ac.balanceCents;
+  }
+  return {assets:a, liabs:l, net:a-l};
+}
+
+/* ---------- sample data ---------- */
+function loadSampleData(){
+  const m0 = thisMonth();
+  const sample = {
+    theme: state.theme, accounts:[], snapshots:[], income:[], expenses:[]
+  };
+  const A = (name,type,balanceDollars,note) => sample.accounts.push(
+    {id:uid(), name, kind:"asset", type, balanceCents:Math.round(balanceDollars*100), note:note||"", archived:false});
+  const L = (name,type,balanceDollars,note) => sample.accounts.push(
+    {id:uid(), name, kind:"liability", type, balanceCents:Math.round(balanceDollars*100), note:note||"", archived:false});
+  A("Checking","cash",4250,"Main checking");
+  A("High-yield savings","savings",18400,"Emergency fund");
+  A("401(k)","investments",62300,"Employer plan");
+  A("Brokerage","investments",21750,"Index funds");
+  A("Home","real estate",95000,"Estimated value minus mortgage is not included — estimate only");
+  A("Car","vehicle",14500,"KBB estimate");
+  A("Bitcoin wallet","crypto",8900,"");
+  L("Visa","credit card",3420,"Paid in full monthly");
+  L("Student loan","loan",22800,"");
+  // 4 months of snapshots, oldest first — values in integer cents
+  const baseDollars = [182400, 188150, 193600]; // net worth for the 3 past months (smooth growth)
+  const liabCents = 2622000; // $26,220
+  for (let i = 3; i >= 1; i--){
+    const mm = monthShift(m0, -i);
+    const nwCents = Math.round(baseDollars[3-i] * 100);
+    sample.snapshots.push({id:uid(), month:mm,
+      netWorthCents:nwCents, assetsCents:nwCents+liabCents, liabilitiesCents:liabCents,
+      takenAt:new Date().toISOString()});
+  }
+  const t0 = totalsOfAccounts(sample.accounts);
+  sample.snapshots.push({id:uid(), month:m0, netWorthCents:t0.net,
+    assetsCents:t0.assets, liabilitiesCents:t0.liabs, takenAt:new Date().toISOString()});
+  const E = (name,amt,month) => sample.income.push({id:uid(),name,amountCents:Math.round(amt*100),month});
+  const X = (name,amt,month) => sample.expenses.push({id:uid(),name,amountCents:Math.round(amt*100),month});
+  E("Paycheck",5200,m0); E("Freelance",850,m0);
+  X("Rent",1650,m0); X("Groceries",520,m0); X("Car payment",310,m0); X("Utilities",210,m0); X("Subscriptions",38,m0);
+  return sample;
+}
+function totalsOfAccounts(accts){
+  let a=0,l=0;
+  for (const ac of accts){ if (ac.archived) continue; if (ac.kind==="liability") l+=ac.balanceCents; else a+=ac.balanceCents; }
+  return {assets:a, liabs:l, net:a-l};
+}
+</script>
+<script>
+"use strict";
+/* ---------- rendering: dashboard ---------- */
+let cfMonth = thisMonth();
+let editingAccountId = null;
+
+function donutSVG(byType){
+  const entries = Object.entries(byType).filter((e)=>e[1] > 0);
+  const total = entries.reduce((s,e)=>s+e[1],0);
+  if (!total) return "";
+  const R = 70, C = 2*Math.PI*R, CX = 90, CY = 90;
+  let offset = 0, segs = "", legend = "";
+  entries.forEach(([type, cents], i)=>{
+    const frac = cents/total;
+    const len = frac*C;
+    const color = DONUT_COLORS[i % DONUT_COLORS.length];
+    segs += '<circle cx="'+CX+'" cy="'+CY+'" r="'+R+'" fill="none" stroke="'+color+'" stroke-width="28" '
+      + 'stroke-dasharray="'+len.toFixed(2)+' '+C.toFixed(2)+'" '
+      + 'stroke-dashoffset="'+(-offset).toFixed(2)+'" transform="rotate(-90 '+CX+' '+CY+')"/>';
+    offset += len;
+    const pct = (frac*100).toFixed(1);
+    legend += '<span><span class="sw" style="background:'+color+'"></span>'+esc(type)
+      + ' — '+esc(fmtCents(cents))+' ('+pct+'%)</span>';
+  });
+  return '<svg viewBox="0 0 180 180" width="220" role="img" aria-label="Asset allocation donut chart"><g>'
+    + segs + '</g></svg><div class="legend">' + legend + '</div>';
+}
+
+function accountRow(ac){
+  const liab = ac.kind === "liability";
+  return '<div class="row" data-account="'+esc(ac.id)+'">'
+    + '<div class="grow"><div class="nm">'+esc(ac.name)+'</div>'
+    + '<span class="tp">'+esc(ac.type)+'</span>'
+    + (ac.note ? '<div class="note">'+esc(ac.note)+'</div>' : '')
+    + '</div>'
+    + '<div class="amt'+(liab?' down':'')+'">'+esc(fmtCents(liab ? -ac.balanceCents : ac.balanceCents))+'</div>'
+    + '<button type="button" class="btn small" data-edit="'+esc(ac.id)+'">Edit</button>'
+    + (ac.archived
+        ? '<button type="button" class="btn small" data-unarchive="'+esc(ac.id)+'">Unarchive</button>'
+        : '<button type="button" class="btn small" data-archive="'+esc(ac.id)+'">Archive</button>')
+    + '<button type="button" class="btn small danger" data-del="'+esc(ac.id)+'">Delete</button>'
+    + '</div>';
+}
+
+function accountFormHTML(ac){
+  const isEdit = !!ac;
+  const kind = ac ? ac.kind : "asset";
+  const typeOpts = (kind === "liability" ? LIAB_TYPES : ASSET_TYPES)
+    .map(t=>'<option value="'+esc(t)+'"'+(ac && ac.type===t?' selected':'')+'>'+esc(t)+'</option>').join("");
+  return '<div class="card" id="accountFormCard"><h2>'+(isEdit?'Edit account':'Add account')+'</h2>'
+    + '<form id="accountForm" class="field" novalidate>'
+    + '<label for="f_name">Name</label><input type="text" id="f_name" required maxlength="80" value="'+esc(ac?ac.name:"")+'" placeholder="e.g. Checking">'
+    + '<label for="f_kind">Asset or liability</label><select id="f_kind">'
+    + '<option value="asset"'+(kind==="asset"?' selected':'')+'>Asset</option>'
+    + '<option value="liability"'+(kind==="liability"?' selected':'')+'>Liability</option></select>'
+    + '<label for="f_type">Type</label><select id="f_type">'+typeOpts+'</select>'
+    + '<label for="f_bal">Balance (USD)</label><input type="text" id="f_bal" inputmode="decimal" value="'+(ac?(ac.balanceCents/100):"")+'" placeholder="0.00">'
+    + '<div class="tip">Enter a positive number. Liabilities are stored as amounts you owe — net worth subtracts them automatically.</div>'
+    + '<label for="f_note">Note (optional)</label><input type="text" id="f_note" maxlength="140" value="'+esc(ac?ac.note:"")+'" placeholder="e.g. Emergency fund">'
+    + '<div class="formbar"><button type="submit" class="btn primary">'+(isEdit?'Save changes':'Add account')+'</button>'
+    + '<button type="button" class="btn ghost" id="accountFormCancel">Cancel</button></div>'
+    + '</form></div>';
+}
+
+function renderDashboard(){
+  const el = document.getElementById("tab-dashboard");
+  const t = totals();
+  const snaps = [...state.snapshots].sort((a,b)=>a.month.localeCompare(b.month));
+  let changeHTML = '<div class="sub">Record snapshots to track change</div>';
+  if (snaps.length >= 2){
+    const d = snaps[snaps.length-1].netWorthCents - snaps[snaps.length-2].netWorthCents;
+    const cls = d > 0 ? "up" : (d < 0 ? "down" : "");
+    const word = d > 0 ? "up" : (d < 0 ? "down" : "flat");
+    changeHTML = '<div class="val '+cls+'">'+esc(fmtCents(Math.abs(d)))+'</div>'
+      + '<div class="sub">'+word+' vs '+esc(monthLabel(snaps[snaps.length-2].month))+'</div>';
+  } else {
+    changeHTML = '<div class="val">—</div>' + changeHTML;
+  }
+  // cash flow for current month
+  const m0 = thisMonth();
+  const inc = state.income.filter(e=>e.month===m0).reduce((s,e)=>s+e.amountCents,0);
+  const exp = state.expenses.filter(e=>e.month===m0).reduce((s,e)=>s+e.amountCents,0);
+
+  const actAssets = state.accounts.filter(a=>a.kind!=="liability" && !a.archived);
+  const actLiabs  = state.accounts.filter(a=>a.kind==="liability" && !a.archived);
+  const arch      = state.accounts.filter(a=>a.archived);
+  const byType = {};
+  for (const a of actAssets) byType[a.type] = (byType[a.type]||0) + a.balanceCents;
+
+  let html = '<div class="kpis">'
+    + '<div class="kpi"><div class="lbl">Net worth</div><div class="val">'+esc(fmtCents(t.net))+'</div><div class="sub">assets − liabilities</div></div>'
+    + '<div class="kpi"><div class="lbl">Total assets</div><div class="val up">'+esc(fmtCents(t.assets))+'</div></div>'
+    + '<div class="kpi"><div class="lbl">Total liabilities</div><div class="val down">'+esc(fmtCents(t.liabs))+'</div></div>'
+    + '<div class="kpi"><div class="lbl">Monthly change</div>'+changeHTML+'</div>'
+    + '</div>';
+
+  html += '<div class="grid2"><div class="card"><h2>Asset allocation</h2>'
+    + (t.assets > 0 ? donutSVG(byType) : '<div class="empty">No assets yet. Add an asset account to see your allocation.</div>')
+    + '</div>'
+    + '<div class="card"><h2>'+esc(monthLabel(m0))+' cash flow</h2>'
+    + '<table class="plain"><tr><th>Metric</th><th class="num">Amount</th></tr>'
+    + '<tr><td>Income</td><td class="num up">'+esc(fmtCents(inc))+'</td></tr>'
+    + '<tr><td>Expenses</td><td class="num down">'+esc(fmtCents(exp))+'</td></tr>'
+    + '<tr><td><strong>Net</strong></td><td class="num"><strong>'+esc(fmtCents(inc-exp))+'</strong></td></tr></table>'
+    + '<div class="tip" style="margin-top:8px">Track income &amp; expenses on the Cash Flow tab.</div></div></div>';
+
+  html += '<div class="card"><h2>Accounts</h2><div class="formbar" style="margin-bottom:10px">'
+    + '<button type="button" class="btn primary" id="addAccountBtn">+ Add account</button>'
+    + '<button type="button" class="btn" id="recordSnapBtn">Record snapshot ('+esc(monthLabel(m0))+')</button></div>'
+    + '<div id="accountFormSlot">'+(editingAccountId === "__new" ? accountFormHTML(null) : "")+'</div>';
+
+  if (!state.accounts.length){
+    html += '<div class="empty"><p>No accounts yet. Add your first account, or tap the flask in the header to explore sample data.</p>'
+      + '<button type="button" class="btn primary" data-loadsample="1">Load sample data</button></div>';
+  } else {
+    html += '<h3 style="margin:12px 0 4px">Assets</h3>'
+      + (actAssets.length ? actAssets.map(accountRow).join("") : '<div class="empty">No assets.</div>');
+    html += '<h3 style="margin:12px 0 4px">Liabilities</h3>'
+      + (actLiabs.length ? actLiabs.map(accountRow).join("") : '<div class="empty">No liabilities.</div>');
+    if (arch.length){
+      html += '<details class="archived"><summary>Archived ('+arch.length+') — not counted in totals</summary>'
+        + arch.map(accountRow).join("") + '</details>';
+    }
+  }
+  if (editingAccountId && editingAccountId !== "__new"){
+    const ac = state.accounts.find(a=>a.id===editingAccountId);
+    if (ac) html += accountFormHTML(ac);
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  wireDashboard(el);
+}
+
+function wireDashboard(el){
+  el.querySelectorAll("[data-tab-jump]").forEach(b=>b.addEventListener("click",()=>switchTab(b.getAttribute("data-tab-jump"))));
+  const addBtn = el.querySelector("#addAccountBtn");
+  if (addBtn) addBtn.addEventListener("click", ()=>{
+    editingAccountId = "__new";
+    const slot = el.querySelector("#accountFormSlot");
+    slot.innerHTML = accountFormHTML(null);
+    wireAccountForm(slot);
+  });
+  const recBtn = el.querySelector("#recordSnapBtn");
+  if (recBtn) recBtn.addEventListener("click", recordSnapshot);
+  const samp = el.querySelector('[data-loadsample]');
+  if (samp) samp.addEventListener("click", ()=>{ setSample(true); switchTab("dashboard"); });
+  el.querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click", ()=>{
+    editingAccountId = b.getAttribute("data-edit");
+    renderDashboard();
+    const card = el.querySelector("#accountFormCard");
+    if (card) card.scrollIntoView({block:"nearest"});
+  }));
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = b.getAttribute("data-del");
+    const ac = state.accounts.find(a=>a.id===id);
+    if (ac && confirm('Delete "'+ac.name+'"? This cannot be undone.')){
+      state.accounts = state.accounts.filter(a=>a.id!==id);
+      save(); renderAll(); Sound.click();
+    }
+  }));
+  el.querySelectorAll("[data-archive]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = b.getAttribute("data-archive");
+    const ac = state.accounts.find(a=>a.id===id);
+    if (ac){ ac.archived = true; save(); renderAll(); }
+  }));
+  el.querySelectorAll("[data-unarchive]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = b.getAttribute("data-unarchive");
+    const ac = state.accounts.find(a=>a.id===id);
+    if (ac){ ac.archived = false; save(); renderAll(); }
+  }));
+  const formCard = el.querySelector("#accountFormCard");
+  if (formCard && editingAccountId) wireAccountForm(formCard);
+}
+
+function wireAccountForm(root){
+  const form = root.querySelector("#accountForm");
+  if (!form) return;
+  const kindSel = form.querySelector("#f_kind");
+  const typeSel = form.querySelector("#f_type");
+  kindSel.addEventListener("change", ()=>{
+    const list = kindSel.value === "liability" ? LIAB_TYPES : ASSET_TYPES;
+    typeSel.innerHTML = list.map(t=>'<option value="'+esc(t)+'">'+esc(t)+'</option>').join("");
+  });
+  form.querySelector("#accountFormCancel").addEventListener("click", ()=>{
+    editingAccountId = null; renderAll();
+  });
+  form.addEventListener("submit", (ev)=>{
+    ev.preventDefault();
+    const name = form.querySelector("#f_name").value.trim();
+    if (!name){ Sound.error(); alert("Account name is required."); return; }
+    const kind = kindSel.value;
+    const type = typeSel.value;
+    const bal = Math.abs(parseMoney(form.querySelector("#f_bal").value)); /* balances are magnitudes; kind determines sign */
+    if (isNaN(bal)){ Sound.error(); alert("Balance must be a number."); return; }
+    const note = form.querySelector("#f_note").value.trim();
+    if (editingAccountId && editingAccountId !== "__new"){
+      const ac = state.accounts.find(a=>a.id===editingAccountId);
+      if (ac){ ac.name=name; ac.kind=kind; ac.type=type; ac.balanceCents=bal; ac.note=note; }
+    } else {
+      state.accounts.push({id:uid(), name, kind, type, balanceCents:bal, note, archived:false});
+    }
+    editingAccountId = null; save(); renderAll(); Sound.success();
+  });
+}
+
+function recordSnapshot(){
+  const m = thisMonth();
+  const t = totals();
+  const existing = state.snapshots.find(s=>s.month===m);
+  if (existing){
+    if (!confirm("A snapshot for "+monthLabel(m)+" already exists. Overwrite it?")) return;
+    existing.netWorthCents = t.net; existing.assetsCents = t.assets;
+    existing.liabilitiesCents = t.liabs; existing.takenAt = new Date().toISOString();
+  } else {
+    state.snapshots.push({id:uid(), month:m, netWorthCents:t.net,
+      assetsCents:t.assets, liabilitiesCents:t.liabs, takenAt:new Date().toISOString()});
+  }
+  save(); renderAll(); Sound.success();
+  switchTab("trends");
+}
+</script>
+<script>
+"use strict";
+/* ---------- rendering: trends ---------- */
+function trendSVG(snaps){
+  const W = 680, H = 300, PL = 92, PR = 30, PT = 20, PB = 34;
+  const vals = snaps.map(s=>s.netWorthCents);
+  let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+  if (min === max){ min -= 100; max += 100; }
+  const pad = (max-min)*0.15; min -= pad; max += pad;
+  const n = snaps.length;
+  const x = i => PL + (n===1 ? (W-PL-PR)/2 : i*(W-PL-PR)/(n-1));
+  const y = v => PT + (1 - (v-min)/(max-min))*(H-PT-PB);
+  let pts = "", dots = "", labels = "";
+  snaps.forEach((s,i)=>{
+    pts += x(i).toFixed(1)+","+y(s.netWorthCents).toFixed(1)+" ";
+    dots += '<circle cx="'+x(i).toFixed(1)+'" cy="'+y(s.netWorthCents).toFixed(1)+'" r="5" style="fill:var(--accent)">'
+      + '<title>'+esc(monthLabel(s.month))+': '+esc(fmtCents(s.netWorthCents))+'</title></circle>';
+  });
+  // y axis ticks
+  const ticks = 4;
+  for (let i=0;i<=ticks;i++){
+    const v = min + (max-min)*i/ticks;
+    const yy = y(v).toFixed(1);
+    labels += '<line x1="'+PL+'" y1="'+yy+'" x2="'+(W-PR)+'" y2="'+yy+'" style="stroke:var(--line)" stroke-width="1"/>'
+      + '<text x="'+(PL-6)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" style="fill:var(--muted)">'+esc(fmtCents(Math.round(v)))+'</text>';
+  }
+  snaps.forEach((s,i)=>{
+    labels += '<text x="'+x(i).toFixed(1)+'" y="'+(H-PB+20)+'" text-anchor="middle" font-size="11" style="fill:var(--muted)">'+esc(monthLabel(s.month))+'</text>';
+  });
+  return '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Net worth trend line chart">'
+    + labels
+    + '<polyline points="'+pts.trim()+'" fill="none" style="stroke:var(--accent)" stroke-width="3" stroke-linejoin="round"/>'
+    + dots + '</svg>';
+}
+
+function renderTrends(){
+  const el = document.getElementById("tab-trends");
+  const snaps = [...state.snapshots].sort((a,b)=>a.month.localeCompare(b.month));
+  let html = '<div class="card"><h2>Net worth trend</h2>';
+  if (snaps.length >= 2){
+    html += trendSVG(snaps);
+  } else if (snaps.length === 1){
+    html += '<div class="empty">One snapshot recorded ('+esc(monthLabel(snaps[0].month))+'). Record at least one more month to see your trend.</div>';
+  } else {
+    html += '<div class="empty">No snapshots yet. Record a snapshot from the Dashboard to start tracking your trend.</div>';
+  }
+  html += '</div><div class="card"><h2>Snapshot history</h2>';
+  if (!snaps.length){
+    html += '<div class="empty">No snapshots recorded.</div>';
+  } else {
+    html += '<table class="plain"><tr><th>Month</th><th class="num">Net worth</th><th class="num">Assets</th><th class="num">Liabilities</th><th></th></tr>'
+      + snaps.slice().reverse().map(s=>'<tr><td>'+esc(monthLabel(s.month))+'</td>'
+        + '<td class="num"><strong>'+esc(fmtCents(s.netWorthCents))+'</strong></td>'
+        + '<td class="num up">'+esc(fmtCents(s.assetsCents))+'</td>'
+        + '<td class="num down">'+esc(fmtCents(s.liabilitiesCents))+'</td>'
+        + '<td class="num"><button type="button" class="btn small danger" data-delsnap="'+esc(s.id)+'">Delete</button></td></tr>').join("")
+      + '</table>';
+  }
+  html += '</div>';
+  el.innerHTML = html;
+  el.querySelectorAll("[data-delsnap]").forEach(b=>b.addEventListener("click", ()=>{
+    const id = b.getAttribute("data-delsnap");
+    const s = state.snapshots.find(x=>x.id===id);
+    if (s && confirm("Delete the "+monthLabel(s.month)+" snapshot?")){
+      state.snapshots = state.snapshots.filter(x=>x.id!==id);
+      save(); renderAll();
+    }
+  }));
+}
+</script>
+<script>
+"use strict";
+/* ---------- rendering: cash flow ---------- */
+function entryRow(e, attr){
+  return '<div class="row"><div class="grow"><div class="nm">'+esc(e.name)+'</div></div>'
+    + '<div class="amt">'+esc(fmtCents(e.amountCents))+'</div>'
+    + '<button type="button" class="btn small danger" data-'+attr+'del="'+esc(e.id)+'">Delete</button></div>';
+}
+function renderCashflow(){
+  const el = document.getElementById("tab-cashflow");
+  const inc = state.income.filter(e=>e.month===cfMonth).sort((a,b)=>b.amountCents-a.amountCents);
+  const exp = state.expenses.filter(e=>e.month===cfMonth).sort((a,b)=>b.amountCents-a.amountCents);
+  const tInc = inc.reduce((s,e)=>s+e.amountCents,0);
+  const tExp = exp.reduce((s,e)=>s+e.amountCents,0);
+  let html = '<div class="card"><h2>Cash flow — '+esc(monthLabel(cfMonth))+'</h2>'
+    + '<div class="formbar" style="margin-bottom:12px"><label for="cf_month" style="align-self:center">Month</label>'
+    + '<input type="month" id="cf_month" value="'+esc(cfMonth)+'" style="max-width:200px">'
+    + '<div class="spacer"></div><span class="tip">Net: <strong>'+esc(fmtCents(tInc-tExp))+'</strong></span></div>'
+    + '<div class="grid2">'
+    + '<div><h3 style="margin:0 0 6px">Income <span class="up">('+esc(fmtCents(tInc))+')</span></h3>'
+    + '<form id="incForm" class="field" novalidate style="margin-bottom:10px">'
+    + '<label for="inc_name">Name</label><input type="text" id="inc_name" maxlength="80" placeholder="e.g. Paycheck" required>'
+    + '<label for="inc_amt">Amount (USD)</label><input type="text" id="inc_amt" inputmode="decimal" placeholder="0.00" required>'
+    + '<div class="formbar"><button type="submit" class="btn primary">+ Add income</button></div></form>'
+    + (inc.length ? inc.map(e=>entryRow(e,"inc")).join("") : '<div class="empty">No income recorded for this month.</div>')
+    + '</div>'
+    + '<div><h3 style="margin:0 0 6px">Expenses <span class="down">('+esc(fmtCents(tExp))+')</span></h3>'
+    + '<form id="expForm" class="field" novalidate style="margin-bottom:10px">'
+    + '<label for="exp_name">Name</label><input type="text" id="exp_name" maxlength="80" placeholder="e.g. Rent" required>'
+    + '<label for="exp_amt">Amount (USD)</label><input type="text" id="exp_amt" inputmode="decimal" placeholder="0.00" required>'
+    + '<div class="formbar"><button type="submit" class="btn primary">+ Add expense</button></div></form>'
+    + (exp.length ? exp.map(e=>entryRow(e,"exp")).join("") : '<div class="empty">No expenses recorded for this month.</div>')
+    + '</div></div>'
+    + '<div class="card" style="margin:14px 0 0"><table class="plain">'
+    + '<tr><th>'+esc(monthLabel(cfMonth))+' totals</th><th class="num">Amount</th></tr>'
+    + '<tr><td>Total income</td><td class="num up">'+esc(fmtCents(tInc))+'</td></tr>'
+    + '<tr><td>Total expenses</td><td class="num down">'+esc(fmtCents(tExp))+'</td></tr>'
+    + '<tr><td><strong>Net</strong></td><td class="num"><strong>'+esc(fmtCents(tInc-tExp))+'</strong></td></tr>'
+    + '</table></div></div>';
+  el.innerHTML = html;
+  el.querySelector("#cf_month").addEventListener("change", (ev)=>{
+    cfMonth = ev.target.value || thisMonth(); renderCashflow();
+  });
+  const wireEntry = (formId, kind) => {
+    el.querySelector("#"+formId).addEventListener("submit", (ev)=>{
+      ev.preventDefault();
+      const form = ev.target;
+      const name = form.querySelector("input[type=text]").value.trim();
+      const amt = parseMoney(form.querySelectorAll("input[type=text]")[1].value);
+      if (!name){ Sound.error(); alert("Name is required."); return; }
+      if (isNaN(amt) || amt < 0){ Sound.error(); alert("Amount must be a positive number."); return; }
+      const rec = {id:uid(), name, amountCents:amt, month:cfMonth};
+      (kind === "income" ? state.income : state.expenses).push(rec);
+      save(); renderCashflow(); Sound.success();
+    });
+  };
+  wireEntry("incForm","income"); wireEntry("expForm","expense");
+  el.querySelectorAll("[data-incdel]").forEach(b=>b.addEventListener("click", ()=>{
+    state.income = state.income.filter(e=>e.id!==b.getAttribute("data-incdel"));
+    save(); renderCashflow(); Sound.click();
+  }));
+  el.querySelectorAll("[data-expdel]").forEach(b=>b.addEventListener("click", ()=>{
+    state.expenses = state.expenses.filter(e=>e.id!==b.getAttribute("data-expdel"));
+    save(); renderCashflow(); Sound.click();
+  }));
+}
+</script>
+<script>
+"use strict";
+/* ---------- rendering: data tab ---------- */
+function renderData(){
+  const el = document.getElementById("tab-data");
+  const t = totals();
+  let html = '<div class="card"><h2>Backup &amp; restore</h2>'
+    + '<p class="tip">Your data lives in this browser on this device only (localStorage). '
+    + 'Export a JSON backup regularly — clearing your browser data erases everything.</p>'
+    + '<div class="formbar">'
+    + '<button type="button" class="btn primary" id="exportBtn">⬇ Export JSON</button>'
+    + '<button type="button" class="btn" id="importBtn">⬆ Import JSON</button>'
+    + '<input type="file" id="importFile" accept="application/json,.json" class="hidden" aria-label="Choose a JSON backup file">'
+    + '<button type="button" class="btn" id="sampleBtn">Load sample data</button>'
+    + '</div><div id="importMsg" class="tip" style="margin-top:8px"></div></div>'
+    + '<div class="card"><h2>Current data</h2><table class="plain">'
+    + '<tr><th>Records</th><th class="num">Count</th></tr>'
+    + '<tr><td>Accounts</td><td class="num">'+state.accounts.length+'</td></tr>'
+    + '<tr><td>Snapshots</td><td class="num">'+state.snapshots.length+'</td></tr>'
+    + '<tr><td>Income entries</td><td class="num">'+state.income.length+'</td></tr>'
+    + '<tr><td>Expense entries</td><td class="num">'+state.expenses.length+'</td></tr>'
+    + '<tr><td><strong>Current net worth</strong></td><td class="num"><strong>'+esc(fmtCents(t.net))+'</strong></td></tr>'
+    + '</table></div>'
+    + '<div class="card dangerzone"><h3>Danger zone</h3>'
+    + '<p class="tip">This permanently erases all WorthAudit data in this browser. Type <strong>DELETE</strong> below to confirm.</p>'
+    + '<div class="formbar"><input type="text" id="resetConfirm" placeholder="Type DELETE" style="max-width:220px" aria-label="Type DELETE to confirm reset">'
+    + '<button type="button" class="btn danger" id="resetBtn">Reset all data</button></div>'
+    + '<div id="resetMsg" class="tip" style="margin-top:8px"></div></div>';
+  el.innerHTML = html;
+
+  el.querySelector("#exportBtn").addEventListener("click", ()=>{
+    const payload = {app:"worthaudit", version:"1.0.1", exportedAt:new Date().toISOString(),
+      accounts:state.accounts, snapshots:state.snapshots, income:state.income, expenses:state.expenses};
+    const blob = new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    const d = new Date();
+    a.download = "worthaudit-backup-" + d.getFullYear() + String(d.getMonth()+1).padStart(2,"0") + String(d.getDate()).padStart(2,"0") + ".json";
+    document.body.appendChild(a); a.click(); Sound.success();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  const importFile = el.querySelector("#importFile");
+  const importMsg = el.querySelector("#importMsg");
+  el.querySelector("#importBtn").addEventListener("click", ()=>importFile.click());
+  importFile.addEventListener("change", ()=>{
+    importMsg.textContent = "";
+    const f = importFile.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const res = validateImport(reader.result);
+      if (!res.ok){ importMsg.textContent = "Import rejected: " + res.error; return; }
+      if (confirm("Import this backup? It will replace all current data.")){
+        state.accounts = res.data.accounts; state.snapshots = res.data.snapshots;
+        state.income = res.data.income; state.expenses = res.data.expenses;
+        save(); renderAll(); switchTab("dashboard");
+      }
+    };
+    reader.onerror = ()=>{ importMsg.textContent = "Could not read the file."; };
+    reader.readAsText(f);
+    importFile.value = "";
+  });
+
+  el.querySelector("#sampleBtn").addEventListener("click", ()=>{ setSample(true); switchTab("dashboard"); });
+
+  el.querySelector("#resetBtn").addEventListener("click", ()=>{
+    const box = el.querySelector("#resetConfirm");
+    const msg = el.querySelector("#resetMsg");
+    if (box.value.trim() !== "DELETE"){
+      msg.textContent = 'Type DELETE in the box first, then click "Reset all data".';
+      return;
+    }
+    if (confirm("Erase ALL WorthAudit data in this browser? This cannot be undone.")){
+      const theme = state.theme;
+      state = blankState(); state.theme = theme;
+      save(); renderAll(); switchTab("dashboard");
+    }
+    box.value = "";
+  });
+}
+
+function isInt(n){ return typeof n === "number" && isFinite(n) && Math.round(n) === n; }
+function validAccount(a){
+  return a && typeof a === "object" && typeof a.id === "string" && typeof a.name === "string"
+    && (a.kind === "asset" || a.kind === "liability")
+    && (ASSET_TYPES.includes(a.type) || LIAB_TYPES.includes(a.type))
+    && isInt(a.balanceCents) && typeof a.note === "string" && typeof a.archived === "boolean";
+}
+function validSnapshot(s){
+  return s && typeof s === "object" && typeof s.id === "string"
+    && /^\d{4}-\d{2}$/.test(s.month) && isInt(s.netWorthCents) && isInt(s.assetsCents) && isInt(s.liabilitiesCents);
+}
+function validEntry(e){
+  return e && typeof e === "object" && typeof e.id === "string" && typeof e.name === "string"
+    && /^\d{4}-\d{2}$/.test(e.month) && isInt(e.amountCents) && e.amountCents >= 0;
+}
+function validateImport(text){
+  let obj;
+  try{ obj = JSON.parse(text); }
+  catch(e){ return {ok:false, error:"not valid JSON."}; }
+  if (!obj || typeof obj !== "object" || Array.isArray(obj))
+    return {ok:false, error:"top level must be an object."};
+  for (const k of ["accounts","snapshots","income","expenses"]){
+    if (!Array.isArray(obj[k])) return {ok:false, error:'missing or invalid "'+k+'" array.'};
+  }
+  if (!obj.accounts.every(validAccount)) return {ok:false, error:"one or more accounts are malformed."};
+  if (!obj.snapshots.every(validSnapshot)) return {ok:false, error:"one or more snapshots are malformed."};
+  if (!obj.income.every(validEntry) || !obj.expenses.every(validEntry))
+    return {ok:false, error:"one or more income/expense entries are malformed."};
+  return {ok:true, data:{accounts:obj.accounts, snapshots:obj.snapshots, income:obj.income, expenses:obj.expenses}};
+}
+</script>
+<script>
+"use strict";
+/* ---------- tabs + init ---------- */
+function renderAll(){
+  renderDashboard(); renderTrends(); renderCashflow(); renderData();
+}
+function switchTab(name){
+  ["dashboard","trends","cashflow","data"].forEach(t=>{
+    document.getElementById("tab-"+t).classList.toggle("hidden", t !== name);
+  });
+  document.querySelectorAll("nav.tabs button").forEach(b=>{
+    if (b.getAttribute("data-tab") === name) b.setAttribute("aria-current","page");
+    else b.removeAttribute("aria-current");
+  });
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>{
+  b.addEventListener("click", ()=>switchTab(b.getAttribute("data-tab")));
+});
+renderAll();
 </script>
 </body>
 </html>
