@@ -1437,7 +1437,7 @@ const PALETTE = ['#0e7c5b', '#d97706', '#2563eb', '#9333ea', '#db2777', '#0891b2
 function svgBars(series, opts) {
   // series: [{label, v1, v2, key}] ; opts: {l1, l2, c1, c2, fmt, on}
   opts = opts || {};
-  const W = 640, H = 260, padL = 64, padB = 34, padT = 14;
+  const W = 640, H = 360, padL = 64, padB = 34, padT = 14;
   const max = Math.max(1, ...series.flatMap(s => [Math.abs(s.v1 || 0), Math.abs(s.v2 || 0)]));
   const bw = Math.min(46, (W - padL - 20) / Math.max(1, series.length) / 2.4);
   let s = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img">';
