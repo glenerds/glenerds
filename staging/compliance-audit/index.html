@@ -688,7 +688,7 @@ function renderAuditPicker(){
       let ans=0; sec.questions.forEach((q,i)=>{ if(getAnswer(t,sec.id,i)) ans++; });
       const frac=sec.questions.length?ans/sec.questions.length:0;
       const cap=esc(sectitle(t,sec).replace(/^.+?:\s*/,""));
-      const short=cap.length>20?cap.slice(0,20).replace(/\s+\S*$/,"")+"\u2026":cap;
+      let short=cap.length>20?cap.slice(0,20).replace(/\s+\S*$/,"")+"\u2026":cap; if(!/[\s\-]/.test(short)&&short.length>11) short=short.slice(0,10)+"\u2026";
       return '<button class="iring" data-ring="'+t+'|'+sec.id+'" title="'+cap+' — '+ans+'/'+sec.questions.length+' answered" aria-label="'+cap+": "+ans+" of "+sec.questions.length+' answered">'+
         ringSVG(frac,scoreColor(frac*100))+'<span class="iring-pct">'+ans+'/'+sec.questions.length+'</span>'+
         '<span class="iring-cap">'+short+'</span></button>';
@@ -1700,13 +1700,13 @@ const STR={
  incidents:{en:"Incidents per Month",es:"Incidentes por mes"},
  trend:{en:"Score History",es:"Historial de puntajes"},
  renewals:{en:"Renewal Alerts",es:"Alertas de vencimiento"},
- nudges:{en:"Action items",es:"Avisos inteligentes"},
+ nudges:{en:"Action items",es:"Acciones pendientes"},
  logsH:{en:"Logs & Corrective Actions",es:"Registros y acciones correctivas"},
  logActions:{en:"Corrective Actions",es:"Acciones correctivas"},
  logInjury:{en:"Injury / Illness",es:"Lesiones / Enfermedades"},
  logTraining:{en:"Training",es:"Capacitación"},
  logDvir:{en:"Vehicle Inspection",es:"Inspección vehicular"},
- logSds:{en:"SDS Inventory",es:"Inventario SDS"},
+ logSds:{en:"Safety Data Sheets",es:"Hojas de datos de seguridad"},
  discBody:{en:"<strong>⚠ Not legal advice</strong> AuditReady is a self-assessment aid, not legal advice and not a substitute for a qualified safety, transportation, or food-safety professional. Regulations change and vary by state — verify requirements with the proper authority or counsel before acting.",
    es:"<strong>⚠ No es asesoría legal</strong> AuditReady es una ayuda de autoevaluación, no asesoría legal ni sustituto de un profesional calificado en seguridad, transporte o inocuidad alimentaria. Las regulaciones cambian y varían por estado — verifique los requisitos con la autoridad o asesor correspondiente antes de actuar."},
  discOk:{en:"I understand",es:"Entendido"},
@@ -1738,7 +1738,7 @@ const STR={
  fleetH:{en:"Fleet — Drivers, Vehicles & Renewals",es:"Flota — Conductores, vehículos y vencimientos"},
  labelsH:{en:"Cottage Food Label Generator",es:"Generador de etiquetas de comida casera"},
  labelsSub:{en:"Complete labels: product name, ingredients by weight, allergens, net weight, and your state's required disclaimer line. Uses the state selected in Settings.",
-   es:"Etiquetas completas: nombre del producto, ingredientes por peso, alérgenos, peso neto y la línea de advertencia requerida por tu estado. Usa el estado seleccionado en Ajustes."},
+   es:"Etiquetas completas: nombre del producto, ingredientes por peso, alérgenos, peso neto y la línea de advertencia requerida por su estado. Use el estado seleccionado en Ajustes."},
  docsH:{en:"Document Generator",es:"Generador de documentos"},
  docsSub:{en:"Documents are generated from your audit answers. Every document carries the not-legal-advice disclaimer. Use <strong>Print / Save PDF</strong> for a clean printout.",
    es:"Los documentos se generan a partir de tus respuestas de auditoría. Cada documento lleva el aviso de no-asesoría-legal. Usa <strong>Imprimir / Guardar PDF</strong> para una impresión limpia."},
@@ -2325,7 +2325,7 @@ function renderInjury(){
   $("#log-injury").innerHTML='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">'+
     "<h3 style='margin:0'>"+D("Injury / Illness / Near-Miss Log","Registro de lesiones / enfermedades / casi-accidentes")+" ("+logs.injury.length+")</h3><button class='btn small' id='addInjury'>＋ "+D("Log incident","Registrar incidente")+"</button></div>"+
     '<p class="small" style="margin-bottom:12px">'+D("OSHA 300-style log. Use the recordability helper when logging to screen whether an injury belongs on the 300 log. Near-misses can carry a photo.","Registro estilo OSHA 300. Use la ayuda de registrabilidad al registrar para saber si una lesión va en el registro 300. Los casi-accidentes pueden llevar foto.")+'</p>'+
-    (logs.injury.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Kind","Clase")+'</th><th>'+D("Incident type","Tipo de incidente")+'</th><th>'+D("Where","Dónde")+'</th><th>'+D("Job title","Puesto")+'</th><th>'+D("Description","Descripción")+'</th><th>'+D("Recordable","Registrable")+'</th><th>'+D("Photo","Foto")+'</th><th></th></tr>'+rows+"</table></div>"
+    (logs.injury.length?'<div style="overflow-x:auto"><table class="log"><tr><th>'+D("Date","Fecha")+'</th><th>'+D("Category","Categoría")+'</th><th>'+D("Incident type","Tipo de incidente")+'</th><th>'+D("Where","Dónde")+'</th><th>'+D("Job title","Puesto")+'</th><th>'+D("Description","Descripción")+'</th><th>'+D("Recordable","Registrable")+'</th><th>'+D("Photo","Foto")+'</th><th></th></tr>'+rows+"</table></div>"
     :'<div class="empty">'+D("No incidents logged.","Sin incidentes registrados.")+'</div>')+"</div>";
   $("#addInjury").addEventListener("click",()=>{ sndClick(); pendingRec=null; injuryDraft=null; openInjuryModal(); });
   $$("#log-injury [data-i]").forEach(b=>b.addEventListener("click",()=>{ if(confirm(D("Delete this entry?","¿Eliminar este registro?"))){ logs.injury.splice(+b.dataset.i,1); saveLogs(); renderInjury(); } }));
@@ -2531,7 +2531,7 @@ function gen48HourDoc(){
   let h=docHead(D("48-Hour Audit Response Pack","Paquete de respuesta de auditoría en 48 horas"),
     D("Every record an auditor typically demands \u2014 assembled for production within 48 hours","Todos los registros que un auditor suele exigir \u2014 reunidos para entrega en 48 horas"));
   h+=D("<p>Safety investigators can require a motor carrier to produce supporting records within 48 hours of the request. This pack assembles every record AuditReady holds, in the order an auditor typically asks for them. Print it or save it as PDF and keep it with your compliance binder.</p>",
-       "<p>Los investigadores pueden exigir que un transportista presente sus registros dentro de las 48 horas siguientes a la solicitud. Este paquete re\u00fane todos los registros de AuditReady en el orden en que suelen pedirse. Impr\u00edmalo o gu\u00e1rdelo como PDF junto a su carpeta de cumplimiento.</p>");
+       "<p>Los investigadores de seguridad pueden exigir que un transportista presente sus registros dentro de las 48 horas siguientes a la solicitud. Este paquete re\u00fane todos los registros de AuditReady en el orden en que suelen pedirse. Impr\u00edmalo o gu\u00e1rdelo como PDF junto a su carpeta de cumplimiento.</p>");
   const nDrv=drivers.length, nVeh=vehicles.length, nDvir=(logs.dvir||[]).length,
         nInj=(logs.injury||[]).length, nTrL=(logs.training||[]).length,
         nAct=actions.length, nOpen=actions.filter(a=>actionStatus(a)!=="done").length;
@@ -2541,9 +2541,9 @@ function gen48HourDoc(){
     [D("Accident / incident register","Registro de accidentes / incidentes"),nInj+" "+D("entries","entradas")],
     [D("Training records","Registros de capacitaci\u00f3n"),nTrL+" "+D("sessions logged","sesiones registradas")],
     [D("Corrective-action log","Registro de acciones correctivas"),nAct+" "+D("actions","acciones")+" ("+nOpen+" "+D("open","abiertas")+")"],
-    [D("Self-audit scores by area","Puntajes de autoauditor\u00eda por \u00e1rea"),Object.keys(TRACKS).length+" "+D("tracks","\u00e1reas")]
+    [D("Self-audit scores by area","Puntajes de autoauditor\u00eda por \u00e1rea"),Object.keys(TRACKS).length+" "+D("audit types","tipos de auditor\u00eda")]
   ];
-  h+="<h2>"+D("Production checklist \u2014 hand these over first","Lista de entrega \u2014 entregue esto primero")+"</h2><ol class='doc-toc'>"+
+  h+="<h2>"+D("Handover checklist \u2014 hand these over first","Lista de entrega \u2014 entregue esto primero")+"</h2><ol class='doc-toc'>"+
     chk.map(c=>"<li>\u2610 <strong>"+esc(c[0])+"</strong> \u2014 "+esc(c[1])+"</li>").join("")+"</ol>";
   h+="<h2>1. "+D("Drivers & qualification files","Conductores y archivos de calificaci\u00f3n")+"</h2>";
   h+=nDrv?'<table class="log"><tr><th>'+D("Driver","Conductor")+'</th><th>'+D("CDL expires","CDL vence")+'</th><th>'+D("Medical card expires","Tarjeta m\u00e9dica vence")+'</th><th>'+D("MVR review due","Revisi\u00f3n MVR")+'</th></tr>'+
@@ -2679,7 +2679,7 @@ Object.assign(DOCS,{
   dvir:{title:"DVIR Inspection Template",titleEs:"Plantilla de inspección DVIR",desc:"Walk-around ordered, defect + repair signoff.",descEs:"En orden de inspección, con defectos y aprobación de reparación.",gen:genDvirDoc,badge:"FMCSA",cls:"badge-fmcsa"},
   master:{title:"Master Audit Report",titleEs:"Informe maestro de auditoría",desc:"One-click report across all tracks — scores, findings, actions.",descEs:"Informe de un clic de todas las áreas.",gen:genMasterDoc,badge:"ALL",cls:"badge-all"},
   newentrant:{title:"New-Entrant Safety Audit Prep Pack",titleEs:"Paquete para nuevo entrante",desc:"Checklist + document bundle for new carriers.",descEs:"Lista + paquete documental para nuevos transportistas.",gen:genNewEntrantDoc,badge:"FMCSA",cls:"badge-fmcsa"},
-  pack48:{title:"48-Hour Audit Response Pack",titleEs:"Paquete de respuesta en 48 horas",desc:"Everything an auditor asks for \u2014 one export, producible within 48 hours.",descEs:"Todo lo que pide un auditor \u2014 una exportaci\u00f3n, lista en 48 horas.",gen:gen48HourDoc,badge:"ALL",cls:"badge-all"}
+  pack48:{title:"48-Hour Audit Response Pack",titleEs:"Paquete de respuesta en 48 horas",desc:"Everything an auditor asks for \u2014 one export, ready within 48 hours.",descEs:"Todo lo que pide un auditor \u2014 una exportaci\u00f3n, lista en 48 horas.",gen:gen48HourDoc,badge:"ALL",cls:"badge-all"}
 });
 /* override: doc picker supports badge/title per doc + ES */
 function renderDocPicker(){
