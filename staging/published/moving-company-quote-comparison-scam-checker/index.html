@@ -5,179 +5,430 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Moving Company Scam Checker — Compare Quotes &amp; Spot Red Flags | Glenerds</title>
 <meta name="description" content="Offline moving-company vetting tool: score movers on 35 red-flag signals, compare up to 4 quotes side by side, verify USDOT credentials. $9 one-time, no subscription.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/moving-company-quote-comparison-scam-checker/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="Moving Company Scam Checker — Compare Quotes &amp; Spot Red Flags | Glenerds">
-<meta property="og:description" content="Offline moving-company vetting tool: score movers on 35 red-flag signals, compare up to 4 quotes side by side, verify USDOT credentials. $9 one-time, no subscription.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/moving-company-quote-comparison-scam-checker/">
-<meta property="og:image" content="https://glenerds.github.io/glenerds/assets/moveaudit.png">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/moving-company-quote-comparison-scam-checker/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "MoveAudit",
-  "description": "Offline moving-company vetting tool: score movers on 35 red-flag signals, compare up to 4 quotes side by side, verify USDOT credentials. $9 one-time, no subscription.",
-  "url": "https://glenerds.github.io/glenerds/products/moving-company-quote-comparison-scam-checker/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "9",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker"
-  }
+<style>
+:root{
+  --bg:#f6f6fb; --card:#ffffff; --ink:#211d33; --muted:#5f5a76; --border:#e1def0;
+  --accent:#4338ca; --accent-ink:#3730a3; --accent-soft:#e6e4fa;
+  --low:#16a34a; --med:#d97706; --high:#dc2626; --shadow:0 2px 10px rgba(67,56,202,.08);
 }
+html[data-theme="dark"]{
+  --bg:#121019; --card:#1c1926; --ink:#edebf7; --muted:#a5a0c0; --border:#322d47;
+  --accent:#a5b4fc; --accent-ink:#c7d2fe; --accent-soft:#282542;
+  --low:#4ade80; --med:#fbbf24; --high:#f87171; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#6366f1,#312e81);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.25rem;font-weight:800;background:var(--accent-soft);
+  border:1px solid var(--border);border-radius:12px;padding:.5rem 1rem;margin-right:.8rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+@media (max-width:520px){.field-row{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.sig{display:flex;gap:.7rem;align-items:flex-start;border:1px solid var(--border);border-radius:12px;
+  padding:.7rem .9rem;margin:.5rem 0;cursor:pointer}
+.sig:hover{border-color:var(--accent)}
+.sig:focus-visible{outline:2px solid var(--accent)}
+.sig input{width:22px;height:22px;min-width:22px;margin-top:.15rem;accent-color:var(--accent);cursor:pointer}
+.sig .slbl{font-size:16px;font-weight:600}
+.sig .swhy{font-size:15px;color:var(--muted)}
+.sig.on{border-color:var(--high);background:color-mix(in srgb,var(--high) 6%,transparent)}
+.sig-cat{font-size:1.05rem;font-weight:800;margin:1.2rem 0 .2rem}
+.verdict{display:inline-block;font-size:1.2rem;font-weight:800;border-radius:12px;padding:.45rem 1rem;margin:.3rem 0}
+.verdict.low{background:color-mix(in srgb,var(--low) 14%,transparent);color:var(--low)}
+.verdict.med{background:color-mix(in srgb,var(--med) 16%,transparent);color:var(--med)}
+.verdict.high{background:color-mix(in srgb,var(--high) 14%,transparent);color:var(--high)}
+.meter{position:relative;height:22px;border-radius:999px;margin:.8rem 0 .3rem;
+  background:linear-gradient(to right,var(--low) 0 25%,var(--med) 25% 50%,var(--high) 50% 100%)}
+.meter .needle{position:absolute;top:-5px;bottom:-5px;width:4px;border-radius:2px;background:var(--ink);
+  box-shadow:0 0 0 2px var(--card);transform:translateX(-50%)}
+.catbars{display:grid;gap:.5rem;margin:.8rem 0}
+.catbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center;
+  cursor:pointer;border-radius:10px;padding:.45rem .6rem;border:1px solid transparent;background:none;
+  font:inherit;color:inherit;text-align:left;width:100%}
+.catbar:hover{background:var(--accent-soft)}
+.catbar:focus-visible{outline:2px solid var(--accent)}
+.catbar.sel{border-color:var(--accent);background:var(--accent-soft)}
+.catbar .cname{font-weight:600;font-size:15px}
+.catbar .cval{font-variant-numeric:tabular-nums;font-size:15px;font-weight:800;white-space:nowrap}
+.catbar .ctrack{grid-column:1/-1;height:12px;border-radius:999px;background:var(--border);overflow:hidden}
+.catbar .ctrack>div{height:100%;border-radius:999px;background:var(--accent)}
+#demo-detail{margin-top:.7rem;font-size:15px;color:var(--muted);min-height:1.2em}
+#demo-detail strong{color:var(--ink)}
+.rule110{border-top:1px solid var(--border);margin-top:1.2rem;padding-top:1rem}
+.rule110 .out{font-size:16px;font-weight:700;margin:.5rem 0}
+.rule110 .out.ok{color:var(--low)} .rule110 .out.over{color:var(--high)}
+.feat{font-size:16px;padding-left:1.3rem}
+.feat li{margin:.35rem 0}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+.small{font-size:15px;color:var(--muted)}
+@media print{.actions,.cta-strip{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"MoveAudit",
+"description":"Offline moving-company vetting tool: score movers on 35 red-flag signals, compare up to 4 quotes side by side, verify USDOT credentials. $9 one-time, no subscription.",
+"url":"https://glenerds.github.io/glenerds/staging/published/moving-company-quote-comparison-scam-checker/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"9","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What is the federal 110% rule?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "On interstate moves with a non-binding estimate, the mover generally can't demand more than 110% of the estimate at delivery. The tool's analyzer checks your quotes against it."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I verify a USDOT number?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The tool walks you through checking the mover's USDOT credentials against the federal database and flags mismatches like a name that doesn't match the record."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does it work for local moves?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "The red-flag signals and quote comparison apply to any move; the 110% rule specifically covers federally regulated interstate moves."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Why a one-time $9 tool instead of a free article?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Articles tell you what to watch for; this scores your actual movers and your actual quotes, then hands you a printable report."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"What is the federal 110% rule?","acceptedAnswer":{"@type":"Answer","text":"On interstate moves with a non-binding estimate, the mover generally can't demand more than 110% of the estimate at delivery. The tool's analyzer checks your quotes against it."}},
+{"@type":"Question","name":"How do I verify a USDOT number?","acceptedAnswer":{"@type":"Answer","text":"The tool walks you through checking the mover's USDOT credentials against the federal database and flags mismatches like a name that doesn't match the record."}},
+{"@type":"Question","name":"Does it work for local moves?","acceptedAnswer":{"@type":"Answer","text":"The red-flag signals and quote comparison apply to any move; the 110% rule specifically covers federally regulated interstate moves."}},
+{"@type":"Question","name":"Why a one-time $9 tool instead of a free article?","acceptedAnswer":{"@type":"Answer","text":"Articles tell you what to watch for; this scores your actual movers and your actual quotes, then hands you a printable report."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; MoveAudit</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="MoveAudit — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5" stroke="#fff" stroke-width="1.8"/><path d="M9 3.5a3 3 0 0 1 6 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M9 13.2l2 2 4-4.4" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 17.5h6" stroke="#7dd3fc" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+    <span><span class="bname">MoveAudit</span><span class="bsub">Mover scam-risk checker</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>Moving Company Scam Checker — Compare Quotes &amp; Spot Red Flags</h1>
-<p class="lead">Moving scams follow patterns: the too-low estimate, the demand for a big deposit, the name that doesn&#x27;t match the USDOT record. This vetting tool scores every mover you consider against 35 red-flag signals, compares up to four quotes side by side ranked by risk, and checks estimates against the federal 110% rule — so the cheapest quote can&#x27;t quietly become the most expensive move.</p>
-<span class="pricebox">$9 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-<h2 class="sec">Screenshots</h2>
-<figure class="shots"><div>
-<img src="../../assets/moveaudit.png" alt="MoveAudit product page showing the tool interface" loading="lazy">
-<figcaption>MoveAudit — live product page</figcaption></div></figure>
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/moving-cost-calculator/index.html"><strong>Free Moving Cost Calculator</strong></a> &mdash; Estimate DIY, container, and full-service move costs to sanity-check the quotes you&#x27;re comparing.</p>
-<p class="small">Free forever, runs offline in your browser. MoveAudit is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>35-signal red-flag checklist covering the most common moving scam patterns</li>
-<li>Weighted scam-risk score per company, ranked for easy comparison</li>
-<li>Side-by-side comparison of up to 4 quotes in one view</li>
-<li>Estimate analyzer that enforces the federal 110% rule</li>
-<li>USDOT credential verification guidance built into the workflow</li>
-<li>Printable vetting report to keep with your moving paperwork</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>Anyone comparing interstate movers and worried about rogue operators</li>
-<li>First-time movers who don&#x27;t know what a legitimate estimate looks like</li>
-<li>People who received a suspiciously cheap quote and want a second opinion</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You&#x27;re moving fully DIY with no movers involved</li>
-<li>You want someone to book and manage the mover for you</li>
-<li>You need international shipping and customs brokerage</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>What is the federal 110% rule?</dt>
-<dd>On interstate moves with a non-binding estimate, the mover generally can&#x27;t demand more than 110% of the estimate at delivery. The tool&#x27;s analyzer checks your quotes against it.</dd>
-<dt>How do I verify a USDOT number?</dt>
-<dd>The tool walks you through checking the mover&#x27;s USDOT credentials against the federal database and flags mismatches like a name that doesn&#x27;t match the record.</dd>
-<dt>Does it work for local moves?</dt>
-<dd>The red-flag signals and quote comparison apply to any move; the 110% rule specifically covers federally regulated interstate moves.</dd>
-<dt>Why a one-time $9 tool instead of a free article?</dt>
-<dd>Articles tell you what to watch for; this scores your actual movers and your actual quotes, then hands you a printable report.</dd>
-</dl>
+<section class="hero">
+  <h1>Moving Company Scam Checker &mdash; Compare Quotes &amp; Spot Red Flags</h1>
+  <p class="lead">Moving scams follow patterns: the too-low estimate, the demand for a big deposit, the name that doesn&rsquo;t match the USDOT record. This vetting tool scores every mover you consider against 35 red-flag signals, compares up to four quotes side by side ranked by risk, and checks estimates against the federal 110% rule &mdash; so the cheapest quote can&rsquo;t quietly become the most expensive move.</p>
+  <p><span class="pricebox">$9 one-time</span>
+  <a class="btn" href="https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker">Get it on Gumroad</a></p>
+  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
 
-<section class="block">
-<h2 class="sec">Related free tools</h2>
-<div class="grid">
-<div class="card"><h3>Free Security Deposit Deduction Calculator</h3><p>Closing out the old place? Itemize deductions and compute the refund.</p><a class="btn" href="../../tools/security-deposit-deduction-calculator/index.html">Open the free tool</a></div>
-<div class="card"><h3>Free Contractor Bid Comparison Worksheet</h3><p>Settling in? Compare two contractor bids line by line.</p><a class="btn" href="../../tools/contractor-bid-comparison/index.html">Open the free tool</a></div>
-<div class="card"><h3>Moving Quote Website Alternative</h3><p>An honest comparison: when the one-time offline tool wins, and when the subscription alternative is the better call.</p><a class="btn" href="../../alternatives/moving-quote-websites-alternative/index.html">Read the comparison</a></div>
-</div>
+<section class="card" aria-label="Scam checker demo">
+  <h2>Try the red-flag scoring</h2>
+  <p class="small" style="margin-top:0">Check off every signal you&rsquo;ve seen from a mover &mdash; the same weighted scoring MoveAudit runs across 35 signals. Tap any category bar to review what you flagged there.</p>
+  <div id="ma-sigs"></div>
+  <div aria-live="polite">
+    <div class="meter" id="ma-meter" role="img" aria-label="Scam-risk meter"><div class="needle" id="ma-needle"></div></div>
+    <p><span class="verdict" id="ma-verdict"></span></p>
+    <div class="catbars" id="ma-cats"></div>
+    <p id="demo-detail" aria-live="polite"></p>
+  </div>
+  <div class="rule110">
+    <h2 style="font-size:1.1rem;margin:0 0 .4rem">The 110% rule check</h2>
+    <p class="small" style="margin-top:0">On interstate moves with a non-binding estimate, the mover generally can&rsquo;t demand more than 110% of the estimate at delivery. Enter your numbers:</p>
+    <div class="field-row">
+      <label class="field">Written estimate ($)<input type="number" id="ma-est" value="2800" min="0" step="50" inputmode="numeric"></label>
+      <label class="field">Amount demanded at delivery ($)<input type="number" id="ma-dem" value="3400" min="0" step="50" inputmode="numeric"></label>
+    </div>
+    <p class="out" id="ma-110" aria-live="polite"></p>
+  </div>
 </section>
-<div class="cta-band">
-<h2>Get MoveAudit today</h2>
-<p>$9 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul class="feat">
+    <li>35-signal red-flag checklist covering the most common moving scam patterns</li>
+    <li>Weighted scam-risk score per company, ranked for easy comparison</li>
+    <li>Side-by-side comparison of up to 4 quotes in one view</li>
+    <li>Estimate analyzer that enforces the federal 110% rule</li>
+    <li>USDOT credential verification guidance built into the workflow</li>
+    <li>Printable vetting report to keep with your moving paperwork</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul class="feat">
+    <li>Anyone comparing interstate movers and worried about rogue operators</li>
+    <li>First-time movers who don&rsquo;t know what a legitimate estimate looks like</li>
+    <li>People who received a suspiciously cheap quote and want a second opinion</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul class="feat">
+    <li>You&rsquo;re moving fully DIY with no movers involved</li>
+    <li>You want someone to book and manage the mover for you</li>
+    <li>You need international shipping and customs brokerage</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>What is the federal 110% rule?</summary><p>On interstate moves with a non-binding estimate, the mover generally can&rsquo;t demand more than 110% of the estimate at delivery. The tool&rsquo;s analyzer checks your quotes against it.</p></details>
+  <details><summary>How do I verify a USDOT number?</summary><p>The tool walks you through checking the mover&rsquo;s USDOT credentials against the federal database and flags mismatches like a name that doesn&rsquo;t match the record.</p></details>
+  <details><summary>Does it work for local moves?</summary><p>The red-flag signals and quote comparison apply to any move; the 110% rule specifically covers federally regulated interstate moves.</p></details>
+  <details><summary>Why a one-time $9 tool instead of a free article?</summary><p>Articles tell you what to watch for; this scores your actual movers and your actual quotes, then hands you a printable report.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get MoveAudit today</h2>
+  <p>$9 one-time &mdash; yours forever. No subscription. 35 signals, quote comparison, the 110% rule analyzer, and the printable vetting report.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/moving-company-quote-comparison-scam-checker">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>MoveAudit</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
-  paint();
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function money(n){return '$'+Math.round(n).toLocaleString('en-US');}
+var SIGS=[
+  ['Estimate',[
+   ['Quote far below the others','The too-low estimate is bait: the price climbs once your belongings are on the truck.',3],
+   ['No written estimate','A legitimate mover puts the estimate in writing. Verbal numbers can change at delivery.',3],
+   ['No in-home or virtual survey','Accurate quotes need a real inventory. Phone-only guesses invite surprise charges.',2]]],
+  ['Deposit & payment',[
+   ['Large deposit demanded upfront','Reputable movers rarely demand big deposits — the fee is usually due at delivery.',3],
+   ['Cash-only or wire transfer','Untraceable payments are a scammer\'s best friend. Cards and checks leave a trail.',3],
+   ['Final price demanded in cash at delivery','The classic hostage-load move: pay cash now or your things stay on the truck.',2]]],
+  ['Credentials',[
+   ['Company name doesn\'t match the USDOT record','Operating under a different name than the federal record is a major red flag.',3],
+   ['No USDOT number on website or paperwork','Interstate movers must display their USDOT number. Missing means unregistered or hiding.',3],
+   ['Can\'t provide proof of insurance','No insurance paperwork, no coverage when something breaks.',2]]],
+  ['Communication',[
+   ['No physical address listed','PO boxes and "call for address" mean there\'s nowhere to find them later.',2],
+   ['Phone answered with generic "movers"','Legitimate companies answer with their name. Generic greetings hide shell operations.',2],
+   ['Pressure to sign immediately','Rushing you past the paperwork keeps you from reading the terms — or checking reviews.',2],
+   ['Reviews mention held belongings','Past hostage-load complaints are the strongest predictor of your future.',3]]]
+];
+var checked={};
+var catSel=null;
+function renderSigs(){
+  var wrap=$('ma-sigs');wrap.innerHTML='';
+  SIGS.forEach(function(cat,ci){
+    var h=document.createElement('p');h.className='sig-cat';h.textContent=cat[0];
+    wrap.appendChild(h);
+    cat[1].forEach(function(s,si){
+      var key=ci+'-'+si;
+      var lab=document.createElement('label');lab.className='sig'+(checked[key]?' on':'');
+      lab.tabIndex=0;
+      lab.setAttribute('role','checkbox');
+      lab.setAttribute('aria-checked',checked[key]?'true':'false');
+      lab.setAttribute('aria-label',s[0]+'. '+s[1]);
+      lab.innerHTML='<input type="checkbox" tabindex="-1" aria-hidden="true"'+(checked[key]?' checked':'')+'>'
+        +'<span><span class="slbl">'+esc(s[0])+'</span><br><span class="swhy">'+esc(s[1])+'</span></span>';
+      var box=lab.querySelector('input');
+      function setState(on){
+        checked[key]=on;
+        renderSigs();score();
+        if(on)Sound.error();else Sound.click();
+      }
+      box.addEventListener('change',function(){setState(box.checked);});
+      lab.addEventListener('click',function(e){
+        if(e.target===box)return; /* input's own change event handles it */
+        e.preventDefault();
+        box.checked=!box.checked;
+        setState(box.checked);
+      });
+      lab.addEventListener('keydown',function(e){
+        if(e.key===' '||e.key==='Enter'){e.preventDefault();box.checked=!box.checked;setState(box.checked);}
+      });
+      wrap.appendChild(lab);
+    });
+  });
+}
+function catPoints(ci){
+  var got=0,max=0;
+  SIGS[ci][1].forEach(function(s,si){
+    max+=s[2];
+    if(checked[ci+'-'+si])got+=s[2];
+  });
+  return[got,max];
+}
+function score(){
+  var got=0,max=0;
+  SIGS.forEach(function(cat,ci){var p=catPoints(ci);got+=p[0];max+=p[1];});
+  var pct=max>0?Math.round(got/max*100):0;
+  var v,vCls;
+  if(pct<25){v='Low scam risk';vCls='low';}
+  else if(pct<50){v='Medium scam risk';vCls='med';}
+  else{v='High scam risk';vCls='high';}
+  $('ma-needle').style.left=pct+'%';
+  $('ma-meter').setAttribute('aria-label','Scam-risk meter: '+pct+' of 100 — '+v+'.');
+  var vd=$('ma-verdict');vd.className='verdict '+vCls;
+  vd.textContent=v+' ('+pct+'/100) — '+Object.keys(checked).filter(function(k){return checked[k];}).length+' signals flagged';
+  var cats=$('ma-cats');cats.innerHTML='';
+  var mx=Math.max.apply(null,SIGS.map(function(c,ci){return catPoints(ci)[0];}).concat([1]));
+  SIGS.forEach(function(cat,ci){
+    var p=catPoints(ci);
+    var b=document.createElement('button');b.type='button';
+    b.className='catbar'+(catSel===ci?' sel':'');
+    b.setAttribute('aria-label',cat[0]+': '+p[0]+' of '+p[1]+' risk points. Activate to review flagged signals.');
+    b.innerHTML='<span class="cname">'+esc(cat[0])+'</span><span class="cval">'+p[0]+'/'+p[1]+' pts</span>'
+      +'<span class="ctrack" aria-hidden="true"><div style="width:'+(p[0]/mx*100).toFixed(1)+'%"></div></span>';
+    (function(idx){b.addEventListener('click',function(){spotCat(idx);});})(ci);
+    cats.appendChild(b);
+  });
+  if(catSel!==null){
+    var flagged=[];
+    SIGS[catSel][1].forEach(function(s,si){
+      if(checked[catSel+'-'+si])flagged.push('<strong>'+esc(s[0])+'</strong> ('+s[2]+' pts)');
+    });
+    $('demo-detail').innerHTML='<strong>'+esc(SIGS[catSel][0])+':</strong> '+
+      (flagged.length?flagged.join('<br>'):'Nothing flagged in this category yet.');
+  }else{
+    $('demo-detail').innerHTML='';
+  }
+}
+function spotCat(ci){
+  if(catSel===ci){catSel=null;Sound.click();}
+  else{catSel=ci;Sound.select();}
+  score();
+}
+function rule110(){
+  var e=parseFloat($('ma-est').value),d=parseFloat($('ma-dem').value);
+  var out=$('ma-110');
+  if(isNaN(e)||isNaN(d)||e<=0){out.textContent='Enter an estimate and a demanded amount.';out.className='out';return;}
+  var limit=e*1.10;
+  if(d<=limit){out.textContent='Within the 110% rule: '+money(d)+' demanded vs. '+money(limit)+' maximum at delivery.';
+    out.className='out ok';}
+  else{out.textContent='Over the limit: '+money(d)+' demanded vs. '+money(limit)+' maximum — '+money(d-limit)+' too much to demand at delivery.';
+    out.className='out over';}
+}
+$('ma-est').addEventListener('input',rule110);
+$('ma-dem').addEventListener('input',rule110);
+$('ma-est').addEventListener('change',function(){Sound.click();});
+$('ma-dem').addEventListener('change',function(){Sound.click();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){catSel=null;score();}
+});
+renderSigs();score();rule110();
+
+/* ---------- sample data: flags a classic scam pattern, restores on off ---------- */
+var sampleOn=false,sampleSnap=null;
+var SCAM=['0-0','0-1','1-0','2-0'];
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){
+    sampleSnap={};
+    Object.keys(checked).forEach(function(k){sampleSnap[k]=checked[k];});
+    checked={};sampleOn=true;
+    SCAM.forEach(function(k){checked[k]=true;});
+  }else{
+    sampleOn=false;checked=sampleSnap||{};sampleSnap=null;
+  }
+  catSel=null;renderSigs();score();paintSample();Sound.select();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
+var Sound=(function(){
+  var SKEY='moving-company-quote-comparison-scam-checker.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
+  };
+})();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
