@@ -47,16 +47,26 @@ a{color:var(--accent)}
 .brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;letter-spacing:.2px}
 .brand svg{flex:0 0 auto}
 .topbar .spacer{flex:1}
-.icon-btn{width:44px;height:44px;min-width:44px;border:1px solid var(--border);
-  background:var(--surface2);border-radius:10px;cursor:pointer;
-  display:inline-flex;align-items:center;justify-content:center}
-.icon-btn:hover{border-color:var(--accent)}
-.icon-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
-.icon-btn svg{width:24px;height:24px}
-.pill-btn{height:44px;padding:0 20px;border-radius:999px;border:1px solid var(--border);
-  background:var(--surface2);cursor:pointer;font-weight:700;font-size:16px;
-  display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)}
-.pill-btn:hover{border-color:var(--accent)}
+/* Glenerds standard header cluster: More Apps pill + sample flask + theme + sound */
+.g-header-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.g-store-btn{display:inline-flex;align-items:center;background:var(--accent);color:var(--accent-ink);
+  border-radius:999px;padding:8px 15px;font-size:15px;font-weight:700;line-height:1.2;
+  text-decoration:none;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.12);
+  transition:background .18s ease,transform .18s ease,box-shadow .18s ease}
+.g-store-btn:hover{box-shadow:0 4px 12px rgba(0,0,0,.16)}
+.g-store-btn:active{transform:scale(.97)}
+a.g-store-btn{color:var(--accent-ink)}
+.round-btn{width:44px;height:44px;min-width:44px;min-height:44px;padding:0;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border);color:var(--text);
+  box-shadow:0 2px 8px rgba(0,0,0,.10);flex:none;font-size:17px}
+.round-btn svg{width:30px;height:30px;flex:none;fill:none;stroke:currentColor;
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.round-btn.theme-toggle,.round-btn.sound-toggle{font-size:1.65rem;line-height:1}
+.round-btn:hover{border-color:var(--accent)}
+.round-btn:active{transform:scale(.92);border-color:var(--accent)}
+.round-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.round-btn.sample-toggle[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
 
 /* ---- tabs ---- */
 .tabs{display:flex;gap:4px;padding:0 20px;background:var(--surface);
@@ -240,17 +250,15 @@ table.log tr:nth-child(even) td{background:var(--surface2)}
     <span>RigAudit</span>
   </div>
   <div class="spacer"></div>
-  <a class="pill-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" id="moreAppsBtn">More Apps</a>
-  <button class="icon-btn" id="sampleBtn" aria-pressed="false" title="Try sample data" aria-label="Toggle sample data">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.8 17a2.4 2.4 0 0 0 2.1 3.5h10.2a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 14h9"/></svg>
+  <div class="g-header-actions">
+  <a class="g-store-btn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" id="moreAppsBtn">More Apps</a>
+  <button class="round-btn sample-toggle" id="sampleBtn" aria-pressed="false" title="Try sample data" aria-label="Try sample data">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg>
   </button>
-  <button class="icon-btn" id="themeBtn" aria-pressed="false" title="Toggle dark mode" aria-label="Toggle dark mode">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-  </button>
-  <button class="icon-btn" id="soundBtn" aria-pressed="true" title="Toggle sound" aria-label="Toggle sound">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9.4 9.4 0 0 1 0 13"/></svg>
-  </button>
-  <button class="icon-btn" id="langBtn" aria-pressed="false" title="Switch language / Cambiar idioma" aria-label="Switch language: English / Español" style="font-weight:800;font-size:17px">ES</button>
+  <button class="round-btn theme-toggle" id="themeBtn" aria-pressed="false" title="Switch to dark mode" aria-label="Switch to dark mode">🌙</button>
+  <button class="round-btn sound-toggle" id="soundBtn" aria-pressed="true" title="Toggle sound" aria-label="Sound: on">🔊</button>
+  <button class="round-btn" id="langBtn" aria-pressed="false" title="Switch language / Cambiar idioma" aria-label="Switch language: English / Español" style="font-weight:800">ES</button>
+  </div>
 </header>
 
 <nav class="tabs" role="tablist" aria-label="Main sections">
@@ -480,16 +488,33 @@ function beep(freq, dur, type){
     o.start(); o.stop(audioCtx.currentTime + (dur||0.08));
   }catch(e){}
 }
+function paintSoundBtn(){
+  const b=$("#soundBtn");
+  b.innerHTML=soundOn?"🔊":"🔇";
+  b.setAttribute("aria-pressed",soundOn?"true":"false");
+  const es=store.get("lang","en")==="es";
+  const l=soundOn?(es?"Sonido: activado":"Sound: on"):(es?"Sonido: desactivado":"Sound: off");
+  b.setAttribute("aria-label",l);
+  b.title=es?"Activar/desactivar sonido":"Toggle sound";
+}
 const sndClick = () => beep(660, .07);
 const sndOk    = () => { beep(523,.09); setTimeout(()=>beep(784,.12),90); };
 const sndBad   = () => beep(220,.15,"triangle");
 
 /* ---------- theme ---------- */
+function paintThemeBtn(){
+  const dark=document.documentElement.getAttribute("data-theme")==="dark";
+  const b=$("#themeBtn");
+  b.innerHTML=dark?"☀️":"🌙";
+  b.setAttribute("aria-pressed",dark?"true":"false");
+  const es=store.get("lang","en")==="es";
+  const l=dark?(es?"Cambiar a modo claro":"Switch to light mode"):(es?"Cambiar a modo oscuro":"Switch to dark mode");
+  b.setAttribute("aria-label",l); b.title=l;
+}
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme", t);
-  const dark = t==="dark";
-  $("#themeBtn").setAttribute("aria-pressed", dark?"true":"false");
   store.set("theme", t);
+  paintThemeBtn();
 }
 function initTheme(){
   const saved = store.get("theme", null);
@@ -839,7 +864,7 @@ function renderDashboard(){
     const s=d[1], col=d[3]?TRACK_COLORS[d[3]]:scoreColor(s);
     const th=(180-1.8*(s==null?0:s))*Math.PI/180;
     const x=(110+90*Math.cos(th)).toFixed(1), y=(120-90*Math.sin(th)).toFixed(1);
-    const large=(s!=null&&s>50)?1:0;
+    const large=0; /* semicircular gauge: progress arc never exceeds 180deg, large-arc-flag must stay 0 (was wrongly 1 for s>50, drawing the arc the long way round) */
     return '<div class="card gauge-card gauge-click" data-go="'+d[4]+'" role="button" tabindex="0" aria-label="'+esc(d[0])+' gauge: '+(s==null?"not audited":s+" percent")+'">'+
       '<svg viewBox="-12 8 244 172" width="100%" style="max-width:230px" aria-hidden="true">'+
       '<path d="M 20 120 A 90 90 0 0 1 200 120" stroke="var(--border)" stroke-width="18" fill="none" stroke-linecap="round"/>'+
@@ -1386,7 +1411,7 @@ function initSettings(){
         if(d.auditRuns){auditRuns=d.auditRuns;saveRuns();}
         if(d.lang&&(d.lang==="es"||d.lang==="en")) setLang(d.lang);
         if(d.theme&&(d.theme==="dark"||d.theme==="light")) applyTheme(d.theme);
-        if(typeof d.sound==="boolean"){ soundOn=d.sound; store.set("sound",soundOn); $("#soundBtn").setAttribute("aria-pressed",soundOn?"true":"false"); }
+        if(typeof d.sound==="boolean"){ soundOn=d.sound; store.set("sound",soundOn); paintSoundBtn(); }
         saveAnswers();saveActions();saveHistory();saveLogs();saveChecks();saveProfile();saveDone();
         refreshProfileFields(); sndOk(); toast(D("Import complete","Importación completa")); goto("dashboard");
       }catch(err){ toast(D("Import failed: invalid file","Importación fallida: archivo inválido")); } };
@@ -1493,7 +1518,7 @@ $("#sampleBtn").setAttribute("aria-pressed",sampleOn?"true":"false");
 $("#themeBtn").addEventListener("click",()=>{ sndClick();
   applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"); });
 $("#soundBtn").addEventListener("click",function(){ soundOn=!soundOn; store.set("sound",soundOn);
-  this.setAttribute("aria-pressed",soundOn?"true":"false"); if(soundOn) sndClick(); toast(soundOn?D("Sound on","Sonido activado"):D("Sound off","Sonido desactivado")); });
+  paintSoundBtn(); if(soundOn) sndClick(); toast(soundOn?D("Sound on","Sonido activado"):D("Sound off","Sonido desactivado")); });
 document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeModal(); });
 
 /* ---- disclaimer ---- */
@@ -1502,7 +1527,7 @@ $("#dismissDisclaimer").addEventListener("click",()=>{ sndClick(); store.set("di
 
 /* ---- init ---- */
 initTheme();
-$("#soundBtn").setAttribute("aria-pressed",soundOn?"true":"false");
+paintSoundBtn();
 initSettings();
 renderDashboard();
 </script>
@@ -1763,10 +1788,11 @@ function applyLang(){
   const r=$("#renewalAlertsTitle"); if(r) r.textContent=T("renewals");
   const n=$("#nudgeTitle"); if(n) n.textContent=T("nudges");
   $$("[data-str]").forEach(el=>{ el.innerHTML=T(el.getAttribute("data-str")); });
-  const hb={sampleBtn:["Try sample data","Probar datos de ejemplo"],themeBtn:["Toggle dark mode","Cambiar modo oscuro"],
-    soundBtn:["Toggle sound","Activar/desactivar sonido"],langBtn:["Toggle Spanish language","Cambiar idioma a inglés"],moreAppsBtn:["More Apps","Más aplicaciones"]};
+  const hb={sampleBtn:["Try sample data","Probar datos de ejemplo"],
+    langBtn:["Toggle Spanish language","Cambiar idioma a inglés"],moreAppsBtn:["More Apps","Más aplicaciones"]};
   Object.keys(hb).forEach(id=>{ const el=document.getElementById(id); if(el){ const t=lang==="es"?hb[id][1]:hb[id][0];
     el.setAttribute("title",t); el.setAttribute("aria-label",t); } });
+  paintThemeBtn(); paintSoundBtn();
 }
 </script>
 <script>
