@@ -16,7 +16,7 @@ I want this!
 gallery/0-cover.png (also attach gallery/1-dashboard.png … 7-mobile.png as product images)
 
 ## Product file
-subaudit-bundle.zip
+subaudit-1.0.1.zip
 
 ## Tags
 subscription tracker, cancel subscriptions, personal finance, budget planner, money saving, recurring charges, subscription audit, finance tracker, monthly bills, expense tracker
