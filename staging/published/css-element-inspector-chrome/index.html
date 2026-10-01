@@ -3,232 +3,356 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CSS Element Inspector for Chrome — Copy CSS, Selectors &amp; Tailwind in One Click | Glenerds</title>
+<title>CSS Inspector — Element Inspector for Chrome | Glenerds</title>
 <meta name="description" content="Chrome extension for web designers and developers: hover any element to inspect it, click to lock, copy CSS, selectors, Tailwind classes, fonts. $9 one-time.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/products/css-element-inspector-chrome/">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Glenerds">
-<meta property="og:title" content="CSS Element Inspector for Chrome — Copy CSS, Selectors &amp; Tailwind in One Click | Glenerds">
-<meta property="og:description" content="Chrome extension for web designers and developers: hover any element to inspect it, click to lock, copy CSS, selectors, Tailwind classes, fonts. $9 one-time.">
-<meta property="og:url" content="https://glenerds.github.io/glenerds/products/css-element-inspector-chrome/">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/css-element-inspector-chrome/">
 <script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
 </script>
-<link rel="stylesheet" href="../../style.css"><script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": [
-    "Product",
-    "SoftwareApplication"
-  ],
-  "name": "CSSHover",
-  "description": "Chrome extension for web designers and developers: hover any element to inspect it, click to lock, copy CSS, selectors, Tailwind classes, fonts. $9 one-time.",
-  "url": "https://glenerds.github.io/glenerds/products/css-element-inspector-chrome/",
-  "brand": {
-    "@type": "Brand",
-    "name": "Glenerds"
-  },
-  "applicationCategory": "UtilitiesApplication",
-  "operatingSystem": "Any modern web browser",
-  "offers": {
-    "@type": "Offer",
-    "price": "9",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock",
-    "url": "https://glenerds.gumroad.com/l/css-element-inspector-chrome"
-  }
+<style>
+:root{
+  --bg:#f7f5fc; --card:#ffffff; --ink:#221d33; --muted:#615a78; --border:#e2dcf2;
+  --accent:#7c3aed; --accent-ink:#6d28d9; --accent-soft:#ece4fb;
+  --a:#dc2626; --b:#d97706; --c:#2563eb; --shadow:0 2px 10px rgba(90,60,160,.08);
 }
+html[data-theme="dark"]{
+  --bg:#14101d; --card:#1e1830; --ink:#ece8f7; --muted:#a79ec2; --border:#342b4f;
+  --accent:#a78bfa; --accent-ink:#c4b0fc; --accent-soft:#2b2145;
+  --a:#f87171; --b:#fbbf24; --c:#60a5fa; --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
+main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
+  padding:.9rem 1rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
+.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
+  background:linear-gradient(135deg,#8b5cf6,#5b21b6);display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--shadow)}
+.brand .badge svg{width:28px;height:28px}
+.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
+.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:8px}
+.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
+  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
+.more-apps:hover{filter:brightness(1.08)}
+.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
+  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
+  color:var(--ink);box-shadow:var(--shadow);padding:0}
+.icon-btn svg{width:24px;height:24px}
+.icon-btn:hover{border-color:var(--accent)}
+.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+.hero{padding:1.2rem 0 .4rem}
+.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
+.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
+.pricebox{display:inline-block;font-size:1.25rem;font-weight:800;background:var(--accent-soft);
+  border:1px solid var(--border);border-radius:12px;padding:.5rem 1rem;margin-right:.8rem}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
+.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
+.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600;margin:.6rem 0}
+.field input{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.field input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
+  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
+.spec-score{font-size:1.6rem;font-weight:800;letter-spacing:-.01em;margin:.8rem 0 .2rem;
+  font-variant-numeric:tabular-nums}
+.spec-score .sa{color:var(--a)} .spec-score .sb{color:var(--b)} .spec-score .sc{color:var(--c)}
+.dcs-bars{display:grid;gap:.5rem;margin:.8rem 0 .4rem}
+.dcs-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.15rem .8rem;align-items:center;
+  cursor:pointer;border-radius:10px;padding:.45rem .6rem;border:1px solid transparent;background:none;
+  font:inherit;color:inherit;text-align:left;width:100%}
+.dcs-row:hover{background:var(--accent-soft)}
+.dcs-row:focus-visible{outline:2px solid var(--accent)}
+.dcs-row.sel{border-color:var(--accent);background:var(--accent-soft)}
+.dcs-name{font-weight:600;font-size:15px}
+.dcs-val{font-variant-numeric:tabular-nums;font-size:15px;font-weight:800;white-space:nowrap}
+.dcs-track{grid-column:1/-1;height:14px;border-radius:999px;background:var(--border);overflow:hidden}
+.dcs-track>div{height:100%;border-radius:999px}
+.dcs-a{background:var(--a)} .dcs-b{background:var(--b)} .dcs-c{background:var(--c)}
+#detail{margin:.9rem 0 0;font-size:15px;color:var(--muted);min-height:1.4em}
+#detail strong{color:var(--ink)}
+#detail code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--accent-soft);
+  padding:.1rem .4rem;border-radius:6px;font-size:15px}
+table.spec{border-collapse:collapse;font-size:15px;margin:.6rem 0}
+table.spec td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
+table.spec td:last-child{font-variant-numeric:tabular-nums;font-weight:700}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:15px}
+.feat{font-size:16px;padding-left:1.3rem}
+.feat li{margin:.35rem 0}
+.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
+.prose p{font-size:16px}
+.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:.8rem 1rem;margin:.55rem 0}
+.prose summary{font-weight:700;font-size:16px;cursor:pointer}
+.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
+  background:var(--accent-soft);border:1px solid var(--border)}
+.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
+.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
+.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
+footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
+footer.site a{color:var(--accent-ink)}
+a{color:var(--accent-ink)}
+@media print{.actions,.cta-strip{display:none!important}}
+</style>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"CSSHover",
+"description":"Chrome extension for web designers and developers: hover any element to inspect it, click to lock, copy CSS, selectors, Tailwind classes, fonts. $9 one-time.",
+"url":"https://glenerds.github.io/glenerds/staging/published/css-element-inspector-chrome/",
+"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
+"operatingSystem":"Any modern web browser",
+"offers":{"@type":"Offer","price":"9","priceCurrency":"USD","availability":"https://schema.org/InStock",
+"url":"https://glenerds.gumroad.com/l/css-element-inspector-chrome"}}
 </script>
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "Which browser does it work in?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Chrome \u2014 it's built as a Chrome extension."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Does it send browsing data anywhere?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "No. Everything runs locally in your browser: no accounts, no tracking, no network requests."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What is click-to-lock?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Hover highlights elements live; clicking locks the current one so you can inspect elements that only appear on hover."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Is it a one-time purchase?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Yes. Pay once, use it in your workflow indefinitely."
-      }
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Which browser does it work in?","acceptedAnswer":{"@type":"Answer","text":"Chrome \u2014 it's built as a Chrome extension."}},
+{"@type":"Question","name":"Does it send browsing data anywhere?","acceptedAnswer":{"@type":"Answer","text":"No. Everything runs locally in your browser: no accounts, no tracking, no network requests."}},
+{"@type":"Question","name":"What is click-to-lock?","acceptedAnswer":{"@type":"Answer","text":"Hover highlights elements live; clicking locks the current one so you can inspect elements that only appear on hover."}},
+{"@type":"Question","name":"Is it a one-time purchase?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pay once, use it in your workflow indefinitely."}}
+]}
 </script>
-</head><body>
-<header class="site"><div class="wrap">
-<a class="brand" href="../../index.html">Glenerds</a>
-<nav class="main">
-<a href="../../index.html">Home</a>
-<a href="../../index.html#free-tools">Free Tools</a>
-<a href="../../index.html#products">Products</a>
-<a href="https://glenerds.gumroad.com">Store</a>
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark mode">◐ Dark</button>
-</nav></div></header>
-<div class="wrap"><p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; Products &rsaquo; CSSHover</p>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="../" aria-label="CSS Inspector — all apps">
+    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="7.2" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="1.6" fill="#fff"/><path d="M12 1.8v3M12 19.2v3M1.8 12h3M19.2 12h3" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <span><span class="bname">CSS Inspector</span><span class="bsub">Element inspector for Chrome</span></span>
+  </a>
+  <div class="actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
 <main>
-<div class="hero">
-<h1>CSS Element Inspector for Chrome — Copy CSS, Selectors &amp; Tailwind in One Click</h1>
-<p class="lead">See a design detail on any website and wonder how it&#x27;s built? Hover any element on any page to inspect it, click to lock it, and instantly grab its unique CSS selector, all 47 computed style properties, the same styles converted to Tailwind utility classes, and the detected font — ready to paste into your own project.</p>
-<span class="pricebox">$9 one-time</span>
-<a class="btn" href="https://glenerds.gumroad.com/l/css-element-inspector-chrome">Get it on Gumroad</a>
-<p class="small">One-time purchase. The tool runs offline in your browser — no account, no subscription.</p>
-</div>
-
-<div class="toolbox">
-<h3 style="margin-top:0">Try the free companion tool first</h3>
-<p><a href="../../tools/css-specificity-calculator/index.html"><strong>Free CSS Specificity Calculator</strong></a> &mdash; Paste any selector and see its specificity score counted and explained.</p>
-<p class="small">Free forever, runs offline in your browser. CSSHover is the full version for when you need more.</p>
-</div>
-<section class="block prose">
-<h2 class="sec">What it does</h2>
-<ul class="feat">
-<li>Hover-to-inspect on any element of any web page</li>
-<li>Click-to-lock so you can examine tricky hover states</li>
-<li>Unique CSS selector generation for the locked element</li>
-<li>All 47 computed style properties, copy-ready</li>
-<li>One-click conversion to Tailwind utility classes</li>
-<li>Font detection for the inspected element</li>
-</ul>
-<h2 class="sec">Who this is for</h2>
-<ul class="feat">
-<li>Web designers reverse-engineering a layout detail they admire</li>
-<li>Developers grabbing exact styles instead of eyeballing them</li>
-<li>Tailwind users converting traditional CSS on the fly</li>
-</ul>
-<h2 class="sec">Who this isn't for</h2>
-<ul class="feat">
-<li>You want a full IDE debugging suite</li>
-<li>You need team design-system governance</li>
-<li>You don&#x27;t work in Chrome</li>
-</ul>
-<p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits.
-If you need cloud sync, team seats, or integrations with other platforms, you'll be happier with a
-subscription product &mdash; and that's fine. This tool is deliberately not that.</p>
-<h2 class="sec">Frequently asked questions</h2>
-<dl class="faq">
-<dt>Which browser does it work in?</dt>
-<dd>Chrome — it&#x27;s built as a Chrome extension.</dd>
-<dt>Does it send browsing data anywhere?</dt>
-<dd>No. Everything runs locally in your browser: no accounts, no tracking, no network requests.</dd>
-<dt>What is click-to-lock?</dt>
-<dd>Hover highlights elements live; clicking locks the current one so you can inspect elements that only appear on hover.</dd>
-<dt>Is it a one-time purchase?</dt>
-<dd>Yes. Pay once, use it in your workflow indefinitely.</dd>
-</dl>
+<section class="hero">
+  <h1>CSS Element Inspector for Chrome &mdash; copy CSS, selectors &amp; Tailwind in one click</h1>
+  <p class="lead">See a design detail on any website and wonder how it&rsquo;s built? Hover any element on any page to inspect it, click to lock it, and instantly grab its unique CSS selector, all 47 computed style properties, the same styles converted to Tailwind utility classes, and the detected font &mdash; ready to paste into your own project.</p>
+  <p><span class="pricebox">$9 one-time</span>
+  <a class="btn" href="https://glenerds.gumroad.com/l/css-element-inspector-chrome">Get it on Gumroad</a></p>
+  <p style="font-size:15px;color:var(--muted)">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
 </section>
-<section class="block">
-<h2 class="sec">Try it: specificity in 10 seconds</h2>
-<div class="toolbox" role="region" aria-label="Specificity mini demo">
-<p class="small">CSSHover copies a unique selector for any element you lock. Paste a selector below to see
-how its specificity score breaks down &mdash; the same (a, b, c) math the extension exposes.</p>
-<label>CSS selector: <input type="text" id="dcs-in" value="#nav .menu li.active a" style="width:65%" aria-label="CSS selector"></label>
-<button id="dcs-go">Score it</button>
-<div id="dcs-out" style="margin-top:1rem"></div>
-<p class="small"><a href="../../tools/css-specificity-calculator/index.html">Open the full free CSS specificity calculator</a>
-for detailed breakdowns, bar charts, and <code>:not()</code> / <code>:is()</code> / <code>:where()</code> handling.</p>
-</div>
-</section>
-<style>
-/* specificity visual: (a,b,c) weight bars */
-.dcs-bars{display:grid;gap:8px;margin:10px 0 4px}
-.dcs-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center}
-.dcs-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dcs-val{font-variant-numeric:tabular-nums;font-size:.85rem;white-space:nowrap}
-.dcs-track{grid-column:1/-1;height:12px;border-radius:999px;background:var(--border);overflow:hidden}
-.dcs-track>div{height:100%}
-.dcs-a{background:#dc2626}.dcs-b{background:#f59e0b}.dcs-c{background:#2563eb}
-</style>
-<script>
-(function(){
-  function specOf(sel){
-    var a=0,b=0,c=0,s=String(sel);
-    var ids=s.match(/#[A-Za-z0-9_-]+/g);if(ids)a+=ids.length;
-    var cls=s.match(/\.[A-Za-z0-9_-]+/g);if(cls)b+=cls.length;
-    var attrs=s.match(/\[[^\]]+\]/g);if(attrs)b+=attrs.length;
-    var pseudoC=s.match(/:(?!:)[A-Za-z-]+(\([^)]*\))?/g);if(pseudoC)b+=pseudoC.length;
-    var pseudoE=s.match(/::[A-Za-z-]+/g);if(pseudoE)c+=pseudoE.length;
-    var els=s.replace(/#[A-Za-z0-9_-]+/g,' ').replace(/\.[A-Za-z0-9_-]+/g,' ')
-      .replace(/\[[^\]]+\]/g,' ').replace(/::?[A-Za-z-]+(\([^)]*\))?/g,' ')
-      .replace(/[\s>+~]+/g,' ').trim().split(' ').filter(function(x){return x&&x!=='*';});
-    c+=els.length;
-    return [a,b,c];
-  }
-  function calc(){
-    var sel=document.getElementById('dcs-in').value.trim();
-    var out=document.getElementById('dcs-out');
-    if(!sel){out.innerHTML='<p class="small">Enter a selector above.</p>';return;}
-    var sp=specOf(sel);
-    out.innerHTML='<p style="font-size:1.3rem"><strong>Specificity: '+sp[0]+','+sp[1]+','+sp[2]+'</strong></p>'
-      +'<table><tbody>'
-      +'<tr><td>ID selectors <code>#id</code></td><td>'+sp[0]+'</td></tr>'
-      +'<tr><td>Classes, attributes, pseudo-classes</td><td>'+sp[1]+'</td></tr>'
-      +'<tr><td>Elements, pseudo-elements</td><td>'+sp[2]+'</td></tr>'
-      +'</tbody></table>'
-      /* visual representation: (a,b,c) weight bars */
-      +'<div class="dcs-bars" role="img" aria-label="Specificity weights: '+sp[0]+' IDs, '+sp[1]+' classes, '+sp[2]+' elements">'
-      +[['IDs (a)','dcs-a',sp[0]],['Classes / attributes / pseudo-classes (b)','dcs-b',sp[1]],['Elements / pseudo-elements (c)','dcs-c',sp[2]]].map(function(r){
-          var mx=Math.max(sp[0],sp[1],sp[2],1);
-          return '<div class="dcs-row"><div class="dcs-name">'+r[0]+'</div><div class="dcs-val">'+r[2]+'</div>'
-            +'<div class="dcs-track"><div class="'+r[1]+'" style="width:'+(r[2]/mx*100).toFixed(1)+'%"></div></div></div>';
-        }).join('')
-      +'</div>'
-      +'<p class="small">Higher columns win: any ID beats any number of classes; any class beats any number of elements.</p>';
-  }
-  document.getElementById('dcs-go').onclick=calc;
-  document.getElementById('dcs-in').addEventListener('input',calc);
-  calc();
-})();
-</script>
 
-<div class="cta-band">
-<h2>Get CSSHover today</h2>
-<p>$9 one-time — one-time purchase, yours forever. No subscription.</p>
-<a class="btn" href="https://glenerds.gumroad.com/l/css-element-inspector-chrome">Get it on Gumroad</a>
-<p class="small">Prefer to browse everything? <a href="https://glenerds.gumroad.com">More offline micro-tools from Glenerds</a></p>
+<section class="card" aria-label="Specificity demo">
+  <h2>Try it: specificity in 10 seconds</h2>
+  <p style="font-size:15px;color:var(--muted);margin-top:0">CSS Inspector copies a unique selector for any element you lock. Paste a selector below to see how its specificity score breaks down &mdash; the same (a, b, c) math the extension exposes. Click any bar to see exactly which parts of your selector contributed.</p>
+  <label class="field">CSS selector<input type="text" id="dcs-in" value="#nav .menu li.active a" autocomplete="off" spellcheck="false" aria-label="CSS selector"></label>
+  <p><button class="btn" id="dcs-go">Score it</button></p>
+  <div id="dcs-out" aria-live="polite"></div>
+  <p id="detail" aria-live="polite"></p>
+</section>
+
+<section class="prose">
+  <h2>What it does</h2>
+  <ul class="feat">
+    <li>Hover-to-inspect on any element of any web page</li>
+    <li>Click-to-lock so you can examine tricky hover states</li>
+    <li>Unique CSS selector generation for the locked element</li>
+    <li>All 47 computed style properties, copy-ready</li>
+    <li>One-click conversion to Tailwind utility classes</li>
+    <li>Font detection for the inspected element</li>
+  </ul>
+  <h2>Who this is for</h2>
+  <ul class="feat">
+    <li>Web designers reverse-engineering a layout detail they admire</li>
+    <li>Developers grabbing exact styles instead of eyeballing them</li>
+    <li>Tailwind users converting traditional CSS on the fly</li>
+  </ul>
+  <h2>Who this isn&rsquo;t for</h2>
+  <ul class="feat">
+    <li>You want a full IDE debugging suite</li>
+    <li>You need team design-system governance</li>
+    <li>You don&rsquo;t work in Chrome</li>
+  </ul>
+  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
+  <h2>Frequently asked questions</h2>
+  <details><summary>Which browser does it work in?</summary><p>Chrome &mdash; it&rsquo;s built as a Chrome extension.</p></details>
+  <details><summary>Does it send browsing data anywhere?</summary><p>No. Everything runs locally in your browser: no accounts, no tracking, no network requests.</p></details>
+  <details><summary>What is click-to-lock?</summary><p>Hover highlights elements live; clicking locks the current one so you can inspect elements that only appear on hover.</p></details>
+  <details><summary>Is it a one-time purchase?</summary><p>Yes. Pay once, use it in your workflow indefinitely.</p></details>
+</section>
+
+<div class="cta-strip">
+  <h2>Get CSS Inspector today</h2>
+  <p>$9 one-time &mdash; yours forever. No subscription. Hover any element, click to lock, copy the CSS.</p>
+  <div class="row">
+    <a class="btn" href="https://glenerds.gumroad.com/l/css-element-inspector-chrome">Get it on Gumroad</a>
+    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </div>
 </div>
 </main>
-</div>
-<footer class="site"><div class="wrap">
-<p><strong>Glenerds</strong> makes single-purpose offline micro-tools: habit trackers, savings planners,
-inspection checklists, and calculators that run in your browser with no account and no subscription.</p>
-<p>More offline micro-tools from Glenerds: <a href="https://glenerds.gumroad.com">https://glenerds.gumroad.com</a></p>
-<p class="small"><a href="../../site-map/index.html">Site map</a> &mdash; every free tool, paid product, and guide on this site.</p>
-<p class="small">&copy; 2026 Glenerds. All tools on this site run locally in your browser; nothing you enter is sent anywhere.</p>
-</div></footer>
+<footer class="site">
+  <p><strong>CSS Inspector</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere. <a href="../">All apps</a></p>
+  <p>&copy; 2026 Glenerds.</p>
+</footer>
 <script>
 (function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.textContent=(t==='dark'?'\u2600 Light':'\u25D0 Dark');btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();});}
-  paint();
+"use strict";
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function detail(html){$('detail').innerHTML=html||'';}
+
+/* specificity with token lists (preserves original counting behavior) */
+function specOf(sel){
+  var s=String(sel),a=[],b=[],c=[];
+  var m;
+  var re={
+    id:/#[A-Za-z0-9_-]+/g, cls:/\.[A-Za-z0-9_-]+/g, attr:/\[[^\]]+\]/g,
+    pc:/:(?!:)[A-Za-z-]+(\([^)]*\))?/g, pe:/::[A-Za-z-]+/g
+  },k;
+  for(k in re){re[k].lastIndex=0;}
+  while((m=re.id.exec(s)))a.push(m[0]);
+  while((m=re.cls.exec(s)))b.push(m[0]);
+  while((m=re.attr.exec(s)))b.push(m[0]);
+  while((m=re.pc.exec(s)))b.push(m[0]);
+  while((m=re.pe.exec(s)))c.push(m[0]);
+  var els=s.replace(/#[A-Za-z0-9_-]+/g,' ').replace(/\.[A-Za-z0-9_-]+/g,' ')
+    .replace(/\[[^\]]+\]/g,' ').replace(/::?[A-Za-z-]+(\([^)]*\))?/g,' ')
+    .replace(/[\s>+~]+/g,' ').trim().split(' ')
+    .filter(function(x){return x&&x!=='*';});
+  els.forEach(function(e){c.push(e);});
+  return{a:a,b:b,c:c};
+}
+var lastSpec=null,lastSel='',selCat=null;
+function calc(){
+  var sel=$('dcs-in').value.trim(),out=$('dcs-out');
+  selCat=null;
+  document.querySelectorAll('.dcs-row.sel').forEach(function(r){r.classList.remove('sel');});
+  if(!sel){out.innerHTML='<p style="font-size:15px;color:var(--muted)">Enter a selector above.</p>';detail('');lastSpec=null;return;}
+  var sp=specOf(sel);lastSpec=sp;lastSel=sel;
+  var mx=Math.max(sp.a.length,sp.b.length,sp.c.length,1);
+  var rows=[
+    ['IDs <code>(a)</code>','dcs-a',sp.a.length,'a'],
+    ['Classes, attributes, pseudo-classes <code>(b)</code>','dcs-b',sp.b.length,'b'],
+    ['Elements, pseudo-elements <code>(c)</code>','dcs-c',sp.c.length,'c']
+  ];
+  var html='<p class="spec-score">Specificity: <span class="sa">'+sp.a.length+'</span>, <span class="sb">'+sp.b.length+'</span>, <span class="sc">'+sp.c.length+'</span></p>'
+    +'<table class="spec"><tbody>'
+    +'<tr><td>ID selectors <code>#id</code></td><td>'+sp.a.length+'</td></tr>'
+    +'<tr><td>Classes, attributes, pseudo-classes</td><td>'+sp.b.length+'</td></tr>'
+    +'<tr><td>Elements, pseudo-elements</td><td>'+sp.c.length+'</td></tr>'
+    +'</tbody></table>'
+    +'<div class="dcs-bars" role="img" aria-label="Specificity weights: '+sp.a.length+' IDs, '+sp.b.length+' classes, '+sp.c.length+' elements">';
+  rows.forEach(function(r){
+    html+='<button type="button" class="dcs-row" data-cat="'+r[3]+'" aria-label="'+r[0].replace(/<[^>]+>/g,'')+': '+r[2]+'. Activate to see which parts contributed.">'
+      +'<span class="dcs-name">'+r[0]+'</span><span class="dcs-val">'+r[2]+'</span>'
+      +'<span class="dcs-track"><div class="'+r[1]+'" style="width:'+(r[2]/mx*100).toFixed(1)+'%"></div></span></button>';
+  });
+  html+='</div><p style="font-size:15px;color:var(--muted)">Higher columns win: any ID beats any number of classes; any class beats any number of elements.</p>';
+  out.innerHTML=html;
+  out.querySelectorAll('.dcs-row').forEach(function(row){
+    row.addEventListener('click',function(){spotCat(row.getAttribute('data-cat'));});
+  });
+  detail('');
+}
+function spotCat(cat){
+  if(!lastSpec)return;
+  document.querySelectorAll('.dcs-row').forEach(function(r){r.classList.toggle('sel',r.getAttribute('data-cat')===cat&&selCat!==cat);});
+  if(selCat===cat){selCat=null;detail('');Sound.click();return;}
+  selCat=cat;
+  var toks=lastSpec[cat],names={a:'ID selectors',b:'classes, attributes &amp; pseudo-classes',c:'elements &amp; pseudo-elements'};
+  if(!toks.length){
+    detail('<strong>'+names[cat]+':</strong> none in <code>'+esc(lastSel)+'</code> &mdash; this column contributes 0.');
+  }else{
+    detail('<strong>'+names[cat]+' ('+toks.length+'):</strong> '+toks.map(function(t){return '<code>'+esc(t)+'</code>';}).join(' '));
+  }
+  Sound.select();
+}
+$('dcs-go').addEventListener('click',function(){calc();Sound.success();});
+$('dcs-in').addEventListener('input',function(){calc();});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){selCat=null;
+    document.querySelectorAll('.dcs-row.sel').forEach(function(r){r.classList.remove('sel');});
+    detail('');}
+});
+calc();
+
+/* ---------- sample data: fills the demo with interesting selectors ---------- */
+var SAMPLES=['#nav .menu li.active a','ul#products li.card:nth-child(2) > .price','body.home main article.post h2::before','[data-theme="dark"] .card .btn:hover'];
+var sIdx=0,sampleOn=false,prevVal=null;
+var sbtn=$('sample-toggle');
+function paintSample(){
+  var lbl=sampleOn?'Clear sample data':'Try sample data';
+  sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
+  sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
+}
+sbtn.addEventListener('click',function(){
+  if(!sampleOn){prevVal=$('dcs-in').value;sampleOn=true;}
+  else{sampleOn=false;if(prevVal!==null)$('dcs-in').value=prevVal;prevVal=null;paintSample();calc();Sound.click();return;}
+  $('dcs-in').value=SAMPLES[sIdx%SAMPLES.length];sIdx++;
+  paintSample();calc();Sound.click();
+});
+paintSample();
+
+/* ---------- theme ---------- */
+var tbtn=$('theme-toggle');
+var sunSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/></svg>';
+var moonSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
+function curTheme(){try{var s=localStorage.getItem('glenerds-theme');if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
+function paintTheme(){
+  var t=curTheme();document.documentElement.setAttribute('data-theme',t);
+  var toDark=t!=='dark';
+  tbtn.innerHTML=toDark?moonSvg:sunSvg;
+  tbtn.setAttribute('aria-pressed',t==='dark'?'true':'false');
+  var lbl=toDark?'Switch to dark mode':'Switch to light mode';
+  tbtn.setAttribute('aria-label',lbl);tbtn.title=lbl;
+}
+tbtn.addEventListener('click',function(){
+  var n=curTheme()==='dark'?'light':'dark';
+  try{localStorage.setItem('glenerds-theme',n);}catch(e){}
+  paintTheme();Sound.toggleTheme();
+});
+paintTheme();
+
+/* ---------- sounds ---------- */
+var Sound=(function(){
+  var SKEY='css-element-inspector-chrome.sound',on=true,ctx=null;
+  try{if(window.localStorage.getItem(SKEY)==='off')on=false;}catch(e){}
+  function ac(){try{
+    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
+    return ctx;}catch(e){return null;}}
+  function tone(freq,dur,type,vol,delay){
+    if(!on)return;var c=ac();if(!c)return;
+    function play(){try{
+      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
+      o.type=type||'sine';o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
+    if(c.state==='suspended'){try{c.resume().then(play,play);}catch(e){play();}}else{play();}
+  }
+  return{
+    isOn:function(){return on;},
+    toggle:function(){on=!on;try{window.localStorage.setItem(SKEY,on?'on':'off');}catch(e){}return on;},
+    click:function(){tone(520,0.06,'sine',0.045);},
+    select:function(){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);},
+    success:function(){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);},
+    error:function(){tone(170,0.16,'sawtooth',0.045);},
+    toggleTheme:function(){tone(440,0.06,'triangle',0.05);}
+  };
+})();
+var sndBtn=$('sound-toggle');
+var spkOn='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
+var spkOff='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+function paintSound(){
+  var on=Sound.isOn();
+  sndBtn.innerHTML=on?spkOn:spkOff;
+  sndBtn.setAttribute('aria-pressed',on?'true':'false');
+  sndBtn.setAttribute('aria-label','Sound: '+(on?'on':'off'));
+  sndBtn.title='Toggle sounds ('+(on?'on':'off')+')';
+}
+sndBtn.addEventListener('click',function(){Sound.toggle();paintSound();Sound.click();});
+paintSound();
 })();
 </script>
 </body>
