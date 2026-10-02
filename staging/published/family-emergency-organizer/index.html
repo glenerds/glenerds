@@ -58,7 +58,9 @@
   .donut-box svg{width:100%;max-width:420px;height:auto;display:block}
   .donut-under{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
   .seg{cursor:pointer;transition:transform .15s ease}
-  .seg:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .seg,.seg:focus,.seg:focus-visible{outline:none}
+  .seg .segring{opacity:0;pointer-events:none}
+  .seg:focus-visible .segring{opacity:1}
   .detail{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;min-height:96px}
   .detail h3{margin:0 0 6px;font-size:19px;color:var(--accent)}
   .detail p{margin:3px 0;font-size:16px}
@@ -533,6 +535,12 @@ function renderDonut(){
     hit.setAttribute("stroke-width", String(sw)); hit.setAttribute("pointer-events","stroke");
     hit.setAttribute("class","seghit");
     g.appendChild(hit);
+    // focus ring: follows the slice arc (CSS outline on SVG groups paints a misplaced box in Chrome)
+    var ring2=document.createElementNS(NS,"path");
+    ring2.setAttribute("d", arcPath(cx,cy,rMid,a0,a1));
+    ring2.setAttribute("fill","none"); ring2.setAttribute("stroke","var(--accent2)");
+    ring2.setAttribute("stroke-width","3"); ring2.setAttribute("class","segring");
+    g.appendChild(ring2);
     if(frac>0){
       var fill=document.createElementNS(NS,"path");
       fill.setAttribute("d", arcPath(cx,cy,rMid,a0, a0+(a1-a0)*frac));
