@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Family Emergency Organizer — Every Document in One Place</title>
+<style>
+  :root{
+    --bg:#f2f7f5; --panel:#ffffff; --panel2:#e9f3ef; --ink:#173a33; --muted:#41655b;
+    --line:#c4dbd3; --accent:#0f4a5c; --accent2:#2e7d8c; --mint:#a8d8c8; --mint-soft:#dcefe8;
+    --danger:#b03a2e; --warn-bg:#fdf3e3; --warn-line:#e3c98f; --warn-ink:#6b5410;
+    --shadow:0 2px 10px rgba(15,74,92,.10);
+  }
+  [data-theme="dark"]{
+    --bg:#0d1f22; --panel:#143034; --panel2:#18393d; --ink:#e6f2ee; --muted:#a9c8bf;
+    --line:#2a4c50; --accent:#7fc7d9; --accent2:#a8d8c8; --mint:#a8d8c8; --mint-soft:#1d4444;
+    --danger:#ff9a8a; --warn-bg:#3a2f14; --warn-line:#7a6526; --warn-ink:#f0d48a;
+    --shadow:0 2px 10px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-size:16px;line-height:1.45}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+
+  /* Header */
+  header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 2px 16px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brand h1{font-size:26px;margin:0;color:var(--accent);letter-spacing:.2px}
+  .brand .tag{color:var(--muted);font-size:15px;margin:2px 0 0}
+  .logo-badge{width:46px;height:46px;flex:0 0 auto}
+  .hbtns{display:flex;gap:10px;align-items:center;margin-left:auto;flex-wrap:wrap}
+  .hbtn{height:44px;min-width:44px;border:1.5px solid var(--line);background:var(--panel);border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;box-shadow:var(--shadow)}
+  .hbtn:hover{border-color:var(--accent2)}
+  .hbtn:focus-visible,.pill:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .hbtn[aria-pressed="true"]{background:var(--mint-soft);border-color:var(--accent2)}
+  .pill{height:44px;border-radius:999px;padding:0 18px;text-decoration:none;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;border:1.5px solid var(--line);background:var(--panel);box-shadow:var(--shadow)}
+  .pill:hover{border-color:var(--accent2)}
+  .hbtn svg{width:22px;height:22px;display:block}
+
+  /* Disclaimer */
+  .legal{background:var(--warn-bg);border:1.5px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:12px 16px;margin:4px 0 18px;font-size:15px}
+  .legal strong{font-weight:700}
+  #storageWarn{display:none;background:var(--warn-bg);border:1.5px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:12px 16px;margin:4px 0 18px;font-size:15px}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 4px;font-size:21px;color:var(--accent)}
+  .card .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+  .span2{grid-column:1/-1}
+
+  /* Dashboard */
+  .dash{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:900px){.dash{grid-template-columns:minmax(320px,460px) 1fr}}
+  .donut-box{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .donut-box svg{width:100%;max-width:420px;height:auto;display:block}
+  .donut-under{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
+  .seg{cursor:pointer;transition:transform .15s ease}
+  .seg:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .detail{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;min-height:96px}
+  .detail h3{margin:0 0 6px;font-size:19px;color:var(--accent)}
+  .detail p{margin:3px 0;font-size:16px}
+  .bars{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+  .bar-row{display:grid;grid-template-columns:200px 1fr 64px;gap:10px;align-items:center;font-size:16px}
+  .bar-name{font-weight:600}
+  .bar-track{background:var(--mint-soft);border:1.5px solid var(--line);border-radius:999px;height:22px;overflow:hidden}
+  .bar-fill{background:var(--accent2);height:100%;border-radius:999px;transition:width .3s ease}
+  .bar-pct{text-align:right;font-weight:700;color:var(--accent)}
+  @media(max-width:560px){.bar-row{grid-template-columns:120px 1fr 56px}}
+
+  /* Guided checklist */
+  .guide{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .guide li{display:flex;gap:10px;align-items:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:15px}
+  .guide .mark{font-weight:800;flex:0 0 auto;width:22px;text-align:center}
+  .guide .done{color:var(--accent2)}
+  .guide .todo{color:var(--muted)}
+
+  /* Forms */
+  form.entry{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0;background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px}
+  @media(min-width:700px){form.entry{grid-template-columns:1fr 1fr} form.entry .full{grid-column:1/-1}}
+  label{display:flex;flex-direction:column;gap:4px;font-size:15px;font-weight:600}
+  label span{color:var(--muted);font-weight:400}
+  input,select,textarea{border:1.5px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 11px;font-size:16px;width:100%}
+  textarea{min-height:110px;resize:vertical}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .btn{border:1.5px solid var(--accent2);background:var(--accent);color:#fff;border-radius:10px;padding:9px 18px;cursor:pointer;font-weight:600;min-height:44px}
+  [data-theme="dark"] .btn{color:#0d1f22}
+  .btn.ghost{background:var(--panel);color:var(--accent)}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .warn-inline{font-size:15px;color:var(--warn-ink);background:var(--warn-bg);border:1px solid var(--warn-line);border-radius:9px;padding:8px 12px}
+
+  /* Entries */
+  .entries{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .entry-item{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+  .entry-item .cat{font-size:15px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.4px}
+  .entry-item .main{font-size:17px;font-weight:600;margin:2px 0}
+  .entry-item .meta{color:var(--muted);font-size:15px;white-space:pre-wrap;word-break:break-word}
+  .entry-item .ops{display:flex;gap:8px;margin-top:8px}
+  .opbtn{border:1.5px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px 14px;cursor:pointer;min-height:38px;font-weight:600}
+  .opbtn:hover{border-color:var(--accent2)}
+  .opbtn.del{color:var(--danger)}
+  .empty{color:var(--muted);font-size:15px;border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;margin-top:12px}
+
+  /* First steps */
+  .steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .steps li{display:flex;gap:12px;align-items:flex-start;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+  .steps input[type="checkbox"]{width:24px;height:24px;flex:0 0 auto;margin-top:2px;accent-color:var(--accent2)}
+  .steps .checked{text-decoration:line-through;color:var(--muted)}
+
+  footer.foot{margin-top:26px;color:var(--muted);font-size:15px;text-align:center}
+  footer.foot .pill{margin-top:10px}
+
+  /* Binder (print only) */
+  #binder{display:none}
+  @media print{
+    body{background:#fff;color:#000}
+    .wrap>header.top,.wrap>.legal,.wrap>.grid,footer.foot{display:none !important}
+    #binder{display:block;font-family:Georgia,"Times New Roman",serif;color:#000}
+    #binder h1{font-size:24pt;margin:0 0 4pt}
+    #binder .b-sub{font-size:11pt;margin:0 0 16pt;color:#222}
+    #binder h2{font-size:15pt;border-bottom:2px solid #000;padding-bottom:3pt;margin:18pt 0 8pt;page-break-after:avoid}
+    #binder h3{font-size:12pt;margin:10pt 0 4pt;page-break-after:avoid}
+    #binder p,#binder li{font-size:11pt}
+    #binder .b-item{margin:0 0 8pt;page-break-inside:avoid}
+    #binder .b-cat{font-weight:bold;text-transform:uppercase;font-size:11pt;letter-spacing:.5pt}
+    #binder .b-main{font-weight:bold}
+    #binder .b-meta{white-space:pre-wrap}
+    #binder .b-note{border:1.5px solid #000;padding:8pt 10pt;margin:12pt 0;font-size:11pt;page-break-inside:avoid}
+    #binder ul{margin:4pt 0 8pt 16pt;padding:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <svg class="logo-badge" viewBox="0 0 100 100" role="img" aria-label="Family Emergency Organizer logo">
+        <path d="M50 6 L94 40 V94 H66 V66 H34 V94 H6 V40 Z" fill="none" stroke="#0f4a5c" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M50 76 C39 66 32 59 32 50 C32 43 37 39 42 39 C46 39 49 42 50 45 C51 42 54 39 58 39 C63 39 68 43 68 50 C68 59 61 66 50 76 Z" fill="#2e7d8c"/>
+      </svg>
+      <div>
+        <h1>Family Emergency Organizer</h1>
+        <p class="tag">Every document in one place — locations only, kept on this device.</p>
+      </div>
+    </div>
+    <div class="hbtns">
+      <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button class="hbtn" id="btnSample" type="button" aria-pressed="false" title="Try sample data" aria-label="Try sample data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6"/><path d="M10 3v5.2L4.8 17a2.4 2.4 0 0 0 2.1 3.6h10.2a2.4 2.4 0 0 0 2.1-3.6L14 8.2V3"/><path d="M7.5 14h9"/></svg>
+      </button>
+      <button class="hbtn" id="btnTheme" type="button" aria-pressed="false" title="Dark mode" aria-label="Toggle dark mode">
+        <svg id="icoMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg>
+        <svg id="icoSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <button class="hbtn" id="btnSound" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound">
+        <svg id="icoSndOn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.4 5.6a9 9 0 0 1 0 12.8"/></svg>
+        <svg id="icoSndOff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M16 9l6 6M22 9l-6 6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="legal" role="note">
+    <strong>Please read:</strong> This organizer is not legal advice and is not a substitute for an attorney or an estate plan.
+    It records <strong>where things are kept</strong> — never passwords, PINs, or account numbers. For wills, trusts, powers of
+    attorney, and similar documents, talk to a licensed attorney or estate planner. Everything you enter stays in this
+    browser on this device; nothing is uploaded anywhere.
+  </div>
+
+  <div id="storageWarn" role="alert"><strong>Saving is not working in this browser.</strong> Storage may be full or blocked, so entries you add now might not be here when you come back. Print a binder copy of anything important.</div>
+
+  <main class="grid">
+
+    <!-- Dashboard -->
+    <section class="card span2" aria-labelledby="h-dash">
+      <h2 id="h-dash">Dashboard — how much is covered</h2>
+      <p class="sub">Each slice is one section of the guided checklist below. Click a slice to pull it out and see its numbers; click it again to put it back.</p>
+      <div class="dash">
+        <div class="donut-box">
+          <svg id="donut" viewBox="0 0 420 420" role="group" aria-label="Coverage by section"></svg>
+          <div class="donut-under" id="donutUnder">Overall coverage: 0%</div>
+        </div>
+        <div>
+          <div class="detail" id="segDetail" aria-live="polite">
+            <h3>Nothing selected</h3>
+            <p>Click any slice of the chart to see that section&rsquo;s covered and missing checklist items.</p>
+          </div>
+          <div class="bars" id="bars"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key People -->
+    <section class="card" aria-labelledby="h-people">
+      <h2 id="h-people">1. Key People</h2>
+      <p class="sub">The people your family will need to reach first.</p>
+      <form class="entry" id="form-people">
+        <label>Role
+          <select name="cat" required></select>
+        </label>
+        <label>Name
+          <input name="main" required maxlength="120" autocomplete="off">
+        </label>
+        <label>Relationship <span>(optional)</span>
+          <input name="f1" maxlength="80" autocomplete="off">
+        </label>
+        <label>Phone <span>(optional)</span>
+          <input name="f2" maxlength="40" autocomplete="off">
+        </label>
+        <label class="full">Notes <span>(optional)</span>
+          <input name="f3" maxlength="240" autocomplete="off">
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add person</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-people"></ul>
+      <ul class="guide" id="guide-people"></ul>
+    </section>
+
+    <!-- Document Locations -->
+    <section class="card" aria-labelledby="h-docs">
+      <h2 id="h-docs">2. Document Locations</h2>
+      <p class="sub">Where the originals live. Locations only — never the documents&rsquo; secrets.</p>
+      <form class="entry" id="form-docs">
+        <label>Document
+          <select name="cat" required></select>
+        </label>
+        <label>Kept at <span>(room, safe, bank, folder…)</span>
+          <input name="main" required maxlength="160" autocomplete="off">
+        </label>
+        <label class="full">Details <span>(original or copy, who knows it&rsquo;s there)</span>
+          <input name="f1" maxlength="240" autocomplete="off">
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add document</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-docs"></ul>
+      <ul class="guide" id="guide-docs"></ul>
+    </section>
+
+    <!-- Accounts & Policies -->
+    <section class="card" aria-labelledby="h-accounts">
+      <h2 id="h-accounts">3. Accounts &amp; Policies</h2>
+      <p class="sub">Institution names only, so your family knows what exists and where to ask.</p>
+      <form class="entry" id="form-accounts">
+        <label>Account / policy type
+          <select name="cat" required></select>
+        </label>
+        <label>Institution or provider <span>(name only)</span>
+          <input name="main" required maxlength="140" autocomplete="off">
+        </label>
+        <label class="full">Details <span>(branch, agent, where paperwork is kept)</span>
+          <input name="f1" maxlength="240" autocomplete="off">
+        </label>
+        <p class="warn-inline full">Names only: never type an account number, PIN, or password here — or anywhere in this app.</p>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add account / policy</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-accounts"></ul>
+      <ul class="guide" id="guide-accounts"></ul>
+    </section>
+
+    <!-- Property, Vehicles & Pets -->
+    <section class="card" aria-labelledby="h-property">
+      <h2 id="h-property">4. Property, Vehicles &amp; Pets</h2>
+      <p class="sub">What you own, what needs care, and who can get in.</p>
+      <form class="entry" id="form-property">
+        <label>Type
+          <select name="cat" required></select>
+        </label>
+        <label>Name / description
+          <input name="main" required maxlength="140" autocomplete="off">
+        </label>
+        <label class="full">Details <span>(where the title, keys, or paperwork live)</span>
+          <input name="f1" maxlength="240" autocomplete="off">
+        </label>
+        <label class="full">Care / access notes <span>(vet, feeding, who takes them, who holds a spare key — names only, never codes)</span>
+          <input name="f2" maxlength="240" autocomplete="off">
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add item</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-property"></ul>
+      <ul class="guide" id="guide-property"></ul>
+    </section>
+
+    <!-- Medical Contacts -->
+    <section class="card" aria-labelledby="h-medical">
+      <h2 id="h-medical">5. Medical Contacts</h2>
+      <p class="sub">Who to call and where the cards and lists are kept. Contact and location organizer only.</p>
+      <form class="entry" id="form-medical">
+        <label>Contact / record
+          <select name="cat" required></select>
+        </label>
+        <label>Name <span>(person, clinic, pharmacy, or where it&rsquo;s kept)</span>
+          <input name="main" required maxlength="140" autocomplete="off">
+        </label>
+        <label class="full">Details <span>(phone, address, or location in the home)</span>
+          <input name="f1" maxlength="240" autocomplete="off">
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add contact</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-medical"></ul>
+      <ul class="guide" id="guide-medical"></ul>
+    </section>
+
+    <!-- Final Wishes -->
+    <section class="card" aria-labelledby="h-wishes">
+      <h2 id="h-wishes">6. Final Wishes</h2>
+      <p class="sub">Your preferences, written in your own words, so family isn&rsquo;t guessing.</p>
+      <form class="entry" id="form-wishes">
+        <label>Topic
+          <select name="cat" required></select>
+        </label>
+        <label>Your wishes / provider <span>(in your own words)</span>
+          <input name="main" required maxlength="200" autocomplete="off">
+        </label>
+        <label class="full">Details <span>(optional)</span>
+          <input name="f1" maxlength="300" autocomplete="off">
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add wish</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-wishes"></ul>
+      <ul class="guide" id="guide-wishes"></ul>
+    </section>
+
+    <!-- Letters to Family -->
+    <section class="card" aria-labelledby="h-letters">
+      <h2 id="h-letters">7. Letters to Family</h2>
+      <p class="sub">Notes for the people you love, stored only on this device. They print with the binder.</p>
+      <form class="entry" id="form-letters">
+        <label class="full">Letter title
+          <input name="main" required maxlength="120" autocomplete="off">
+        </label>
+        <label class="full">Letter
+          <textarea name="f1" required maxlength="8000"></textarea>
+        </label>
+        <div class="btnrow full">
+          <button class="btn" type="submit">Add letter</button>
+          <button class="btn ghost" type="reset">Clear</button>
+        </div>
+      </form>
+      <ul class="entries" id="list-letters"></ul>
+    </section>
+
+    <!-- Next-of-Kin First Steps -->
+    <section class="card" aria-labelledby="h-steps">
+      <h2 id="h-steps">8. Next-of-Kin First Steps</h2>
+      <p class="sub">Print this with the binder. A calm first-72-hours list for whoever finds it.</p>
+      <ul class="steps" id="stepsList"></ul>
+    </section>
+
+    <!-- Print -->
+    <section class="card span2" aria-labelledby="h-print">
+      <h2 id="h-print">Print the binder</h2>
+      <p class="sub">One clean, printable copy of everything you&rsquo;ve entered — the guided checklist status, every section, and your letters. Keep it somewhere your family can find it, and tell them it exists.</p>
+      <div class="btnrow">
+        <button class="btn" id="btnPrint" type="button">Print binder</button>
+      </div>
+      <p class="sub" style="margin-top:10px">Tip: review the binder once a year, and after any big change — a move, a new account, a new policy, a marriage or divorce. Reprint and replace the old copy.</p>
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <div>Family Emergency Organizer — an organizational aid only. Not legal, financial, or medical advice. Your entries never leave this device.</div>
+    <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </footer>
+
+  <!-- Print-only binder -->
+  <div id="binder" aria-hidden="true"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Guided checklist definitions ---------- */
+var GUIDED = {
+  people:  {label:"Key People", items:["Next of kin","Emergency contact","Executor / trustee","Attorney","Accountant / financial advisor","Spare-key holder"]},
+  docs:    {label:"Document Locations", items:["Will / trust","Power of attorney","Healthcare directive / living will","Birth certificate","Social Security card","Passport","Marriage / divorce certificates","Property deeds","Vehicle titles","Safe deposit box","Home safe"]},
+  accounts:{label:"Accounts & Policies", items:["Bank / credit union accounts","Credit cards","Mortgage / rent","Utility accounts","Life insurance","Home insurance","Auto insurance","Retirement accounts","Investment accounts","Employer benefits","Digital services list","Password manager (name only)"]},
+  property:{label:"Property, Vehicles & Pets", items:["Vehicle","Other property","Pet","Spare keys"]},
+  medical: {label:"Medical Contacts", items:["Primary doctor","Specialist","Dentist","Pharmacy","Health insurance card location","Healthcare directive location","Medication list location"]},
+  wishes:  {label:"Final Wishes", items:["Funeral preference","Burial / cremation preference","Prepaid funeral plan","Organ donation","Other wishes"]}
+};
+var COVERED_SECTIONS = ["people","docs","accounts","property","medical","wishes"];
+var SECTION_COLORS = {people:"#2e7d8c",docs:"#0f4a5c",accounts:"#3d9db5",property:"#57b08a",medical:"#7a6fc0",wishes:"#c07a3d"};
+
+var FIRST_STEPS = [
+  "Call the emergency contacts in Section 1 (Key People) and one other family member.",
+  "Find the will or trust and the healthcare directive — their locations are in Section 2 (Document Locations).",
+  "Contact the attorney listed in Section 1 before signing anything.",
+  "Secure the home, vehicles, and pets (Sections 4 and 5). Check on the pets first if no one has been home.",
+  "Locate the insurance policies in Section 3 (Accounts & Policies) before paying for anything major out of pocket.",
+  "Do not throw away any mail — bills, policies, and statements explain what exists.",
+  "Ask the funeral home or county office about ordering several certified copies of the death certificate — banks and insurers will each ask for one.",
+  "Work through the letters in Section 7 when you are ready. They were written for you."
+];
+
+/* ---------- State ---------- */
+var LS_DATA="feo-data-v1", LS_THEME="feo-theme", LS_SOUND="feo-sound", LS_BACKUP="feo-sample-backup", LS_SAMPLE="feo-sample-on";
+var emptyData = function(){ return {people:[],docs:[],accounts:[],property:[],medical:[],wishes:[],letters:[],steps:{}}; };
+var data = load(LS_DATA) || emptyData();
+["people","docs","accounts","property","medical","wishes","letters"].forEach(function(k){ if(!Array.isArray(data[k])) data[k]=[]; });
+if(!data.steps || typeof data.steps!=="object") data.steps={};
+var editing = {}; // section -> id being edited
+
+function load(k){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function save(){
+  var w=document.getElementById("storageWarn");
+  try{ localStorage.setItem(LS_DATA, JSON.stringify(data)); if(w) w.style.display="none"; }
+  catch(e){ if(w) w.style.display="block"; }
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+/* ---------- Theme ---------- */
+var root=document.documentElement;
+function applyTheme(t){
+  root.setAttribute("data-theme", t);
+  document.getElementById("btnTheme").setAttribute("aria-pressed", t==="dark"?"true":"false");
+  document.getElementById("icoMoon").style.display = t==="dark"?"none":"block";
+  document.getElementById("icoSun").style.display = t==="dark"?"block":"none";
+}
+var savedTheme = (function(){ try{ return localStorage.getItem(LS_THEME); }catch(e){ return null; } })();
+if(!savedTheme) savedTheme = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+applyTheme(savedTheme);
+document.getElementById("btnTheme").addEventListener("click", function(){
+  var t = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+  applyTheme(t); try{ localStorage.setItem(LS_THEME,t); }catch(e){}
+  tone(520,.06);
+});
+
+/* ---------- Sound ---------- */
+var soundOn = (function(){ try{ var v=localStorage.getItem(LS_SOUND); return v===null?true:v==="1"; }catch(e){ return true; } })();
+var actx=null;
+function applySound(){
+  document.getElementById("btnSound").setAttribute("aria-pressed", soundOn?"true":"false");
+  document.getElementById("icoSndOn").style.display = soundOn?"block":"none";
+  document.getElementById("icoSndOff").style.display = soundOn?"none":"block";
+}
+function tone(freq, dur, delay){
+  if(!soundOn) return;
+  try{
+    if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
+    var t0 = actx.currentTime + (delay||0);
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type="sine"; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.12, t0+0.015);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0+(dur||0.09));
+    o.connect(g); g.connect(actx.destination);
+    o.start(t0); o.stop(t0+(dur||0.09)+0.03);
+  }catch(e){}
+}
+function sndAdd(){ tone(660,.08); tone(880,.09,.07); }
+function sndDel(){ tone(330,.09); }
+function sndTick(){ tone(740,.05); }
+applySound();
+document.getElementById("btnSound").addEventListener("click", function(){
+  soundOn=!soundOn; applySound();
+  try{ localStorage.setItem(LS_SOUND, soundOn?"1":"0"); }catch(e){}
+  if(soundOn) sndTick();
+});
+
+/* ---------- Coverage ---------- */
+function coveredCount(section){
+  var items=GUIDED[section].items, set={};
+  data[section].forEach(function(e){ set[e.cat]=true; });
+  var n=0; items.forEach(function(it){ if(set[it]) n++; });
+  return {covered:n, total:items.length, missing:items.filter(function(it){return !set[it];})};
+}
+function overall(){
+  var c=0,t=0; COVERED_SECTIONS.forEach(function(s){ var r=coveredCount(s); c+=r.covered; t+=r.total; });
+  return {covered:c,total:t,pct:t?Math.round(c/t*100):0};
+}
+
+/* ---------- Donut ---------- */
+var selectedSeg=null;
+function polar(cx,cy,r,ang){ var rad=(ang-90)*Math.PI/180; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
+function arcPath(cx,cy,r,a0,a1){
+  var p0=polar(cx,cy,r,a0), p1=polar(cx,cy,r,a1), large=(a1-a0)>180?1:0;
+  return "M "+p0[0].toFixed(2)+" "+p0[1].toFixed(2)+" A "+r+" "+r+" 0 "+large+" 1 "+p1[0].toFixed(2)+" "+p1[1].toFixed(2);
+}
+function renderDonut(){
+  var svg=document.getElementById("donut");
+  var NS="http://www.w3.org/2000/svg";
+  var ae=document.activeElement;
+  var focusSec=(ae && ae.classList && ae.classList.contains("seg")) ? ae.dataset.section : null;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  var cx=210, cy=210, R=168, rMid=140, sw=52;
+  var n=COVERED_SECTIONS.length, slice=360/n, gap=2.5;
+  COVERED_SECTIONS.forEach(function(sec, i){
+    var a0=i*slice+gap/2, a1=(i+1)*slice-gap/2;
+    var cov=coveredCount(sec), frac=cov.total?cov.covered/cov.total:0;
+    // track
+    var track=document.createElementNS(NS,"path");
+    track.setAttribute("d", arcPath(cx,cy,rMid,a0,a1));
+    track.setAttribute("fill","none"); track.setAttribute("stroke","var(--mint-soft)");
+    track.setAttribute("stroke-width", String(sw)); track.setAttribute("stroke-linecap","butt");
+    svg.appendChild(track);
+    // filled portion (category group lets keyboard focus work)
+    var g=document.createElementNS(NS,"g");
+    g.setAttribute("class","seg"); g.setAttribute("tabindex","0"); g.setAttribute("role","button");
+    g.setAttribute("aria-label", GUIDED[sec].label+": "+cov.covered+" of "+cov.total+" covered");
+    g.dataset.section=sec;
+    var mid=(a0+a1)/2;
+    if(selectedSeg===sec){
+      var off=polar(0,0,13,mid);
+      g.setAttribute("transform","translate("+off[0].toFixed(1)+","+off[1].toFixed(1)+")");
+    }
+    // invisible hit arc: every slice is clickable/focus-activatable, even at 0% coverage
+    var hit=document.createElementNS(NS,"path");
+    hit.setAttribute("d", arcPath(cx,cy,rMid,a0,a1));
+    hit.setAttribute("fill","none"); hit.setAttribute("stroke","rgba(0,0,0,0)");
+    hit.setAttribute("stroke-width", String(sw)); hit.setAttribute("pointer-events","stroke");
+    hit.setAttribute("class","seghit");
+    g.appendChild(hit);
+    if(frac>0){
+      var fill=document.createElementNS(NS,"path");
+      fill.setAttribute("d", arcPath(cx,cy,rMid,a0, a0+(a1-a0)*frac));
+      fill.setAttribute("fill","none"); fill.setAttribute("stroke", SECTION_COLORS[sec]);
+      fill.setAttribute("stroke-width", String(sw));
+      g.appendChild(fill);
+      if(selectedSeg===sec){
+        var ring=document.createElementNS(NS,"path");
+        ring.setAttribute("d", arcPath(cx,cy,rMid,a0, a0+(a1-a0)*frac));
+        ring.setAttribute("fill","none"); ring.setAttribute("stroke","var(--ink)");
+        ring.setAttribute("stroke-width", String(sw+7)); ring.setAttribute("opacity","1");
+        g.insertBefore(ring, fill);
+      }
+    } else if(selectedSeg===sec){
+      var ghost=document.createElementNS(NS,"path");
+      ghost.setAttribute("d", arcPath(cx,cy,rMid,a0,a1));
+      ghost.setAttribute("fill","none"); ghost.setAttribute("stroke","var(--ink)");
+      ghost.setAttribute("stroke-width","3"); ghost.setAttribute("stroke-dasharray","6 6");
+      g.appendChild(ghost);
+    }
+    svg.appendChild(g);
+  });
+  var ov=overall();
+  document.getElementById("donutUnder").textContent =
+    "Overall coverage: "+ov.pct+"%  ("+ov.covered+" of "+ov.total+" guided items)";
+  renderDetail();
+  renderBars();
+  if(focusSec){
+    var ng=svg.querySelector(".seg[data-section='"+focusSec+"']");
+    if(ng && ng.focus) ng.focus({preventScroll:true});
+  }
+}
+function renderDetail(){
+  var box=document.getElementById("segDetail");
+  if(!selectedSeg || !GUIDED[selectedSeg]){
+    box.innerHTML="<h3>Nothing selected</h3><p>Click any slice of the chart to see that section&rsquo;s covered and missing checklist items.</p>";
+    return;
+  }
+  var r=coveredCount(selectedSeg), pct=r.total?Math.round(r.covered/r.total*100):0;
+  var miss = r.missing.length ? r.missing.map(esc).join(", ") : "none — every guided item has an entry";
+  box.innerHTML="<h3>"+esc(GUIDED[selectedSeg].label)+"</h3>"+
+    "<p><strong>"+r.covered+" of "+r.total+"</strong> guided items covered ("+pct+"%).</p>"+
+    "<p>Still to add: "+miss+".</p>";
+}
+function renderBars(){
+  var bars=document.getElementById("bars"); bars.innerHTML="";
+  COVERED_SECTIONS.forEach(function(sec){
+    var r=coveredCount(sec), pct=r.total?Math.round(r.covered/r.total*100):0;
+    var row=document.createElement("div"); row.className="bar-row";
+    row.innerHTML="<div class='bar-name'>"+esc(GUIDED[sec].label)+"</div>"+
+      "<div class='bar-track'><div class='bar-fill' style='width:"+pct+"%;background:"+SECTION_COLORS[sec]+"'></div></div>"+
+      "<div class='bar-pct'>"+pct+"%</div>";
+    bars.appendChild(row);
+  });
+}
+document.getElementById("donut").addEventListener("click", function(ev){
+  var g=ev.target.closest ? ev.target.closest(".seg") : null;
+  if(!g) return;
+  var sec=g.dataset.section;
+  selectedSeg = (selectedSeg===sec) ? null : sec;
+  sndTick(); renderDonut();
+});
+document.getElementById("donut").addEventListener("keydown", function(ev){
+  if(ev.key!=="Enter" && ev.key!==" ") return;
+  var g=ev.target.closest ? ev.target.closest(".seg") : null;
+  if(!g) return;
+  ev.preventDefault();
+  var sec=g.dataset.section;
+  selectedSeg = (selectedSeg===sec) ? null : sec;
+  sndTick(); renderDonut();
+});
+
+/* ---------- Escaping ---------- */
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+
+/* ---------- Section forms & lists ---------- */
+var FIELDS = {
+  people:  ["main","f1","f2","f3"],
+  docs:    ["main","f1"],
+  accounts:["main","f1"],
+  property:["main","f1","f2"],
+  medical: ["main","f1"],
+  wishes:  ["main","f1"],
+  letters: ["main","f1"]
+};
+function fillCategories(section){
+  var sel=document.querySelector("#form-"+section+" select[name='cat']");
+  if(!sel) return;
+  sel.innerHTML="";
+  GUIDED[section].items.concat(["Other"]).forEach(function(it){
+    var o=document.createElement("option"); o.value=it; o.textContent=it; sel.appendChild(o);
+  });
+}
+function metaLines(section, e){
+  var lines=[];
+  if(section==="people"){
+    if(e.f1) lines.push("Relationship: "+e.f1);
+    if(e.f2) lines.push("Phone: "+e.f2);
+    if(e.f3) lines.push(e.f3);
+  } else if(section==="property"){
+    if(e.f1) lines.push(e.f1);
+    if(e.f2) lines.push(e.f2);
+  } else {
+    if(e.f1) lines.push(e.f1);
+  }
+  return lines;
+}
+function renderList(section){
+  var ul=document.getElementById("list-"+section); ul.innerHTML="";
+  var entries=data[section];
+  if(!entries.length){
+    var li=document.createElement("li"); li.className="empty";
+    li.textContent = section==="letters" ? "No letters yet. Add one above." : "Nothing here yet. Add your first entry above.";
+    ul.appendChild(li); return;
+  }
+  entries.forEach(function(e){
+    var li=document.createElement("li"); li.className="entry-item";
+    var html="";
+    if(section!=="letters") html+="<div class='cat'>"+esc(e.cat)+"</div>";
+    html+="<div class='main'>"+esc(e.main)+"</div>";
+    metaLines(section,e).forEach(function(m){ html+="<div class='meta'>"+esc(m)+"</div>"; });
+    html+="<div class='ops'><button type='button' class='opbtn' data-act='edit'>Edit</button>"+
+          "<button type='button' class='opbtn del' data-act='del'>Delete</button></div>";
+    li.innerHTML=html;
+    li.querySelector("[data-act='edit']").addEventListener("click", function(){ startEdit(section, e.id); });
+    li.querySelector("[data-act='del']").addEventListener("click", function(){
+      data[section]=data[section].filter(function(x){ return x.id!==e.id; });
+      if(editing[section]===e.id) stopEdit(section);
+      save(); refresh(); sndDel();
+    });
+    ul.appendChild(li);
+  });
+}
+function renderGuide(section){
+  var ul=document.getElementById("guide-"+section); if(!ul) return;
+  ul.innerHTML="";
+  var set={}; data[section].forEach(function(e){ set[e.cat]=true; });
+  GUIDED[section].items.forEach(function(it){
+    var li=document.createElement("li");
+    var done=!!set[it];
+    li.innerHTML="<span class='mark "+(done?"done":"todo")+"'>"+(done?"✓":"○")+"</span><span>"+esc(it)+"</span>";
+    ul.appendChild(li);
+  });
+}
+function startEdit(section, id){
+  var e=data[section].filter(function(x){return x.id===id;})[0]; if(!e) return;
+  editing[section]=id;
+  var form=document.getElementById("form-"+section);
+  if(form.elements.cat){
+    var sel=form.elements.cat;
+    if(GUIDED[section].items.concat(["Other"]).indexOf(e.cat)<0){
+      var o=document.createElement("option"); o.value=e.cat; o.textContent=e.cat; sel.appendChild(o);
+    }
+    sel.value=e.cat;
+  }
+  FIELDS[section].forEach(function(f){ if(form.elements[f]) form.elements[f].value = e[f]||""; });
+  var submit=form.querySelector("button[type='submit']");
+  submit.textContent="Save changes";
+  form.scrollIntoView({behavior:"smooth", block:"center"});
+  sndTick();
+}
+function stopEdit(section){
+  delete editing[section];
+  var form=document.getElementById("form-"+section);
+  form.reset();
+  fillCategories(section);
+  var labels={people:"Add person",docs:"Add document",accounts:"Add account / policy",property:"Add item",medical:"Add contact",wishes:"Add wish",letters:"Add letter"};
+  form.querySelector("button[type='submit']").textContent=labels[section];
+}
+Object.keys(FIELDS).forEach(function(section){
+  var form=document.getElementById("form-"+section);
+  form.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var e={cat: form.elements.cat ? form.elements.cat.value : "", id: editing[section] || uid()};
+    FIELDS[section].forEach(function(f){ e[f]=(form.elements[f].value||"").trim(); });
+    if(!e.main) return;
+    if(editing[section]){
+      data[section]=data[section].map(function(x){ return x.id===e.id?e:x; });
+      stopEdit(section);
+    } else {
+      data[section].push(e); form.reset();
+    }
+    save(); refresh(); sndAdd();
+  });
+  form.addEventListener("reset", function(){ if(editing[section]) stopEdit(section); });
+});
+
+/* ---------- First steps ---------- */
+function renderSteps(){
+  var ul=document.getElementById("stepsList"); ul.innerHTML="";
+  FIRST_STEPS.forEach(function(text, i){
+    var li=document.createElement("li");
+    var cb=document.createElement("input"); cb.type="checkbox"; cb.id="step-"+i;
+    cb.checked=!!data.steps[i];
+    var lab=document.createElement("label"); lab.htmlFor="step-"+i; lab.textContent=text;
+    lab.style.fontWeight="400"; if(cb.checked) lab.className="checked";
+    cb.addEventListener("change", function(){ data.steps[i]=cb.checked; save(); lab.className=cb.checked?"checked":""; sndTick(); });
+    li.appendChild(cb); li.appendChild(lab); ul.appendChild(li);
+  });
+}
+
+/* ---------- Binder (print) ---------- */
+function buildBinder(){
+  var b=document.getElementById("binder");
+  var ov=overall();
+  var html="<h1>Family Emergency Organizer</h1>"+
+    "<p class='b-sub'>Printed binder copy. This organizer records where things are kept. It is not legal advice and is not a substitute for an attorney or an estate plan. For wills, trusts, and powers of attorney, talk to a licensed attorney or estate planner.</p>"+
+    "<div class='b-note'><strong>Coverage summary:</strong> "+ov.covered+" of "+ov.total+" guided checklist items have entries ("+ov.pct+"%). An item without an entry below has not been recorded yet.</div>";
+  COVERED_SECTIONS.forEach(function(sec){
+    var r=coveredCount(sec);
+    html+="<h2>"+esc(GUIDED[sec].label)+" ("+r.covered+"/"+r.total+")</h2>";
+    if(!data[sec].length){ html+="<p><em>Nothing recorded yet.</em></p>"; }
+    data[sec].forEach(function(e){
+      html+="<div class='b-item'><div class='b-cat'>"+esc(e.cat)+"</div><div class='b-main'>"+esc(e.main)+"</div>";
+      metaLines(sec,e).forEach(function(m){ html+="<div class='b-meta'>"+esc(m)+"</div>"; });
+      html+="</div>";
+    });
+    if(r.missing.length) html+="<p><em>Not recorded yet: "+r.missing.map(esc).join(", ")+".</em></p>";
+  });
+  html+="<h2>Letters to Family</h2>";
+  if(!data.letters.length) html+="<p><em>No letters recorded.</em></p>";
+  data.letters.forEach(function(e){
+    html+="<h3>"+esc(e.main)+"</h3><div class='b-meta'>"+esc(e.f1)+"</div>";
+  });
+  html+="<h2>Next-of-Kin First Steps</h2><ul>";
+  FIRST_STEPS.forEach(function(t){ html+="<li>"+esc(t)+"</li>"; });
+  html+="</ul><div class='b-note'>Keep this binder somewhere your family can find it, and tell them it exists. Review it once a year and after any big life change.</div>";
+  b.innerHTML=html;
+}
+document.getElementById("btnPrint").addEventListener("click", function(){ buildBinder(); sndTick(); window.print(); });
+window.addEventListener("beforeprint", buildBinder);
+
+/* ---------- Sample data ---------- */
+var sampleOn=false;
+try{ sampleOn = localStorage.getItem(LS_SAMPLE)==="1"; }catch(e){}
+if(sampleOn) document.getElementById("btnSample").setAttribute("aria-pressed","true");
+function demoData(){
+  return {
+    people:[
+      {id:uid(),cat:"Next of kin",main:"Jamie Example",f1:"Son",f2:"(555) 010-2233",f3:"Lives 20 minutes away; has a house key."},
+      {id:uid(),cat:"Emergency contact",main:"Pat Example",f1:"Sister",f2:"(555) 010-7788",f3:""},
+      {id:uid(),cat:"Attorney",main:"R. Alvarez, Alvarez Law Office",f1:"",f2:"(555) 010-9000",f3:"Prepared the will in 2024."}
+    ],
+    docs:[
+      {id:uid(),cat:"Will / trust",main:"Fireproof safe, hall closet, top shelf",f1:"Original; copy with attorney."},
+      {id:uid(),cat:"Passport",main:"Bedroom dresser, top-left drawer",f1:""},
+      {id:uid(),cat:"Safe deposit box",main:"First Example Bank, Main Street branch",f1:"Key is in the fireproof safe. Names only here — the bank holds the details."}
+    ],
+    accounts:[
+      {id:uid(),cat:"Bank / credit union accounts",main:"First Example Bank; Example Credit Union",f1:"Statements in the blue folder, filing cabinet."},
+      {id:uid(),cat:"Life insurance",main:"Example Mutual Life",f1:"Policy paperwork in the fireproof safe."},
+      {id:uid(),cat:"Password manager (name only)",main:"Example password manager app",f1:"Family access uses the manager's built-in emergency-access feature."}
+    ],
+    property:[
+      {id:uid(),cat:"Vehicle",main:"2019 Example SUV, silver",f1:"Title in the fireproof safe; spare key on the hook by the garage door.",f2:""},
+      {id:uid(),cat:"Pet",main:"Biscuit — beagle, 6 years old",f1:"",f2:"Vet: Example Animal Clinic, (555) 010-4455. Fed twice a day. Pat Example can take him."}
+    ],
+    medical:[
+      {id:uid(),cat:"Primary doctor",main:"Dr. Lee, Example Family Clinic",f1:"(555) 010-1212"},
+      {id:uid(),cat:"Medication list location",main:"Printed list taped inside the kitchen cabinet door",f1:"Updated every January."}
+    ],
+    wishes:[
+      {id:uid(),cat:"Funeral preference",main:"Small gathering at home; favorite songs list is with the letters",f1:""},
+      {id:uid(),cat:"Organ donation",main:"Wishes recorded on driver's license",f1:""}
+    ],
+    letters:[
+      {id:uid(),main:"For Jamie",f1:"If you are reading this, thank you for handling things. Everything you need is in this binder. Take your time, ask the attorney questions, and do not let anyone rush you. — Love, always."}
+    ],
+    steps:{}
+  };
+}
+document.getElementById("btnSample").addEventListener("click", function(){
+  var btn=this;
+  if(!sampleOn){
+    try{ localStorage.setItem(LS_BACKUP, JSON.stringify(data)); localStorage.setItem(LS_SAMPLE,"1"); }catch(e){}
+    data=demoData(); sampleOn=true; btn.setAttribute("aria-pressed","true");
+  } else {
+    var back=load(LS_BACKUP);
+    data = back || emptyData();
+    try{ localStorage.removeItem(LS_BACKUP); localStorage.removeItem(LS_SAMPLE); }catch(e){}
+    sampleOn=false; btn.setAttribute("aria-pressed","false");
+  }
+  Object.keys(editing).forEach(function(k){ delete editing[k]; });
+  COVERED_SECTIONS.concat(["letters"]).forEach(function(s){ stopEditSilent(s); });
+  save(); refresh(); sndAdd();
+});
+function stopEditSilent(section){
+  var form=document.getElementById("form-"+section); if(!form) return;
+  form.reset();
+  fillCategories(section);
+  var labels={people:"Add person",docs:"Add document",accounts:"Add account / policy",property:"Add item",medical:"Add contact",wishes:"Add wish",letters:"Add letter"};
+  form.querySelector("button[type='submit']").textContent=labels[section];
+}
+
+/* ---------- Refresh ---------- */
+function refresh(){
+  COVERED_SECTIONS.forEach(function(s){ renderList(s); renderGuide(s); });
+  renderList("letters");
+  renderSteps();
+  renderDonut();
+}
+COVERED_SECTIONS.forEach(fillCategories);
+refresh();
+buildBinder();
+})();
+</script>
+</body>
+</html>
