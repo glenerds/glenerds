@@ -77,6 +77,7 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 #printReport{display:none}
 @media print{
   body{background:#fff;color:#000}
+  header.top, section, footer, dialog{display:none !important}
   .noprint{display:none !important}
   #printReport{display:block;font-size:12pt}
   #printReport table{font-size:11pt}
@@ -504,7 +505,7 @@ function renderTxns(){
     tr.innerHTML='<td>'+escapeHtml(t.date||'')+'</td><td>'+escapeHtml(t.payee)+(t.note?' <span class="mut">'+escapeHtml(t.note)+'</span>':'')+'</td><td>'+escapeHtml(t.type==='income'?'other income':t.type)+'</td><td>'+escapeHtml(e?e.name:(t.type==='transfer'?'—':''))+'</td><td>'+escapeHtml(a?a.name:'')+(t.type==='transfer'&&a2?' → '+escapeHtml(a2.name):'')+'</td><td class="num">'+fmt(+t.amount||0)+'</td>';
     const td=document.createElement('td'); const row=document.createElement('div'); row.className='row';
     const eb=document.createElement('button'); eb.className='btn ghost small'; eb.textContent='Edit'; eb.addEventListener('click',()=>startEditTxn(t.id));
-    const db=document.createElement('button'); db.className='btn ghost small'; db.textContent='Delete'; db.addEventListener('click',()=>{ mm.txns=mm.txns.filter(x=>x.id!==t.id); save(); render(); });
+    const db=document.createElement('button'); db.className='btn ghost small'; db.textContent='Delete'; db.addEventListener('click',()=>{ if(confirm('Delete this transaction?')){ mm.txns=mm.txns.filter(x=>x.id!==t.id); save(); render(); } });
     row.appendChild(eb); row.appendChild(db); td.appendChild(row); tr.appendChild(td); tbl.appendChild(tr); }
   const wrap=document.createElement('div'); wrap.style.overflowX='auto'; wrap.appendChild(tbl); box.replaceChildren(wrap);
 }
@@ -541,6 +542,7 @@ $('#tType').addEventListener('change',syncTxnType);
 $('#txnForm').addEventListener('submit',ev=>{ ev.preventDefault();
   const tp=$('#tType').value;
   if(tp==='transfer'&&(!$('#tAcct').value||!$('#tToAcct').value||$('#tAcct').value===$('#tToAcct').value)){ setStatus('A transfer needs a From account and a different To account — pick another destination account.',true); beep(160); return; }
+  if(tp==='expense'&&!$('#tEnv').value){ if(!S.envelopes.length){ setStatus('Add an envelope first — every expense has to come out of an envelope, so create one above before adding expenses.',true); } else { setStatus('An expense needs an envelope — pick the envelope this spending comes out of.',true); } beep(160); $('#tEnv').focus(); return; }
   const dateStr=$('#tDate').value||todayISO(); const targetMonth=dateStr.slice(0,7);
   const t={ id: editTxnId||uid(), date:dateStr, payee:$('#tPayee').value.trim(), type:tp, envelopeId:tp==='expense'?($('#tEnv').value||''):'', accountId:$('#tAcct').value||'', toAccountId:tp==='transfer'?($('#tToAcct').value||''):'' , amount:parseFloat($('#tAmt').value)||0, note:$('#tNote').value.trim() };
   if(editTxnId){ const cur=S.months[curMonth]; if(cur) cur.txns=cur.txns.filter(x=>x.id!==editTxnId); month(targetMonth).txns.push(t); editTxnId=null; $('#txnSubmit').textContent='Add transaction'; $('#txnCancel').style.display='none'; }
@@ -557,7 +559,7 @@ $('#nextMonth').addEventListener('click',()=>shiftMonth(1));
 $('#monthPick').addEventListener('change',()=>{ if($('#monthPick').value){ curMonth=$('#monthPick').value; month(curMonth); save(); render(); } });
 
 /* ---------- data ops ---------- */
-$('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='envelope-budget-planner-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); beep(700); });
+$('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='envelope-budget-planner-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); setStatus('Backup exported — keep this file somewhere safe.'); beep(700); });
 $('#importFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f)return; if(S.sample.active){ setStatus('Sample data is on — turn sample data off before importing a backup.',true); ev.target.value=''; return; } const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const clean=cleanData(d,true); if(!confirm('Import this backup? It replaces ALL current planner data.')){ ev.target.value=''; return; } S=clean; save(); refreshSelects(); applyTheme(); render(); setStatus('Import complete.'); }catch(e){ alert('That file is not a valid Stuffed backup. Nothing was changed.'); } ev.target.value=''; }; r.readAsText(f); });
 $('#clearBtn').addEventListener('click',()=>{ if(S.sample.active){ setStatus('Sample data is on — turn sample data off before clearing all data, so you do not wipe your real budget.',true); beep(160); return; } if(confirm('Clear ALL planner data (every month, envelope, account and transaction)? This cannot be undone. Export a backup first if you need one.')){ const keep=S.settings; S=defaults(); S.settings=keep; save(); refreshSelects(); selEnv=null; render(); } });
 $('#printBtn').addEventListener('click',()=>window.print());
