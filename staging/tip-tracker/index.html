@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Server tip tracker, bartender income log, shift earnings and true hourly wage tracker</title>
+<style>
+:root{
+  --bg:#f4f6f3; --card:#ffffff; --ink:#1d241f; --muted:#5d6d63; --line:#dce5dd;
+  --green:#1d7a3d; --green-soft:#e2f2e6; --accent:#2563eb; --accent-ink:#ffffff;
+  --gold:#b45309; --gold-soft:#fdf0dc; --chip:#eef3ee; --shadow:0 1px 3px rgba(20,40,25,.10);
+  --input:#ffffff; --danger:#b91c1c;
+}
+body.dark{
+  --bg:#121814; --card:#1b241d; --ink:#e7efe8; --muted:#9db3a4; --line:#2c3a30;
+  --green:#4cc36e; --green-soft:#1d3323; --accent:#5b8def; --chip:#243028;
+  --gold:#f0b35e; --gold-soft:#3a2c16; --shadow:0 1px 3px rgba(0,0,0,.4); --input:#232f26; --danger:#f87171;
+  color-scheme:dark;
+}
+*{ box-sizing:border-box; }
+body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:16px; line-height:1.45; }
+button{ font:inherit; cursor:pointer; }
+input,select,textarea{ font:inherit; color:var(--ink); }
+header.top{ max-width:1180px; margin:0 auto; padding:14px 16px 6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.logo{ width:44px; height:44px; border-radius:12px; background:var(--green); display:flex; align-items:center; justify-content:center; flex:none; }
+.logo svg{ width:26px; height:26px; }
+.brand h1{ font-size:24px; margin:0; line-height:1.1; }
+.brand p{ margin:2px 0 0; color:var(--muted); font-size:15px; }
+.top-actions{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+.icon-btn{ width:44px; height:44px; border-radius:12px; border:1px solid var(--line); background:var(--card); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); }
+.icon-btn svg{ width:22px; height:22px; stroke:var(--ink); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.icon-btn.on{ background:var(--green-soft); border-color:var(--green); }
+.icon-btn.on svg{ stroke:var(--green); }
+.more-apps{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); text-decoration:none; font-weight:600; font-size:15px; box-shadow:var(--shadow); }
+.more-apps svg{ width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:2; }
+main{ max-width:1180px; margin:0 auto; padding:6px 16px 40px; }
+.samplebar{ display:none; background:var(--gold-soft); border:1px solid var(--gold); color:var(--ink); border-radius:12px; padding:10px 14px; margin:8px 0; font-size:15px; }
+.samplebar.show{ display:block; }
+.samplebar b{ color:var(--gold); }
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:10px 0; }
+.stat{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); }
+.stat .n{ font-size:24px; font-weight:800; line-height:1.15; }
+.stat .l{ color:var(--muted); font-size:15px; }
+.cols{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start; }
+@media (max-width:860px){ .cols{ grid-template-columns:minmax(0,1fr); } }
+.panel{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+.panel h2{ margin:0 0 4px; font-size:19px; }
+.panel .sub{ color:var(--muted); font-size:15px; margin:0 0 12px; }
+.tabs{ display:flex; gap:8px; margin:10px 0 14px; flex-wrap:wrap; }
+.tab{ padding:10px 18px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-weight:700; min-height:44px; }
+.tab.on{ background:var(--green); color:#fff; border-color:var(--green); }
+label.f{ display:block; font-weight:600; font-size:15px; margin:12px 0 5px; }
+input[type=text],input[type=date],input[type=number],select,textarea{ width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--input); font-size:16px; }
+.frow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:560px){ .frow{ grid-template-columns:1fr; } }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 18px; min-height:46px; border-radius:11px; border:1px solid var(--line); background:var(--chip); color:var(--ink); font-weight:700; font-size:16px; }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.btn.green{ background:var(--green); border-color:var(--green); color:#fff; }
+.btn.danger{ color:var(--danger); }
+.btnrow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.hint{ color:var(--muted); font-size:15px; }
+.stepper{ display:flex; align-items:center; gap:8px; }
+.stepper button{ width:46px; height:46px; border-radius:10px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); font-size:22px; font-weight:800; flex:none; }
+.stepper .v{ flex:1; text-align:center; font-size:20px; font-weight:800; }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.chip{ padding:8px 14px; border-radius:999px; background:var(--chip); border:1px solid var(--line); color:var(--ink); font-size:15px; font-weight:600; min-height:40px; }
+.chip.on{ background:var(--green); color:#fff; border-color:var(--green); }
+table.list{ width:100%; border-collapse:collapse; font-size:15px; }
+table.list th{ text-align:left; color:var(--muted); font-weight:600; padding:8px 6px; border-bottom:2px solid var(--line); font-size:14px; }
+table.list td{ padding:9px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr.clickable{ cursor:pointer; }
+tr.clickable:hover td{ background:var(--chip); }
+tr.sel td{ background:var(--green-soft); }
+.pos{ color:var(--green); font-weight:700; }
+.bars{ display:flex; flex-direction:column; gap:7px; margin-top:6px; }
+.bar-row{ display:grid; grid-template-columns:104px 1fr 76px; gap:8px; align-items:center; font-size:15px; }
+.bar-track{ height:16px; border-radius:8px; background:var(--chip); overflow:hidden; }
+.bar-fill{ height:100%; background:var(--green); border-radius:8px; }
+.bar-fill.gold{ background:var(--gold); }
+.toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px); background:#1c2420; color:#fff; padding:12px 18px; border-radius:12px; font-size:15px; opacity:0; pointer-events:none; transition:.25s; max-width:92vw; text-align:center; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.3); }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.seg-legend{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.seg-legend .li{ font-size:14px; padding:4px 10px; border-radius:999px; background:var(--chip); color:var(--ink); }
+.donut-wrap{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.donut-box{ position:relative; width:190px; height:190px; flex:none; }
+.donut-box svg{ width:190px; height:190px; }
+.donut-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 44px; pointer-events:none; }
+.donut-center b{ font-size:22px; line-height:1.05; }
+.donut-center span{ font-size:13px; color:var(--muted); }
+.earnings-chart{ display:flex; align-items:flex-end; gap:5px; height:150px; margin-top:8px; padding-top:8px; }
+.ec-col{ flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; min-width:0; cursor:pointer; }
+.ec-bar{ width:100%; max-width:44px; background:var(--green); border-radius:6px 6px 0 0; min-height:4px; }
+.ec-col.sel .ec-bar{ background:var(--gold); outline:3px solid var(--gold); outline-offset:1px; }
+.ec-lab{ font-size:12px; color:var(--muted); white-space:nowrap; }
+big-preview{ }
+.preview-box{ background:var(--green-soft); border:1.5px solid var(--green); border-radius:12px; padding:12px 14px; margin-top:14px; font-size:16px; }
+footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:center; }
+#printReport{ display:none; }
+@media print{
+  body{ background:#fff; } header.top,.tabs,.samplebar,.no-print,footer.cta,.toast{ display:none !important; }
+  main{ max-width:100%; } .panel{ box-shadow:none; break-inside:avoid; }
+  #printReport{ display:block; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.2 9.2c.6-1 1.6-1.4 2.8-1.4 1.5 0 2.7.8 2.7 2 0 2.9-5.5 1.6-5.5 4.3 0 1.2 1.3 2 2.9 2 1.3 0 2.3-.5 2.9-1.5"/></svg></div>
+  <div class="brand"><h1 id="brandName">TipTally</h1><p>Tip &amp; shift income tracker for tipped workers — no account, no subscription</p></div>
+  <div class="top-actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+    <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
+    <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg></button>
+    <button class="icon-btn" id="soundBtn" title="Sounds" aria-label="Toggle sounds"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path class="sw" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
+<main>
+  <div class="samplebar" id="sampleBar"><b>Sample data is on.</b> This is a made-up server's shifts (two jobs, eight weeks) so you can see everything working. Your real shifts come back exactly as they were when you tap the flask again.</div>
+  <div class="stats-grid" id="statTiles"></div>
+  <div class="tabs no-print" role="tablist">
+    <button class="tab on" id="tabShifts">Shifts</button>
+    <button class="tab" id="tabAdd">Add a shift</button>
+    <button class="tab" id="tabStats">Stats &amp; tax year</button>
+    <button class="tab" id="tabJobs">Jobs</button>
+  </div>
+
+  <section id="viewShifts">
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Your shifts</h2>
+          <p class="sub">Newest first. Tap a shift to see or fix it. Everything the premium apps charge monthly for is in here.</p>
+          <div class="btnrow no-print" style="margin:0 0 12px">
+            <button class="btn" id="exportCsvBtn">Export CSV</button>
+            <button class="btn" id="backupBtn">Backup</button>
+            <button class="btn" id="restoreBtn">Restore</button>
+            <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+          </div>
+          <div id="shiftsTableWrap"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" id="shiftDetailPanel">
+          <h2>Shift detail</h2>
+          <p class="sub" id="shiftDetailSub">Tap any shift to see the full breakdown.</p>
+          <div id="shiftDetail"></div>
+        </div>
+        <div class="panel">
+          <h2>Where the money came from</h2>
+          <p class="sub">Everything you've logged, split by source. Tap a slice to pin it.</p>
+          <div class="donut-wrap">
+            <div class="donut-box"><svg id="mixDonut" viewBox="0 0 100 100" role="img" aria-label="Income mix chart"></svg><div class="donut-center" id="mixCenter"></div></div>
+            <div class="seg-legend" id="mixLegend"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Last 14 shifts</h2>
+          <p class="sub">What you actually walked with. Tap a bar to open that shift.</p>
+          <div class="earnings-chart" id="earnChart"></div>
+          <p class="hint" id="earnDetail">Tap a bar for the shift behind it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewAdd" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2 id="formTitle">Add a shift</h2>
+          <p class="sub">Ten seconds at the end of the night: what you made, what you tipped out, what you actually walked with.</p>
+          <label class="f" for="inJob">Job</label>
+          <select id="inJob"></select>
+          <div class="frow">
+            <div><label class="f" for="inDate">Date</label><input type="date" id="inDate"></div>
+            <div><label class="f" for="inRole">Role</label><input type="text" id="inRole" placeholder="Server, Bartender…"></div>
+          </div>
+          <label class="f">Hours worked</label>
+          <div class="stepper"><button id="hrsDown" aria-label="fewer hours">−</button><span class="v" id="hrsVal">6.0</span><button id="hrsUp" aria-label="more hours">+</button></div>
+          <div class="frow">
+            <div><label class="f" for="inWage">Hourly wage ($)</label><input type="number" id="inWage" min="0" step="0.25" placeholder="2.83"></div>
+            <div><label class="f" for="inSales">Sales ($, optional — powers tip %)</label><input type="number" id="inSales" min="0" step="1" placeholder="0"></div>
+          </div>
+          <div class="frow">
+            <div><label class="f" for="inCash">Cash tips ($)</label><input type="number" id="inCash" min="0" step="1" placeholder="0"></div>
+            <div><label class="f" for="inCard">Card tips ($)</label><input type="number" id="inCard" min="0" step="1" placeholder="0"></div>
+          </div>
+          <div class="frow">
+            <div><label class="f" for="inTipOut">Tip-out paid ($)</label><input type="number" id="inTipOut" min="0" step="1" placeholder="0"></div>
+            <div><label class="f" for="inCovers">Covers / guests (optional)</label><input type="number" id="inCovers" min="0" step="1" placeholder=""></div>
+          </div>
+          <label class="f" for="inNote">Note</label>
+          <input type="text" id="inNote" placeholder="Slow Tuesday, patio section, big party of 12…">
+          <div class="preview-box" id="formPreview">Fill in the shift to see what you walked with.</div>
+          <div class="btnrow"><button class="btn green" id="saveShiftBtn">Save shift</button><button class="btn" id="resetFormBtn">Clear form</button><button class="btn danger" id="cancelEditBtn" hidden>Cancel edit</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Why track it nightly?</h2>
+          <p class="sub">Three reasons this beats a shoebox of receipts:</p>
+          <p><b>Your real rate.</b> $140 in tips sounds great until the tip-out and the slow Tuesday drag your true hourly under what the kitchen makes. This does that math every shift.</p>
+          <p><b>Tax time.</b> Federal law now lets tipped workers deduct qualified tips (up to $25,000 a year, tax years 2025–2028). The IRS expects you to keep daily tip records — this is that record, with cash and card kept separate because only voluntary charged/cash tips count. This app is a logbook, not tax advice; check IRS Publication 531 and your own tax pro for your situation.</p>
+          <p><b>Your best shifts.</b> Weekday patterns, best jobs, best sections — the numbers that tell you which shifts to pick up and which to give away.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewStats" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Earnings by month</h2>
+          <p class="sub">Take-home per month. Tap a bar to pin its numbers.</p>
+          <div class="earnings-chart" id="monthChart" style="height:170px"></div>
+          <p class="hint" id="monthDetail">Tap a month for its breakdown.</p>
+        </div>
+        <div class="panel">
+          <h2>Best shifts ever</h2>
+          <p class="sub">Your top take-home shifts.</p>
+          <div id="bestWrap"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>By day of week</h2>
+          <p class="sub">Average true hourly rate. Tap a day to pin it — find your money days.</p>
+          <div class="bars" id="dowBars"></div>
+          <p class="hint" id="dowDetail"></p>
+        </div>
+        <div class="panel">
+          <h2>Tax-year summary</h2>
+          <p class="sub">Your tip record for the year — the daily log the IRS asks tipped workers to keep. Logbook only, not tax advice.</p>
+          <label class="f" for="taxYear">Tax year</label>
+          <select id="taxYear"></select>
+          <div id="taxWrap" style="margin-top:10px"></div>
+        </div>
+        <div class="panel">
+          <h2>Print your record</h2>
+          <p class="sub">One clean page: year totals, monthly earnings, best shifts, by-job summary. Handy at tax time or for a loan application.</p>
+          <div class="btnrow no-print"><button class="btn primary" id="printBtn">Print income report</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewJobs" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Add a job</h2>
+          <p class="sub">Two restaurants, a bar and a catering gig? Track them separately and see which one actually pays.</p>
+          <label class="f" for="jName">Job / place name</label><input type="text" id="jName" placeholder="e.g. Olive Branch Bistro">
+          <div class="frow">
+            <div><label class="f" for="jRole">Your role</label><input type="text" id="jRole" placeholder="Server"></div>
+            <div><label class="f" for="jWage">Default hourly wage ($)</label><input type="number" id="jWage" min="0" step="0.25" placeholder="2.83"></div>
+          </div>
+          <div class="btnrow"><button class="btn green" id="addJobBtn">Add job</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Your jobs</h2>
+          <p class="sub">Tap a job to see its numbers. Jobs with shifts can't be deleted — the history stays honest.</p>
+          <div id="jobWrap"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="printReport"></div>
+</main>
+<footer class="cta">
+  <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+  <p class="hint" style="margin-top:12px">TipTally keeps everything in this browser on this device — no account, no cloud, no subscription. Your earnings stay yours. Back up now and then from the Shifts tab.</p>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+"use strict";
+const BRAND = "TipTally";
+const LS_KEY = "tiptally_v1";
+const $ = s => document.querySelector(s);
+const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const clone = o => JSON.parse(JSON.stringify(o));
+const money = n => "$" + (Math.round((+n || 0) * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money0 = n => "$" + Math.round(+n || 0).toLocaleString("en-US");
+const fmtD = iso => { if(!iso) return ""; const p = iso.split("-"); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : iso; };
+const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+const blankState = () => ({ shifts: [], jobs: [], weekStart: 1, sampling:false, snapshot:null, theme:null, sound:true, selShift:null, editId:null, taxYear:null });
+let S = blankState();
+let _saveWarned = false;
+function load(){ try{ const raw = localStorage.getItem(LS_KEY); if(raw){ const d = JSON.parse(raw); if(d && Array.isArray(d.shifts) && Array.isArray(d.jobs)) S = Object.assign(blankState(), d); } }catch(e){} }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ if(!_saveWarned){ _saveWarned = true; toast("Couldn't save — this browser's storage may be full. Use Backup in the Shifts tab to keep a copy."); } } }
+
+let AC = null;
+function beep(freq, dur, type, gain){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === "suspended") AC.resume();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain || 0.08, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + (dur || 0.12));
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + (dur || 0.12));
+  }catch(e){}
+}
+const tick = () => beep(660, .07, "triangle", .06);
+const chime = () => { beep(660,.1,"sine",.07); setTimeout(()=>beep(880,.14,"sine",.07), 90); };
+const thud = () => beep(180, .12, "sine", .08);
+let toastTimer = null;
+function toast(msg){ const t = $("#toast"); t.innerText = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 3400); }
+
+/* ---------- shift math ---------- */
+const wagePay = s => (+s.hours || 0) * (+s.wage || 0);
+const grossTips = s => (+s.cash || 0) + (+s.card || 0);
+const netPay = s => wagePay(s) + grossTips(s) - (+s.tipOut || 0);
+const trueHourly = s => (+s.hours > 0) ? netPay(s) / (+s.hours) : 0;
+const tipPct = s => (+s.sales > 0) ? grossTips(s) / (+s.sales) * 100 : null;
+function sum(list, fn){ return list.reduce((a,x)=>a + fn(x), 0); }
+function periodShifts(kind){
+  const now = new Date(); const y = now.getFullYear(), m = now.getMonth();
+  if(kind === "year") return S.shifts.filter(s => (s.date||"").startsWith(String(y)));
+  if(kind === "month"){ const key = `${y}-${String(m+1).padStart(2,"0")}`; return S.shifts.filter(s => (s.date||"").startsWith(key)); }
+  // week starting on S.weekStart (1=Mon)
+  const d = new Date(y, m, now.getDate());
+  const shiftBack = (d.getDay() - (S.weekStart ?? 1) + 7) % 7;
+  const start = new Date(d); start.setDate(d.getDate() - shiftBack);
+  const end = new Date(start); end.setDate(start.getDate() + 7);
+  return S.shifts.filter(s => { const t = new Date((s.date||"") + "T12:00:00"); return t >= start && t < end; });
+}
+
+/* ---------- header ---------- */
+function applyTheme(){
+  const dark = S.theme ? S.theme === "dark" : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.body.classList.toggle("dark", dark);
+  $("#themeBtn").classList.toggle("on", dark);
+}
+function applySound(){ $("#soundBtn").classList.toggle("on", !!S.sound); $("#soundBtn").style.opacity = S.sound ? "1" : ".55"; }
+$("#themeBtn").addEventListener("click", ()=>{ S.theme = document.body.classList.contains("dark") ? "light" : "dark"; applyTheme(); save(); tick(); });
+$("#soundBtn").addEventListener("click", ()=>{ S.sound = !S.sound; applySound(); save(); if(S.sound) tick(); });
+
+/* ---------- tabs ---------- */
+const VIEWS = [["#tabShifts","#viewShifts"],["#tabAdd","#viewAdd"],["#tabStats","#viewStats"],["#tabJobs","#viewJobs"]];
+function showTab(tabSel){ VIEWS.forEach(([t,v])=>{ $(t).classList.toggle("on", t===tabSel); $(v).hidden = t!==tabSel; }); }
+VIEWS.forEach(([t])=> $(t).addEventListener("click", ()=>{ showTab(t); tick(); }));
+
+/* ---------- tiles ---------- */
+function renderTiles(){
+  const wk = periodShifts("week"), mo = periodShifts("month"), yr = periodShifts("year");
+  const all = S.shifts;
+  const avgHr = all.length ? sum(all, s => trueHourly(s)) / all.length : 0;
+  const tiles = [
+    [money0(sum(wk, netPay)), `This week (${wk.length} shift${wk.length===1?"":"s"})`],
+    [money0(sum(mo, netPay)), "This month"],
+    [money0(sum(yr, grossTips)), "Tips this year"],
+    ["$" + avgHr.toFixed(2), "Avg true $/hr (all shifts)"],
+    [money0(all.length ? Math.max(...all.map(netPay)) : 0), "Best shift ever"],
+    [all.length, "Shifts logged"]
+  ];
+  $("#statTiles").innerHTML = tiles.map(t=>`<div class="stat"><div class="n">${t[0]}</div><div class="l">${t[1]}</div></div>`).join("");
+}
+
+/* ---------- shifts list + detail ---------- */
+function renderShifts(){
+  const shifts = [...S.shifts].sort((a,b)=> (b.date||"").localeCompare(a.date||"") || (b.created||0)-(a.created||0));
+  const wrap = $("#shiftsTableWrap");
+  if(!shifts.length){
+    wrap.innerHTML = `<p class="hint">No shifts yet. Tap <b>Add a shift</b> after your next one — or tap the flask up top to see a sample server's two months first.</p>`;
+    return;
+  }
+  wrap.innerHTML = `<table class="list"><thead><tr><th>Date</th><th>Job</th><th>Walked with</th><th>True $/hr</th></tr></thead><tbody>${
+    shifts.map(s => `<tr class="clickable ${S.selShift===s.id?"sel":""}" data-shift="${s.id}"><td>${fmtD(s.date)}</td><td><b>${esc(s.jobName || "—")}</b>${s.role?`<br><span class="hint">${esc(s.role)}</span>`:""}</td><td><b>${money(netPay(s))}</b></td><td class="pos">$${trueHourly(s).toFixed(2)}</td></tr>`).join("")
+  }</tbody></table>`;
+  wrap.querySelectorAll("[data-shift]").forEach(tr => tr.addEventListener("click", ()=>{ S.selShift = tr.dataset.shift; save(); renderShifts(); renderDetail(); tick(); }));
+}
+function renderDetail(){
+  const s = S.shifts.find(x => x.id === S.selShift);
+  const box = $("#shiftDetail"), sub = $("#shiftDetailSub");
+  if(!s){ box.innerHTML = ""; sub.textContent = "Tap any shift to see the full breakdown."; return; }
+  const tp = tipPct(s);
+  sub.textContent = `${fmtD(s.date)} — ${s.jobName || ""}${s.role ? " · " + s.role : ""}`;
+  box.innerHTML = `
+    <p style="margin:0 0 6px"><b style="font-size:21px">${money(netPay(s))}</b> walked · <span class="pos"><b>$${trueHourly(s).toFixed(2)}/hr</b> true rate</span></p>
+    <table class="list">
+      <tr><td>Hours × wage (${money(s.wage)}/hr)</td><td style="text-align:right">${money(wagePay(s))}</td></tr>
+      <tr><td>Cash tips</td><td style="text-align:right">${money(s.cash)}</td></tr>
+      <tr><td>Card tips</td><td style="text-align:right">${money(s.card)}</td></tr>
+      <tr><td>Tip-out paid</td><td style="text-align:right">−${money(s.tipOut)}</td></tr>
+      ${+s.sales ? `<tr><td>Sales (tip %)</td><td style="text-align:right">${money(s.sales)} · ${tp==null?"—":tp.toFixed(1)+"%"}</td></tr>` : ""}
+      ${+s.covers ? `<tr><td>Covers</td><td style="text-align:right">${s.covers} guests · ${money(netPay(s)/s.covers)}/guest</td></tr>` : ""}
+    </table>
+    ${s.note ? `<p style="margin:10px 0 0">${esc(s.note)}</p>` : ""}
+    <div class="btnrow no-print"><button class="btn" id="editShiftBtn">Edit this shift</button><button class="btn danger" id="delShiftBtn">Delete</button></div>`;
+  $("#delShiftBtn").addEventListener("click", ()=>{
+    if(!confirm("Delete this shift for good?")) return;
+    S.shifts = S.shifts.filter(x => x.id !== s.id);
+    if(S.selShift === s.id) S.selShift = null;
+    if(S.editId === s.id){ S.editId = null; resetForm(); }
+    save(); renderAll(); thud(); toast("Shift deleted.");
+  });
+  $("#editShiftBtn").addEventListener("click", ()=>{
+    S.editId = s.id; save(); fillForm(s); showTab("#tabAdd"); tick();
+  });
+}
+
+/* ---------- income-mix donut ---------- */
+let mixSel = null;
+const MIXSEG = [
+  { key:"wages", label:"Wages", color:"#2563eb" },
+  { key:"cash", label:"Cash tips", color:"#1d7a3d" },
+  { key:"card", label:"Card tips", color:"#b45309" }
+];
+function renderMix(){
+  const totals = { wages: sum(S.shifts, wagePay), cash: sum(S.shifts, s => +s.cash || 0), card: sum(S.shifts, s => +s.card || 0) };
+  const tipOutTotal = sum(S.shifts, s => +s.tipOut || 0);
+  const total = totals.wages + totals.cash + totals.card;
+  const svg = $("#mixDonut"), center = $("#mixCenter"), legend = $("#mixLegend");
+  if(!total){
+    svg.innerHTML = `<circle cx="50" cy="50" r="38" fill="none" stroke="var(--line)" stroke-width="13"/>`;
+    center.innerHTML = `<b>—</b><span>no shifts yet</span>`;
+    legend.innerHTML = `<span class="hint">Log a shift and your income mix shows up here.</span>`;
+    return;
+  }
+  let acc = 0, parts = "";
+  MIXSEG.forEach(k => {
+    const n = totals[k.key]; if(!n) return;
+    const frac = n/total, sel = mixSel === k.key;
+    const rr = sel ? 36 : 38, cc = 2*Math.PI*rr;
+    const len = Math.max(frac*cc - 1.2, 0.6);
+    parts += `<circle cx="50" cy="50" r="${rr}" fill="none" stroke="${k.color}" stroke-width="${sel?15:13}" stroke-dasharray="${len} ${cc-len}" stroke-dashoffset="${-acc*cc}" transform="rotate(-90 50 50)" data-seg="${k.key}" style="cursor:pointer" opacity="${mixSel && !sel ? .45 : 1}"><title>${k.label}: ${money(n)}</title></circle>`;
+    acc += frac;
+  });
+  svg.innerHTML = parts;
+  svg.querySelectorAll("[data-seg]").forEach(el => el.addEventListener("click", ()=>{ mixSel = mixSel === el.dataset.seg ? null : el.dataset.seg; renderMix(); tick(); }));
+  const selK = MIXSEG.find(k => k.key === mixSel);
+  if(selK && totals[selK.key]) center.innerHTML = `<b>${money0(totals[selK.key])}</b><span>${selK.label.toLowerCase()} (${Math.round(totals[selK.key]/total*100)}%)</span>`;
+  else center.innerHTML = `<b>${money0(total - tipOutTotal)}</b><span>kept after tip-outs</span>`;
+  legend.innerHTML = MIXSEG.filter(k=>totals[k.key]).map(k=>`<span class="li" style="${mixSel===k.key?"outline:2px solid "+k.color:""}"><b style="color:${k.color}">●</b> ${k.label} — ${money0(totals[k.key])} (${Math.round(totals[k.key]/total*100)}%)</span>`).join("") +
+    (tipOutTotal ? `<span class="li">Tip-outs paid out — ${money0(tipOutTotal)}</span>` : "");
+}
+
+/* ---------- earnings chart (last 14 shifts) ---------- */
+function renderEarnChart(){
+  const shifts = [...S.shifts].sort((a,b)=> (a.date||"").localeCompare(b.date||"") || (a.created||0)-(b.created||0)).slice(-14);
+  const wrap = $("#earnChart");
+  if(shifts.length < 2){ wrap.innerHTML = `<p class="hint">Log two or more shifts and the trend appears here.</p>`; $("#earnDetail").textContent = ""; return; }
+  const max = Math.max(...shifts.map(netPay), 1);
+  wrap.innerHTML = shifts.map(s => `<div class="ec-col ${S.selShift===s.id?"sel":""}" data-bar="${s.id}" title="${fmtD(s.date)} — ${money(netPay(s))}"><div class="ec-bar" style="height:${Math.max(6, Math.round(netPay(s)/max*110))}px"></div><span class="ec-lab">${(s.date||"").slice(5)}</span></div>`).join("");
+  wrap.querySelectorAll("[data-bar]").forEach(c => c.addEventListener("click", ()=>{
+    const s = S.shifts.find(x => x.id === c.dataset.bar); if(!s) return;
+    S.selShift = s.id; save(); renderShifts(); renderDetail(); renderEarnChart();
+    $("#earnDetail").innerHTML = `<b>${fmtD(s.date)}</b> — ${esc(s.jobName || "")}: walked with <b>${money(netPay(s))}</b> ($${trueHourly(s).toFixed(2)}/hr). Full breakdown is in Shift detail above.`;
+    tick();
+  }));
+}
+</script>
+<script>
+/* ---------- add/edit shift form ---------- */
+let formHours = 6;
+function renderJobSelect(){
+  const sel = $("#inJob");
+  const cur = sel.value;
+  sel.innerHTML = S.jobs.length ? S.jobs.map(j => `<option value="${j.id}">${esc(j.name)}${j.role ? " — " + esc(j.role) : ""}</option>`).join("") : `<option value="">No jobs yet — add one in the Jobs tab</option>`;
+  if(cur && S.jobs.some(j => j.id === cur)) sel.value = cur;
+  syncJobDefaults(false);
+}
+function syncJobDefaults(force){
+  const j = S.jobs.find(x => x.id === $("#inJob").value);
+  if(!j) return;
+  if(force || !$("#inRole").value) $("#inRole").value = j.role || "";
+  if(force || !$("#inWage").value) $("#inWage").value = j.wage != null && j.wage !== "" ? j.wage : "";
+  formPreview();
+}
+$("#inJob").addEventListener("change", ()=> syncJobDefaults(true));
+function formShift(){
+  const j = S.jobs.find(x => x.id === $("#inJob").value);
+  return {
+    date: $("#inDate").value, jobId: j ? j.id : "", jobName: j ? j.name : "",
+    role: $("#inRole").value.trim(), hours: formHours,
+    wage: parseFloat($("#inWage").value) || 0, sales: parseFloat($("#inSales").value) || 0,
+    cash: parseFloat($("#inCash").value) || 0, card: parseFloat($("#inCard").value) || 0,
+    tipOut: parseFloat($("#inTipOut").value) || 0,
+    covers: parseInt($("#inCovers").value, 10) || 0, note: $("#inNote").value.trim()
+  };
+}
+function formPreview(){
+  const s = formShift();
+  const gross = grossTips(s);
+  $("#formPreview").innerHTML = gross || wagePay(s)
+    ? `You'll walk with <b>${money(netPay(s))}</b> — that's <b>$${trueHourly(s).toFixed(2)}/hr</b> after the ${money(s.tipOut)} tip-out${tipPct(s)!=null ? ` · ${tipPct(s).toFixed(1)}% tips on sales` : ""}.`
+    : "Fill in the shift to see what you walked with.";
+  $("#hrsVal").textContent = formHours.toFixed(1);
+}
+["inWage","inSales","inCash","inCard","inTipOut","inCovers","inRole"].forEach(id => $("#"+id).addEventListener("input", formPreview));
+$("#inDate").addEventListener("change", formPreview);
+$("#hrsDown").addEventListener("click", ()=>{ formHours = Math.max(0.5, formHours - 0.5); formPreview(); tick(); });
+$("#hrsUp").addEventListener("click", ()=>{ formHours = Math.min(24, formHours + 0.5); formPreview(); tick(); });
+function resetForm(){
+  S.editId = null; $("#cancelEditBtn").hidden = true; $("#formTitle").textContent = "Add a shift";
+  $("#inDate").value = new Date().toISOString().slice(0,10);
+  $("#inRole").value = ""; $("#inWage").value = ""; $("#inSales").value = ""; $("#inCash").value = "";
+  $("#inCard").value = ""; $("#inTipOut").value = ""; $("#inCovers").value = ""; $("#inNote").value = "";
+  formHours = 6; renderJobSelect(); formPreview();
+}
+$("#resetFormBtn").addEventListener("click", resetForm);
+$("#cancelEditBtn").addEventListener("click", ()=>{ resetForm(); toast("Edit canceled — nothing changed."); });
+function fillForm(s){
+  renderJobSelect();
+  $("#inJob").value = s.jobId || "";
+  $("#inDate").value = s.date || "";
+  $("#inRole").value = s.role || "";
+  formHours = +s.hours || 6;
+  $("#inWage").value = s.wage ?? ""; $("#inSales").value = s.sales || ""; $("#inCash").value = s.cash || "";
+  $("#inCard").value = s.card || ""; $("#inTipOut").value = s.tipOut || ""; $("#inCovers").value = s.covers || "";
+  $("#inNote").value = s.note || "";
+  $("#formTitle").textContent = "Edit shift";
+  $("#cancelEditBtn").hidden = false;
+  formPreview();
+}
+$("#saveShiftBtn").addEventListener("click", ()=>{
+  const s = formShift();
+  if(!s.jobName){ toast("Pick a job first — add one in the Jobs tab if the list is empty."); return; }
+  if(!s.date){ toast("Give the shift a date."); return; }
+  if(grossTips(s) <= 0 && wagePay(s) <= 0){ toast("Enter at least the tips or wage for this shift."); return; }
+  if(S.editId){
+    const old = S.shifts.find(x => x.id === S.editId);
+    if(old) Object.assign(old, s);
+    S.selShift = S.editId;
+    toast(`Shift updated — ${money(netPay(s))} walked ($${trueHourly(s).toFixed(2)}/hr).`);
+  } else {
+    const rec = Object.assign({ id: uid(), created: Date.now() }, s);
+    S.shifts.push(rec); S.selShift = rec.id;
+    toast(`Saved — you walked with ${money(netPay(s))} ($${trueHourly(s).toFixed(2)}/hr true rate).`);
+  }
+  S.editId = null;
+  save(); resetForm(); renderAll(); showTab("#tabShifts"); chime();
+});
+
+/* ---------- export / backup / restore ---------- */
+function download(name, content, type){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+$("#exportCsvBtn").addEventListener("click", ()=>{
+  if(!S.shifts.length){ toast("No shifts to export yet."); return; }
+  const lines = [["Date","Job","Role","Hours","Wage","WagesEarned","CashTips","CardTips","TipOut","Sales","TipPct","NetWalked","TrueHourly","Covers","Note"].join(",")];
+  [...S.shifts].sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach(s => {
+    const q = v => `"${String(v==null?"":v).replace(/"/g,'""')}"`;
+    lines.push([s.date, q(s.jobName), q(s.role), s.hours, s.wage, wagePay(s).toFixed(2), s.cash, s.card, s.tipOut, s.sales || "", tipPct(s)==null?"":tipPct(s).toFixed(1), netPay(s).toFixed(2), trueHourly(s).toFixed(2), s.covers || "", q(s.note)].join(","));
+  });
+  download("tiptally-shifts.csv", lines.join("\n"), "text/csv");
+  toast("Every shift, exported — opens in any spreadsheet, ready for tax time or a second job hunt.");
+});
+$("#backupBtn").addEventListener("click", ()=>{ download("tiptally-backup.json", JSON.stringify({ shifts: S.shifts, jobs: S.jobs, weekStart: S.weekStart }, null, 1), "application/json"); toast("Backup downloaded — every shift and job in one file."); });
+$("#restoreBtn").addEventListener("click", ()=> $("#jsonFile").click());
+$("#jsonFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(String(rd.result));
+      if(!d || !Array.isArray(d.shifts)) throw new Error("bad");
+      const jobMap = {};
+      const normJ = (Array.isArray(d.jobs) ? d.jobs : []).filter(x => x && typeof x === "object").map(x => {
+        const j = { id: uid(), name: String(x.name || "Job"), role: String(x.role || ""), wage: Math.max(0, +x.wage || 0) };
+        jobMap[x.id] = j; return j;
+      });
+      const normS = d.shifts.map(r => {
+        if(!r || typeof r !== "object") throw new Error("bad shift");
+        const job = normJ.find(j => j.name === String(r.jobName || "")) || jobMap[r.jobId];
+        return { id: uid(), created: +r.created || Date.now(), date: String(r.date || "").slice(0,10),
+          jobId: job ? job.id : "", jobName: String(r.jobName || (job ? job.name : "")), role: String(r.role || ""),
+          hours: Math.min(24, Math.max(0, +r.hours || 0)), wage: Math.max(0, +r.wage || 0),
+          cash: Math.max(0, +r.cash || 0), card: Math.max(0, +r.card || 0), tipOut: Math.max(0, +r.tipOut || 0),
+          sales: Math.max(0, +r.sales || 0), covers: Math.max(0, parseInt(r.covers, 10) || 0), note: String(r.note || "") };
+      });
+      if(S.sampling && S.snapshot){ S.shifts = S.snapshot.shifts; S.jobs = S.snapshot.jobs; S.snapshot = null; S.sampling = false; setSampleUI(); toast("Sample mode turned off so the restored data lands in your real log."); }
+      const sig = s => `${s.date}|${s.jobName}|${s.cash}|${s.card}|${s.tipOut}|${s.hours}`;
+      const freshS = normS.filter(r => !S.shifts.some(x => sig(x) === sig(r)));
+      const freshJ = normJ.filter(j => !S.jobs.some(x => x.name === j.name));
+      freshJ.forEach(j => S.jobs.push(j));
+      freshS.forEach(r => { const j = S.jobs.find(x => x.name === r.jobName); if(j) r.jobId = j.id; S.shifts.push(r); });
+      save(); renderAll(); chime(); toast(`Restored ${freshS.length} shift${freshS.length===1?"":"s"}${freshJ.length ? ` and ${freshJ.length} jobs` : ""}${normS.length-freshS.length ? ` — skipped ${normS.length-freshS.length} already logged` : ""}.`);
+    }catch(err){ toast("That file doesn't look like a TipTally backup."); }
+    e.target.value = "";
+  };
+  rd.readAsText(f);
+});
+
+/* ---------- stats view ---------- */
+let monthSel = null, dowSel = null;
+function renderStats(){
+  // months
+  const byMonth = {};
+  S.shifts.forEach(s => { const k = (s.date||"").slice(0,7); if(k) (byMonth[k] = byMonth[k] || []).push(s); });
+  const months = Object.keys(byMonth).sort().slice(-8);
+  const mc = $("#monthChart");
+  if(months.length){
+    const max = Math.max(...months.map(k => sum(byMonth[k], netPay)), 1);
+    mc.innerHTML = months.map(k => `<div class="ec-col ${monthSel===k?"sel":""}" data-month="${k}" title="${k} — ${money(sum(byMonth[k], netPay))}"><div class="ec-bar" style="height:${Math.max(6, Math.round(sum(byMonth[k], netPay)/max*130))}px"></div><span class="ec-lab">${MONTHS[+k.slice(5)-1]} ${k.slice(2,4)}</span></div>`).join("");
+    mc.querySelectorAll("[data-month]").forEach(c => c.addEventListener("click", ()=>{
+      monthSel = monthSel === c.dataset.month ? null : c.dataset.month; renderStats(); tick();
+    }));
+    if(monthSel && byMonth[monthSel]){
+      const ss = byMonth[monthSel];
+      $("#monthDetail").innerHTML = `<b>${MONTHS[+monthSel.slice(5)-1]} ${monthSel.slice(0,4)}</b> — ${ss.length} shifts, ${sum(ss, s => +s.hours).toFixed(1)} hrs, walked with <b>${money(sum(ss, netPay))}</b> (${money0(sum(ss, grossTips))} in tips, avg $${(sum(ss, trueHourly)/ss.length).toFixed(2)}/hr).`;
+    } else $("#monthDetail").textContent = "Tap a month for its breakdown.";
+  } else { mc.innerHTML = `<p class="hint">No shifts yet — your monthly earnings chart appears here.</p>`; $("#monthDetail").textContent = ""; }
+  // best shifts
+  const best = [...S.shifts].sort((a,b)=> netPay(b)-netPay(a)).slice(0,5);
+  $("#bestWrap").innerHTML = best.length ? `<table class="list"><thead><tr><th>Date</th><th>Job</th><th>Walked</th><th>$/hr</th></tr></thead><tbody>${best.map(s=>`<tr><td>${fmtD(s.date)}</td><td><b>${esc(s.jobName)}</b></td><td>${money(netPay(s))}</td><td class="pos">$${trueHourly(s).toFixed(2)}</td></tr>`).join("")}</tbody></table>` : `<p class="hint">No shifts yet.</p>`;
+  // day of week (by true hourly)
+  const byDow = [[],[],[],[],[],[],[]];
+  S.shifts.forEach(s => { const t = new Date((s.date||"")+"T12:00:00"); if(!isNaN(t)) byDow[t.getDay()].push(s); });
+  const rates = byDow.map(list => list.length ? sum(list, trueHourly)/list.length : 0);
+  const maxR = Math.max(...rates, 1);
+  $("#dowBars").innerHTML = [1,2,3,4,5,6,0].map(d => `<div class="bar-row" data-dow="${d}" style="cursor:pointer"><span>${DOW[d]}</span><div class="bar-track"><div class="bar-fill ${dowSel===d?"gold":""}" style="width:${Math.round(rates[d]/maxR*100)}%"></div></div><b>${byDow[d].length ? "$"+rates[d].toFixed(2) : "—"}</b></div>`).join("");
+  $("#dowBars").querySelectorAll("[data-dow]").forEach(r => r.addEventListener("click", ()=>{
+    const d = +r.dataset.dow; dowSel = dowSel === d ? null : d;
+    const list = byDow[d];
+    $("#dowDetail").innerHTML = list.length ? `<b>${DOW[d]}s</b> — ${list.length} shift${list.length===1?"":"s"} averaging $${rates[d].toFixed(2)}/hr true rate, ${money0(sum(list, netPay)/list.length)} walked per shift.` : `No ${DOW[d]} shifts logged yet.`;
+    renderStats(); tick();
+  }));
+  renderTax();
+}
+function renderTax(){
+  const sel = $("#taxYear");
+  const years = [...new Set(S.shifts.map(s => (s.date||"").slice(0,4)).filter(Boolean))].sort();
+  const cur = String(new Date().getFullYear());
+  if(!years.includes(cur)) years.push(cur);
+  years.sort().reverse();
+  sel.innerHTML = years.map(y => `<option value="${y}">${y}</option>`).join("");
+  if(!S.taxYear || !years.includes(String(S.taxYear))) S.taxYear = years[0];
+  sel.value = S.taxYear;
+  const ss = S.shifts.filter(s => (s.date||"").startsWith(S.taxYear));
+  const tips = sum(ss, grossTips), cash = sum(ss, s => +s.cash || 0), card = sum(ss, s => +s.card || 0);
+  const capPct = Math.min(100, Math.round(tips / 25000 * 100));
+  $("#taxWrap").innerHTML = ss.length ? `
+    <table class="list">
+      <tr><td>Shifts / hours</td><td style="text-align:right">${ss.length} · ${sum(ss, s => +s.hours).toFixed(1)} hrs</td></tr>
+      <tr><td>Wages earned</td><td style="text-align:right">${money(sum(ss, wagePay))}</td></tr>
+      <tr><td>Cash tips</td><td style="text-align:right">${money(cash)}</td></tr>
+      <tr><td>Card tips</td><td style="text-align:right">${money(card)}</td></tr>
+      <tr><td>Tip-outs paid</td><td style="text-align:right">−${money(sum(ss, s => +s.tipOut || 0))}</td></tr>
+      <tr><td><b>Total kept</b></td><td style="text-align:right"><b>${money(sum(ss, netPay))}</b></td></tr>
+    </table>
+    <div class="bar-row" style="margin-top:10px"><span>Tips vs cap</span><div class="bar-track"><div class="bar-fill gold" style="width:${capPct}%"></div></div><b>${capPct}%</b></div>
+    <p class="hint">Federal law (tax years 2025–2028) lets eligible tipped workers deduct up to $25,000 of qualified tips — voluntary cash and charged tips, reported on a W-2/1099/4137; automatic service charges don't count. Your ${S.taxYear} logged qualified tips total <b>${money(tips)}</b>. This is a record of what you entered, not tax advice — see IRS Publication 531 or your tax pro.</p>`
+  : `<p class="hint">No shifts logged in ${S.taxYear} yet.</p>`;
+}
+$("#taxYear").addEventListener("change", e => { S.taxYear = e.target.value; save(); renderTax(); });
+$("#printBtn").addEventListener("click", ()=>{
+  const y = S.taxYear || String(new Date().getFullYear());
+  const ss = S.shifts.filter(s => (s.date||"").startsWith(y));
+  const byJob = {};
+  ss.forEach(s => { (byJob[s.jobName || "—"] = byJob[s.jobName || "—"] || []).push(s); });
+  const best = [...ss].sort((a,b)=> netPay(b)-netPay(a)).slice(0,5);
+  $("#printReport").innerHTML = `<h2>${BRAND} — ${y} income record</h2>
+    <p>${ss.length} shifts · ${sum(ss, s => +s.hours).toFixed(1)} hours · wages ${money(sum(ss, wagePay))} · cash tips ${money(sum(ss, s => +s.cash || 0))} · card tips ${money(sum(ss, s => +s.card || 0))} · tip-outs −${money(sum(ss, s => +s.tipOut || 0))} · <b>total kept ${money(sum(ss, netPay))}</b></p>
+    <h3>By job</h3>${Object.entries(byJob).map(([n,list])=>`<p>${esc(n)} — ${list.length} shifts, ${money(sum(list, netPay))} kept, avg $${(sum(list, trueHourly)/(list.length||1)).toFixed(2)}/hr</p>`).join("")}
+    <h3>Best shifts</h3>${best.map(s=>`<p>${fmtD(s.date)} — ${esc(s.jobName)}: ${money(netPay(s))} ($${trueHourly(s).toFixed(2)}/hr)</p>`).join("")}
+    <p>Generated from the worker's own TipTally log. A personal record, not tax advice.</p>`;
+  window.print();
+});
+
+/* ---------- jobs ---------- */
+$("#addJobBtn").addEventListener("click", ()=>{
+  const name = $("#jName").value.trim();
+  if(!name){ toast("Name the job first."); $("#jName").focus(); return; }
+  if(S.jobs.some(j => j.name.toLowerCase() === name.toLowerCase())){ toast("That job is already on your list."); return; }
+  S.jobs.push({ id: uid(), name, role: $("#jRole").value.trim(), wage: parseFloat($("#jWage").value) || 0 });
+  $("#jName").value = ""; $("#jRole").value = ""; $("#jWage").value = "";
+  save(); renderJobs(); renderJobSelect(); chime(); toast(`${name} added — log its first shift anytime.`);
+});
+function renderJobs(){
+  const wrap = $("#jobWrap");
+  if(!S.jobs.length){ wrap.innerHTML = `<p class="hint">No jobs yet. Add the places you work on the left.</p>`; return; }
+  wrap.innerHTML = `<table class="list"><thead><tr><th>Job</th><th>Shifts</th><th>Kept</th><th>Avg $/hr</th><th></th></tr></thead><tbody>${S.jobs.map(j => {
+    const list = S.shifts.filter(s => s.jobId === j.id || s.jobName === j.name);
+    const avg = list.length ? sum(list, trueHourly)/list.length : 0;
+    return `<tr><td><b>${esc(j.name)}</b>${j.role?`<br><span class="hint">${esc(j.role)} · ${money(j.wage)}/hr</span>`:""}</td><td>${list.length}</td><td>${money(sum(list, netPay))}</td><td class="pos">${list.length ? "$"+avg.toFixed(2) : "—"}</td><td>${list.length ? "" : `<button class="btn danger" data-del-job="${j.id}">Remove</button>`}</td></tr>`;
+  }).join("")}</tbody></table>`;
+  wrap.querySelectorAll("[data-del-job]").forEach(b => b.addEventListener("click", ()=>{
+    const j = S.jobs.find(x => x.id === b.dataset.delJob); if(!j) return;
+    if(!confirm(`Remove ${j.name}? It has no shifts logged.`)) return;
+    S.jobs = S.jobs.filter(x => x.id !== j.id); save(); renderJobs(); renderJobSelect(); thud();
+  }));
+}
+
+/* ---------- sample data ---------- */
+function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function sampleData(){
+  const rnd = mulberry(20261009);
+  const jobs = [
+    { id: uid(), name: "Maple Street Bistro", role: "Server", wage: 2.83 },
+    { id: uid(), name: "The Copper Mug", role: "Bartender", wage: 5.25 }
+  ];
+  const shifts = [];
+  let day = new Date(2026, 7, 10); // Aug 10 2026 (Mon)
+  for(let i=0;i<26;i++){
+    const dow = day.getDay();
+    const weekend = (dow === 5 || dow === 6);
+    const job = weekend ? jobs[1] : jobs[0];
+    const hours = 5 + Math.floor(rnd()*3) + (weekend ? 1.5 : 0);
+    const sales = Math.round((weekend ? 700 : 420) + rnd()*380);
+    const tipRate = 0.17 + rnd()*0.07;
+    const gross = Math.round(sales * tipRate);
+    const cash = Math.round(gross * (0.35 + rnd()*0.2));
+    const card = gross - cash;
+    const tipOut = Math.round(gross * 0.22);
+    shifts.push({ id: uid(), created: day.getTime(), date: day.toISOString().slice(0,10), jobId: job.id, jobName: job.name, role: job.role,
+      hours, wage: job.wage, cash, card, tipOut, sales, covers: Math.round(sales/38), note: weekend ? "Busy bar night" : (rnd() < .3 ? "Slow lunch crowd" : "") });
+    day = new Date(day.getTime() + (2 + Math.floor(rnd()*3)) * 86400000);
+  }
+  return { jobs, shifts };
+}
+function setSampleUI(){
+  $("#sampleBar").classList.toggle("show", !!S.sampling);
+  $("#sampleBtn").classList.toggle("on", !!S.sampling);
+}
+$("#sampleBtn").addEventListener("click", ()=>{
+  if(!S.sampling){
+    S.snapshot = { shifts: clone(S.shifts), jobs: clone(S.jobs), selShift: S.selShift };
+    const sd = sampleData();
+    S.jobs = sd.jobs; S.shifts = sd.shifts; S.selShift = sd.shifts[sd.shifts.length-1].id;
+    S.sampling = true; setSampleUI(); save(); renderAll(); chime();
+    toast("Sample data on — two jobs, 26 shifts. Your real log comes back exactly when you tap the flask again.");
+  } else {
+    if(S.snapshot){ S.shifts = S.snapshot.shifts; S.jobs = S.snapshot.jobs; S.selShift = S.snapshot.selShift; S.snapshot = null; }
+    S.sampling = false; setSampleUI(); save(); renderAll(); tick();
+    toast("Sample off — your real log is back, exactly as you left it.");
+  }
+});
+
+/* ---------- render all / init ---------- */
+function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix(); renderEarnChart(); renderStats(); renderJobs(); renderJobSelect(); formPreview(); }
+load();
+$("#brandName").textContent = BRAND;
+applyTheme(); applySound(); setSampleUI();
+$("#inDate").value = new Date().toISOString().slice(0,10);
+if(S.sampling && !S.snapshot) S.snapshot = { shifts: [], jobs: [], selShift: null };
+renderAll();
+</script>
+</body>
+</html>
