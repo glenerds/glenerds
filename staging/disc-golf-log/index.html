@@ -534,7 +534,8 @@ $("#csvFile").addEventListener("change", e => {
         const layout = iLayout >= 0 ? (r[iLayout]||"").trim() : "";
         const holes = holeIdx.map((ci,k) => ({ par: pars[k] || 3, score: Math.max(1, parseInt(r[ci],10) || pars[k] || 3) }));
         const total = holes.reduce((a,h)=>a+h.score,0);
-        const dup = S.rounds.some(x => x.date === date && x.course === course && x.layout === layout && roundScore(x) === total);
+        const sig = holes.map(h=>h.score).join(",");
+        const dup = S.rounds.some(x => x.date === date && x.course === course && x.layout === layout && roundScore(x) === total && x.holes.map(h=>h.score).join(",") === sig);
         if(dup){ skipped++; return; }
         S.rounds.push({ id: uid(), date, course, layout, holes, created: Date.now() }); added++;
       });
@@ -582,8 +583,12 @@ $("#jsonFile").addEventListener("change", e => {
       });
       const normD = (Array.isArray(discs) ? discs : []).filter(x => x && typeof x === "object").map(x => ({ id: uid(), name: String(x.name||"Disc"), type: String(x.type||"Midrange"), plastic: String(x.plastic||""), speed: x.speed, glide: x.glide, turn: x.turn, fade: x.fade, inBag: x.inBag !== false }));
       if(S.sampling && S.snapshot){ S.rounds = S.snapshot.rounds; S.discs = S.snapshot.discs; S.snapshot = null; S.sampling = false; $("#sampleBar").classList.remove("show"); $("#sampleBtn").classList.remove("on"); toast("Sample mode turned off so the restored data lands in your real log."); }
-      S.rounds = S.rounds.concat(normR); S.discs = S.discs.concat(normD);
-      save(); renderAll(); chime(); toast(`Restored ${normR.length} round${normR.length===1?"":"s"}${normD.length ? ` and ${normD.length} discs` : ""}.`);
+      const sigOf = r => `${r.date}|${r.course}|${r.layout}|${roundScore(r)}|${r.holes.map(h=>h.score).join(",")}`;
+      const freshR = normR.filter(r => !S.rounds.some(x => sigOf(x) === sigOf(r)));
+      const freshD = normD.filter(d => !S.discs.some(x => x.name === d.name && x.type === d.type));
+      const skippedN = (normR.length - freshR.length) + (normD.length - freshD.length);
+      S.rounds = S.rounds.concat(freshR); S.discs = S.discs.concat(freshD);
+      save(); renderAll(); chime(); toast(`Restored ${freshR.length} round${freshR.length===1?"":"s"}${freshD.length ? ` and ${freshD.length} discs` : ""}${skippedN ? ` — skipped ${skippedN} already in your log` : ""}.`);
     }catch(err){ toast("That file doesn't look like a ChainLog backup."); }
     e.target.value = "";
   };
