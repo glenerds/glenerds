@@ -380,7 +380,6 @@ $("#darkBtn").addEventListener("click",()=>{ const nowDark=document.documentElem
 $("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!(S.settings.sound!==false); $("#soundBtn").classList.toggle("snd-off",!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed",S.settings.sound); save(); beep(700); });
 
 /* ---------- sample data ---------- */
-function snapshotKey(){ const copy={...S, meta:{...S.meta, sampleLockHash:null, snapshot:null}}; return hashStr(JSON.stringify(copy.entries)+"|"+S.moods.length+"|"+S.acts.length); }
 function sampleData(){
   const d=defaults();
   const acts=["a1","a2","a3","a4","a5","a6","a7","a8","a9"], moods=["m1","m2","m3","m4","m5","m6"];
@@ -683,7 +682,7 @@ $("#jsonImp").addEventListener("change",ev=>{
 });
 $("#clearBtn").addEventListener("click",()=>{
   if($("#sampleBtn").getAttribute("aria-pressed")==="true"){ $("#dataStatus").textContent="Sample data is on — turn it off with the flask button first (clearing now would only clear the demo)."; return; }
-  if(!confirm("Clear ALL your MoodLog data on this device? This cannot be undone.")) return;
+  if(!confirm("Clear ALL your MoodLog data on this device? This cannot be undone. (Your theme/sound settings stay; your passcode is removed.)")) return;
   const keep=S.settings; S=defaults(); S.settings=keep; save();
   resetDraft(); selDate=todayISO(); curMonth=selDate.slice(0,7); render();
   $("#dataStatus").textContent="All data cleared."; beep(420);
