@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Insurance Claim Settlement &amp; Recoverable Depreciation Tracker</title>
+<style>
+  :root{
+    --bg:#eef3f8; --panel:#ffffff; --panel2:#e6eef7; --ink:#16293d; --muted:#40576e;
+    --line:#b9cbdd; --accent:#123f63; --accent2:#24719e; --soft:#d7e9f7;
+    --danger:#b03a2e; --warn-bg:#fdf3e3; --warn-line:#e3c98f; --warn-ink:#6b5410;
+    --good:#1e7a4f; --gold:#b8860b; --shadow:0 2px 10px rgba(18,63,99,.10);
+    --seg-paid:#24719e; --seg-withheld:#d99a26; --seg-unclaimed:#7a9cc0; --seg-deductible:#8a97a5;
+  }
+  [data-theme="dark"]{
+    --bg:#0c1826; --panel:#122539; --panel2:#173048; --ink:#e7f0f8; --muted:#adc2d6;
+    --line:#2b4a68; --accent:#8ec9ec; --accent2:#a9d6f2; --soft:#1d4262;
+    --danger:#ff9a8a; --warn-bg:#3a2f14; --warn-line:#7a6526; --warn-ink:#f0d48a;
+    --good:#7fd6a8; --gold:#eec27a; --shadow:0 2px 10px rgba(0,0,0,.35);
+    --seg-paid:#4d9ecf; --seg-withheld:#d99a26; --seg-unclaimed:#5c82a8; --seg-deductible:#71808f;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Segoe UI",Arial,Helvetica,sans-serif;font-size:16px;line-height:1.45}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+  header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 2px 16px}
+  .brand{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 320px}
+  .brand h1{font-size:25px;margin:0;color:var(--accent);letter-spacing:.2px;line-height:1.2}
+  .brand .tag{color:var(--muted);font-size:15px;margin:3px 0 0}
+  .logo-badge{width:48px;height:48px;flex:0 0 auto}
+  .hbtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .hbtn{height:44px;min-width:44px;border:1.5px solid var(--line);background:var(--panel);border-radius:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;box-shadow:var(--shadow)}
+  .hbtn:hover{border-color:var(--accent2)}
+  .hbtn:focus-visible,.pill:focus-visible,.btn:focus-visible,.opbtn:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .hbtn[aria-pressed="true"]{background:var(--soft);border-color:var(--accent2)}
+  .pill{height:44px;border-radius:999px;padding:0 18px;text-decoration:none;font-weight:600;color:var(--accent);display:inline-flex;align-items:center;border:1.5px solid var(--line);background:var(--panel);box-shadow:var(--shadow)}
+  .pill:hover{border-color:var(--accent2)}
+  .hbtn svg{width:22px;height:22px;display:block}
+  .legal{background:var(--warn-bg);border:1.5px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:12px 16px;margin:4px 0 14px;font-size:15px}
+  #storageWarn{display:none;background:var(--warn-bg);border:1.5px solid var(--warn-line);color:var(--warn-ink);border-radius:12px;padding:12px 16px;margin:4px 0 14px;font-size:15px}
+  #statusLine{font-size:15px;color:var(--muted);min-height:22px;margin:0 0 10px}
+  .grid{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
+  .card{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 4px;font-size:21px;color:var(--accent)}
+  .card .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+  .span2{grid-column:1/-1}
+  .kpis{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+  @media(min-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1020px){.kpis{grid-template-columns:repeat(4,1fr)}}
+  .kpi{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .klabel{font-size:15px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+  .kpi .kval{font-size:29px;font-weight:800;color:var(--accent);margin:2px 0}
+  .kpi .knote{font-size:15px;color:var(--muted)}
+  .kpi.alert .kval{color:var(--gold)}
+  /* Waterfall */
+  .wf{display:flex;width:100%;min-height:64px;border:1.5px solid var(--line);border-radius:12px;overflow:visible;background:var(--panel2)}
+  .wfseg{border:none;border-right:1.5px solid var(--panel);cursor:pointer;color:#fff;font-weight:700;font-size:15px;padding:8px 6px;min-width:0;overflow:hidden;text-align:center;transition:transform .15s ease;position:relative}
+  .wfseg:first-child{border-radius:11px 0 0 11px}
+  .wfseg:last-child{border-radius:0 11px 11px 0;border-right:none}
+  .wfseg .amt{display:block;font-size:16px;white-space:nowrap}
+  .wfseg .lbl{display:block}
+  .wfseg.narrow .lbl{display:none}
+  .wfseg.sel{transform:translateY(-7px);outline:3px solid var(--accent);outline-offset:1px;z-index:2;border-radius:8px}
+  .wfseg:focus-visible{outline:3px solid var(--accent);outline-offset:2px;z-index:2}
+  .detail{background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;min-height:96px;margin-top:14px}
+  .detail h3{margin:0 0 6px;font-size:19px;color:var(--accent)}
+  .detail p{margin:3px 0;font-size:16px}
+  .chartgrid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:18px}
+  @media(min-width:900px){.chartgrid{grid-template-columns:minmax(300px,430px) 1fr}}
+  .donut-box{display:flex;flex-direction:column;align-items:center;gap:8px}
+  .donut-box svg{width:100%;max-width:400px;height:auto;display:block}
+  .donut-under{font-size:20px;font-weight:700;color:var(--accent);text-align:center}
+  .seg{cursor:pointer;transition:transform .15s ease}
+  .donut-box svg text{pointer-events:none}
+  .seg,.seg:focus,.seg:focus-visible{outline:none}
+  .seg .segring{opacity:0;pointer-events:none}
+  .seg:focus-visible .segring{opacity:1}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:15px;margin-top:6px}
+  .legend .sw{display:inline-block;width:14px;height:14px;border-radius:4px;margin-right:6px;vertical-align:-2px}
+  /* Gap bars */
+  .gaprows{display:flex;flex-direction:column;gap:16px}
+  .gaprow{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel);cursor:pointer;text-align:left;width:100%}
+  .gaprow:hover{border-color:var(--accent2)}
+  .gaprow.sel{outline:3px solid var(--accent);outline-offset:1px;transform:translateY(-3px)}
+  .gaprow .gname{font-weight:700;font-size:17px;color:var(--accent)}
+  .gapbar{display:grid;grid-template-columns:118px 1fr 96px;gap:10px;align-items:center;font-size:15px;margin-top:7px}
+  .gap-track{background:var(--soft);border:1.5px solid var(--line);border-radius:999px;height:20px;overflow:hidden}
+  .gap-fill{height:100%;border-radius:999px}
+  .gap-fill.ins{background:var(--seg-unclaimed)}
+  .gap-fill.con{background:var(--gold)}
+  .gap-amt{text-align:right;font-weight:700}
+  .gap-note{font-size:15px;margin-top:8px;color:var(--muted)}
+  @media(max-width:560px){.gapbar{grid-template-columns:92px 1fr 78px}}
+  /* Forms */
+  form.entry{display:grid;grid-template-columns:1fr;gap:10px;margin:12px 0;background:var(--panel2);border:1.5px solid var(--line);border-radius:12px;padding:14px}
+  @media(min-width:700px){form.entry{grid-template-columns:1fr 1fr} form.entry .full{grid-column:1/-1}}
+  label{display:flex;flex-direction:column;gap:4px;font-size:15px;font-weight:600}
+  label span{color:var(--muted);font-weight:400}
+  input,select,textarea{border:1.5px solid var(--line);background:var(--panel);border-radius:9px;padding:9px 11px;font-size:16px;width:100%}
+  textarea{min-height:84px;resize:vertical}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:2px}
+  .btn{border:1.5px solid var(--accent2);background:var(--accent);color:#fff;border-radius:10px;padding:9px 18px;cursor:pointer;font-weight:600;min-height:44px}
+  [data-theme="dark"] .btn{color:#0c1826}
+  .btn.ghost{background:var(--panel);color:var(--accent)}
+  .btn:hover{filter:brightness(1.08)}
+  .buckets{display:grid;grid-template-columns:1fr;gap:18px}
+  @media(min-width:1020px){.buckets{grid-template-columns:repeat(3,1fr)}}
+  .bucket{background:var(--panel);border:1.5px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+  .bucket h3{margin:0 0 2px;font-size:19px;color:var(--accent)}
+  .bucket .bsub{color:var(--muted);font-size:15px;margin:0 0 10px}
+  .bucket label{margin-bottom:8px}
+  .bsummary{background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;margin-top:6px}
+  .bsummary div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+  .bsummary b{color:var(--accent)}
+  /* Entries */
+  .entries{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .entry-item{border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--panel)}
+  .entry-item .cat{font-size:15px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.4px}
+  .entry-item .main{font-size:17px;font-weight:600;margin:2px 0}
+  .entry-item .meta{color:var(--muted);font-size:15px;white-space:pre-wrap;word-break:break-word}
+  .entry-item .ops{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .opbtn{border:1.5px solid var(--line);background:var(--panel2);border-radius:9px;padding:6px 14px;cursor:pointer;min-height:38px;font-weight:600}
+  .opbtn:hover{border-color:var(--accent2)}
+  .opbtn.del{color:var(--danger)}
+  .empty{color:var(--muted);font-size:15px;border:1.5px dashed var(--line);border-radius:12px;padding:14px;text-align:center;margin-top:12px}
+  .pilltag{display:inline-block;border:1.5px solid var(--line);background:var(--panel2);border-radius:999px;padding:2px 10px;font-size:15px;font-weight:600;margin-left:6px}
+  /* ALE + room bars */
+  .minibars{display:flex;flex-direction:column;gap:10px;margin:12px 0}
+  .minibar{display:grid;grid-template-columns:170px 1fr 100px;gap:10px;align-items:center;font-size:15px;width:100%;background:none;border:none;cursor:pointer;text-align:left;padding:4px;border-radius:8px}
+  .minibar.sel{outline:3px solid var(--accent);outline-offset:1px;transform:translateY(-2px)}
+  .minibar .mbname{font-weight:600}
+  .mb-track{background:var(--soft);border:1.5px solid var(--line);border-radius:999px;height:20px;overflow:hidden}
+  .mb-fill{background:var(--accent2);height:100%;border-radius:999px}
+  .mb-fill.ale{background:var(--gold)}
+  .mb-amt{text-align:right;font-weight:700;color:var(--accent)}
+  @media(max-width:560px){.minibar{grid-template-columns:110px 1fr 82px}}
+  /* Checklist */
+  .steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
+  .steps li{display:flex;gap:12px;align-items:flex-start;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
+  .steps input[type="checkbox"]{width:24px;height:24px;flex:0 0 auto;margin-top:2px;accent-color:var(--accent2)}
+  .steps .checked{text-decoration:line-through;color:var(--muted)}
+  .steps .del{margin-left:auto}
+  footer.foot{margin-top:26px;color:var(--muted);font-size:15px;text-align:center}
+  footer.foot .pill{margin-top:10px}
+  /* Print packet */
+  #packet{display:none}
+  @media print{
+    body{background:#fff;color:#000;font-size:12pt}
+    .wrap>header.top,.wrap>.legal,.wrap>#storageWarn,.wrap>#statusLine,.wrap>main,.wrap>footer.foot{display:none !important}
+    #packet{display:block;color:#000}
+    #packet h1{font-size:19pt;margin:0 0 4pt}
+    #packet h2{font-size:14pt;margin:16pt 0 6pt;border-bottom:1.5pt solid #333;padding-bottom:3pt}
+    #packet table{border-collapse:collapse;width:100%;margin:6pt 0}
+    #packet th,#packet td{border:1pt solid #666;padding:4pt 6pt;text-align:left;font-size:11pt;vertical-align:top}
+    #packet .meta{font-size:11pt;color:#333}
+    #packet .disc{border:1pt solid #666;padding:8pt;margin-top:14pt;font-size:11pt}
+    #packet ul{margin:4pt 0 4pt 18pt;padding:0}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo-badge" viewBox="0 0 48 48" aria-hidden="true"><path d="M24 3 5 19h5v24h28V19h5L24 3z" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/><path d="M24 12l11 4v9c0 8-4.6 13.4-11 16C17.6 38.4 13 33 13 25v-9l11-4z" fill="var(--soft)" stroke="var(--accent2)" stroke-width="2.4" stroke-linejoin="round"/><path d="M18.5 25.5l4 4 7.5-8" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div>
+        <h1>Home Claim Organizer</h1>
+        <p class="tag">Post-loss claim money, deadlines, and documents — organized in one place, on this device only.</p>
+      </div>
+    </div>
+    <div class="hbtns">
+      <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button class="hbtn" id="sampleBtn" type="button" aria-pressed="false" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v5.5L4.8 18a2.4 2.4 0 0 0 2.1 3.5h10.2a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 15h9"/></svg></button>
+      <button class="hbtn" id="themeBtn" type="button" aria-pressed="false" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2z"/></svg></button>
+      <button class="hbtn" id="soundBtn" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="snd-waves" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+    </div>
+  </header>
+
+  <div class="legal" role="note"><strong>Please read first:</strong> this tool keeps organizational and educational records only. It is <strong>not legal, insurance, or financial advice</strong> and is <strong>not a substitute for a licensed public adjuster or an attorney</strong>. Every deadline here is one <strong>you</strong> entered — always confirm deadlines against your own policy and insurer letters. For a large, denied, or disputed claim, consider consulting a licensed public adjuster or attorney in your area before relying on your own records alone. Do not store passwords, PINs, or full account numbers in this tool.</div>
+  <div id="storageWarn" role="alert">This browser could not save data on this device. Your entries may disappear when you close this page — use the printable claim packet to keep a paper copy.</div>
+  <p id="statusLine" aria-live="polite"></p>
+
+  <main class="grid">
+    <!-- Claim overview -->
+    <section class="card span2" aria-labelledby="claimH">
+      <h2 id="claimH">Claim overview</h2>
+      <p class="sub">The basics of the loss and the one deadline that matters most. Dates and deadlines are yours — this tool never looks up state law or policy rules.</p>
+      <form class="entry" id="claimForm">
+        <label>Insurer name<input type="text" id="c_insurer" autocomplete="off" placeholder="e.g. Example Mutual Insurance"></label>
+        <label>Claim number <span>(kept on this device only)</span><input type="text" id="c_claimNo" autocomplete="off" placeholder="e.g. CLM-2026-0000"></label>
+        <label>Date of loss<input type="date" id="c_lossDate"></label>
+        <label>Type of loss
+          <select id="c_lossType"><option value="">Choose…</option><option>Water / plumbing</option><option>Roof / hail / wind</option><option>Fire / smoke</option><option>Theft / vandalism</option><option>Other</option></select>
+        </label>
+        <label>Property address <span>(optional)</span><input type="text" id="c_address" autocomplete="off" placeholder="Street, city"></label>
+        <label>Adjuster name &amp; phone <span>(optional)</span><input type="text" id="c_adjuster" autocomplete="off" placeholder="Name, phone"></label>
+        <label>Recoverable depreciation deadline <span>(enter the date from your insurer letter)</span><input type="date" id="c_deadline"></label>
+        <label>Second deadline <span>(optional — name it yourself)</span><input type="text" id="c_deadline2Label" autocomplete="off" placeholder="e.g. Supplement documents due"></label>
+        <label>Second deadline date<input type="date" id="c_deadline2"></label>
+      </form>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="card span2" aria-labelledby="dashH">
+      <h2 id="dashH">Where the money stands</h2>
+      <p class="sub">Built only from the numbers you entered below. “Still unclaimed” means the difference between the entered estimate (after deductible) and what has been paid plus depreciation still withheld — it is a records figure, not a determination of what any insurer must pay.</p>
+      <div class="kpis">
+        <div class="kpi alert"><div class="klabel">Depreciation at risk</div><div class="kval" id="kAtRisk">$0</div><div class="knote" id="kAtRiskNote">Withheld and not yet recovered, based on entered numbers.</div></div>
+        <div class="kpi"><div class="klabel">Deadline countdown</div><div class="kval" id="kCountdown">—</div><div class="knote" id="kCountdownNote">Enter your recoverable depreciation deadline above.</div></div>
+        <div class="kpi"><div class="klabel">Paid so far</div><div class="kval" id="kPaid">$0</div><div class="knote" id="kPaidNote">Across all coverage buckets.</div></div>
+        <div class="kpi"><div class="klabel">Loss-of-use remaining</div><div class="kval" id="kAleLeft">$0</div><div class="knote" id="kAleNote">Entered ALE spending vs. the loss-of-use limit.</div></div>
+      </div>
+      <h3 style="margin:0 0 8px;font-size:19px;color:var(--accent)">Payment waterfall — all buckets combined</h3>
+      <div class="wf" id="waterfall" role="group" aria-label="Payment waterfall chart"></div>
+      <div class="legend" id="wfLegend"></div>
+      <div class="detail" id="wfDetail"><h3>Tap a waterfall segment</h3><p>Each segment shows its dollars and what the figure means in plain language. Tap again to release it.</p></div>
+      <div class="chartgrid">
+        <div>
+          <h3 style="margin:0 0 8px;font-size:19px;color:var(--accent)">Dollar composition</h3>
+          <div class="donut-box">
+            <div id="donutHost"></div>
+            <div class="donut-under" id="donutUnder">No numbers entered yet</div>
+          </div>
+          <div class="legend" id="donutLegend"></div>
+        </div>
+        <div>
+          <h3 style="margin:0 0 8px;font-size:19px;color:var(--accent)">Insurer estimate vs. contractor actual</h3>
+          <div class="gaprows" id="gapRows"></div>
+          <div class="detail" id="gapDetail"><h3>Tap a coverage row</h3><p>See the gap between the insurer estimate you entered and the contractor figure you entered for that bucket.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Buckets -->
+    <section class="card span2" aria-labelledby="bucketH">
+      <h2 id="bucketH">Coverage buckets</h2>
+      <p class="sub">One card per kind of coverage. Copy figures from your insurer’s estimate and your contractor’s paperwork — this tool does the arithmetic, nothing more. Amounts save as you type.</p>
+      <div class="buckets" id="bucketHost"></div>
+    </section>
+
+    <!-- Contents -->
+    <section class="card span2" aria-labelledby="contentsH">
+      <h2 id="contentsH">Contents lines by room</h2>
+      <p class="sub">Damaged or lost belongings, room by room, with the proof notes you may be asked for. This is a post-loss replacement record — different from a pre-loss home inventory.</p>
+      <div class="minibars" id="roomBars"></div>
+      <div class="detail" id="roomDetail"><h3>Tap a room bar</h3><p>Filter the list to that room and see its replacement-cost total. Tap again to show everything.</p></div>
+      <form class="entry" id="contentsForm">
+        <label>Item<input type="text" id="i_item" required placeholder="e.g. Sofa"></label>
+        <label>Room<input type="text" id="i_room" required placeholder="e.g. Living room"></label>
+        <label>Brand / model <span>(optional)</span><input type="text" id="i_brand" placeholder="e.g. Ashley 3-seat"></label>
+        <label>Age (years)<input type="number" id="i_age" min="0" step="0.5" placeholder="0"></label>
+        <label>Replacement cost ($)<input type="number" id="i_cost" min="0" step="0.01" required placeholder="0.00"></label>
+        <label>Proof on hand <span>(receipt, photo, manual…)</span><input type="text" id="i_proof" placeholder="e.g. Photo + receipt in email"></label>
+        <label>Replacement status
+          <select id="i_replaced"><option>Not replaced yet</option><option>Replaced</option><option>Not replacing</option></select>
+        </label>
+        <label>Submitted to insurer
+          <select id="i_submitted"><option>Not submitted</option><option>Submitted</option><option>Paid</option></select>
+        </label>
+        <div class="btnrow full"><button class="btn" type="submit" id="contentsSave">Add item</button><button class="btn ghost" type="button" id="contentsCancel" hidden>Cancel edit</button></div>
+      </form>
+      <ul class="entries" id="contentsList"></ul>
+      <div class="empty" id="contentsEmpty">No contents lines yet. Add the first damaged or lost item above.</div>
+    </section>
+
+    <!-- ALE -->
+    <section class="card" aria-labelledby="aleH">
+      <h2 id="aleH">Additional living expenses (ALE)</h2>
+      <p class="sub">Hotel, meals, mileage, and other extra living costs while the home is unlivable, measured against the loss-of-use limit on the coverage card above.</p>
+      <div class="minibars" id="aleBars"></div>
+      <div class="detail" id="aleDetail"><h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p></div>
+      <form class="entry" id="aleForm">
+        <label>Date<input type="date" id="a_date" required></label>
+        <label>Category
+          <select id="a_category"><option>Lodging</option><option>Meals</option><option>Mileage / fuel</option><option>Laundry</option><option>Pet boarding</option><option>Other</option></select>
+        </label>
+        <label>Amount ($)<input type="number" id="a_amount" min="0" step="0.01" required placeholder="0.00"></label>
+        <label>Reimbursed?
+          <select id="a_reimbursed"><option>Not yet</option><option>Submitted</option><option>Reimbursed</option></select>
+        </label>
+        <label class="full">Note <span>(optional)</span><input type="text" id="a_note" placeholder="e.g. Hotel night 3 of 9"></label>
+        <div class="btnrow full"><button class="btn" type="submit" id="aleSave">Add expense</button><button class="btn ghost" type="button" id="aleCancel" hidden>Cancel edit</button></div>
+      </form>
+      <ul class="entries" id="aleList"></ul>
+      <div class="empty" id="aleEmpty">No ALE expenses yet.</div>
+    </section>
+
+    <!-- Communications -->
+    <section class="card" aria-labelledby="commH">
+      <h2 id="commH">Communications log</h2>
+      <p class="sub">Who said what, when — the paper trail that keeps a claim moving.</p>
+      <form class="entry" id="commForm">
+        <label>Date<input type="date" id="m_date" required></label>
+        <label>Who
+          <select id="m_who"><option>Insurer / adjuster</option><option>Contractor</option><option>Public adjuster / attorney</option><option>Other</option></select>
+        </label>
+        <label>How
+          <select id="m_method"><option>Phone</option><option>Email</option><option>Letter / mail</option><option>In person</option><option>Portal message</option></select>
+        </label>
+        <label>Next step <span>(optional)</span><input type="text" id="m_next" placeholder="e.g. Send final invoice by Friday"></label>
+        <label class="full">What was said<textarea id="m_summary" required placeholder="Short summary in your own words"></textarea></label>
+        <div class="btnrow full"><button class="btn" type="submit" id="commSave">Add log entry</button><button class="btn ghost" type="button" id="commCancel" hidden>Cancel edit</button></div>
+      </form>
+      <ul class="entries" id="commList"></ul>
+      <div class="empty" id="commEmpty">No communications logged yet.</div>
+    </section>
+
+    <!-- Documents -->
+    <section class="card span2" aria-labelledby="docH">
+      <h2 id="docH">Document checklist</h2>
+      <p class="sub">The paperwork a self-managed claim usually runs on. Check items off as you gather or send them, and add your own.</p>
+      <ul class="steps" id="docList"></ul>
+      <form class="entry" id="docForm">
+        <label class="full">Add your own document<input type="text" id="d_name" required placeholder="e.g. Engineer report"></label>
+        <div class="btnrow full"><button class="btn" type="submit">Add document</button></div>
+      </form>
+      <div class="btnrow" style="margin-top:14px">
+        <button class="btn" type="button" id="printBtn">Print claim packet</button>
+        <button class="btn ghost" type="button" id="exportBtn">Download data backup (JSON)</button>
+      </div>
+      <p class="sub" style="margin-top:10px">The printable packet gathers your claim overview, bucket figures, contents lines, ALE, communications, and this checklist onto clean pages for a folder, a contractor, or a professional you consult.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>Records only — not legal, insurance, or financial advice. Confirm every deadline against your policy and insurer letters.</p>
+    <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  </footer>
+</div>
+
+<div id="packet" aria-hidden="true"></div>
+
+<script>
+"use strict";
+/* Home Insurance Claim Settlement & Recoverable Depreciation Tracker — v1
+   Local-only records tool. No advice, no state law, no outcome promises. */
+var LS_KEY = "insuranceClaimTracker.v1";
+var LS_BACKUP = "insuranceClaimTracker.v1.sampleBackup";
+var LS_SAMPLE = "insuranceClaimTracker.v1.sampleMode";
+var LS_THEME = "insuranceClaimTracker.theme";
+var LS_SOUND = "insuranceClaimTracker.sound";
+
+var BUCKETS = [
+  { id:"dwelling", name:"Dwelling", sub:"The structure itself — roof, walls, built-ins." },
+  { id:"contents", name:"Contents", sub:"Belongings — furniture, clothing, electronics." },
+  { id:"lossOfUse", name:"Loss of use (ALE)", sub:"Extra living expenses while the home is unlivable." }
+];
+var STATUSES = ["Not started","First payment received","Work in progress","Final invoice submitted","Depreciation recovery submitted","Closed"];
+var DEFAULT_DOCS = [
+  "Policy declarations page (limits and deductibles)",
+  "Insurer estimate / scope of loss",
+  "Photos or video of the damage",
+  "Contractor bid or final invoice",
+  "Receipts for replaced contents",
+  "Proof of payment for completed work",
+  "ALE receipts (lodging, meals, mileage)",
+  "Copies of letters and emails sent or received",
+  "Depreciation recovery submission record",
+  "Final settlement letter from the insurer"
+];
+
+function blankBucket(){ return { limit:0, deductible:0, rcv:0, depreciation:0, acvPaid:0, depRecovered:0, suppPaid:0, contractor:0, status:"Not started" }; }
+function blankState(){
+  return {
+    claim:{ insurer:"", claimNo:"", lossDate:"", lossType:"", address:"", adjuster:"", deadline:"", deadline2Label:"", deadline2:"" },
+    buckets:{ dwelling:blankBucket(), contents:blankBucket(), lossOfUse:blankBucket() },
+    contents:[], ale:[], comms:[], docs: DEFAULT_DOCS.map(function(n,i){ return { id:"doc"+i, name:n, done:false, custom:false }; })
+  };
+}
+function uid(){ return "x" + Date.now().toString(36) + Math.floor(Math.random()*9999).toString(36); }
+function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+function money(n){
+  n = num(n);
+  var neg = n < 0; n = Math.abs(n);
+  var s = n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return (neg ? "-$" : "$") + s;
+}
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function todayMidnight(){ var d = new Date(); d.setHours(0,0,0,0); return d; }
+function parseDateLocal(v){ if(!v) return null; var p = v.split("-"); if(p.length !== 3) return null; return new Date(+p[0], +p[1]-1, +p[2]); }
+function daysUntil(v){ var d = parseDateLocal(v); if(!d) return null; return Math.round((d - todayMidnight()) / 86400000); }
+function fmtDate(v){ var d = parseDateLocal(v); if(!d) return v || ""; return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" }); }
+
+var state = blankState();
+var storageOK = true;
+var sampleMode = false;
+var selWaterfall = null, selDonut = null, selGap = null, selRoom = null, selAle = null;
+var editing = { contents:null, ale:null, comms:null };
+
+function save(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+  catch(e){ storageOK = false; document.getElementById("storageWarn").style.display = "block"; }
+}
+function load(){
+  try {
+    sampleMode = localStorage.getItem(LS_SAMPLE) === "1";
+    var raw = localStorage.getItem(LS_KEY);
+    if(raw){ var parsed = JSON.parse(raw); if(parsed && parsed.buckets && parsed.claim){ state = parsed; return; } }
+  } catch(e){ storageOK = false; }
+  state = blankState();
+}
+
+/* ---------- Sound (WebAudio, user-interaction only) ---------- */
+var actx = null;
+function soundOn(){ try { return localStorage.getItem(LS_SOUND) !== "0"; } catch(e){ return true; } }
+function beep(freq){
+  if(!soundOn()) return;
+  try {
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if(actx.state === "suspended") actx.resume();
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = "sine"; o.frequency.value = freq || 660;
+    g.gain.setValueAtTime(0.08, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.16);
+    o.connect(g); g.connect(actx.destination); o.start(); o.stop(actx.currentTime + 0.17);
+  } catch(e){ /* sound is optional */ }
+}
+
+/* ---------- Bucket math ---------- */
+function bucketCalc(b){
+  var covered = b.limit > 0 ? Math.min(b.rcv, b.limit) : b.rcv;
+  var netPayable = Math.max(covered - b.deductible, 0);
+  var paid = b.acvPaid + b.depRecovered + b.suppPaid;
+  var withheld = Math.max(b.depreciation - b.depRecovered, 0);
+  var unclaimed = Math.max(netPayable - paid - withheld, 0);
+  var gap = b.contractor - b.rcv;
+  var overLimit = b.limit > 0 ? Math.max(b.rcv - b.limit, 0) : 0;
+  return { covered:covered, netPayable:netPayable, paid:paid, withheld:withheld, unclaimed:unclaimed, gap:gap, overLimit:overLimit };
+}
+function totals(){
+  var t = { rcv:0, deductible:0, paid:0, withheld:0, unclaimed:0, contractor:0, netPayable:0 };
+  BUCKETS.forEach(function(cfg){
+    var b = state.buckets[cfg.id], c = bucketCalc(b);
+    t.rcv += b.rcv; t.deductible += b.deductible; t.paid += c.paid;
+    t.withheld += c.withheld; t.unclaimed += c.unclaimed; t.contractor += b.contractor; t.netPayable += c.netPayable;
+  });
+  return t;
+}
+function aleTotal(){ return state.ale.reduce(function(s,a){ return s + num(a.amount); }, 0); }
+</script>
+<script>
+"use strict";
+/* ---------- Buckets UI ---------- */
+var BUCKET_FIELDS = [
+  ["limit","Policy limit ($)"],["deductible","Deductible ($)"],["rcv","Insurer RCV estimate ($)"],
+  ["depreciation","Depreciation withheld ($) — from insurer estimate"],["acvPaid","First (ACV) payment received ($)"],
+  ["depRecovered","Depreciation recovered so far ($)"],["suppPaid","Supplement / other payments received ($)"],
+  ["contractor","Contractor actual or bid ($)"]
+];
+function buildBuckets(){
+  var host = document.getElementById("bucketHost");
+  host.innerHTML = "";
+  BUCKETS.forEach(function(cfg){
+    var b = state.buckets[cfg.id];
+    var card = document.createElement("div"); card.className = "bucket";
+    var html = "<h3>" + cfg.name + "</h3><p class='bsub'>" + cfg.sub + "</p>";
+    BUCKET_FIELDS.forEach(function(f){
+      html += "<label>" + f[1] + "<input type='number' min='0' step='0.01' data-bucket='" + cfg.id + "' data-field='" + f[0] + "' value='" + (b[f[0]] ? b[f[0]] : "") + "' placeholder='0.00'></label>";
+    });
+    html += "<label>Payment status<select data-bucket='" + cfg.id + "' data-field='status'>";
+    STATUSES.forEach(function(s){ html += "<option" + (b.status === s ? " selected" : "") + ">" + s + "</option>"; });
+    html += "</select></label><div class='bsummary' id='bsum-" + cfg.id + "'></div>";
+    card.innerHTML = html;
+    host.appendChild(card);
+  });
+  host.querySelectorAll("input,select").forEach(function(el){
+    el.addEventListener("input", function(){
+      var bk = state.buckets[el.getAttribute("data-bucket")], fld = el.getAttribute("data-field");
+      bk[fld] = fld === "status" ? el.value : num(el.value);
+      save(); renderDashboard(); renderBucketSummaries();
+    });
+  });
+}
+function renderBucketSummaries(){
+  BUCKETS.forEach(function(cfg){
+    var b = state.buckets[cfg.id], c = bucketCalc(b), el = document.getElementById("bsum-" + cfg.id);
+    if(!el) return;
+    var html = "<div><span>Net after deductible (entered)</span><b>" + money(c.netPayable) + "</b></div>"
+      + "<div><span>Paid so far</span><b>" + money(c.paid) + "</b></div>"
+      + "<div><span>Depreciation withheld</span><b>" + money(c.withheld) + "</b></div>"
+      + "<div><span>Still unclaimed (entered figures)</span><b>" + money(c.unclaimed) + "</b></div>"
+      + "<div><span>Contractor vs. insurer gap</span><b>" + money(c.gap) + "</b></div>";
+    if(c.overLimit > 0) html += "<div><span>Estimate above entered limit</span><b>" + money(c.overLimit) + "</b></div>";
+    el.innerHTML = html;
+  });
+}
+
+/* ---------- Dashboard ---------- */
+function setText(id, v){ document.getElementById(id).textContent = v; }
+function composition(){
+  var t = totals();
+  return [
+    { key:"paid", label:"Paid so far", color:"var(--seg-paid)", value:t.paid, note:"Payments you recorded across all buckets." },
+    { key:"withheld", label:"Depreciation withheld", color:"var(--seg-withheld)", value:t.withheld, note:"Still withheld and not yet recovered, based on entered numbers." },
+    { key:"unclaimed", label:"Still unclaimed", color:"var(--seg-unclaimed)", value:t.unclaimed, note:"Entered estimate after deductible, minus paid and withheld. A records figure — not a determination of what any insurer must pay." },
+    { key:"deductible", label:"Deductibles", color:"var(--seg-deductible)", value:t.deductible, note:"The deductible amounts you entered — normally the homeowner's share." }
+  ];
+}
+function renderDashboard(){
+  var t = totals(), comp = composition();
+  setText("kPaid", money(t.paid));
+  setText("kPaidNote", "Insurer RCV entered: " + money(t.rcv) + " · Contractor figures: " + money(t.contractor));
+  setText("kAtRisk", money(t.withheld));
+  var dl = daysUntil(state.claim.deadline);
+  if(dl === null){
+    setText("kCountdown", "—");
+    setText("kCountdownNote", "Enter your recoverable depreciation deadline above.");
+    setText("kAtRiskNote", "Withheld and not yet recovered, based on entered numbers.");
+  } else {
+    setText("kCountdown", dl > 1 ? dl + " days" : (dl === 1 ? "1 day" : (dl === 0 ? "Today" : Math.abs(dl) + "d past")));
+    setText("kCountdownNote", "Until the deadline you entered (" + fmtDate(state.claim.deadline) + "). Confirm it against your insurer letter.");
+    setText("kAtRiskNote", dl < 0 ? "The deadline you entered has passed — ask a licensed public adjuster or attorney what options may remain."
+      : (dl <= 30 ? "Deadline is close. This is the withheld amount still unclaimed based on the numbers you entered."
+      : "Withheld and not yet recovered, based on entered numbers."));
+  }
+  var aleSpent = aleTotal(), aleLimit = state.buckets.lossOfUse.limit;
+  setText("kAleLeft", aleLimit > 0 ? money(Math.max(aleLimit - aleSpent, 0)) : money(0));
+  setText("kAleNote", aleLimit > 0
+    ? "Spent " + money(aleSpent) + " of the " + money(aleLimit) + " loss-of-use limit you entered (" + Math.round(aleSpent / aleLimit * 100) + "%)."
+    : "Enter a loss-of-use limit on the coverage card to measure ALE burn.");
+
+  /* Waterfall */
+  var wf = document.getElementById("waterfall");
+  var totalComp = comp.reduce(function(s,c){ return s + c.value; }, 0);
+  wf.innerHTML = "";
+  if(totalComp <= 0){
+    wf.innerHTML = "<div style='padding:18px;font-size:15px;color:var(--muted)'>Enter estimate, deductible, and payment figures on the coverage cards and the waterfall will build itself here.</div>";
+  } else {
+    comp.forEach(function(c, i){
+      if(c.value <= 0) return;
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "wfseg" + (selWaterfall === i ? " sel" : "");
+      btn.style.background = c.color; btn.style.width = Math.max(c.value / totalComp * 100, 3) + "%";
+      btn.setAttribute("aria-pressed", selWaterfall === i ? "true" : "false");
+      btn.setAttribute("aria-label", c.label + " " + money(c.value));
+      btn.innerHTML = "<span class='amt'>" + money(c.value) + "</span><span class='lbl'>" + esc(c.label) + "</span>";
+      if(c.value / totalComp * 100 < 10) btn.classList.add("narrow");
+      btn.addEventListener("click", function(){ selWaterfall = (selWaterfall === i ? null : i); beep(selWaterfall === null ? 440 : 720); renderDashboard(); });
+      wf.appendChild(btn);
+    });
+    if(selWaterfall !== null && comp[selWaterfall]){
+      var c2 = comp[selWaterfall];
+      document.getElementById("wfDetail").innerHTML = "<h3>" + esc(c2.label) + " — " + money(c2.value) + "</h3><p>" + esc(c2.note) + "</p><p>Share of entered dollars: " + Math.round(c2.value / totalComp * 100) + "%.</p>";
+    }
+  }
+  document.getElementById("wfLegend").innerHTML = comp.map(function(c){
+    return "<span><span class='sw' style='background:" + c.color + "'></span>" + esc(c.label) + "</span>";
+  }).join("");
+
+  renderDonut(comp, totalComp);
+  renderGap();
+}
+
+function arcPath(cx, cy, r, a0, a1){
+  var x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0);
+  var x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+  var large = (a1 - a0) > Math.PI ? 1 : 0;
+  return "M " + x0.toFixed(2) + " " + y0.toFixed(2) + " A " + r + " " + r + " 0 " + large + " 1 " + x1.toFixed(2) + " " + y1.toFixed(2);
+}
+function renderDonut(comp, totalComp){
+  var host = document.getElementById("donutHost");
+  var under = document.getElementById("donutUnder");
+  document.getElementById("donutLegend").innerHTML = comp.map(function(c){
+    return "<span><span class='sw' style='background:" + c.color + "'></span>" + esc(c.label) + " " + money(c.value) + "</span>";
+  }).join("");
+  if(totalComp <= 0){ host.innerHTML = ""; under.textContent = "No numbers entered yet"; return; }
+  var cx = 110, cy = 110, r = 82, sw = 30;
+  var svg = "<svg viewBox='0 0 220 220' role='img' aria-label='Dollar composition donut chart'>";
+  var a = -Math.PI / 2;
+  comp.forEach(function(c, i){
+    if(c.value <= 0) return;
+    var frac = c.value / totalComp, a1 = a + frac * Math.PI * 2;
+    var mid = (a + a1) / 2;
+    var dx = selDonut === i ? Math.cos(mid) * 7 : 0, dy = selDonut === i ? Math.sin(mid) * 7 : 0;
+    var colCss = getComputedStyle(document.documentElement).getPropertyValue(c.color.replace("var(", "").replace(")", "")).trim() || "#24719e";
+    svg += "<g class='seg' data-seg='" + i + "' tabindex='0' role='button' aria-label='" + esc(c.label) + " " + money(c.value) + "' transform='translate(" + dx.toFixed(1) + "," + dy.toFixed(1) + ")'>"
+      + "<path d='" + arcPath(cx, cy, r, a, Math.max(a1 - 0.012, a + 0.004)) + "' fill='none' stroke='" + colCss + "' stroke-width='" + (selDonut === i ? sw + 7 : sw) + "'/>"
+      + "<path class='segring' d='" + arcPath(cx, cy, r, a, Math.max(a1 - 0.012, a + 0.004)) + "' fill='none' stroke='var(--accent)' stroke-width='" + (sw + 8) + "' stroke-opacity='0.55'/>"
+      + "</g>";
+    a = a1;
+  });
+  var centerLabel = selDonut !== null && comp[selDonut] ? comp[selDonut].label : "Entered total";
+  var centerVal = selDonut !== null && comp[selDonut] ? money(comp[selDonut].value) : money(totalComp);
+  var fs = centerVal.length > 10 ? 15 : (centerVal.length > 8 ? 17 : 20);
+  svg += "<text x='110' y='104' text-anchor='middle' font-size='" + fs + "' font-weight='800' fill='var(--accent)'>" + esc(centerVal) + "</text>"
+    + "<text x='110' y='126' text-anchor='middle' font-size='15' fill='var(--muted)'>" + esc(centerLabel) + "</text></svg>";
+  host.innerHTML = svg;
+  under.textContent = selDonut !== null && comp[selDonut]
+    ? comp[selDonut].label + ": " + money(comp[selDonut].value)
+    : "All entered dollars: " + money(totalComp);
+  host.querySelectorAll(".seg").forEach(function(g){
+    function pick(){ var i = +g.getAttribute("data-seg"); selDonut = (selDonut === i ? null : i); beep(selDonut === null ? 440 : 720); renderDashboard(); }
+    g.addEventListener("click", pick);
+    g.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(); } });
+  });
+}
+
+function renderGap(){
+  var host = document.getElementById("gapRows");
+  host.innerHTML = "";
+  var maxV = 1;
+  BUCKETS.forEach(function(cfg){ var b = state.buckets[cfg.id]; maxV = Math.max(maxV, b.rcv, b.contractor); });
+  BUCKETS.forEach(function(cfg, i){
+    var b = state.buckets[cfg.id], c = bucketCalc(b);
+    var row = document.createElement("button");
+    row.type = "button"; row.className = "gaprow" + (selGap === i ? " sel" : "");
+    row.setAttribute("aria-pressed", selGap === i ? "true" : "false");
+    row.innerHTML = "<span class='gname'>" + cfg.name + "</span>"
+      + "<span class='gapbar'><span>Insurer est.</span><span class='gap-track'><span class='gap-fill ins' style='display:block;width:" + (b.rcv / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.rcv) + "</span></span>"
+      + "<span class='gapbar'><span>Contractor</span><span class='gap-track'><span class='gap-fill con' style='display:block;width:" + (b.contractor / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.contractor) + "</span></span>"
+      + "<span class='gap-note'>Gap: " + money(c.gap) + (c.gap > 0 ? " — contractor figure is higher than the insurer estimate you entered." : (c.gap < 0 ? " — contractor figure is below the insurer estimate you entered." : " — figures match.")) + "</span>";
+    row.addEventListener("click", function(){
+      selGap = (selGap === i ? null : i); beep(selGap === null ? 440 : 720);
+      document.getElementById("gapDetail").innerHTML = selGap === null
+        ? "<h3>Tap a coverage row</h3><p>See the gap between the insurer estimate you entered and the contractor figure you entered for that bucket.</p>"
+        : "<h3>" + cfg.name + "</h3><p>Insurer RCV estimate entered: " + money(b.rcv) + ". Contractor actual/bid entered: " + money(b.contractor) + ".</p><p>Gap: " + money(c.gap) + ". Status: " + esc(b.status) + ". A gap on paper is a documentation prompt — final invoices and receipts are what usually close it in a claim file.</p>";
+      renderGap();
+    });
+    host.appendChild(row);
+  });
+}
+</script>
+<script>
+"use strict";
+/* ---------- Contents ---------- */
+function roomTotals(){
+  var map = {};
+  state.contents.forEach(function(it){ map[it.room] = (map[it.room] || 0) + num(it.cost); });
+  return Object.keys(map).map(function(r){ return { room:r, total:map[r] }; }).sort(function(a,b){ return b.total - a.total; });
+}
+function renderContents(){
+  var list = document.getElementById("contentsList");
+  var bars = document.getElementById("roomBars");
+  var rooms = roomTotals();
+  var grand = rooms.reduce(function(s,r){ return s + r.total; }, 0);
+  var maxV = Math.max(1, rooms.length ? rooms[0].total : 0);
+  bars.innerHTML = "";
+  if(rooms.length === 0){
+    bars.innerHTML = "<div class='empty'>Room totals will appear here once contents lines are added.</div>";
+  } else {
+    rooms.forEach(function(r){
+      var btn = document.createElement("button");
+      btn.type = "button"; btn.className = "minibar" + (selRoom === r.room ? " sel" : "");
+      btn.setAttribute("aria-pressed", selRoom === r.room ? "true" : "false");
+      btn.innerHTML = "<span class='mbname'>" + esc(r.room) + "</span><span class='mb-track'><span class='mb-fill' style='display:block;width:" + (r.total / maxV * 100) + "%'></span></span><span class='mb-amt'>" + money(r.total) + "</span>";
+      btn.addEventListener("click", function(){
+        selRoom = (selRoom === r.room ? null : r.room); beep(selRoom === null ? 440 : 720);
+        document.getElementById("roomDetail").innerHTML = selRoom === null
+          ? "<h3>Tap a room bar</h3><p>Filter the list to that room and see its replacement-cost total. Tap again to show everything.</p>"
+          : "<h3>" + esc(r.room) + "</h3><p>Replacement cost entered for this room: " + money(r.total) + " of " + money(grand) + " across all rooms.</p>";
+        renderContents();
+      });
+      bars.appendChild(btn);
+    });
+  }
+  var items = selRoom ? state.contents.filter(function(it){ return it.room === selRoom; }) : state.contents;
+  document.getElementById("contentsEmpty").style.display = state.contents.length ? "none" : "block";
+  list.innerHTML = items.map(function(it){
+    return "<li class='entry-item'><div class='cat'>" + esc(it.room) + "</div>"
+      + "<div class='main'>" + esc(it.item) + " — " + money(it.cost) + "<span class='pilltag'>" + esc(it.replaced) + "</span><span class='pilltag'>" + esc(it.submitted) + "</span></div>"
+      + "<div class='meta'>" + esc(it.brand ? it.brand + " · " : "") + (it.age ? "Age " + esc(it.age) + " yrs · " : "") + esc(it.proof ? "Proof: " + it.proof : "No proof note") + "</div>"
+      + "<div class='ops'><button class='opbtn' data-edit-contents='" + it.id + "'>Edit</button><button class='opbtn del' data-del-contents='" + it.id + "'>Delete</button></div></li>";
+  }).join("");
+  bindListOps(list);
+}
+function bindListOps(scope){
+  scope.querySelectorAll("[data-del-contents]").forEach(function(b){ b.addEventListener("click", function(){ delItem("contents", b.getAttribute("data-del-contents")); }); });
+  scope.querySelectorAll("[data-edit-contents]").forEach(function(b){ b.addEventListener("click", function(){ editItem("contents", b.getAttribute("data-edit-contents")); }); });
+  scope.querySelectorAll("[data-del-ale]").forEach(function(b){ b.addEventListener("click", function(){ delItem("ale", b.getAttribute("data-del-ale")); }); });
+  scope.querySelectorAll("[data-edit-ale]").forEach(function(b){ b.addEventListener("click", function(){ editItem("ale", b.getAttribute("data-edit-ale")); }); });
+  scope.querySelectorAll("[data-del-comms]").forEach(function(b){ b.addEventListener("click", function(){ delItem("comms", b.getAttribute("data-del-comms")); }); });
+  scope.querySelectorAll("[data-edit-comms]").forEach(function(b){ b.addEventListener("click", function(){ editItem("comms", b.getAttribute("data-edit-comms")); }); });
+}
+function delItem(kind, id){
+  state[kind] = state[kind].filter(function(x){ return x.id !== id; });
+  if(editing[kind] === id) editing[kind] = null;
+  save(); beep(330); renderAll();
+}
+function fillForm(ids, values){
+  Object.keys(ids).forEach(function(k){ var el = document.getElementById(ids[k]); if(el) el.value = values[k] || ""; });
+}
+function editItem(kind, id){
+  var it = state[kind].filter(function(x){ return x.id === id; })[0];
+  if(!it) return;
+  editing[kind] = id; beep(720);
+  if(kind === "contents"){
+    fillForm({item:"i_item", room:"i_room", brand:"i_brand", age:"i_age", cost:"i_cost", proof:"i_proof"}, it);
+    document.getElementById("i_replaced").value = it.replaced;
+    document.getElementById("i_submitted").value = it.submitted;
+    document.getElementById("contentsSave").textContent = "Save changes";
+    document.getElementById("contentsCancel").hidden = false;
+    document.getElementById("i_item").focus();
+  } else if(kind === "ale"){
+    fillForm({date:"a_date", amount:"a_amount", note:"a_note"}, it);
+    document.getElementById("a_category").value = it.category;
+    document.getElementById("a_reimbursed").value = it.reimbursed;
+    document.getElementById("aleSave").textContent = "Save changes";
+    document.getElementById("aleCancel").hidden = false;
+    document.getElementById("a_date").focus();
+  } else {
+    fillForm({date:"m_date", next:"m_next", summary:"m_summary"}, it);
+    document.getElementById("m_who").value = it.who;
+    document.getElementById("m_method").value = it.method;
+    document.getElementById("commSave").textContent = "Save changes";
+    document.getElementById("commCancel").hidden = false;
+    document.getElementById("m_date").focus();
+  }
+}
+function resetForm(formId, saveId, cancelId, label){
+  document.getElementById(formId).reset();
+  document.getElementById(saveId).textContent = label;
+  document.getElementById(cancelId).hidden = true;
+}
+
+/* ---------- ALE ---------- */
+function renderAle(){
+  var list = document.getElementById("aleList");
+  var bars = document.getElementById("aleBars");
+  var limit = state.buckets.lossOfUse.limit, spent = aleTotal();
+  var byCat = {};
+  state.ale.forEach(function(a){ byCat[a.category] = (byCat[a.category] || 0) + num(a.amount); });
+  var cats = Object.keys(byCat).map(function(c){ return { cat:c, total:byCat[c] }; }).sort(function(a,b){ return b.total - a.total; });
+  var maxV = Math.max(1, limit, cats.length ? cats[0].total : 0);
+  bars.innerHTML = "";
+  var burnBtn = document.createElement("button");
+  burnBtn.type = "button"; burnBtn.className = "minibar" + (selAle === "__burn" ? " sel" : "");
+  burnBtn.innerHTML = "<span class='mbname'>Total burn vs. limit</span><span class='mb-track'><span class='mb-fill ale' style='display:block;width:" + (limit > 0 ? Math.min(spent / limit * 100, 100) : 0) + "%'></span></span><span class='mb-amt'>" + money(spent) + (limit > 0 ? " / " + money(limit) : "") + "</span>";
+  burnBtn.addEventListener("click", function(){
+    selAle = (selAle === "__burn" ? null : "__burn"); beep(selAle === null ? 440 : 720);
+    document.getElementById("aleDetail").innerHTML = "<h3>ALE burn</h3><p>" + (limit > 0
+      ? "You entered " + money(spent) + " of ALE spending against a " + money(limit) + " loss-of-use limit (" + Math.round(spent / limit * 100) + "% used, " + money(Math.max(limit - spent, 0)) + " remaining on paper)."
+      : "Enter a loss-of-use limit on the coverage card above to measure burn.") + " Keep lodging and meal receipts together — they are the records usually requested for ALE.</p>";
+    renderAle();
+  });
+  bars.appendChild(burnBtn);
+  cats.forEach(function(c){
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "minibar" + (selAle === c.cat ? " sel" : "");
+    btn.innerHTML = "<span class='mbname'>" + esc(c.cat) + "</span><span class='mb-track'><span class='mb-fill ale' style='display:block;width:" + (c.total / maxV * 100) + "%'></span></span><span class='mb-amt'>" + money(c.total) + "</span>";
+    btn.addEventListener("click", function(){
+      selAle = (selAle === c.cat ? null : c.cat); beep(selAle === null ? 440 : 720);
+      document.getElementById("aleDetail").innerHTML = selAle === null
+        ? "<h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p>"
+        : "<h3>" + esc(c.cat) + "</h3><p>Entered spending: " + money(c.total) + (limit > 0 ? " — " + Math.round(c.total / limit * 100) + "% of the entered loss-of-use limit." : ".") + "</p>";
+      renderAle();
+    });
+    bars.appendChild(btn);
+  });
+  document.getElementById("aleEmpty").style.display = state.ale.length ? "none" : "block";
+  var sorted = state.ale.slice().sort(function(a,b){ return (a.date || "").localeCompare(b.date || ""); });
+  list.innerHTML = sorted.map(function(a){
+    return "<li class='entry-item'><div class='cat'>" + esc(a.category) + " · " + esc(fmtDate(a.date)) + "</div>"
+      + "<div class='main'>" + money(a.amount) + "<span class='pilltag'>" + esc(a.reimbursed) + "</span></div>"
+      + (a.note ? "<div class='meta'>" + esc(a.note) + "</div>" : "")
+      + "<div class='ops'><button class='opbtn' data-edit-ale='" + a.id + "'>Edit</button><button class='opbtn del' data-del-ale='" + a.id + "'>Delete</button></div></li>";
+  }).join("");
+  bindListOps(list);
+}
+
+/* ---------- Communications ---------- */
+function renderComms(){
+  var list = document.getElementById("commList");
+  document.getElementById("commEmpty").style.display = state.comms.length ? "none" : "block";
+  var sorted = state.comms.slice().sort(function(a,b){ return (a.date || "").localeCompare(b.date || ""); });
+  list.innerHTML = sorted.map(function(m){
+    return "<li class='entry-item'><div class='cat'>" + esc(m.who) + " · " + esc(m.method) + " · " + esc(fmtDate(m.date)) + "</div>"
+      + "<div class='main' style='font-weight:400'>" + esc(m.summary) + "</div>"
+      + (m.next ? "<div class='meta'>Next step: " + esc(m.next) + "</div>" : "")
+      + "<div class='ops'><button class='opbtn' data-edit-comms='" + m.id + "'>Edit</button><button class='opbtn del' data-del-comms='" + m.id + "'>Delete</button></div></li>";
+  }).join("");
+  bindListOps(list);
+}
+
+/* ---------- Documents ---------- */
+function renderDocs(){
+  var list = document.getElementById("docList");
+  list.innerHTML = "";
+  state.docs.forEach(function(d){
+    var li = document.createElement("li");
+    var cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = !!d.done;
+    cb.setAttribute("aria-label", d.name);
+    cb.addEventListener("change", function(){ d.done = cb.checked; save(); beep(cb.checked ? 780 : 440); renderDocs(); });
+    var span = document.createElement("span");
+    span.textContent = d.name; if(d.done) span.className = "checked";
+    li.appendChild(cb); li.appendChild(span);
+    if(d.custom){
+      var del = document.createElement("button");
+      del.type = "button"; del.className = "opbtn del"; del.textContent = "Delete";
+      del.addEventListener("click", function(){ state.docs = state.docs.filter(function(x){ return x.id !== d.id; }); save(); renderDocs(); });
+      li.appendChild(del);
+    }
+    list.appendChild(li);
+  });
+}
+
+/* ---------- Claim form ---------- */
+var CLAIM_MAP = { c_insurer:"insurer", c_claimNo:"claimNo", c_lossDate:"lossDate", c_lossType:"lossType", c_address:"address", c_adjuster:"adjuster", c_deadline:"deadline", c_deadline2Label:"deadline2Label", c_deadline2:"deadline2" };
+function buildClaimForm(){
+  Object.keys(CLAIM_MAP).forEach(function(id){
+    var el = document.getElementById(id);
+    el.value = state.claim[CLAIM_MAP[id]] || "";
+    el.addEventListener("input", function(){ state.claim[CLAIM_MAP[id]] = el.value; save(); renderDashboard(); });
+    el.addEventListener("change", function(){ state.claim[CLAIM_MAP[id]] = el.value; save(); renderDashboard(); });
+  });
+}
+</script>
+<script>
+"use strict";
+/* ---------- Forms ---------- */
+function wireForms(){
+  document.getElementById("contentsForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var data = {
+      item: document.getElementById("i_item").value.trim(),
+      room: document.getElementById("i_room").value.trim(),
+      brand: document.getElementById("i_brand").value.trim(),
+      age: document.getElementById("i_age").value,
+      cost: num(document.getElementById("i_cost").value),
+      proof: document.getElementById("i_proof").value.trim(),
+      replaced: document.getElementById("i_replaced").value,
+      submitted: document.getElementById("i_submitted").value
+    };
+    if(!data.item || !data.room) return;
+    if(editing.contents){ var it = state.contents.filter(function(x){ return x.id === editing.contents; })[0]; if(it) Object.assign(it, data); editing.contents = null; }
+    else { data.id = uid(); state.contents.push(data); }
+    save(); beep(760); resetForm("contentsForm", "contentsSave", "contentsCancel", "Add item");
+    selRoom = null; renderAll();
+  });
+  document.getElementById("contentsCancel").addEventListener("click", function(){ editing.contents = null; resetForm("contentsForm", "contentsSave", "contentsCancel", "Add item"); });
+
+  document.getElementById("aleForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var data = {
+      date: document.getElementById("a_date").value,
+      category: document.getElementById("a_category").value,
+      amount: num(document.getElementById("a_amount").value),
+      reimbursed: document.getElementById("a_reimbursed").value,
+      note: document.getElementById("a_note").value.trim()
+    };
+    if(!data.date) return;
+    if(editing.ale){ var it = state.ale.filter(function(x){ return x.id === editing.ale; })[0]; if(it) Object.assign(it, data); editing.ale = null; }
+    else { data.id = uid(); state.ale.push(data); }
+    save(); beep(760); resetForm("aleForm", "aleSave", "aleCancel", "Add expense");
+    renderAll();
+  });
+  document.getElementById("aleCancel").addEventListener("click", function(){ editing.ale = null; resetForm("aleForm", "aleSave", "aleCancel", "Add expense"); });
+
+  document.getElementById("commForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var data = {
+      date: document.getElementById("m_date").value,
+      who: document.getElementById("m_who").value,
+      method: document.getElementById("m_method").value,
+      next: document.getElementById("m_next").value.trim(),
+      summary: document.getElementById("m_summary").value.trim()
+    };
+    if(!data.date || !data.summary) return;
+    if(editing.comms){ var it = state.comms.filter(function(x){ return x.id === editing.comms; })[0]; if(it) Object.assign(it, data); editing.comms = null; }
+    else { data.id = uid(); state.comms.push(data); }
+    save(); beep(760); resetForm("commForm", "commSave", "commCancel", "Add log entry");
+    renderAll();
+  });
+  document.getElementById("commCancel").addEventListener("click", function(){ editing.comms = null; resetForm("commForm", "commSave", "commCancel", "Add log entry"); });
+
+  document.getElementById("docForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var name = document.getElementById("d_name").value.trim();
+    if(!name) return;
+    state.docs.push({ id: uid(), name: name, done: false, custom: true });
+    save(); beep(760); e.target.reset(); renderDocs();
+  });
+}
+
+/* ---------- Print packet ---------- */
+function bucketTable(){
+  var rows = BUCKETS.map(function(cfg){
+    var b = state.buckets[cfg.id], c = bucketCalc(b);
+    return "<tr><td>" + cfg.name + "</td><td>" + money(b.limit) + "</td><td>" + money(b.rcv) + "</td><td>" + money(b.deductible) + "</td><td>" + money(c.paid) + "</td><td>" + money(c.withheld) + "</td><td>" + money(c.unclaimed) + "</td><td>" + money(b.contractor) + "</td><td>" + esc(b.status) + "</td></tr>";
+  }).join("");
+  return "<table><tr><th>Bucket</th><th>Limit</th><th>Insurer RCV est.</th><th>Deductible</th><th>Paid</th><th>Dep. withheld</th><th>Still unclaimed (entered)</th><th>Contractor</th><th>Status</th></tr>" + rows + "</table>";
+}
+function buildPacket(){
+  var c = state.claim, t = totals(), dl = daysUntil(c.deadline);
+  var html = "<h1>Home Claim Organizer — Claim Packet</h1>"
+    + "<p class='meta'>Prepared from records entered in the Home Insurance Claim Settlement &amp; Recoverable Depreciation Tracker. Figures are the user's own records, shown as entered.</p>"
+    + "<h2>Claim overview</h2><table>"
+    + "<tr><th>Insurer</th><td>" + esc(c.insurer || "—") + "</td><th>Claim number</th><td>" + esc(c.claimNo || "—") + "</td></tr>"
+    + "<tr><th>Date / type of loss</th><td>" + esc(fmtDate(c.lossDate) || "—") + " · " + esc(c.lossType || "—") + "</td><th>Property</th><td>" + esc(c.address || "—") + "</td></tr>"
+    + "<tr><th>Adjuster</th><td>" + esc(c.adjuster || "—") + "</td><th>Depreciation deadline (user-entered)</th><td>" + esc(fmtDate(c.deadline) || "—") + (dl === null ? "" : " (" + dl + " days from preparation)") + "</td></tr>"
+    + (c.deadline2Label ? "<tr><th>" + esc(c.deadline2Label) + "</th><td colspan='3'>" + esc(fmtDate(c.deadline2) || "—") + "</td></tr>" : "")
+    + "</table>"
+    + "<h2>Settlement figures (as entered)</h2>" + bucketTable()
+    + "<p>Totals — paid so far: <b>" + money(t.paid) + "</b> · depreciation still unclaimed based on entered numbers: <b>" + money(t.withheld) + "</b> · ALE spent: <b>" + money(aleTotal()) + "</b> of entered loss-of-use limit <b>" + money(state.buckets.lossOfUse.limit) + "</b>.</p>"
+    + "<h2>Contents lines</h2>";
+  if(state.contents.length){
+    html += "<table><tr><th>Room</th><th>Item</th><th>Brand/model</th><th>Age</th><th>Replacement cost</th><th>Proof</th><th>Replaced</th><th>Submitted</th></tr>"
+      + state.contents.map(function(it){ return "<tr><td>" + esc(it.room) + "</td><td>" + esc(it.item) + "</td><td>" + esc(it.brand) + "</td><td>" + esc(it.age) + "</td><td>" + money(it.cost) + "</td><td>" + esc(it.proof) + "</td><td>" + esc(it.replaced) + "</td><td>" + esc(it.submitted) + "</td></tr>"; }).join("") + "</table>";
+  } else html += "<p>No contents lines recorded.</p>";
+  html += "<h2>Additional living expenses</h2>";
+  if(state.ale.length){
+    html += "<table><tr><th>Date</th><th>Category</th><th>Amount</th><th>Status</th><th>Note</th></tr>"
+      + state.ale.map(function(a){ return "<tr><td>" + esc(fmtDate(a.date)) + "</td><td>" + esc(a.category) + "</td><td>" + money(a.amount) + "</td><td>" + esc(a.reimbursed) + "</td><td>" + esc(a.note) + "</td></tr>"; }).join("") + "</table>";
+  } else html += "<p>No ALE expenses recorded.</p>";
+  html += "<h2>Communications log</h2>";
+  if(state.comms.length){
+    html += "<table><tr><th>Date</th><th>Who</th><th>How</th><th>What was said</th><th>Next step</th></tr>"
+      + state.comms.map(function(m){ return "<tr><td>" + esc(fmtDate(m.date)) + "</td><td>" + esc(m.who) + "</td><td>" + esc(m.method) + "</td><td>" + esc(m.summary) + "</td><td>" + esc(m.next) + "</td></tr>"; }).join("") + "</table>";
+  } else html += "<p>No communications recorded.</p>";
+  html += "<h2>Document checklist</h2><ul>"
+    + state.docs.map(function(d){ return "<li>" + (d.done ? "☑ " : "☐ ") + esc(d.name) + "</li>"; }).join("") + "</ul>"
+    + "<div class='disc'><strong>Disclaimer:</strong> This packet is an organizational and educational record only. It is not legal, insurance, or financial advice and is not a substitute for a licensed public adjuster or an attorney. Deadlines shown are user-entered — confirm them against your policy and insurer letters. For a large, denied, or disputed claim, consider consulting a licensed public adjuster or attorney in your area.</div>";
+  document.getElementById("packet").innerHTML = html;
+}
+
+/* ---------- Sample data ---------- */
+function sampleState(){
+  var s = blankState();
+  var d = new Date(); d.setDate(d.getDate() + 74);
+  var dl = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  var d2 = new Date(); d2.setDate(d2.getDate() - 21);
+  var loss = d2.getFullYear() + "-" + String(d2.getMonth() + 1).padStart(2, "0") + "-" + String(d2.getDate()).padStart(2, "0");
+  s.claim = { insurer:"Example Mutual Insurance", claimNo:"CLM-2026-1042", lossDate:loss, lossType:"Roof / hail / wind", address:"Maple Street (sample)", adjuster:"J. Rivera — adjuster (sample)", deadline:dl, deadline2Label:"Supplement documents due (sample)", deadline2:"" };
+  s.buckets.dwelling = { limit:385000, deductible:2500, rcv:18600, depreciation:4200, acvPaid:11900, depRecovered:0, suppPaid:650, contractor:21450, status:"Work in progress" };
+  s.buckets.contents = { limit:192500, deductible:0, rcv:6800, depreciation:2100, acvPaid:4700, depRecovered:0, suppPaid:0, contractor:7350, status:"Final invoice submitted" };
+  s.buckets.lossOfUse = { limit:38500, deductible:0, rcv:5200, depreciation:0, acvPaid:2600, depRecovered:0, suppPaid:0, contractor:4980, status:"Work in progress" };
+  s.contents = [
+    { id:uid()+"1", item:"Sofa", room:"Living room", brand:"Ashley 3-seat (sample)", age:6, cost:1899, proof:"Photo + email receipt", replaced:"Replaced", submitted:"Submitted" },
+    { id:uid()+"2", item:"Area rug", room:"Living room", brand:"—", age:4, cost:420, proof:"Photo", replaced:"Not replaced yet", submitted:"Submitted" },
+    { id:uid()+"3", item:"Television 55in", room:"Living room", brand:"Sample brand (sample)", age:5, cost:749, proof:"Photo of model label", replaced:"Replaced", submitted:"Paid" },
+    { id:uid()+"4", item:"Washer", room:"Laundry", brand:"Sample brand (sample)", age:8, cost:899, proof:"Receipt in email", replaced:"Not replaced yet", submitted:"Not submitted" },
+    { id:uid()+"5", item:"Dining table + 4 chairs", room:"Kitchen", brand:"—", age:9, cost:1150, proof:"Photo", replaced:"Not replacing", submitted:"Submitted" },
+    { id:uid()+"6", item:"Mattress (queen)", room:"Bedroom", brand:"Sample brand (sample)", age:7, cost:980, proof:"Photo + order email", replaced:"Replaced", submitted:"Submitted" }
+  ];
+  var a1 = new Date(); a1.setDate(a1.getDate() - 19);
+  var a2 = new Date(); a2.setDate(a2.getDate() - 12);
+  function iso(x){ return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); }
+  s.ale = [
+    { id:uid()+"a", date:iso(a1), category:"Lodging", amount:1180, reimbursed:"Submitted", note:"Hotel, first stay (sample)" },
+    { id:uid()+"b", date:iso(a1), category:"Meals", amount:386, reimbursed:"Not yet", note:"Groceries + meals out (sample)" },
+    { id:uid()+"c", date:iso(a2), category:"Lodging", amount:1325, reimbursed:"Not yet", note:"Hotel, second stay (sample)" },
+    { id:uid()+"d", date:iso(a2), category:"Mileage / fuel", amount:214, reimbursed:"Not yet", note:"Trips to the house (sample)" }
+  ];
+  s.comms = [
+    { id:uid()+"m1", date:iso(a1), who:"Insurer / adjuster", method:"Phone", summary:"Adjuster walked through the estimate and explained depreciation is withheld until final invoices are sent (sample note).", next:"Send contractor final invoice" },
+    { id:uid()+"m2", date:iso(a2), who:"Contractor", method:"Email", summary:"Contractor sent updated bid; roof scope is higher than the insurer estimate (sample note).", next:"Ask adjuster about supplement process" }
+  ];
+  s.docs.forEach(function(doc, i){ doc.done = i < 5; });
+  return s;
+}
+function setStatus(msg){ document.getElementById("statusLine").textContent = msg || ""; }
+function setSample(on){
+  var btn = document.getElementById("sampleBtn");
+  if(on){
+    try {
+      if(localStorage.getItem(LS_BACKUP) === null) localStorage.setItem(LS_BACKUP, JSON.stringify(state));
+      localStorage.setItem(LS_SAMPLE, "1");
+    } catch(e){ storageOK = false; document.getElementById("storageWarn").style.display = "block"; }
+    state = sampleState(); sampleMode = true; save();
+    setStatus("Sample claim loaded. Your own entries are saved and will come back exactly as you left them when you turn sample data off.");
+  } else {
+    try {
+      var bak = localStorage.getItem(LS_BACKUP);
+      if(bak !== null){ state = JSON.parse(bak); localStorage.removeItem(LS_BACKUP); }
+      else state = blankState();
+      localStorage.setItem(LS_SAMPLE, "0");
+    } catch(e){ state = blankState(); }
+    sampleMode = false; save();
+    setStatus("Sample data off — your own entries are back.");
+  }
+  btn.setAttribute("aria-pressed", sampleMode ? "true" : "false");
+  selWaterfall = selDonut = selGap = selRoom = selAle = null;
+  buildClaimForm(); buildBuckets(); renderAll();
+  beep(sampleMode ? 760 : 520);
+}
+
+/* ---------- Header buttons, render, init ---------- */
+function renderAll(){ renderDashboard(); renderBucketSummaries(); renderContents(); renderAle(); renderComms(); renderDocs(); }
+function wireHeader(){
+  var themeBtn = document.getElementById("themeBtn");
+  function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); themeBtn.setAttribute("aria-pressed", t === "dark" ? "true" : "false"); try { localStorage.setItem(LS_THEME, t); } catch(e){} renderDashboard(); }
+  var saved = null;
+  try { saved = localStorage.getItem(LS_THEME); } catch(e){}
+  var initial = saved || ((window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", initial);
+  themeBtn.setAttribute("aria-pressed", initial === "dark" ? "true" : "false");
+  themeBtn.addEventListener("click", function(){ applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"); beep(600); });
+  var soundBtn = document.getElementById("soundBtn");
+  function paintSound(){ soundBtn.setAttribute("aria-pressed", soundOn() ? "true" : "false"); }
+  paintSound();
+  soundBtn.addEventListener("click", function(){
+    try { localStorage.setItem(LS_SOUND, soundOn() ? "0" : "1"); } catch(e){}
+    paintSound(); if(soundOn()) beep(700);
+  });
+  document.getElementById("sampleBtn").addEventListener("click", function(){ setSample(!sampleMode); });
+  document.getElementById("printBtn").addEventListener("click", function(){ buildPacket(); beep(760); setTimeout(function(){ window.print(); }, 30); });
+  document.getElementById("exportBtn").addEventListener("click", function(){
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type:"application/json" });
+    var aEl = document.createElement("a");
+    aEl.href = URL.createObjectURL(blob); aEl.download = "claim-tracker-backup.json"; aEl.click();
+    setTimeout(function(){ URL.revokeObjectURL(aEl.href); }, 400);
+    beep(700);
+  });
+  window.addEventListener("beforeprint", buildPacket);
+}
+
+load();
+if(!storageOK) document.getElementById("storageWarn").style.display = "block";
+document.getElementById("sampleBtn").setAttribute("aria-pressed", sampleMode ? "true" : "false");
+wireHeader();
+buildClaimForm();
+buildBuckets();
+wireForms();
+renderAll();
+</script>
+</body>
+</html>
