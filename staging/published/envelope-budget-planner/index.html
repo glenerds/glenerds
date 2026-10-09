@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envelope Budget Planner | Zero-Based Budgeting, Envelope Method Cash Budget Tracker & Monthly Budget Planner</title>
+<style>
+:root{
+  --bg:#f4f6fb; --panel:#ffffff; --panel2:#eef1f8; --ink:#17203a; --muted:#4a5878;
+  --line:#d5dcee; --accent:#2563eb; --accent2:#0e9f6e; --warn:#d97706; --bad:#dc2626;
+  --good:#0e9f6e; --bar:#e3e9f5; --sel:#ffbf47; --shadow:0 2px 10px rgba(20,30,60,.08);
+}
+[data-theme="dark"]{
+  --bg:#0e1322; --panel:#171f36; --panel2:#1e2947; --ink:#eef2ff; --muted:#b9c4e4;
+  --line:#33406b; --accent:#6ea8ff; --accent2:#3ddc97; --warn:#ffb020; --bad:#ff6b6b;
+  --good:#3ddc97; --bar:#263356; --sel:#ffd166; --shadow:0 2px 10px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:var(--ink)}
+button{cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:14px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 0 4px}
+.brand-lockup{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-badge{width:44px;height:44px;flex:0 0 44px;display:block}
+.brand-copy{min-width:0}
+.brand{font-size:26px;font-weight:800;letter-spacing:.2px;line-height:1.05}
+.sub{color:var(--muted);font-size:15px;line-height:1.25}
+.hbtns{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.hbtn{min-width:44px;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:17px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);box-shadow:var(--shadow)}
+.hbtn[aria-pressed="true"]{outline:3px solid var(--sel);outline-offset:1px}
+.pill{font-weight:700;font-size:15px}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin:12px 0}
+.hero .big{font-size:40px;font-weight:800;line-height:1.05}
+.hero.ok .big{color:var(--good)} .hero.warn .big{color:var(--warn)} .hero.bad .big{color:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:var(--shadow)}
+.card h2{font-size:19px;margin:2px 0 10px}
+.card h3{font-size:16px;margin:10px 0 6px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+label{font-size:15px;color:var(--muted);display:block;margin:6px 0 3px}
+input,select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 10px;min-height:44px;width:100%}
+input[type="checkbox"]{width:22px;height:22px;min-height:22px}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:10px;padding:10px 14px;min-height:44px;font-weight:700}
+.btn.ghost{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.small{min-height:38px;padding:6px 10px;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+#txnList,#acctList,#incList{overflow-x:auto}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:700}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.mut{color:var(--muted);font-size:15px}
+.env{border:1px solid var(--line);border-radius:12px;padding:10px;margin:8px 0;background:var(--panel)}
+.env.sel{outline:3px solid var(--sel);outline-offset:1px}
+.envhead{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.envname{font-weight:800;font-size:17px}
+.fill{height:20px;background:var(--bar);border-radius:999px;overflow:hidden;margin:8px 0;cursor:pointer;border:2px solid transparent}
+.fill.sel{border-color:var(--sel)}
+.fill>i{display:block;height:100%;border-radius:999px;background:var(--accent2)}
+.fill.near>i{background:var(--warn)} .fill.over>i{background:var(--bad)}
+.pillstat{font-size:15px;font-weight:700;padding:2px 9px;border-radius:999px;border:1px solid var(--line)}
+.pillstat.ok{color:var(--good)} .pillstat.near{color:var(--warn)} .pillstat.over{color:var(--bad)}
+.seg{cursor:pointer;stroke:var(--panel);stroke-width:2}
+.seg.sel{stroke:var(--sel);stroke-width:5}
+.tbar{cursor:pointer}
+.tbar.sel rect{stroke:var(--sel);stroke-width:4}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px}
+.kpi .v{font-size:22px;font-weight:800}
+.kpi .k{font-size:15px;color:var(--muted)}
+footer{color:var(--muted);font-size:15px;padding:18px 0 30px}
+.detail{background:var(--panel2);border:1px dashed var(--line);border-radius:12px;padding:10px;margin-top:10px;font-size:15px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--ink);max-width:520px;width:94vw}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+#printReport{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  header.top, section, footer, dialog{display:none !important}
+  .noprint{display:none !important}
+  #printReport{display:block;font-size:12pt}
+  #printReport table{font-size:11pt}
+}
+@media (max-width:560px){
+  .brand{font-size:22px}
+  .hero .big{font-size:32px}
+  .wrap{padding:10px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand-lockup">
+      <svg class="brand-badge" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+        <rect x="3" y="3" width="42" height="42" rx="11" fill="var(--accent)"/>
+        <path d="M12 18.2c0-1.7 1.3-3 3-3h18c1.7 0 3 1.3 3 3v13.1c0 1.7-1.3 3-3 3H15c-1.7 0-3-1.3-3-3Z" fill="none" stroke="#fff" stroke-width="3"/>
+        <path d="m12.8 17 11.2 8.4L35.2 17" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand-copy">
+        <div class="brand">Stuffed</div>
+        <div class="sub">Envelope Budget Tracker</div>
+      </div>
+    </div>
+    <nav class="hbtns" aria-label="App tools">
+      <a class="hbtn pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button class="hbtn" id="sampleBtn" type="button" aria-pressed="false" title="Try sample data" aria-label="Try sample data">🧪</button>
+      <button class="hbtn" id="darkBtn" type="button" aria-pressed="false" title="Dark mode" aria-label="Toggle dark mode">🌙</button>
+      <button class="hbtn" id="soundBtn" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+    </nav>
+  </header>
+
+  <!-- Month switcher -->
+  <section class="card noprint" aria-label="Month">
+    <div class="row" style="justify-content:space-between">
+      <div class="row">
+        <button class="btn ghost" id="prevMonth" type="button">◀ Prev</button>
+        <input type="month" id="monthPick" style="width:190px" aria-label="Pick a month">
+        <button class="btn ghost" id="nextMonth" type="button">Next ▶</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="exportBtn" type="button">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON
+          <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+        </label>
+        <button class="btn ghost" id="printBtn" type="button">Print report</button>
+        <button class="btn danger" id="clearBtn" type="button">Clear all</button>
+      </div>
+    </div>
+    <div id="statusMsg" role="alert" style="margin-top:8px;font-size:15px"></div>
+  </section>
+
+  <!-- Zero-based hero -->
+  <section class="hero" id="heroBox" aria-label="To be budgeted">
+    <div class="mut">To be budgeted (total income − total budgeted) — give every dollar a job.</div>
+    <div class="big" id="tbbBig">$0.00</div>
+    <div id="tbbMsg" class="mut"></div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Income this month</div><div class="v" id="kIncome">$0</div></div>
+      <div class="kpi"><div class="k">Budgeted</div><div class="v" id="kBudgeted">$0</div></div>
+      <div class="kpi"><div class="k">Spent</div><div class="v" id="kSpent">$0</div></div>
+      <div class="kpi"><div class="k">Savings rate</div><div class="v" id="kSave">—</div></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <!-- Envelopes -->
+    <section class="card" aria-label="Envelopes">
+      <h2>Envelopes <span class="mut">(unlimited)</span></h2>
+      <div id="envList"></div>
+      <div class="detail" id="envDetail">Select an envelope fill bar, a donut segment, or a row to see its detail here.</div>
+      <h3>Add envelope</h3>
+      <form id="envForm">
+        <label>Name <input id="eName" required maxlength="60"></label>
+        <label>Group <select id="eGroup"></select></label>
+        <label>Monthly budget $ <input id="eBudget" type="number" step="0.01" min="0" value="0"></label>
+        <label>Due day (optional, 1–31) <input id="eDue" type="number" min="1" max="31"></label>
+        <label>Notes <input id="eNotes" maxlength="120"></label>
+        <button class="btn" type="submit">Add envelope</button>
+      </form>
+      <h3>Groups</h3>
+      <div class="row"><input id="gName" placeholder="New group name" style="flex:1;min-width:160px"><button class="btn ghost" id="gAdd" type="button">Add group</button></div>
+      <div class="mut" id="gList" style="margin-top:6px"></div>
+    </section>
+
+    <!-- Charts -->
+    <section class="card" aria-label="Charts">
+      <h2>Spending by envelope — <span id="chartMonth"></span></h2>
+      <div class="row" style="align-items:flex-start">
+        <svg id="donut" width="240" height="240" viewBox="0 0 240 240" role="img" aria-label="Spending by envelope donut chart"></svg>
+        <div id="donutLegend" style="flex:1;min-width:170px"></div>
+      </div>
+      <h3>Budgeted vs spent — last 6 months</h3>
+      <svg id="trend" width="100%" height="190" viewBox="0 0 560 190" role="img" aria-label="Six month budgeted versus spent chart"></svg>
+      <div class="mut">Blue = budgeted, teal = spent. Click a month to jump to it.</div>
+    </section>
+  </div>
+
+  <div class="grid">
+    <!-- Income + accounts -->
+    <section class="card" aria-label="Income and accounts">
+      <h2>Income this month</h2>
+      <div id="incList"></div>
+      <p class="mut">Use the form below for regular income (paychecks &amp; deposits). One-off income can instead be added below as an "other income" transaction — but never enter the same paycheck in both places: both count toward this month's income.</p>
+      <form id="incForm">
+        <label>Source <input id="iSource" required maxlength="60"></label>
+        <div class="row">
+          <div style="flex:1;min-width:130px"><label>Amount $ <input id="iAmt" type="number" step="0.01" min="0" required></label></div>
+          <div style="flex:1;min-width:150px"><label>Date <input id="iDate" type="date"></label></div>
+        </div>
+        <label>Account <select id="iAcct"></select></label>
+        <button class="btn" type="submit">Add income</button>
+      </form>
+
+      <h2 style="margin-top:18px">Accounts <span class="mut">(unlimited)</span></h2>
+      <div id="acctList"></div>
+      <form id="acctForm">
+        <label>Account name <input id="aName" required maxlength="50"></label>
+        <label>Type
+          <select id="aType">
+            <option value="checking">Checking</option><option value="savings">Savings</option>
+            <option value="cash">Cash</option><option value="credit">Credit card</option><option value="other">Other</option>
+          </select></label>
+        <label>Starting balance $ <input id="aStart" type="number" step="0.01" value="0"></label>
+        <button class="btn" type="submit">Add account</button>
+      </form>
+      <p class="mut">Credit-card accounts show spending as a balance owed. Accounts hold a name, type and starting balance only — never enter passwords, PINs or full account numbers.</p>
+    </section>
+
+    <!-- Transactions -->
+    <section class="card" aria-label="Transactions">
+      <h2>Transactions</h2>
+      <form id="txnForm">
+        <div class="row">
+          <div style="flex:1;min-width:140px"><label>Date <input id="tDate" type="date"></label></div>
+          <div style="flex:2;min-width:160px"><label>Payee / description <input id="tPayee" required maxlength="80"></label></div>
+        </div>
+        <label>Type
+          <select id="tType"><option value="expense">Expense</option><option value="income">Income (other income)</option><option value="transfer">Transfer</option></select></label>
+        <div class="row">
+          <div id="envWrap" style="flex:1;min-width:150px"><label>Envelope <select id="tEnv"></select></label></div>
+          <div style="flex:1;min-width:150px"><label>Account <select id="tAcct"></select></label></div>
+        </div>
+        <label id="toAcctWrap" style="display:none">To account <select id="tToAcct"></select></label>
+        <div class="row">
+          <div style="flex:1;min-width:130px"><label>Amount $ <input id="tAmt" type="number" step="0.01" min="0" required></label></div>
+          <div style="flex:2;min-width:160px"><label>Note <input id="tNote" maxlength="120"></label></div>
+        </div>
+        <button class="btn" type="submit" id="txnSubmit">Add transaction</button>
+        <button class="btn ghost" type="button" id="txnCancel" style="display:none">Cancel edit</button>
+      </form>
+      <h3>Filter</h3>
+      <div class="row">
+        <select id="fEnv" aria-label="Filter by envelope" style="flex:1;min-width:140px"></select>
+        <select id="fAcct" aria-label="Filter by account" style="flex:1;min-width:140px"></select>
+        <input id="fText" placeholder="Search text…" aria-label="Search transactions" style="flex:1;min-width:140px">
+      </div>
+      <div id="txnList" style="margin-top:8px"></div>
+    </section>
+  </div>
+
+  <!-- Summary -->
+  <section class="card" aria-label="Month summary" style="margin-top:14px">
+    <h2>Month summary & reports</h2>
+    <div id="summary"></div>
+  </section>
+
+  <footer>
+    <p><strong>Honest notes:</strong> This is a manual-entry planning and tracking tool — an educational budget planner, not financial advice. There is no bank connection and no sync; you type in your own numbers, the way envelope budgeting has always worked. Nothing here guarantees any financial outcome. All data stays in this browser (localStorage) and never leaves your device; export a JSON backup to keep your own copy. Works fully offline from this one file — no account, no subscription.</p>
+    <p>Stuffed — Envelope Budget Tracker · single-file offline app · <span id="footMonth"></span></p>
+  </footer>
+</div>
+
+<dialog id="editDlg">
+  <form method="dialog" id="editForm">
+    <h3 style="margin-top:0">Edit envelope</h3>
+    <input type="hidden" id="edId">
+    <label>Name <input id="edName" required maxlength="60"></label>
+    <label>Group <select id="edGroup"></select></label>
+    <label>Default monthly budget $ <input id="edBudget" type="number" step="0.01" min="0"></label>
+    <label>Budget for <span id="edMonthName"></span> only (optional) $ <input id="edMonthBudget" type="number" step="0.01" min="0" placeholder="Same as default"></label>
+    <div class="row"><button class="btn ghost small" id="edClearOverride" type="button">Clear this month's budget override</button></div>
+    <p class="mut" id="edOverrideNote"></p>
+    <label>Due day (optional) <input id="edDue" type="number" min="1" max="31"></label>
+    <label>Notes <input id="edNotes" maxlength="120"></label>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="edSave" type="button">Save</button>
+      <button class="btn ghost" type="submit">Cancel</button>
+      <button class="btn danger" id="edDel" type="button">Delete envelope</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="printReport"></div>
+
+<script>
+"use strict";
+const KEY='envelopeBudgetPlannerV1';
+const RESCUE_KEY='envelopeBudgetPlannerV1.rescue';
+const $=s=>document.querySelector(s);
+const uid=()=>{ try{ if(window.crypto&&typeof crypto.randomUUID==='function') return crypto.randomUUID(); }catch(e){} return 'id'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4); };
+const fmt=n=>{ n=Number(n); if(!isFinite(n)) n=0; return (n<0?'-':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+const ymOf=d=> d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+const todayISO=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+let curMonth=ymOf(new Date());
+let selEnv=null, editTxnId=null;
+
+function defaults(){return {months:{},envelopes:[],accounts:[],groups:['Housing','Food','Transport','Fun','Savings','Other'],settings:{dark:null,sound:true},sample:{active:false,snapshot:null}};}
+const TXN_TYPES=['expense','income','transfer'];
+function isNum(x){ if(typeof x==='number') return isFinite(x); if(typeof x==='string'&&x.trim()!=='') return isFinite(Number(x)); return false; }
+function numOr(x,def){ return isNum(x)?Number(x):def; }
+function validDateStr(s){ return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&+s.slice(5,7)>=1&&+s.slice(5,7)<=12&&+s.slice(8,10)>=1&&+s.slice(8,10)<=31; }
+function cleanData(d,strict){
+  const fail=m=>{throw new Error('Invalid data: '+m);};
+  if(!d||typeof d!=='object'||Array.isArray(d)){ if(strict)fail('not a planner data object'); return defaults(); }
+  const out=defaults();
+  if(Array.isArray(d.groups)){ const g=d.groups.filter(x=>typeof x==='string'&&x.trim()); if(g.length)out.groups=g; }
+  else if(strict)fail('groups missing');
+  if(!Array.isArray(d.envelopes)){ if(strict)fail('envelopes missing'); out.envelopes=[]; }
+  else { out.envelopes=[]; for(const e of d.envelopes){
+    if(!e||typeof e!=='object'||typeof e.id!=='string'||!e.id||typeof e.name!=='string'||!e.name.trim()){ if(strict)fail('an envelope is missing its id or name'); continue; }
+    if(!isNum(e.budget==null?0:e.budget)){ if(strict)fail('envelope "'+e.name+'" has a non-numeric budget'); }
+    const mb={}; if(e.monthBudgets&&typeof e.monthBudgets==='object'&&!Array.isArray(e.monthBudgets)){ for(const k of Object.keys(e.monthBudgets)){ if(!/^\d{4}-\d{2}$/.test(k)){ if(strict)fail('bad month key in monthBudgets for "'+e.name+'"'); continue; } if(!isNum(e.monthBudgets[k])){ if(strict)fail('non-numeric monthly budget for "'+e.name+'" in '+k); continue; } mb[k]=Number(e.monthBudgets[k]); } }
+    out.envelopes.push({id:e.id,name:e.name,group:(typeof e.group==='string'&&e.group)?e.group:'Other',budget:numOr(e.budget,0),dueDay:(Number.isInteger(e.dueDay)&&e.dueDay>=1&&e.dueDay<=31)?e.dueDay:null,notes:(typeof e.notes==='string'?e.notes:''),monthBudgets:mb});
+  } }
+  if(!Array.isArray(d.accounts)){ if(strict)fail('accounts missing'); out.accounts=[]; }
+  else { out.accounts=[]; for(const a of d.accounts){
+    if(!a||typeof a!=='object'||typeof a.id!=='string'||!a.id||typeof a.name!=='string'||!a.name.trim()){ if(strict)fail('an account is missing its id or name'); continue; }
+    if(!isNum(a.startBal==null?0:a.startBal)){ if(strict)fail('account "'+a.name+'" has a non-numeric starting balance'); }
+    out.accounts.push({id:a.id,name:a.name,type:(typeof a.type==='string'&&a.type)?a.type:'other',startBal:numOr(a.startBal,0)});
+  } }
+  out.months={};
+  if(!d.months||typeof d.months!=='object'||Array.isArray(d.months)){ if(strict)fail('months missing'); }
+  else for(const k of Object.keys(d.months)){
+    if(!/^\d{4}-\d{2}$/.test(k)){ if(strict)fail('bad month key "'+k+'"'); continue; }
+    const mo=(d.months[k]&&typeof d.months[k]==='object')?d.months[k]:{};
+    const rec={income:[],txns:[]};
+    if(!Array.isArray(mo.income)||!Array.isArray(mo.txns)){ if(strict)fail('month '+k+' is missing its income/transactions lists'); out.months[k]=rec; continue; }
+    for(const i of mo.income){ if(!i||typeof i!=='object'||!isNum(i.amount)||!validDateStr(i.date||'')){ if(strict)fail('an income row in '+k+' is invalid'); continue; } rec.income.push({id:(typeof i.id==='string'&&i.id)?i.id:uid(),source:(typeof i.source==='string'?i.source:''),amount:Number(i.amount),date:i.date,accountId:(typeof i.accountId==='string'?i.accountId:'')}); }
+    for(const t of mo.txns){ if(!t||typeof t!=='object'||!isNum(t.amount)||!validDateStr(t.date||'')||!TXN_TYPES.includes(t.type)){ if(strict)fail('a transaction in '+k+' is invalid'); continue; } rec.txns.push({id:(typeof t.id==='string'&&t.id)?t.id:uid(),date:t.date,payee:(typeof t.payee==='string'?t.payee:''),type:t.type,envelopeId:(typeof t.envelopeId==='string'?t.envelopeId:''),accountId:(typeof t.accountId==='string'?t.accountId:''),toAccountId:(typeof t.toAccountId==='string'?t.toAccountId:''),amount:Number(t.amount),note:(typeof t.note==='string'?t.note:'')}); }
+    out.months[k]=rec;
+  }
+  if(d.settings&&typeof d.settings==='object'){ out.settings.dark=(d.settings.dark===true||d.settings.dark===false)?d.settings.dark:null; out.settings.sound=d.settings.sound!==false; }
+  if(d.sample&&typeof d.sample==='object'&&!Array.isArray(d.sample)){ out.sample.active=d.sample.active===true; out.sample.snapshot=(typeof d.sample.snapshot==='string')?d.sample.snapshot:null; }
+  return out;
+}
+let S=load();
+function load(){ try{ const r=localStorage.getItem(KEY); if(r){ const d=JSON.parse(r); if(d&&typeof d==='object'&&!Array.isArray(d)) return cleanData(d,false); } }catch(e){} return defaults(); }
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function setStatus(msg,warn){ const s=$('#statusMsg'); if(!s)return; s.textContent=msg||''; s.style.color=warn?'var(--bad)':'var(--muted)'; s.style.fontWeight=warn?'700':'400'; }
+function month(m){ if(!S.months[m]) S.months[m]={income:[],txns:[]}; return S.months[m]; }
+month(curMonth);
+
+/* ---------- sound ---------- */
+let AC=null;
+function beep(f){ if(S.settings.sound===false) return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const o=AC.createOscillator(),g=AC.createGain(); o.type='sine';o.frequency.value=f||660; g.gain.value=.06; o.connect(g);g.connect(AC.destination); o.start(); g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+.12); o.stop(AC.currentTime+.13);}catch(e){} }
+
+/* ---------- theme ---------- */
+function applyTheme(){ const dark = S.settings.dark===null ? window.matchMedia('(prefers-color-scheme: dark)').matches : !!S.settings.dark; document.documentElement.setAttribute('data-theme',dark?'dark':'light'); $('#darkBtn').textContent=dark?'☀️':'🌙'; $('#darkBtn').setAttribute('aria-pressed',dark); }
+$('#darkBtn').addEventListener('click',()=>{ const nowDark=document.documentElement.getAttribute('data-theme')==='dark'; S.settings.dark=!nowDark; applyTheme(); save(); beep(520); });
+$('#soundBtn').addEventListener('click',()=>{ S.settings.sound=!(S.settings.sound!==false); $('#soundBtn').textContent=S.settings.sound?'🔊':'🔇'; $('#soundBtn').setAttribute('aria-pressed',S.settings.sound); save(); beep(700); });
+
+/* ---------- math ---------- */
+function envById(id){return S.envelopes.find(e=>e.id===id);}
+function acctById(id){return S.accounts.find(a=>a.id===id);}
+function spentIn(envId,m){ const mm=S.months[m]; if(!mm)return 0; return mm.txns.filter(t=>t.type==='expense'&&t.envelopeId===envId).reduce((a,t)=>a+(+t.amount||0),0); }
+function effBudget(e,m){ if(!e)return 0; const o=e.monthBudgets; if(o&&typeof o==='object'&&Object.prototype.hasOwnProperty.call(o,m)&&isNum(o[m])) return Number(o[m]); return numOr(e.budget,0); }
+function addMonths(ym,k){ const p=ym.split('-'); let y=+p[0],mo=+p[1]+k; while(mo>12){mo-=12;y++;} while(mo<1){mo+=12;y--;} return y+'-'+String(mo).padStart(2,'0'); }
+function earliestDataMonth(){ const cand=[]; for(const k of Object.keys(S.months)){ const mo=S.months[k]; if(mo&&((mo.income&&mo.income.length)||(mo.txns&&mo.txns.length))) cand.push(k); } for(const e of S.envelopes){ if(e.monthBudgets&&typeof e.monthBudgets==='object') for(const k of Object.keys(e.monthBudgets)) cand.push(k); } return cand.length?cand.sort()[0]:null; }
+function carryIn(envId,m){ const e=envById(envId); if(!e)return 0; const start=earliestDataMonth(); if(!start||start>=m)return 0; let bal=0,x=start,guard=0; while(x<m&&guard++<1200){ bal += effBudget(e,x) - spentIn(envId,x); x=addMonths(x,1); } return bal; }
+function incomeTotal(m){ const mm=S.months[m]; if(!mm)return 0; const a=mm.income.reduce((s,i)=>s+(+i.amount||0),0); const b=mm.txns.filter(t=>t.type==='income').reduce((s,t)=>s+(+t.amount||0),0); return a+b; }
+function spentTotal(m){ const mm=S.months[m]; if(!mm)return 0; return mm.txns.filter(t=>t.type==='expense').reduce((s,t)=>s+(+t.amount||0),0); }
+function budgetedTotal(m){ return S.envelopes.reduce((s,e)=>s+effBudget(e,m||curMonth),0); }
+function acctBalance(a){ let bal=+a.startBal||0; for(const m of Object.keys(S.months)){ const mm=S.months[m]; for(const i of mm.income){ if(i.accountId===a.id) bal+=+i.amount||0; } for(const t of mm.txns){ if(t.type==='expense'&&t.accountId===a.id) bal-=+t.amount||0; if(t.type==='income'&&t.accountId===a.id) bal+=+t.amount||0; if(t.type==='transfer'){ if(t.accountId===a.id)bal-=+t.amount||0; if(t.toAccountId===a.id)bal+=+t.amount||0; } } } return bal; }
+function statusOf(spent,avail,budget){ const rem=avail-spent; if(rem<-0.001)return'over'; if(rem<=0.001&&spent>numOr(budget,0)+0.001)return'over'; if(avail>0&&spent/Math.max(avail,0.01)>=0.85)return'near'; return'ok'; }
+
+/* ---------- selects ---------- */
+function fillSelect(sel,items,allLabel){ sel.innerHTML=''; if(allLabel!==undefined){const o=document.createElement('option');o.value='';o.textContent=allLabel;sel.appendChild(o);} for(const it of items){const o=document.createElement('option');o.value=it.id;o.textContent=it.name;sel.appendChild(o);} }
+function refreshSelects(){
+  const gsel=[$('#eGroup'),$('#edGroup')]; for(const s of gsel){ s.innerHTML=''; for(const g of S.groups){const o=document.createElement('option');o.value=g;o.textContent=g;s.appendChild(o);} }
+  fillSelect($('#iAcct'),S.accounts); fillSelect($('#tAcct'),S.accounts); fillSelect($('#tToAcct'),S.accounts);
+  fillSelect($('#tEnv'),S.envelopes); fillSelect($('#fEnv'),S.envelopes,'All envelopes'); fillSelect($('#fAcct'),S.accounts,'All accounts');
+  $('#gList').textContent = S.groups.length? ('Groups: '+S.groups.join(' · ')) : 'No groups yet.';
+}
+
+/* ---------- render ---------- */
+function render(){
+  month(curMonth);
+  $('#monthPick').value=curMonth; $('#chartMonth').textContent=curMonth; $('#footMonth').textContent=curMonth;
+  const inc=incomeTotal(curMonth), bud=budgetedTotal(curMonth), spent=spentTotal(curMonth), tbb=inc-bud;
+  $('#kIncome').textContent=fmt(inc); $('#kBudgeted').textContent=fmt(bud); $('#kSpent').textContent=fmt(spent);
+  $('#kSave').textContent = inc>0 ? Math.round(((inc-spent)/inc)*1000)/10+'%' : '—';
+  const hb=$('#heroBox'); hb.className='hero '+(Math.abs(tbb)<0.005?'ok':(tbb>0?'warn':'bad'));
+  $('#tbbBig').textContent=fmt(tbb);
+  $('#tbbMsg').textContent = Math.abs(tbb)<0.005 ? 'Zero-based: every dollar has a job. Nice.' : (tbb>0 ? fmt(tbb)+' is still unassigned — put it in an envelope or savings.' : 'You have assigned '+fmt(-tbb)+' more than this month\u2019s income. Trim an envelope.');
+
+  /* envelopes grouped */
+  const el=$('#envList'); el.innerHTML='';
+  if(!S.envelopes.length) el.innerHTML='<p class="mut">No envelopes yet — add your first one below.</p>';
+  for(const g of S.groups.concat(['(no group)'])){
+    const list=S.envelopes.filter(e=>(e.group||'(no group)')===g); if(!list.length)continue;
+    const h=document.createElement('h3'); h.textContent=g; el.appendChild(h);
+    for(const e of list){
+      const eb2=effBudget(e,curMonth), sp=spentIn(e.id,curMonth), ci=carryIn(e.id,curMonth), avail=eb2+ci, rem=avail-sp;
+      const pct=avail>0?Math.min(100,Math.max(0,sp/Math.max(avail,0.01)*100)): (sp>0?100:0);
+      const st=statusOf(sp,avail,eb2);
+      const d=document.createElement('div'); d.className='env'+(selEnv===e.id?' sel':'');
+      d.innerHTML='<div class="envhead"><span class="envname"></span><span class="pillstat '+st+'">'+(st==='over'?'Over budget':st==='near'?'Near limit':'On track')+'</span></div>'+
+        '<div class="mut">Budgeted '+fmt(eb2)+' · carried in '+fmt(ci)+' · spent '+fmt(sp)+' · <strong>remaining '+fmt(rem)+'</strong>'+(e.dueDay?' · due day '+e.dueDay:'')+(e.notes?' · '+escapeHtml(e.notes):'')+'</div>';
+      d.querySelector('.envname').textContent=e.name;
+      const bar=document.createElement('div'); bar.className='fill '+st+(selEnv===e.id?' sel':''); bar.setAttribute('role','button'); bar.setAttribute('tabindex','0'); bar.setAttribute('aria-label','Select envelope '+e.name);
+      bar.innerHTML='<i style="width:'+pct+'%"></i>';
+      const pick=()=>{ selectEnv(selEnv===e.id?null:e.id); };
+      bar.addEventListener('click',ev=>{ ev.stopPropagation(); pick(); });
+      bar.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); ev.stopPropagation(); pick(); } });
+      d.addEventListener('click',ev=>{ if(ev.target.closest('button'))return; pick(); });
+      const row=document.createElement('div'); row.className='row';
+      const eb=document.createElement('button'); eb.className='btn ghost small'; eb.textContent='Edit'; eb.addEventListener('click',ev=>{ev.stopPropagation();openEdit(e.id);});
+      row.appendChild(eb); d.appendChild(bar); d.appendChild(row); el.appendChild(d);
+    }
+  }
+  renderDetail(); renderDonut(); renderTrend(); renderIncome(); renderAccounts(); renderTxns(); renderSummary();
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function selectEnv(id){ selEnv=id; beep(id?740:440); render(); }
+function renderDetail(){
+  const box=$('#envDetail'); const e=selEnv?envById(selEnv):null;
+  if(!e){ box.textContent='Select an envelope fill bar, a donut segment, or a row to see its detail here.'; return; }
+  const eb2=effBudget(e,curMonth), sp=spentIn(e.id,curMonth), ci=carryIn(e.id,curMonth), avail=eb2+ci;
+  const txns=(S.months[curMonth]?S.months[curMonth].txns:[]).filter(t=>t.type==='expense'&&t.envelopeId===e.id);
+  box.innerHTML='<strong>'+escapeHtml(e.name)+'</strong> ('+escapeHtml(e.group||'')+')<br>Budgeted '+fmt(eb2)+' · carried in '+fmt(ci)+' · spent '+fmt(sp)+' · remaining '+fmt(avail-sp)+'<br>'+txns.length+' expense(s) this month'+(txns.length?': '+txns.slice(0,5).map(t=>escapeHtml(t.payee)+' '+fmt(+t.amount||0)).join(' · '):'');
+}
+
+/* donut */
+const COLORS=['#2563eb','#0e9f6e','#d97706','#9333ea','#dc2626','#0891b2','#65a30d','#db2777','#4f46e5','#b45309','#0d9488','#7c3aed','#c026d3','#ea580c','#475569'];
+function renderDonut(){
+  const svg=$('#donut'); svg.innerHTML='';
+  const data=S.envelopes.map((e,i)=>({e,v:spentIn(e.id,curMonth),c:COLORS[i%COLORS.length]})).filter(d=>d.v>0);
+  const total=data.reduce((s,d)=>s+d.v,0);
+  const cx=120,cy=120,R=92,r=56;
+  if(!total){ svg.innerHTML='<circle cx="120" cy="120" r="92" fill="none" stroke="var(--bar)" stroke-width="36"/><text x="120" y="112" text-anchor="middle" font-size="16" fill="var(--muted)">No spending</text><text x="120" y="134" text-anchor="middle" font-size="16" fill="var(--muted)">yet</text>'; $('#donutLegend').innerHTML='<p class="mut">Add an expense and the chart fills in.</p>'; return; }
+  let a0=-Math.PI/2;
+  const NS='http://www.w3.org/2000/svg';
+  for(const d of data){
+    const frac=d.v/total;
+    if(frac>0.999999){
+      const ring=document.createElementNS(NS,'circle');
+      ring.setAttribute('cx',cx); ring.setAttribute('cy',cy); ring.setAttribute('r',(R+r)/2);
+      ring.setAttribute('fill','none'); ring.setAttribute('stroke',d.c); ring.setAttribute('stroke-width',R-r);
+      ring.style.cursor='pointer';
+      if(selEnv===d.e.id){ ring.style.stroke='var(--sel)'; }
+      ring.addEventListener('click',()=>selectEnv(selEnv===d.e.id?null:d.e.id));
+      const rt=document.createElementNS(NS,'title'); rt.textContent=d.e.name+' '+fmt(d.v); ring.appendChild(rt);
+      svg.appendChild(ring); continue;
+    }
+    const a1=a0+frac*Math.PI*2;
+    const large=frac>0.5?1:0;
+    const p=(ang,rad)=>[cx+rad*Math.cos(ang),cy+rad*Math.sin(ang)];
+    const [x0,y0]=p(a0,R),[x1,y1]=p(a1,R),[x2,y2]=p(a1,r),[x3,y3]=p(a0,r);
+    const path=document.createElementNS(NS,'path');
+    path.setAttribute('d','M'+x0+' '+y0+' A'+R+' '+R+' 0 '+large+' 1 '+x1+' '+y1+' L'+x2+' '+y2+' A'+r+' '+r+' 0 '+large+' 0 '+x3+' '+y3+' Z');
+    path.setAttribute('fill',d.c); path.setAttribute('class','seg'+(selEnv===d.e.id?' sel':''));
+    if(selEnv===d.e.id){ const mid=(a0+a1)/2; path.setAttribute('transform','translate('+(8*Math.cos(mid))+' '+(8*Math.sin(mid))+')'); }
+    path.addEventListener('click',()=>selectEnv(selEnv===d.e.id?null:d.e.id));
+    const t=document.createElementNS(NS,'title'); t.textContent=d.e.name+' '+fmt(d.v); path.appendChild(t);
+    svg.appendChild(path); a0=a1;
+  }
+  const ctr=document.createElementNS(NS,'text'); ctr.setAttribute('x',cx); ctr.setAttribute('y',cy-4); ctr.setAttribute('text-anchor','middle'); ctr.setAttribute('font-size','17'); ctr.setAttribute('font-weight','800'); ctr.setAttribute('fill','var(--ink)');
+  ctr.textContent = total>=100000 ? '$'+(Math.round(total/100)/10)+'k' : fmt(total).replace('.00','');
+  const ctr2=document.createElementNS(NS,'text'); ctr2.setAttribute('x',cx); ctr2.setAttribute('y',cy+18); ctr2.setAttribute('text-anchor','middle'); ctr2.setAttribute('font-size','15'); ctr2.setAttribute('fill','var(--muted)'); ctr2.textContent='spent';
+  svg.appendChild(ctr); svg.appendChild(ctr2);
+  const lg=$('#donutLegend'); lg.innerHTML='';
+  data.forEach((d,i)=>{ const row=document.createElement('div'); row.className='row'; row.style.cursor='pointer'; row.innerHTML='<span style="width:16px;height:16px;border-radius:4px;background:'+d.c+';display:inline-block"></span><span style="flex:1">'+escapeHtml(d.e.name)+'</span><strong>'+fmt(d.v)+'</strong>'; row.addEventListener('click',()=>selectEnv(selEnv===d.e.id?null:d.e.id)); lg.appendChild(row); });
+}
+
+/* trend */
+function renderTrend(){
+  const svg=$('#trend'); const NS='http://www.w3.org/2000/svg'; svg.innerHTML='';
+  const ms=[]; const [Y,M]=curMonth.split('-').map(Number);
+  for(let k=5;k>=0;k--){ const d=new Date(Y,M-1-k,1); ms.push(ymOf(d)); }
+  const vals=ms.map(m=>({m,b:budgetedTotal(m),s:spentTotal(m)}));
+  const max=Math.max(1,...vals.map(v=>Math.max(v.b,v.s)));
+  const W=560,H=190,bw=34,gap=(W-30)/6;
+  vals.forEach((v,i)=>{
+    const x=18+i*gap, bh=v.b/max*120, sh=v.s/max*120;
+    const gEl=document.createElementNS(NS,'g'); gEl.setAttribute('class','tbar'+(v.m===curMonth?' sel':''));
+    const r1=document.createElementNS(NS,'rect'); r1.setAttribute('x',x); r1.setAttribute('y',150-bh); r1.setAttribute('width',bw); r1.setAttribute('height',bh); r1.setAttribute('fill','#2563eb'); r1.setAttribute('rx','4');
+    const r2=document.createElementNS(NS,'rect'); r2.setAttribute('x',x+bw+5); r2.setAttribute('y',150-sh); r2.setAttribute('width',bw); r2.setAttribute('height',sh); r2.setAttribute('fill','#0e9f6e'); r2.setAttribute('rx','4');
+    const lab=document.createElementNS(NS,'text'); lab.setAttribute('x',x+bw); lab.setAttribute('y',168); lab.setAttribute('text-anchor','middle'); lab.setAttribute('font-size','13'); lab.setAttribute('fill','var(--muted)'); lab.textContent=v.m.slice(5);
+    const val=document.createElementNS(NS,'text'); val.setAttribute('x',x+bw); val.setAttribute('y',140-Math.max(bh,sh)); val.setAttribute('text-anchor','middle'); val.setAttribute('font-size','13'); val.setAttribute('fill','var(--ink)'); val.textContent='$'+Math.round(Math.max(v.b,v.s)).toLocaleString();
+    gEl.appendChild(r1);gEl.appendChild(r2);gEl.appendChild(lab);gEl.appendChild(val);
+    const pickMonth=()=>{ curMonth=v.m; month(curMonth); beep(600); render(); };
+    gEl.addEventListener('click',pickMonth);
+    lab.setAttribute('pointer-events','all'); lab.style.cursor='pointer'; lab.addEventListener('click',ev=>{ ev.stopPropagation(); pickMonth(); });
+    svg.appendChild(gEl);
+  });
+}
+
+function renderIncome(){
+  const box=$('#incList'); const mm=month(curMonth); box.innerHTML='';
+  if(!mm.income.length && !mm.txns.some(t=>t.type==='income')) box.innerHTML='<p class="mut">No income recorded for '+curMonth+' yet.</p>';
+  const tbl=document.createElement('table'); tbl.innerHTML='<tr><th>Date</th><th>Source</th><th>Account</th><th class="num">Amount</th><th></th></tr>';
+  for(const i of mm.income){ const tr=document.createElement('tr'); const a=acctById(i.accountId); tr.innerHTML='<td>'+escapeHtml(i.date||'')+'</td><td>'+escapeHtml(i.source)+'</td><td>'+escapeHtml(a?a.name:'')+'</td><td class="num">'+fmt(+i.amount||0)+'</td>'; const td=document.createElement('td'); const b=document.createElement('button'); b.className='btn ghost small'; b.textContent='Delete'; b.addEventListener('click',()=>{ mm.income=mm.income.filter(x=>x.id!==i.id); save(); render(); }); td.appendChild(b); tr.appendChild(td); tbl.appendChild(tr); }
+  box.appendChild(tbl);
+}
+function renderAccounts(){
+  const box=$('#acctList'); box.innerHTML='';
+  if(!S.accounts.length){ box.innerHTML='<p class="mut">No accounts yet — add one below (name, type, starting balance).</p>'; return; }
+  const tbl=document.createElement('table'); tbl.innerHTML='<tr><th>Account</th><th>Type</th><th class="num">Balance</th><th></th></tr>';
+  for(const a of S.accounts){ const bal=acctBalance(a); const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+escapeHtml(a.name)+'</td><td>'+escapeHtml(a.type)+'</td><td class="num">'+(a.type==='credit' ? (bal<0 ? fmt(-bal)+' owed' : fmt(bal)) : fmt(bal))+'</td>';
+    const td=document.createElement('td'); const b=document.createElement('button'); b.className='btn ghost small'; b.textContent='Delete'; b.addEventListener('click',()=>{ if(confirm('Delete account "'+a.name+'"? Its transactions stay but lose the account link.')){ S.accounts=S.accounts.filter(x=>x.id!==a.id); save(); refreshSelects(); render(); } }); td.appendChild(b); tr.appendChild(td); tbl.appendChild(tr); }
+  box.appendChild(tbl);
+}
+function renderTxns(){
+  const box=$('#txnList'); const mm=month(curMonth);
+  const fe=$('#fEnv').value, fa=$('#fAcct').value, ft=($('#fText').value||'').toLowerCase();
+  let list=mm.txns.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  list=list.filter(t=> (!fe||t.envelopeId===fe) && (!fa||t.accountId===fa||t.toAccountId===fa) && (!ft || ((t.payee||'')+' '+(t.note||'')).toLowerCase().includes(ft)) );
+  if(!list.length){ box.innerHTML='<p class="mut">No transactions match for '+curMonth+'.</p>'; return; }
+  const tbl=document.createElement('table'); tbl.innerHTML='<tr><th>Date</th><th>Payee</th><th>Type</th><th>Envelope</th><th>Account</th><th class="num">Amount</th><th></th></tr>';
+  for(const t of list){ const e=envById(t.envelopeId), a=acctById(t.accountId), a2=acctById(t.toAccountId);
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td>'+escapeHtml(t.date||'')+'</td><td>'+escapeHtml(t.payee)+(t.note?' <span class="mut">'+escapeHtml(t.note)+'</span>':'')+'</td><td>'+escapeHtml(t.type==='income'?'other income':t.type)+'</td><td>'+escapeHtml(e?e.name:(t.type==='transfer'?'—':''))+'</td><td>'+escapeHtml(a?a.name:'')+(t.type==='transfer'&&a2?' → '+escapeHtml(a2.name):'')+'</td><td class="num">'+fmt(+t.amount||0)+'</td>';
+    const td=document.createElement('td'); const row=document.createElement('div'); row.className='row';
+    const eb=document.createElement('button'); eb.className='btn ghost small'; eb.textContent='Edit'; eb.addEventListener('click',()=>startEditTxn(t.id));
+    const db=document.createElement('button'); db.className='btn ghost small'; db.textContent='Delete'; db.addEventListener('click',()=>{ if(confirm('Delete this transaction?')){ mm.txns=mm.txns.filter(x=>x.id!==t.id); save(); render(); } });
+    row.appendChild(eb); row.appendChild(db); td.appendChild(row); tr.appendChild(td); tbl.appendChild(tr); }
+  const wrap=document.createElement('div'); wrap.style.overflowX='auto'; wrap.appendChild(tbl); box.replaceChildren(wrap);
+}
+function renderSummary(){
+  const inc=incomeTotal(curMonth), bud=budgetedTotal(curMonth), sp=spentTotal(curMonth);
+  const over=S.envelopes.map(e=>({e,over:spentIn(e.id,curMonth)-(effBudget(e,curMonth)+carryIn(e.id,curMonth))})).filter(x=>x.over>0).sort((a,b)=>b.over-a.over).slice(0,5);
+  const sr= inc>0 ? Math.round(((inc-sp)/inc)*1000)/10 : null;
+  $('#summary').innerHTML='<div class="kpis">'+
+    '<div class="kpi"><div class="k">Income</div><div class="v">'+fmt(inc)+'</div></div>'+
+    '<div class="kpi"><div class="k">Budgeted</div><div class="v">'+fmt(bud)+'</div></div>'+
+    '<div class="kpi"><div class="k">Spent</div><div class="v">'+fmt(sp)+'</div></div>'+
+    '<div class="kpi"><div class="k">Left to budget</div><div class="v">'+fmt(inc-bud)+'</div></div>'+
+    '<div class="kpi"><div class="k">Savings rate</div><div class="v">'+(sr===null?'—':sr+'%')+'</div></div></div>'+
+    '<h3>Top overspent envelopes</h3>'+ (over.length? '<table><tr><th>Envelope</th><th class="num">Over by</th></tr>'+over.map(x=>'<tr><td>'+escapeHtml(x.e.name)+'</td><td class="num">'+fmt(x.over)+'</td></tr>').join('')+'</table>' : '<p class="mut">Nothing overspent this month. </p>');
+  /* print report */
+  const rows=S.envelopes.map(e=>{const s=spentIn(e.id,curMonth),ci=carryIn(e.id,curMonth),eb2=effBudget(e,curMonth);return '<tr><td>'+escapeHtml(e.name)+'</td><td>'+escapeHtml(e.group||'')+'</td><td style="text-align:right">'+fmt(eb2)+'</td><td style="text-align:right">'+fmt(ci)+'</td><td style="text-align:right">'+fmt(s)+'</td><td style="text-align:right">'+fmt(eb2+ci-s)+'</td></tr>';}).join('');
+  $('#printReport').innerHTML='<h1>Stuffed — Envelope Budget Tracker — Monthly Budget Report</h1><p>Month: '+curMonth+' · Income '+fmt(inc)+' · Budgeted '+fmt(bud)+' · Spent '+fmt(sp)+' · To be budgeted '+fmt(inc-bud)+' · Savings rate '+(sr===null?'—':sr+'%')+'</p><table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Envelope</th><th>Group</th><th>Budgeted</th><th>Carried in</th><th>Spent</th><th>Remaining</th></tr>'+rows+'</table><p>Manual-entry educational planner — not financial advice. Data stays in your browser.</p>';
+}
+
+/* ---------- forms ---------- */
+function openEdit(id){ const e=envById(id); if(!e)return; $('#edId').value=e.id; $('#edName').value=e.name; $('#edGroup').value=e.group||S.groups[0]||''; $('#edBudget').value=e.budget; $('#edDue').value=e.dueDay||''; $('#edNotes').value=e.notes||''; $('#edMonthName').textContent=curMonth; if(!e.monthBudgets)e.monthBudgets={}; $('#edMonthBudget').value=Object.prototype.hasOwnProperty.call(e.monthBudgets,curMonth)?e.monthBudgets[curMonth]:''; updateOverrideNote(e); $('#editDlg').showModal(); }
+function updateOverrideNote(e){ if(!e)e=envById($('#edId').value); if(!e)return; const has=e.monthBudgets&&Object.prototype.hasOwnProperty.call(e.monthBudgets,curMonth); $('#edOverrideNote').textContent=has? ('Month '+curMonth+' currently uses '+fmt(e.monthBudgets[curMonth])+' instead of the default '+fmt(numOr(e.budget,0))+'.') : ('Month '+curMonth+' currently uses the default '+fmt(numOr(e.budget,0))+'.'); }
+$('#edSave').addEventListener('click',()=>{ const e=envById($('#edId').value); if(!e)return; e.name=$('#edName').value.trim()||e.name; e.group=$('#edGroup').value; e.budget=parseFloat($('#edBudget').value)||0; if(!e.monthBudgets)e.monthBudgets={}; const mb=$('#edMonthBudget').value; if(mb!=='') e.monthBudgets[curMonth]=parseFloat(mb)||0; e.dueDay=$('#edDue').value?parseInt($('#edDue').value,10):null; e.notes=$('#edNotes').value; save(); $('#editDlg').close(); beep(700); render(); });
+$('#edClearOverride').addEventListener('click',()=>{ const e=envById($('#edId').value); if(!e)return; if(e.monthBudgets) delete e.monthBudgets[curMonth]; $('#edMonthBudget').value=''; save(); updateOverrideNote(e); beep(600); render(); });
+$('#edDel').addEventListener('click',()=>{ const id=$('#edId').value; if(confirm('Delete this envelope? Past transactions keep their amounts but lose the envelope link.')){ S.envelopes=S.envelopes.filter(x=>x.id!==id); if(selEnv===id)selEnv=null; save(); refreshSelects(); $('#editDlg').close(); render(); } });
+
+$('#envForm').addEventListener('submit',ev=>{ ev.preventDefault(); const name=$('#eName').value.trim(); if(!name)return; S.envelopes.push({id:uid(),name,group:$('#eGroup').value||'Other',budget:parseFloat($('#eBudget').value)||0,dueDay:$('#eDue').value?parseInt($('#eDue').value,10):null,notes:$('#eNotes').value.trim(),monthBudgets:{}}); save(); refreshSelects(); ev.target.reset(); beep(760); render(); });
+$('#gAdd').addEventListener('click',()=>{ const v=$('#gName').value.trim(); if(v&&!S.groups.includes(v)){ S.groups.push(v); $('#gName').value=''; save(); refreshSelects(); render(); } });
+$('#acctForm').addEventListener('submit',ev=>{ ev.preventDefault(); const name=$('#aName').value.trim(); if(!name)return; S.accounts.push({id:uid(),name,type:$('#aType').value,startBal:parseFloat($('#aStart').value)||0}); save(); refreshSelects(); ev.target.reset(); beep(760); render(); });
+$('#incForm').addEventListener('submit',ev=>{ ev.preventDefault(); const mm=month(curMonth); mm.income.push({id:uid(),source:$('#iSource').value.trim(),amount:parseFloat($('#iAmt').value)||0,date:$('#iDate').value||todayISO(),accountId:$('#iAcct').value||''}); save(); ev.target.reset(); $('#iDate').value=todayISO(); beep(760); render(); });
+
+function syncTxnType(){ const tp=$('#tType').value; const isExp=tp==='expense', isTr=tp==='transfer'; $('#envWrap').style.display=isExp?'':'none'; $('#toAcctWrap').style.display=isTr?'block':'none'; if(!isExp)$('#tEnv').value=''; if(!isTr)$('#tToAcct').value=''; }
+$('#tType').addEventListener('change',syncTxnType);
+$('#txnForm').addEventListener('submit',ev=>{ ev.preventDefault();
+  const tp=$('#tType').value;
+  if(tp==='transfer'&&(!$('#tAcct').value||!$('#tToAcct').value||$('#tAcct').value===$('#tToAcct').value)){ setStatus('A transfer needs a From account and a different To account — pick another destination account.',true); beep(160); return; }
+  if(tp==='expense'&&!$('#tEnv').value){ if(!S.envelopes.length){ setStatus('Add an envelope first — every expense has to come out of an envelope, so create one above before adding expenses.',true); } else { setStatus('An expense needs an envelope — pick the envelope this spending comes out of.',true); } beep(160); $('#tEnv').focus(); return; }
+  const dateStr=$('#tDate').value||todayISO(); const targetMonth=dateStr.slice(0,7);
+  const t={ id: editTxnId||uid(), date:dateStr, payee:$('#tPayee').value.trim(), type:tp, envelopeId:tp==='expense'?($('#tEnv').value||''):'', accountId:$('#tAcct').value||'', toAccountId:tp==='transfer'?($('#tToAcct').value||''):'' , amount:parseFloat($('#tAmt').value)||0, note:$('#tNote').value.trim() };
+  if(editTxnId){ const cur=S.months[curMonth]; if(cur) cur.txns=cur.txns.filter(x=>x.id!==editTxnId); month(targetMonth).txns.push(t); editTxnId=null; $('#txnSubmit').textContent='Add transaction'; $('#txnCancel').style.display='none'; }
+  else month(targetMonth).txns.push(t);
+  save(); ev.target.reset(); $('#tDate').value=todayISO(); $('#tType').value='expense'; syncTxnType(); beep(760); render(); });
+function startEditTxn(id){ const mm=month(curMonth); const t=mm.txns.find(x=>x.id===id); if(!t)return; editTxnId=id; $('#tDate').value=t.date||''; $('#tPayee').value=t.payee||''; $('#tType').value=t.type; syncTxnType(); $('#tEnv').value=t.envelopeId||''; $('#tAcct').value=t.accountId||''; $('#tToAcct').value=t.toAccountId||''; $('#tAmt').value=t.amount; $('#tNote').value=t.note||''; $('#txnSubmit').textContent='Save transaction'; $('#txnCancel').style.display=''; window.scrollTo({top:$('#txnForm').getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'}); }
+$('#txnCancel').addEventListener('click',()=>{ editTxnId=null; $('#txnForm').reset(); $('#tDate').value=todayISO(); $('#tType').value='expense'; syncTxnType(); $('#txnSubmit').textContent='Add transaction'; $('#txnCancel').style.display='none'; });
+['fEnv','fAcct','fText'].forEach(id=> $('#'+id).addEventListener('input',renderTxns));
+
+/* ---------- month nav ---------- */
+function shiftMonth(d){ const [Y,M]=curMonth.split('-').map(Number); const dt=new Date(Y,M-1+d,1); curMonth=ymOf(dt); month(curMonth); save(); render(); }
+$('#prevMonth').addEventListener('click',()=>shiftMonth(-1));
+$('#nextMonth').addEventListener('click',()=>shiftMonth(1));
+$('#monthPick').addEventListener('change',()=>{ if($('#monthPick').value){ curMonth=$('#monthPick').value; month(curMonth); save(); render(); } });
+
+/* ---------- data ops ---------- */
+$('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='envelope-budget-planner-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); setStatus('Backup exported — keep this file somewhere safe.'); beep(700); });
+$('#importFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f)return; if(S.sample.active){ setStatus('Sample data is on — turn sample data off before importing a backup.',true); ev.target.value=''; return; } const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const clean=cleanData(d,true); if(!confirm('Import this backup? It replaces ALL current planner data.')){ ev.target.value=''; return; } S=clean; save(); refreshSelects(); applyTheme(); render(); setStatus('Import complete.'); }catch(e){ alert('That file is not a valid Stuffed backup. Nothing was changed.'); } ev.target.value=''; }; r.readAsText(f); });
+$('#clearBtn').addEventListener('click',()=>{ if(S.sample.active){ setStatus('Sample data is on — turn sample data off before clearing all data, so you do not wipe your real budget.',true); beep(160); return; } if(confirm('Clear ALL planner data (every month, envelope, account and transaction)? This cannot be undone. Export a backup first if you need one.')){ const keep=S.settings; S=defaults(); S.settings=keep; save(); refreshSelects(); selEnv=null; render(); } });
+$('#printBtn').addEventListener('click',()=>window.print());
+
+/* ---------- sample data ---------- */
+$('#sampleBtn').addEventListener('click',()=>{
+  setStatus('');
+  if(!S.sample.active){
+    S.sample.snapshot=JSON.stringify({months:S.months,envelopes:S.envelopes,accounts:S.accounts,groups:S.groups});
+    const A=[{id:'sa-chk',name:'Everyday Checking',type:'checking',startBal:1250},{id:'sa-sav',name:'Emergency Savings',type:'savings',startBal:5200},{id:'sa-cc',name:'Rewards Card',type:'credit',startBal:0}];
+    const E=[['Rent','Housing',1500,1],['Utilities','Housing',210,15],['Groceries','Food',520,null],['Dining Out','Food',160,null],['Gas','Transport',180,null],['Car Insurance','Transport',132,20],['Phone','Housing',65,8],['Internet','Housing',70,12],['Fun Money','Fun',120,null],['Streaming','Fun',28,null],['Emergency Fund','Savings',300,null],['Vacation Jar','Savings',150,null],['Household','Other',90,null],['Giving','Other',75,null]].map(x=>({id:'se-'+x[0].replace(/\W+/g,''),name:x[0],group:x[1],budget:x[2],dueDay:x[3],notes:'',monthBudgets:{}}));
+    S.accounts=A; S.envelopes=E; S.groups=['Housing','Food','Transport','Fun','Savings','Other'];
+    const mm=month(curMonth); const D=todayISO().slice(0,8);
+    mm.income=[{id:'si1',source:'Paycheck — BrightPath Studio',amount:3650,date:D+'02',accountId:'sa-chk'},{id:'si2',source:'Freelance design',amount:1200,date:D+'14',accountId:'sa-chk'}];
+    const T=[['02','Meadowbrook Apartments','Rent',1500,'sa-chk'],['03','City Utilities','Utilities',186.40,'sa-chk'],['04','Kroger','Groceries',132.18,'sa-chk'],['06','Shell','Gas',48.60,'sa-cc'],['07','Kroger','Groceries',96.42,'sa-cc'],['09','State Farm','Car Insurance',132,'sa-chk'],['10','T-Mobile','Phone',65,'sa-chk'],['11','Xfinity','Internet',70,'sa-chk'],['12','Chipotle','Dining Out',24.80,'sa-cc'],['13','Target','Household',54.25,'sa-cc'],['15','Transfer to savings','Emergency Fund',300,'sa-chk'],['16','Netflix + Spotify','Streaming',27.98,'sa-cc'],['17','Shell','Gas',44.10,'sa-chk'],['18','Aldi','Groceries',88.37,'sa-chk'],['19','Movie night','Fun Money',36,'sa-cc'],['20','Vacation deposit','Vacation Jar',150,'sa-chk'],['21','Local food bank','Giving',75,'sa-chk'],['22','Thai House','Dining Out',41.60,'sa-cc'],['23','Kroger','Groceries',104.55,'sa-chk'],['24','Bookstore','Fun Money',28.40,'sa-cc'],['25','Pharmacy','Household',19.85,'sa-cc'],['26','Gas station snacks','Gas',12.30,'sa-cc'],['27','Utilities true-up','Utilities',24.10,'sa-chk'],['28','Coffee beans','Groceries',16.50,'sa-cc']];
+    mm.txns=T.map((x,i)=>({id:'st'+i,date:D+x[0],payee:x[1],type: x[2]==='Emergency Fund'||x[2]==='Vacation Jar' ? 'expense':'expense',envelopeId:(E.find(e=>e.name===x[2])||{}).id||'',accountId:x[4],toAccountId:'',amount:x[3],note:''}));
+    S.sample.active=true; selEnv=null; beep(820);
+  } else {
+    let restored=false;
+    try{
+      const raw=S.sample.snapshot; const snap=JSON.parse(raw);
+      if(!snap||typeof snap!=='object'||Array.isArray(snap)||typeof snap.months!=='object'||snap.months===null||Array.isArray(snap.months)||!Array.isArray(snap.envelopes)) throw new Error('Unreadable sample snapshot');
+      const clean=cleanData({months:snap.months,envelopes:snap.envelopes,accounts:Array.isArray(snap.accounts)?snap.accounts:[],groups:Array.isArray(snap.groups)?snap.groups:S.groups,settings:S.settings,sample:{active:false,snapshot:null}},false);
+      S.months=clean.months; S.envelopes=clean.envelopes; S.accounts=clean.accounts; S.groups=clean.groups; restored=true;
+    }catch(e){
+      let rescueNote='';
+      try{ localStorage.setItem(RESCUE_KEY,String(S.sample.snapshot==null?'':S.sample.snapshot)); rescueNote=' A rescue copy of the unreadable backup was saved in this browser.'; }catch(e2){ rescueNote=' The rescue copy could not be saved either.'; }
+      setStatus('Warning: your saved pre-sample backup could not be read, so nothing was restored and nothing was deleted — the sample data on screen was kept as your current data.'+rescueNote+' Export a JSON backup now to keep the data currently on screen.',true);
+    }
+    S.sample.active=false; S.sample.snapshot=null; selEnv=null; if(restored) beep(500);
+  }
+  $('#sampleBtn').setAttribute('aria-pressed',S.sample.active);
+  save(); refreshSelects(); render();
+});
+
+/* ---------- init ---------- */
+$('#tDate').value=todayISO(); $('#iDate').value=todayISO(); syncTxnType();
+$('#soundBtn').textContent = S.settings.sound===false ? '🔇':'🔊'; $('#soundBtn').setAttribute('aria-pressed', S.settings.sound!==false);
+if(S.sample&&S.sample.active) $('#sampleBtn').setAttribute('aria-pressed','true');
+applyTheme(); refreshSelects(); render();
+</script>
+</body>
+</html>
