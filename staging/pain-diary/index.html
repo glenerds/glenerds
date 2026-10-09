@@ -41,6 +41,8 @@ body.dark .logo{color:#171126}
 main{max-width:1220px;margin:0 auto;padding:6px 16px 40px}
 .samplebar{display:none;background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:15px}
 .samplebar.show{display:block}.samplebar b{color:var(--gold)}
+.form-sample-note{display:none;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;margin:0 0 12px;color:var(--ink);font-size:16px}
+.form-sample-note.show{display:block}.form-sample-note b{color:var(--gold)}
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);color:var(--ink)}
 .stat .n{font-size:24px;font-weight:800;line-height:1.15;color:var(--ink)}
@@ -136,6 +138,7 @@ footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}
     <div class="cols">
       <div>
         <div class="panel"><h2 id="entryFormTitle">Log a pain entry</h2><p class="sub">Record what happened in your own words. Edit any entry later from History.</p>
+          <div class="form-sample-note" id="formSampleNote" role="note"><b>Sample diary is on.</b> Entries saved now are discarded when you turn sample off — your real diary stays untouched.</div>
           <div class="frow"><div><label class="f" for="eDate">Date *</label><input type="date" id="eDate"></div><div><label class="f" for="eTime">Time</label><input type="time" id="eTime"></div></div>
           <label class="f" for="eSeverity">Pain severity (0–10)</label>
           <div class="severity-box"><div class="severity-control"><button class="step-btn" id="sevMinus" type="button" aria-label="Decrease severity">−</button><input type="range" id="eSeverity" min="0" max="10" step="1" value="5" aria-label="Pain severity"><button class="step-btn" id="sevPlus" type="button" aria-label="Increase severity">+</button><div class="severity-value" id="sevValue">5</div></div><div class="scale-labels"><span>0 · none</span><span>5 · moderate</span><span>10 · worst recorded</span></div></div>
@@ -239,6 +242,7 @@ const $ = s => document.querySelector(s);
 const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const localToday = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const localNowTime = () => { const d=new Date(); return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; };
 const parseDate = v => { if(!v||typeof v!=="string") return null; const [y,m,d]=v.split("-").map(Number); if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d)) return null; const dt=new Date(y,m-1,d); return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d ? dt : null; };
 const fmtDate = v => { const d=parseDate(v); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—"; };
 const fmtShort = v => { const d=parseDate(v); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) : "—"; };
@@ -410,7 +414,7 @@ function sampleData(){
 }
 function applyTheme(){ document.body.classList.toggle("dark", !!S.settings.dark); $("#themeBtn").classList.toggle("on", !!S.settings.dark); $("#themeBtn").setAttribute("aria-pressed", S.settings.dark ? "true" : "false"); }
 function setSoundUI(){ $("#soundBtn").classList.toggle("on", !!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed", S.settings.sound ? "true" : "false"); }
-function setSampleUI(){ $("#sampleBar").classList.toggle("show", !!S.sampling); $("#sampleBtn").classList.toggle("on", !!S.sampling); $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false"); }
+function setSampleUI(){ $("#sampleBar").classList.toggle("show", !!S.sampling); $("#sampleBtn").classList.toggle("on", !!S.sampling); $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false"); const note=$("#formSampleNote"); if(note) note.classList.toggle("show", !!S.sampling); }
 function switchView(name){
   $$(".tab").forEach(t=>{ const on=t.dataset.view===name; t.classList.toggle("on",on); t.setAttribute("aria-selected",on?"true":"false"); });
   ["Dashboard","Log","History","Charts","Stats","Report"].forEach(v=>{ const el=$("#view"+v); if(el) el.hidden = v !== name; });
@@ -609,7 +613,7 @@ function clearEntryForm(){
   $("#saveEntryBtn").textContent = "Save entry";
   $("#cancelEditBtn").hidden = true;
   $("#eDate").value = localToday();
-  $("#eTime").value = "";
+  $("#eTime").value = localNowTime();
   $("#eSeverity").value = 5;
   ["#eCustomLocation","#eCustomTrigger","#eMedication","#eDose","#eMood","#eNote"].forEach(s=>{ $(s).value=""; });
   $("#eEffect").value = "Not recorded";
@@ -666,7 +670,7 @@ function renderQuickTotals(){
   const entries=S.entries;
   const locRows=aggregateBy(entries,e=>e.locations).sort((a,b)=>b.count-a.count);
   const trigRows=aggregateBy(entries,e=>e.triggers).sort((a,b)=>b.count-a.count);
-  $("#quickTotals").innerHTML = entries.length ? `<dl class="kv"><dt>Entries</dt><dd>${entries.length}</dd><dt>Average severity</dt><dd>${round1(avg(entries.map(e=>e.severity)))}/10</dd><dt>Most logged location</dt><dd>${esc(locRows[0]?.name || "—")}</dd><dt>Most logged trigger</dt><dd>${esc(trigRows[0]?.name || "—")}</dd></dl>` : `<p class="hint">Totals appear after the first entry.</p>`;
+  $("#quickTotals").innerHTML = `<dl class="kv"><dt>Entries</dt><dd>${entries.length}</dd><dt>Average severity</dt><dd>${entries.length?`${round1(avg(entries.map(e=>e.severity)))}/10`:"—"}</dd><dt>Most logged location</dt><dd>${esc(locRows[0]?.name || "None yet")}</dd><dt>Most logged trigger</dt><dd>${esc(trigRows[0]?.name || "None yet")}</dd></dl>`;
 }
 function filteredHistory(){
   let list = sortedEntries();
