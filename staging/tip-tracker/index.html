@@ -293,7 +293,7 @@ const blankState = () => ({ shifts: [], jobs: [], weekStart: 1, sampling:false, 
 let S = blankState();
 let _saveWarned = false;
 function load(){ try{ const raw = localStorage.getItem(LS_KEY); if(raw){ const d = JSON.parse(raw); if(d && Array.isArray(d.shifts) && Array.isArray(d.jobs)) S = Object.assign(blankState(), d); } }catch(e){} }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ if(!_saveWarned){ _saveWarned = true; toast("Couldn't save — this browser's storage may be full. Use Backup in the Shifts tab to keep a copy."); } } }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); _saveWarned = false; }catch(e){ if(!_saveWarned){ _saveWarned = true; toast("Couldn't save — this browser's storage may be full. Use Backup in the Shifts tab to keep a copy."); } } }
 
 let AC = null;
 function beep(freq, dur, type, gain){
@@ -481,10 +481,10 @@ function formShift(){
   return {
     date: $("#inDate").value, jobId: j ? j.id : "", jobName: j ? j.name : "",
     role: $("#inRole").value.trim(), hours: formHours,
-    wage: parseFloat($("#inWage").value) || 0, sales: parseFloat($("#inSales").value) || 0,
-    cash: parseFloat($("#inCash").value) || 0, card: parseFloat($("#inCard").value) || 0,
-    tipOut: parseFloat($("#inTipOut").value) || 0,
-    covers: parseInt($("#inCovers").value, 10) || 0, note: $("#inNote").value.trim()
+    wage: Math.max(0, parseFloat($("#inWage").value) || 0), sales: Math.max(0, parseFloat($("#inSales").value) || 0),
+    cash: Math.max(0, parseFloat($("#inCash").value) || 0), card: Math.max(0, parseFloat($("#inCard").value) || 0),
+    tipOut: Math.max(0, parseFloat($("#inTipOut").value) || 0),
+    covers: Math.max(0, parseInt($("#inCovers").value, 10) || 0), note: $("#inNote").value.trim()
   };
 }
 function formPreview(){
