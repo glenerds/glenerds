@@ -242,7 +242,7 @@ footer{max-width:1460px;margin:6px auto 0;padding:0 16px 26px}
 const BRAND = "ResumeNest";
 const LS_KEY = "resumenest_v1";
 const $ = s => document.querySelector(s);
-const uid = () => Math.random().toString(36).slice(2,10);
+const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2,10) + Date.now().toString(36);
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const VERBS = ["Led","Built","Improved","Reduced","Delivered","Launched","Trained","Automated","Increased","Resolved","Managed","Designed","Shipped","Saved","Coordinated","Streamlined"];
@@ -282,7 +282,8 @@ function load(){
   const r = blankResume("My Resume");
   return { resumes:[r], activeId:r.id, theme:"", sound:true, sampling:false, snapshot:null };
 }
-function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){} }
+let _saveWarned = false;
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ if(!_saveWarned){ _saveWarned = true; toast("Couldn't save — this browser's storage may be full. Use Backup to keep a copy of your resumes."); } } }
 function cur(){ return S.resumes.find(r=>r.id===S.activeId) || S.resumes[0]; }
 
 /* ============================== sound ============================== */
@@ -531,7 +532,8 @@ function renderMatch(){
   let info = null;
   if(r.doc === "resume" && jd){
     const kws = jdKeywords(jd), text = " " + resumeText(r).toLowerCase() + " ";
-    const hit = kws.filter(k=>text.includes(k)), miss = kws.filter(k=>!text.includes(k));
+    const kwTest = k => { try{ return new RegExp("(?<![a-z0-9])" + k.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "(?![a-z0-9])").test(text); }catch(e){ return text.includes(k); } };
+    const hit = kws.filter(kwTest), miss = kws.filter(k=>!kwTest(k));
     const pct = kws.length ? Math.round(hit.length/kws.length*100) : 0;
     info = { hit, miss, pct };
     $("#kwWrap").classList.remove("hidden");
@@ -595,7 +597,7 @@ function zipStore(files){
   end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
   return new Blob([...chunks, ...central, new Uint8Array(end.buffer)], {type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
 }
-const xesc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const xesc = s => String(s==null?"":s).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g,"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 function wp(text, opts){
   opts = opts || {};
   const rpr = `${opts.b?"<w:b/>":""}${opts.i?"<w:i/>":""}${opts.sz?`<w:sz w:val="${opts.sz}"/><w:szCs w:val="${opts.sz}"/>`:""}${opts.color?`<w:color w:val="${opts.color}"/>`:""}${opts.caps?'<w:caps w:val="true"/>':""}${opts.font?`<w:rFonts w:ascii="${opts.font}" w:hAnsi="${opts.font}"/>`:""}`;
@@ -728,9 +730,24 @@ $("#importFile").addEventListener("change", e=>{
   rd.onload = ()=>{ try{
       const d = JSON.parse(rd.result);
       const arr = Array.isArray(d) ? d : d.resumes;
-      if(!arr || !arr.length || !arr[0].basics) throw new Error("bad file");
-      arr.forEach(x=>{ x.id = uid(); S.resumes.push(x); });
-      S.activeId = arr[0].id; save(); renderAll(); chime(); toast("Backup restored — your resumes are in the Resume menu.");
+      if(!arr || !arr.length) throw new Error("bad file");
+      const norm = arr.map(x=>{
+        if(!x || typeof x !== "object" || !x.basics || typeof x.basics !== "object") throw new Error("bad entry");
+        const base = blankResume(x.name || "Restored Resume");
+        const merged = Object.assign(base, x);
+        merged.basics = Object.assign(blankResume().basics, x.basics);
+        merged.experience = Array.isArray(x.experience) ? x.experience.map(j=>Object.assign({id:uid(),title:"",company:"",location:"",start:"",end:"",current:false,bullets:""}, j, { id: j && j.id ? String(j.id) : uid() })) : [];
+        merged.education = Array.isArray(x.education) ? x.education.map(e2=>Object.assign({id:uid(),school:"",degree:"",location:"",start:"",end:""}, e2, { id: e2 && e2.id ? String(e2.id) : uid() })) : [];
+        merged.letter = Object.assign({company:"",role:"",manager:"",body:""}, x.letter && typeof x.letter === "object" ? x.letter : {});
+        merged.skills = typeof x.skills === "string" ? x.skills : "";
+        merged.certs = typeof x.certs === "string" ? x.certs : "";
+        merged.doc = x.doc === "letter" ? "letter" : "resume";
+        merged.id = uid();
+        return merged;
+      });
+      if(S.sampling && S.snapshot){ S.resumes = S.snapshot.resumes; S.activeId = S.snapshot.activeId; S.snapshot = null; S.sampling = false; toast("Sample mode turned off so the restored resumes land in your real data."); }
+      norm.forEach(x=>S.resumes.push(x));
+      S.activeId = norm[0].id; save(); renderAll(); chime(); toast("Backup restored — your resumes are in the Resume menu.");
     }catch(err){ toast("That file doesn't look like a ResumeNest backup."); } };
   rd.readAsText(f); e.target.value = "";
 });
