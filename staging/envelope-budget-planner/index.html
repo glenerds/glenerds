@@ -391,7 +391,9 @@ function render(){
       const bar=document.createElement('div'); bar.className='fill '+st+(selEnv===e.id?' sel':''); bar.setAttribute('role','button'); bar.setAttribute('tabindex','0'); bar.setAttribute('aria-label','Select envelope '+e.name);
       bar.innerHTML='<i style="width:'+pct+'%"></i>';
       const pick=()=>{ selectEnv(selEnv===e.id?null:e.id); };
-      bar.addEventListener('click',pick); d.addEventListener('click',ev=>{ if(ev.target.closest('button'))return; pick(); });
+      bar.addEventListener('click',ev=>{ ev.stopPropagation(); pick(); });
+      bar.addEventListener('keydown',ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); ev.stopPropagation(); pick(); } });
+      d.addEventListener('click',ev=>{ if(ev.target.closest('button'))return; pick(); });
       const row=document.createElement('div'); row.className='row';
       const eb=document.createElement('button'); eb.className='btn ghost small'; eb.textContent='Edit'; eb.addEventListener('click',ev=>{ev.stopPropagation();openEdit(e.id);});
       row.appendChild(eb); d.appendChild(bar); d.appendChild(row); el.appendChild(d);
@@ -467,7 +469,9 @@ function renderTrend(){
     const lab=document.createElementNS(NS,'text'); lab.setAttribute('x',x+bw); lab.setAttribute('y',168); lab.setAttribute('text-anchor','middle'); lab.setAttribute('font-size','13'); lab.setAttribute('fill','var(--muted)'); lab.textContent=v.m.slice(5);
     const val=document.createElementNS(NS,'text'); val.setAttribute('x',x+bw); val.setAttribute('y',140-Math.max(bh,sh)); val.setAttribute('text-anchor','middle'); val.setAttribute('font-size','13'); val.setAttribute('fill','var(--ink)'); val.textContent='$'+Math.round(Math.max(v.b,v.s)).toLocaleString();
     gEl.appendChild(r1);gEl.appendChild(r2);gEl.appendChild(lab);gEl.appendChild(val);
-    gEl.addEventListener('click',()=>{ curMonth=v.m; month(curMonth); beep(600); render(); });
+    const pickMonth=()=>{ curMonth=v.m; month(curMonth); beep(600); render(); };
+    gEl.addEventListener('click',pickMonth);
+    lab.setAttribute('pointer-events','all'); lab.style.cursor='pointer'; lab.addEventListener('click',ev=>{ ev.stopPropagation(); pickMonth(); });
     svg.appendChild(gEl);
   });
 }
@@ -502,7 +506,7 @@ function renderTxns(){
     const eb=document.createElement('button'); eb.className='btn ghost small'; eb.textContent='Edit'; eb.addEventListener('click',()=>startEditTxn(t.id));
     const db=document.createElement('button'); db.className='btn ghost small'; db.textContent='Delete'; db.addEventListener('click',()=>{ mm.txns=mm.txns.filter(x=>x.id!==t.id); save(); render(); });
     row.appendChild(eb); row.appendChild(db); td.appendChild(row); tr.appendChild(td); tbl.appendChild(tr); }
-  box.appendChild(tbl);
+  const wrap=document.createElement('div'); wrap.style.overflowX='auto'; wrap.appendChild(tbl); box.replaceChildren(wrap);
 }
 function renderSummary(){
   const inc=incomeTotal(curMonth), bud=budgetedTotal(curMonth), sp=spentTotal(curMonth);
@@ -554,12 +558,13 @@ $('#monthPick').addEventListener('change',()=>{ if($('#monthPick').value){ curMo
 
 /* ---------- data ops ---------- */
 $('#exportBtn').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='envelope-budget-planner-backup.json'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); beep(700); });
-$('#importFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; if(!f)return; if(S.sample.active){ setStatus('Sample data is on — turn sample data off before importing a backup.',true); ev.target.value=''; return; } const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const clean=cleanData(d,true); if(!confirm('Import this backup? It replaces ALL current planner data.')){ ev.target.value=''; return; } S=clean; save(); refreshSelects(); applyTheme(); render(); setStatus('Import complete.'); }catch(e){ alert('That file is not a valid Stuffed backup. Nothing was changed.'); } ev.target.value=''; }; r.readAsText(f); });
+$('#importFile').addEventListener('change',ev=>{ const f=ev.target.files[0]; ev.target.value=''; if(!f)return; if(S.sample.active){ setStatus('Sample data is on — turn sample data off before importing a backup.',true); ev.target.value=''; return; } const r=new FileReader(); r.onload=()=>{ try{ const d=JSON.parse(r.result); const clean=cleanData(d,true); if(!confirm('Import this backup? It replaces ALL current planner data.')){ ev.target.value=''; return; } S=clean; save(); refreshSelects(); applyTheme(); render(); setStatus('Import complete.'); }catch(e){ alert('That file is not a valid Stuffed backup. Nothing was changed.'); } ev.target.value=''; }; r.readAsText(f); });
 $('#clearBtn').addEventListener('click',()=>{ if(S.sample.active){ setStatus('Sample data is on — turn sample data off before clearing all data, so you do not wipe your real budget.',true); beep(160); return; } if(confirm('Clear ALL planner data (every month, envelope, account and transaction)? This cannot be undone. Export a backup first if you need one.')){ const keep=S.settings; S=defaults(); S.settings=keep; save(); refreshSelects(); selEnv=null; render(); } });
 $('#printBtn').addEventListener('click',()=>window.print());
 
 /* ---------- sample data ---------- */
 $('#sampleBtn').addEventListener('click',()=>{
+  setStatus('');
   if(!S.sample.active){
     S.sample.snapshot=JSON.stringify({months:S.months,envelopes:S.envelopes,accounts:S.accounts,groups:S.groups});
     const A=[{id:'sa-chk',name:'Everyday Checking',type:'checking',startBal:1250},{id:'sa-sav',name:'Emergency Savings',type:'savings',startBal:5200},{id:'sa-cc',name:'Rewards Card',type:'credit',startBal:0}];
