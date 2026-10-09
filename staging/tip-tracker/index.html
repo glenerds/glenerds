@@ -178,7 +178,7 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
           <label class="f">Hours worked</label>
           <div class="stepper"><button id="hrsDown" aria-label="fewer hours">−</button><span class="v" id="hrsVal">6.0</span><button id="hrsUp" aria-label="more hours">+</button></div>
           <div class="frow">
-            <div><label class="f" for="inWage">Hourly wage ($)</label><input type="number" id="inWage" min="0" step="0.25" placeholder="2.83"></div>
+            <div><label class="f" for="inWage">Hourly wage ($)</label><input type="number" id="inWage" min="0" step="any" placeholder="2.83"></div>
             <div><label class="f" for="inSales">Sales ($, optional — powers tip %)</label><input type="number" id="inSales" min="0" step="1" placeholder="0"></div>
           </div>
           <div class="frow">
@@ -254,7 +254,7 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
           <label class="f" for="jName">Job / place name</label><input type="text" id="jName" placeholder="e.g. Olive Branch Bistro">
           <div class="frow">
             <div><label class="f" for="jRole">Your role</label><input type="text" id="jRole" placeholder="Server"></div>
-            <div><label class="f" for="jWage">Default hourly wage ($)</label><input type="number" id="jWage" min="0" step="0.25" placeholder="2.83"></div>
+            <div><label class="f" for="jWage">Default hourly wage ($)</label><input type="number" id="jWage" min="0" step="any" placeholder="2.83"></div>
           </div>
           <div class="btnrow"><button class="btn green" id="addJobBtn">Add job</button></div>
         </div>
@@ -288,6 +288,8 @@ const money0 = n => "$" + Math.round(+n || 0).toLocaleString("en-US");
 const localToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
 const fmtD = iso => { if(!iso) return ""; const p = iso.split("-"); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : iso; };
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const DOWF = ["Sundays","Mondays","Tuesdays","Wednesdays","Thursdays","Fridays","Saturdays"];
+const DOW1 = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
 const blankState = () => ({ shifts: [], jobs: [], weekStart: 1, sampling:false, snapshot:null, theme:null, sound:true, selShift:null, editId:null, taxYear:null });
@@ -626,10 +628,12 @@ function renderStats(){
   $("#dowBars").innerHTML = [1,2,3,4,5,6,0].map(d => `<div class="bar-row" data-dow="${d}" style="cursor:pointer"><span>${DOW[d]}</span><div class="bar-track"><div class="bar-fill ${dowSel===d?"gold":""}" style="width:${Math.round(rates[d]/maxR*100)}%"></div></div><b>${byDow[d].length ? "$"+rates[d].toFixed(2) : "—"}</b></div>`).join("");
   $("#dowBars").querySelectorAll("[data-dow]").forEach(r => r.addEventListener("click", ()=>{
     const d = +r.dataset.dow; dowSel = dowSel === d ? null : d;
-    const list = byDow[d];
-    $("#dowDetail").innerHTML = list.length ? `<b>${DOW[d]}s</b> — ${list.length} shift${list.length===1?"":"s"} averaging $${rates[d].toFixed(2)}/hr true rate, ${money0(sum(list, netPay)/list.length)} walked per shift.` : `No ${DOW[d]} shifts logged yet.`;
     renderStats(); tick();
   }));
+  if(dowSel != null){
+    const list = byDow[dowSel];
+    $("#dowDetail").innerHTML = list.length ? `<b>${DOWF[dowSel]}</b> — ${list.length} shift${list.length===1?"":"s"} averaging $${rates[dowSel].toFixed(2)}/hr true rate, ${money0(sum(list, netPay)/list.length)} walked per shift.` : `No ${DOW1[dowSel]} shifts logged yet.`;
+  }
   renderTax();
 }
 function renderTax(){
@@ -705,7 +709,7 @@ function sampleData(){
     { id: uid(), name: "The Copper Mug", role: "Bartender", wage: 5.25 }
   ];
   const shifts = [];
-  let day = new Date(2026, 7, 10); // Aug 10 2026 (Mon)
+  let day = new Date(); day.setDate(day.getDate() - 80); // sample ends right about today — never future-dated
   for(let i=0;i<26;i++){
     const dow = day.getDay();
     const weekend = (dow === 5 || dow === 6);
