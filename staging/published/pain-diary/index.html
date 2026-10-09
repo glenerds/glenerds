@@ -86,9 +86,9 @@ input[type=range]{width:100%;accent-color:var(--accent);min-height:44px}
 @media(max-width:560px){.kv{grid-template-columns:1fr}.kv dd{margin-bottom:5px}.severity-control{grid-template-columns:48px minmax(0,1fr) 48px}.severity-value{grid-column:1/-1}}
 table.list{width:100%;border-collapse:collapse;font-size:15px;color:var(--ink)}table.list th{text-align:left;color:var(--muted);font-weight:600;padding:8px 6px;border-bottom:2px solid var(--line);font-size:15px}table.list td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
 .heat-1{background:var(--green-soft);color:var(--green)}.heat-2{background:var(--gold-soft);color:var(--gold)}.heat-3{background:var(--orange-soft);color:var(--orange)}.heat-4{background:var(--red-soft);color:var(--red)}
-.trend-wrap{overflow-x:auto;padding:8px 2px 2px}.trend{display:flex;align-items:flex-end;gap:4px;min-height:212px;padding:14px 4px 4px;border-bottom:1px solid var(--line);min-width:0}.trend-col{flex:1;min-width:7px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--ink);background:none;border:0;padding:4px 1px}.trend-bar{width:min(34px,90%);border-radius:6px 6px 0 0;min-height:4px;background:var(--accent)}.trend-bar.none{display:none}.trend-bar.zero{width:9px;height:9px;min-height:9px;border-radius:50%;background:var(--gold);align-self:center}.trend-col.sel .trend-bar{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px);background:var(--gold)}.trend-lab{font-size:15px;color:var(--muted);white-space:nowrap}.trend-val{font-size:15px;font-weight:700;color:var(--ink)}
-.hbar-list{display:grid;gap:8px}.hbar{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(120px,1.6fr) minmax(76px,.45fr);gap:9px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:8px}.hbar.sel{outline:3px solid var(--gold);background:var(--gold-soft)}.hbar-name{font-size:15px;font-weight:700;color:var(--ink)}.hbar-track{height:20px;background:var(--chip);border-radius:999px;overflow:hidden}.hbar-fill{height:100%;background:var(--teal);border-radius:999px}.hbar.sel .hbar-fill{background:var(--gold)}.hbar-val{font-size:15px;font-weight:700;color:var(--ink);text-align:right}
-.donut-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.donut-box{position:relative;width:200px;height:200px;flex:none}.donut-box svg{width:200px;height:200px}.donut-seg{cursor:pointer;stroke:var(--card);stroke-width:1.4}.donut-seg.sel{stroke:var(--gold);stroke-width:3}.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 52px;pointer-events:none;color:var(--ink)}.donut-center b{font-size:22px;line-height:1.05;color:var(--ink)}.donut-center span{font-size:15px;color:var(--muted)}
+.trend-wrap{overflow-x:auto;padding:8px 2px 2px}.trend{display:flex;align-items:flex-end;gap:4px;min-height:212px;padding:14px 4px 4px;border-bottom:1px solid var(--line);min-width:0}.trend-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--ink);background:none;border:0;padding:4px 1px}.trend-bar{width:100%;max-width:34px;border-radius:6px 6px 0 0;min-height:4px;background:var(--accent)}.trend-bar.none{display:none}.trend-bar.zero{width:9px;height:9px;min-height:9px;border-radius:50%;background:var(--gold);align-self:center}.trend-col.sel .trend-bar{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px);background:var(--gold)}.trend-lab{font-size:15px;color:var(--muted);white-space:nowrap;line-height:18px;min-height:18px}.trend-val{font-size:15px;font-weight:700;color:var(--ink)}
+.hbar-list{display:grid;gap:8px}.hbar{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(120px,1.6fr) minmax(76px,.45fr);gap:9px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:8px}.hbar.sel{outline:3px solid var(--gold);background:var(--gold-soft)}.hbar-name{font-size:15px;font-weight:700;color:var(--ink)}.hbar-track{height:20px;background:var(--chip);border-radius:999px;overflow:hidden}.hbar-fill{display:block;height:100%;background:var(--teal);border-radius:999px}.hbar.sel .hbar-fill{background:var(--gold)}.hbar-val{font-size:15px;font-weight:700;color:var(--ink);text-align:right}
+.donut-wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.donut-box{position:relative;width:252px;height:252px;flex:none}.donut-box svg{width:252px;height:252px}.donut-seg{cursor:pointer;stroke:var(--card);stroke-width:1.4}.donut-seg.sel{stroke:var(--gold);stroke-width:3}.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 54px;pointer-events:none;color:var(--ink)}.donut-center b{font-size:27px;line-height:1.05;color:var(--ink)}.donut-center span{font-size:15px;color:var(--muted)}.donut-side{flex:1;min-width:min(320px,100%);display:grid;gap:10px;align-content:center}.outcome-bars{display:grid;gap:8px}.outcome-total{font-size:15px;color:var(--muted)}.outcome-total b{color:var(--ink)}
 .seg-legend{display:flex;flex-wrap:wrap;gap:6px}.legend-btn{font-size:15px;padding:7px 11px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-weight:600}.legend-btn.sel{outline:3px solid var(--gold);background:var(--gold-soft)}
 .detail-box{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink)}
 .notice{background:var(--teal-soft);border:1px solid var(--teal);border-radius:12px;padding:12px 14px;color:var(--ink);font-size:15px}.notice b{color:var(--teal)}
@@ -128,7 +128,7 @@ footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}
         <div class="panel"><h2>Recent entries</h2><p class="sub">Your newest pain records, newest first.</p><div id="recentList"></div></div>
       </div>
       <div>
-        <div class="panel"><h2>Medication outcomes you recorded</h2><p class="sub">Tap a slice or label to pin that outcome.</p><div class="donut-wrap"><div class="donut-box"><svg id="dashMedDonut" viewBox="0 0 100 100" role="img" aria-label="Medication outcome chart"></svg><div class="donut-center" id="dashMedCenter"></div></div><div><div class="seg-legend" id="dashMedLegend"></div><p class="hint" id="dashMedMeta"></p></div></div></div>
+        <div class="panel"><h2>Medication outcomes you recorded</h2><p class="sub">Tap a slice or label to pin that outcome.</p><div class="donut-wrap"><div class="donut-box"><svg id="dashMedDonut" viewBox="-8 -8 116 116" role="img" aria-label="Medication outcome chart"></svg><div class="donut-center" id="dashMedCenter"></div></div><div class="donut-side"><div class="seg-legend" id="dashMedLegend"></div><div class="outcome-bars" id="dashMedBars"></div><p class="hint" id="dashMedMeta"></p></div></div></div>
         <div class="panel"><h2>Patterns at a glance</h2><p class="sub">The locations and triggers appearing most often in your records.</p><h3>Body locations</h3><div class="hbar-list" id="dashLocations"></div><h3>Triggers</h3><div class="hbar-list" id="dashTriggers"></div></div>
       </div>
     </div>
@@ -187,7 +187,7 @@ footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}
         <div class="panel"><h2>Trigger frequency</h2><p class="sub">How often each trigger appears in your entries. Tap a row to pin it.</p><div class="hbar-list" id="triggerChart"></div><p class="hint" id="triggerDetail">Tap a trigger for its detail.</p></div>
       </div>
       <div>
-        <div class="panel"><h2>Medication-response breakdown</h2><p class="sub">Outcomes exactly as you recorded them. Tap a slice or label to pin it.</p><div class="donut-wrap"><div class="donut-box"><svg id="medDonut" viewBox="0 0 100 100" role="img" aria-label="Medication response chart"></svg><div class="donut-center" id="medCenter"></div></div><div><div class="seg-legend" id="medLegend"></div><p class="hint" id="medMeta"></p></div></div></div>
+        <div class="panel"><h2>Medication-response breakdown</h2><p class="sub">Outcomes exactly as you recorded them. Tap a slice or label to pin it.</p><div class="donut-wrap"><div class="donut-box"><svg id="medDonut" viewBox="-8 -8 116 116" role="img" aria-label="Medication response chart"></svg><div class="donut-center" id="medCenter"></div></div><div class="donut-side"><div class="seg-legend" id="medLegend"></div><div class="outcome-bars" id="medBars"></div><p class="hint" id="medMeta"></p></div></div></div>
         <div class="panel"><h2>What the charts mean</h2><p>These charts summarize <b>your entries only</b>. They do not diagnose a condition, prove a cause, or show that a medication or activity caused an outcome.</p><p>Use them as a record to review and discuss with a qualified clinician. This is not medical advice.</p></div>
       </div>
     </div>
@@ -265,7 +265,8 @@ let editing = {entry:null};
 let sel = {trend:null, trendDash:null, location:null, trigger:null, med:null, historyEntry:null, trendRange:30};
 let trendRange = 30;
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),3400); }
-function beep(freq=660,dur=.08,type="sine",gain=.055){ if(!S.settings.sound) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(gain,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); }catch(e){} }
+function ensureAudio(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); }catch(e){} return audioCtx; }
+function beep(freq=660,dur=.08,type="sine",gain=.055){ if(!S.settings.sound) return; const ctx=ensureAudio(); if(!ctx) return; try{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur); o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime+dur); }catch(e){} }
 function chime(){ beep(740,.07,"sine",.05); setTimeout(()=>beep(980,.06,"sine",.04),65); }
 function thud(){ beep(180,.09,"triangle",.06); }
 function prefersDark(){ try{ return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }catch(e){ return false; } }
@@ -474,6 +475,7 @@ function bindTrend(scope, detailId, detailPrefix){
     const [prefix,date] = el.dataset.trend.split("|");
     if(prefix === "dash"){ sel.trendDash = sel.trendDash === date ? null : date; }
     else { sel.trend = sel.trend === date ? null : date; }
+    beep(660,.04,"sine",.035);
     renderAll();
   }));
 }
@@ -511,6 +513,7 @@ function bindHbars(scope){
     try{ name = decodeURIComponent(name); }catch(e){}
     if(kind==="location") sel.location = sel.location===name ? null : name;
     if(kind==="trigger") sel.trigger = sel.trigger===name ? null : name;
+    beep(660,.04,"sine",.035);
     renderAll();
   }));
 }
@@ -538,15 +541,16 @@ function largestRemainderPcts(rows, total){
   for(let k=0;k<order.length && left>0;k++,left--) out[order[k].i]++;
   return out;
 }
-function renderDonut(svgSel, centerSel, legendSel, metaSel){
+function renderDonut(svgSel, centerSel, legendSel, metaSel, barsSel){
   const rows = donutData();
   const total = rows.reduce((a,r)=>a+r.count,0);
-  const svg = $(svgSel), center = $(centerSel), legend = $(legendSel), meta = $(metaSel);
+  const svg = $(svgSel), center = $(centerSel), legend = $(legendSel), meta = $(metaSel), bars = $(barsSel);
   if(!svg || !center || !legend || !meta) return;
   if(!total){
     svg.innerHTML = `<circle cx="50" cy="50" r="39" fill="none" stroke="var(--line)" stroke-width="16"></circle>`;
     center.innerHTML = `<b>0</b><span>medicated entries</span>`;
     legend.innerHTML = "";
+    if(bars) bars.innerHTML = "";
     meta.textContent = "Medication outcomes appear after an entry with a medication is logged.";
     return;
   }
@@ -564,9 +568,15 @@ function renderDonut(svgSel, centerSel, legendSel, metaSel){
   const selectedPct = selectedRow ? pcts[rows.indexOf(selectedRow)] : 0;
   center.innerHTML = selectedRow ? `<b>${selectedRow.count}</b><span>${esc(selectedRow.name)}</span>` : `<b>${total}</b><span>medicated entries</span>`;
   legend.innerHTML = rows.map((r,i)=>`<button type="button" class="legend-btn ${sel.med===r.name?"sel":""}" data-med="${esc(r.name)}">${esc(r.name)} · ${r.count} · ${pcts[i]}%</button>`).join("");
+  if(bars){
+    const top = rows.reduce((a,r)=>r.count>a.count?r:a, rows[0]);
+    const topPct = pcts[rows.indexOf(top)];
+    bars.innerHTML = `<div class="outcome-total"><b>${total}</b> medicated entries · most recorded outcome: <b>${esc(top.name)}</b> (${top.count} · ${topPct}%)</div>` + rows.map((r,i)=>`<button type="button" class="hbar ${sel.med===r.name?"sel":""}" data-med="${esc(r.name)}"><span class="hbar-name">${esc(r.name)}</span><span class="hbar-track"><span class="hbar-fill" style="width:${pcts[i]}%;background:${r.color}"></span></span><span class="hbar-val">${r.count} · ${pcts[i]}%</span></button>`).join("");
+  }
   meta.textContent = selectedRow ? `${selectedRow.name}: ${selectedRow.count} of ${total} medicated entries (${selectedPct}%). Tap again to release.` : `Counts and percentages cover the ${total} entries where you recorded a medication. Tap a slice or label to pin an outcome.`;
-  document.querySelectorAll(`${svgSel} [data-med], ${legendSel} [data-med]`).forEach(el=>el.addEventListener("click",()=>{
+  document.querySelectorAll(`${svgSel} [data-med], ${legendSel} [data-med], ${barsSel} [data-med]`).forEach(el=>el.addEventListener("click",()=>{
     sel.med = sel.med === el.dataset.med ? null : el.dataset.med;
+    beep(660,.04,"sine",.035);
     renderAll();
   }));
 }
@@ -578,7 +588,7 @@ function renderDashboard(){
   const recent = sortedEntries().slice(0,6);
   $("#recentList").innerHTML = recent.length ? recent.map(e=>recordCard(e,"dashboard")).join("") : `<p class="hint">No entries yet. Tap Log Entry, or use the flask to explore a sample diary.</p>`;
   bindRecordCards("#viewDashboard");
-  renderDonut("#dashMedDonut","#dashMedCenter","#dashMedLegend","#dashMedMeta");
+  renderDonut("#dashMedDonut","#dashMedCenter","#dashMedLegend","#dashMedMeta","#dashMedBars");
   const locRows = aggregateBy(S.entries,e=>e.locations).sort((a,b)=>b.count-a.count || b.avg-a.avg).slice(0,5);
   const trigRows = aggregateBy(S.entries,e=>e.triggers).sort((a,b)=>b.count-a.count || b.avg-a.avg).slice(0,5);
   $("#dashLocations").innerHTML = hbarHTML(locRows,sel.location,"location","count");
@@ -730,7 +740,7 @@ function renderCharts(){
   $("#locationDetail").textContent = loc ? `${loc.name}: ${loc.count} entries, average ${round1(loc.avg)}/10, highest ${loc.max}/10.` : "Tap a location for its detail.";
   const trig = trigRows.find(r=>r.name===sel.trigger);
   $("#triggerDetail").textContent = trig ? `${trig.name}: appears in ${trig.count} entries, average severity ${round1(trig.avg)}/10.` : "Tap a trigger for its detail.";
-  renderDonut("#medDonut","#medCenter","#medLegend","#medMeta");
+  renderDonut("#medDonut","#medCenter","#medLegend","#medMeta","#medBars");
 }
 function startOfWeek(dateStr){
   const d = parseDate(dateStr); if(!d) return "";
@@ -895,6 +905,7 @@ function toggleSample(){
   save(); clearEntryForm(); renderAll(); applyTheme(); setSoundUI(); chime();
 }
 function bind(){
+  window.addEventListener("pointerdown",()=>{ if(S.settings.sound) ensureAudio(); },{passive:true});
   $$(".tab").forEach(t=>t.addEventListener("click",()=>{ switchView(t.dataset.view); beep(620,.035,"sine",.028); }));
   $("#themeBtn").addEventListener("click",()=>{ S.settings.dark=!S.settings.dark; save(); applyTheme(); beep(S.settings.dark?520:700,.06); });
   $("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!S.settings.sound; save(); setSoundUI(); toast(S.settings.sound?"Sounds on.":"Sounds off."); if(S.settings.sound) chime(); });
@@ -903,13 +914,13 @@ function bind(){
   $("#sevPlus").addEventListener("click",()=>{ $("#eSeverity").value = clampInt($("#eSeverity").value,0,10,0)+1; updateSeverityUI(); beep(760,.04); });
   $("#eSeverity").addEventListener("input",updateSeverityUI);
   ["#eDate","#eTime","#eCustomLocation","#eCustomTrigger","#eMedication","#eDose","#eEffect","#eImpact","#eSleep","#eMood","#eNote"].forEach(s=>{ $(s).addEventListener("input",updateEntryPreview); $(s).addEventListener("change",updateEntryPreview); });
-  ["#locationChecks","#characterChecks","#triggerChecks"].forEach(s=>$(s).addEventListener("change",updateEntryPreview));
+  ["#locationChecks","#characterChecks","#triggerChecks"].forEach(s=>{ $(s).addEventListener("change",updateEntryPreview); $(s).addEventListener("change",()=>beep(700,.03,"sine",.03)); });
   $("#saveEntryBtn").addEventListener("click",saveEntry);
   $("#clearEntryBtn").addEventListener("click",()=>{ clearEntryForm(); toast("Entry form cleared."); });
   $("#cancelEditBtn").addEventListener("click",()=>{ clearEntryForm(); toast("Edit canceled."); });
   ["#historyPeriod","#historyLocation"].forEach(s=>$(s).addEventListener("change",renderHistory));
   $("#historySearch").addEventListener("input",renderHistory);
-  $$(".trend-range").forEach(b=>b.addEventListener("click",()=>{ trendRange=parseInt(b.dataset.range,10)||30; sel.trendRange=trendRange; sel.trend=null; renderCharts(); }));
+  $$(".trend-range").forEach(b=>b.addEventListener("click",()=>{ trendRange=parseInt(b.dataset.range,10)||30; sel.trendRange=trendRange; sel.trend=null; beep(620,.04,"sine",.035); renderCharts(); }));
   $("#statsPeriod").addEventListener("change",renderStats);
   ["#reportPeriod","#reportFrom","#reportTo"].forEach(s=>$(s).addEventListener("change",renderReport));
   $("#patientName").addEventListener("input",()=>{ S.settings.patientName=cleanText($("#patientName").value,90); save(); renderReport(); });
