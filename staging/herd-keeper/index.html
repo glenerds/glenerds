@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Goat and sheep herd record keeper, breeding due dates, health log, weights and farm profit tracker</title>
+<style>
+:root{
+  --bg:#f5f4ee; --card:#ffffff; --ink:#22301f; --muted:#66745f; --line:#dce2d2;
+  --green:#34783c; --green-dark:#245c2b; --green-soft:#e5f1df; --accent:#2563eb; --accent-ink:#fff;
+  --gold:#a86512; --gold-soft:#fbf0d8; --red:#b42318; --red-soft:#fde8e4; --chip:#eef2e7;
+  --shadow:0 1px 3px rgba(35,55,30,.12); --input:#ffffff; --purple:#6d4fa1; --teal:#0f766e; --blue:#2563eb;
+}
+body.dark{
+  --bg:#131711; --card:#1c241a; --ink:#edf3e8; --muted:#aebba4; --line:#34402f;
+  --green:#65b86f; --green-dark:#93d69a; --green-soft:#243824; --gold:#f2bb62; --gold-soft:#3b2e18;
+  --red:#ff9a8f; --red-soft:#47231f; --chip:#273126; --shadow:0 1px 3px rgba(0,0,0,.45); --input:#242f22;
+  --purple:#c2a4f2; --teal:#5ed3c6; --blue:#82a8ff; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+input,select,textarea{font:inherit;color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.78}
+header.top{max-width:1220px;margin:0 auto;padding:14px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--green);display:flex;align-items:center;justify-content:center;flex:none}
+.logo svg{width:27px;height:27px}
+.brand h1{font-size:24px;margin:0;line-height:1.1}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);color:var(--ink)}
+.icon-btn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn.on{background:var(--green-soft);border-color:var(--green)}
+.icon-btn.on svg{stroke:var(--green)}
+.more-apps{display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;box-shadow:var(--shadow)}
+.more-apps svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2}
+main{max-width:1220px;margin:0 auto;padding:6px 16px 40px}
+.samplebar{display:none;background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:15px}
+.samplebar.show{display:block}.samplebar b{color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow)}
+.stat .n{font-size:24px;font-weight:800;line-height:1.15}.stat .l{color:var(--muted);font-size:15px}.stat.warn .n{color:var(--gold)}.stat.bad .n{color:var(--red)}
+.tabs{display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap}
+.tab{padding:10px 17px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;min-height:44px}
+.tab.on{background:var(--green);color:#fff;border-color:var(--green)}
+.cols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:14px;align-items:start}
+.cols.equal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:880px){.cols,.cols.equal{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.panel h2{margin:0 0 4px;font-size:19px}.panel h3{margin:16px 0 6px;font-size:17px}.panel .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+label.f{display:block;font-weight:600;font-size:15px;margin:12px 0 5px}
+input[type=text],input[type=date],input[type=number],select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--input);font-size:16px}
+textarea{min-height:74px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:600px){.frow,.frow3{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 18px;min-height:46px;border-radius:11px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:16px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}.btn.green{background:var(--green);border-color:var(--green);color:#fff}.btn.danger{color:var(--red)}.btn.small{min-height:40px;padding:0 13px;font-size:15px}.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hint{color:var(--muted);font-size:15px}.tiny{color:var(--muted);font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:600;min-height:40px}.chip.on{background:var(--green);color:#fff;border-color:var(--green)}
+table.list{width:100%;border-collapse:collapse;font-size:15px}table.list th{text-align:left;color:var(--muted);font-weight:600;padding:8px 6px;border-bottom:2px solid var(--line);font-size:15px}table.list td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top}tr.clickable{cursor:pointer}tr.clickable:hover td{background:var(--chip)}tr.sel td{background:var(--green-soft)}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-size:15px;font-weight:700;background:var(--chip);color:var(--ink);white-space:nowrap}.badge.overdue{background:var(--red-soft);color:var(--red)}.badge.soon{background:var(--gold-soft);color:var(--gold)}.badge.ok{background:var(--green-soft);color:var(--green)}.badge.info{background:#e2eaff;color:var(--blue)}body.dark .badge.info{background:#263558}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:7px 12px;font-size:15px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600}.record{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:8px 0;background:var(--card)}.record.sel{outline:3px solid var(--gold);background:var(--gold-soft)}.record.clickable{cursor:pointer}.flagline{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.money-pos{color:var(--green);font-weight:800}.money-neg{color:var(--red);font-weight:800}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;min-height:190px;padding:16px 4px 4px;border-bottom:1px solid var(--line)}
+.chart-col{flex:1;min-width:58px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--ink);background:none;border:0;padding:4px}.chart-pair{display:flex;align-items:flex-end;gap:4px;height:140px}.chart-bar{width:24px;border-radius:6px 6px 0 0;min-height:5px;background:var(--green)}.chart-bar.exp{background:var(--gold)}.chart-col.sel .chart-bar{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px)}.chart-lab{font-size:15px;color:var(--muted);text-align:center}.chart-val{font-size:15px;font-weight:700;text-align:center}
+.growth-chart{display:flex;align-items:flex-end;gap:12px;min-height:200px;padding:16px 6px 4px;border-bottom:1px solid var(--line)}.growth-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;background:none;border:0;color:var(--ink);padding:4px}.growth-bar{width:min(62px,80%);background:var(--teal);border-radius:7px 7px 0 0;min-height:5px}.growth-col.sel .growth-bar{background:var(--gold);outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px)}
+.donut-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.donut-box{position:relative;width:190px;height:190px;flex:none}.donut-box svg{width:190px;height:190px}.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 48px;pointer-events:none}.donut-center b{font-size:22px;line-height:1.05}.donut-center span{font-size:15px;color:var(--muted)}.seg-legend{display:flex;flex-wrap:wrap;gap:6px}.legend-btn{font-size:15px;padding:7px 11px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-weight:600}.legend-btn.sel{outline:3px solid var(--gold);background:var(--gold-soft)}
+.pedigree{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ped-box{border:1.5px solid var(--line);border-radius:12px;padding:11px;background:var(--chip)}.ped-box.self{grid-column:1/-1;background:var(--green-soft);border-color:var(--green)}.ped-box b{font-size:16px}.ped-box span{display:block;color:var(--muted);font-size:15px}@media(max-width:560px){.pedigree{grid-template-columns:1fr}.kv{grid-template-columns:1fr}.kv dd{margin-bottom:5px}}
+.preview-box{background:var(--green-soft);border:1.5px solid var(--green);border-radius:12px;padding:12px 14px;margin-top:14px;font-size:16px}
+footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#1c2420;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;max-width:92vw;text-align:center;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.3)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#printArea{display:none}
+@media print{body{background:#fff;color:#111}header.top,.tabs,.samplebar,.no-print,footer.cta,.toast,main>section{display:none!important}main{max-width:100%;padding:0}.panel{box-shadow:none;break-inside:avoid}#printArea{display:block;color:#111}#printArea h1{font-size:26px;margin:0 0 6px}#printArea h2{font-size:20px;margin:18px 0 6px}#printArea table{width:100%;border-collapse:collapse;font-size:12pt}#printArea th,#printArea td{border-bottom:1px solid #bbb;padding:5px;text-align:left}#printArea .sheet{page-break-after:always}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19V9.5C5 6.5 7.2 4.5 10 4.2M19 19V9.5c0-3-2.2-5-5-5.3"/><path d="M3.5 19h17M7 19v-4.5C7 12 8.8 10.5 12 10.5s5 1.5 5 4V19"/><path d="M12 10.5V7.8M9.2 8.5c.8.8 1.7 1.2 2.8 1.2s2-.4 2.8-1.2"/></svg></div>
+  <div class="brand"><h1 id="brandName">Goat &amp; Sheep Herd Record Keeper</h1><p>Herd records, breeding due dates, health care, weights, milk and profit — offline on this device</p></div>
+  <div class="top-actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+    <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
+    <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg></button>
+    <button class="icon-btn" id="soundBtn" title="Sounds" aria-label="Toggle sounds"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
+<main>
+  <div class="samplebar" id="sampleBar"><b>Sample herd is on.</b> A made-up homestead herd shows breeding, births, care flags, milk, weights and profit working together. Tap the flask again and your real herd returns exactly as you left it.</div>
+  <div class="stats-grid" id="dashTiles"></div>
+  <div class="tabs no-print" role="tablist">
+    <button class="tab on" data-view="Dashboard" role="tab" aria-selected="true">Dashboard</button>
+    <button class="tab" data-view="Animals" role="tab" aria-selected="false">Animals</button>
+    <button class="tab" data-view="Breeding" role="tab" aria-selected="false">Breeding &amp; Births</button>
+    <button class="tab" data-view="Health" role="tab" aria-selected="false">Health &amp; Milk</button>
+    <button class="tab" data-view="Money" role="tab" aria-selected="false">Money</button>
+    <button class="tab" data-view="Reports" role="tab" aria-selected="false">Reports &amp; Data</button>
+  </div>
+
+  <section id="viewDashboard">
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>Needs attention</h2><p class="sub">Computed from your dates — nothing to recalculate in a spreadsheet.</p><div id="attentionList"></div></div>
+        <div class="panel"><h2>Breeding due soon</h2><p class="sub">Expected kidding and lambing dates use each species’ gestation setting.</p><div id="dueList"></div></div>
+        <div class="panel"><h2>Recent herd activity</h2><p class="sub">Latest births, treatments, weights, milk and money entries.</p><div id="recentList"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Herd mix</h2><p class="sub">Tap a slice or label to pin that species.</p><div class="donut-wrap"><div class="donut-box"><svg id="mixDonut" viewBox="0 0 100 100" role="img" aria-label="Herd mix chart"></svg><div class="donut-center" id="mixCenter"></div></div><div><div class="seg-legend" id="mixLegend"></div><p class="hint" id="mixMeta"></p></div></div></div>
+        <div class="panel"><h2>Income vs expenses</h2><p class="sub">Last six months. Tap a month to inspect its herd profit or loss.</p><div class="chart-bars" id="moneyChart"></div><p class="hint" id="moneyChartDetail">Tap a month for the detail.</p></div>
+        <div class="panel"><h2>Youngstock growth snapshot</h2><p class="sub">Latest recorded weight for each young animal. Tap a bar to open that animal.</p><div class="growth-chart" id="dashGrowthChart"></div><p class="hint" id="dashGrowthDetail">Tap a bar for weight and average daily gain.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewAnimals" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>Animal register</h2><p class="sub">Tap an animal for its pedigree, records and printable sheet.</p>
+          <div class="frow"><div><label class="f" for="animalSearch">Search</label><input type="text" id="animalSearch" placeholder="Name, tag, tattoo, breed…"></div><div><label class="f" for="animalFilter">Show</label><select id="animalFilter"><option value="all">All animals</option><option value="active">Active only</option><option value="Goat">Goats</option><option value="Sheep">Sheep</option><option value="female">Breeding females</option><option value="male">Breeding males</option></select></div></div>
+          <div id="animalsTableWrap" style="margin-top:12px"></div>
+        </div>
+        <div class="panel" id="animalDetailPanel"><h2>Animal detail &amp; pedigree</h2><p class="sub" id="animalDetailSub">Tap any animal to see its family and history.</p><div id="animalDetail"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2 id="animalFormTitle">Add an animal</h2><p class="sub">Use the name or tag your family actually calls out in the barn.</p>
+          <label class="f" for="aName">Name *</label><input type="text" id="aName" placeholder="Clover">
+          <div class="frow"><div><label class="f" for="aSpecies">Species</label><select id="aSpecies"><option>Goat</option><option>Sheep</option></select></div><div><label class="f" for="aBreed">Breed</label><input type="text" id="aBreed" placeholder="Nubian, Katahdin…"></div></div>
+          <div class="frow"><div><label class="f" for="aSex">Sex / class</label><select id="aSex"><option>Doe</option><option>Ewe</option><option>Buck</option><option>Ram</option><option>Wether</option><option>Kid / Lamb</option></select></div><div><label class="f" for="aStatus">Status</label><select id="aStatus"><option>Active</option><option>Bred</option><option>Dry</option><option>For sale</option><option>Sold</option><option>Died</option><option>Culled</option></select></div></div>
+          <div class="frow"><div><label class="f" for="aTag">Ear tag</label><input type="text" id="aTag" placeholder="G-014"></div><div><label class="f" for="aTattoo">Tattoo / scrapie ID</label><input type="text" id="aTattoo" placeholder="Optional"></div></div>
+          <div class="frow"><div><label class="f" for="aReg">Registration #</label><input type="text" id="aReg" placeholder="Optional"></div><div><label class="f" for="aBirth">Birth date</label><input type="date" id="aBirth"></div></div>
+          <div class="frow"><div><label class="f" for="aDam">Dam (mother)</label><select id="aDam"></select></div><div><label class="f" for="aSire">Sire (father)</label><select id="aSire"></select></div></div>
+          <div class="frow"><div><label class="f" for="aAcquired">Date joined herd</label><input type="date" id="aAcquired"></div><div><label class="f" for="aCost">Purchase cost ($)</label><input type="number" id="aCost" min="0" step="0.01" placeholder="0"></div></div>
+          <label class="f" for="aNotes">Notes</label><textarea id="aNotes" placeholder="Temperament, markings, where purchased, strengths or watch-outs…"></textarea>
+          <div class="preview-box" id="animalPreview">Add the basics, then save. You can attach health, breeding, milk and money records afterward.</div>
+          <div class="btnrow"><button class="btn green" id="saveAnimalBtn">Save animal</button><button class="btn" id="clearAnimalBtn">Clear form</button><button class="btn danger" id="cancelAnimalEditBtn" hidden>Cancel edit</button></div>
+        </div>
+        <div class="panel"><h2>Register at a glance</h2><p class="sub">A quick count of what is currently on the place.</p><div id="animalGlance"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewBreeding" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2 id="breedingFormTitle">Record a breeding</h2><p class="sub">Due date is calculated for you and stays adjustable per breeding.</p>
+          <div class="frow"><div><label class="f" for="bDam">Dam *</label><select id="bDam"></select></div><div><label class="f" for="bSire">Sire *</label><select id="bSire"></select></div></div>
+          <div class="frow"><div><label class="f" for="bDate">Breeding date *</label><input type="date" id="bDate"></div><div><label class="f" for="bGestation">Gestation days</label><input type="number" id="bGestation" min="130" max="170" step="1"></div></div>
+          <div class="frow"><div><label class="f" for="bMethod">Method</label><select id="bMethod"><option>Live cover</option><option>AI</option><option>Pen breeding</option><option>Unknown</option></select></div><div><label class="f" for="bStatus">Status</label><select id="bStatus"><option>Exposed</option><option>Confirmed pregnant</option><option>Completed</option><option>Open / did not settle</option></select></div></div>
+          <label class="f" for="bNotes">Notes</label><textarea id="bNotes" placeholder="Pen, heat observed, ultrasound result, expected sire notes…"></textarea>
+          <div class="preview-box" id="breedingPreview">Choose a dam and date to see the expected due date.</div>
+          <div class="btnrow"><button class="btn green" id="saveBreedingBtn">Save breeding</button><button class="btn" id="clearBreedingBtn">Clear form</button><button class="btn danger" id="cancelBreedingEditBtn" hidden>Cancel edit</button></div>
+        </div>
+        <div class="panel"><h2>Record a birth</h2><p class="sub">Link the litter to its dam and sire, then build a row for each kid or lamb.</p>
+          <label class="f" for="birthBreeding">Breeding record</label><select id="birthBreeding"></select>
+          <div class="frow"><div><label class="f" for="birthDate">Birth date *</label><input type="date" id="birthDate"></div><div><label class="f" for="birthCount">Litter size</label><input type="number" id="birthCount" min="1" max="8" step="1" value="2"></div></div>
+          <div class="frow"><div><label class="f" for="birthEase">Ease</label><select id="birthEase"><option>Easy / unassisted</option><option>Easy assist</option><option>Hard assist</option><option>C-section</option><option>Stillborn litter</option></select></div><div><label class="f" for="birthNotes">Birth notes</label><input type="text" id="birthNotes" placeholder="Presentation, vigor, mothering, colostrum…"></div></div>
+          <div id="kidRows"></div>
+          <label class="f"><input type="checkbox" id="birthCreateAnimals" checked style="width:auto"> Create an animal profile for each live kid/lamb</label>
+          <div class="btnrow"><button class="btn" id="buildKidRowsBtn">Build kid rows</button><button class="btn green" id="saveBirthBtn">Save birth record</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Breeding &amp; birth records</h2><p class="sub">Tap a record to edit it or inspect the due-date math.</p><div id="breedingList"></div></div>
+        <div class="panel"><h2>Kid &amp; lamb growth</h2><p class="sub">Birth, 30-, 60- and 90-day weights with average daily gain calculated between weigh-ins.</p>
+          <div class="frow"><div><label class="f" for="wAnimal">Animal</label><select id="wAnimal"></select></div><div><label class="f" for="wDate">Weigh date</label><input type="date" id="wDate"></div></div>
+          <div class="frow"><div><label class="f" for="wWeight">Weight (lb)</label><input type="number" id="wWeight" min="0" step="0.1" placeholder="42.5"></div><div><label class="f" for="wKind">Weigh-in type</label><select id="wKind"><option>Routine</option><option>Birth</option><option>30-day</option><option>60-day</option><option>90-day</option><option>Weaning</option><option>Sale</option></select></div></div>
+          <div class="btnrow"><button class="btn green" id="saveWeightBtn">Save weight</button><button class="btn danger" id="cancelWeightEditBtn" hidden>Cancel edit</button></div>
+          <div class="growth-chart" id="growthChart"></div><p class="hint" id="growthDetail">Choose an animal with weights to see growth.</p><div id="weightList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewHealth" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2 id="healthFormTitle">Add health or care record</h2><p class="sub">Withdrawal and next-due dates turn into automatic barn reminders.</p>
+          <div class="frow"><div><label class="f" for="hAnimal">Animal *</label><select id="hAnimal"></select></div><div><label class="f" for="hDate">Date *</label><input type="date" id="hDate"></div></div>
+          <div class="frow"><div><label class="f" for="hType">Type</label><select id="hType"><option>Deworming</option><option>Vaccination</option><option>Treatment</option><option>Hoof trim</option><option>FAMACHA check</option><option>Body condition</option><option>Mineral / supplement</option><option>Other care</option></select></div><div><label class="f" for="hProduct">Product / finding</label><input type="text" id="hProduct" placeholder="Product, vaccine, condition found…"></div></div>
+          <div class="frow3"><div><label class="f" for="hDose">Dose / amount</label><input type="text" id="hDose" placeholder="As given"></div><div><label class="f" for="hFamacha">FAMACHA (1–5)</label><input type="number" id="hFamacha" min="1" max="5" step="1" placeholder="Optional"></div><div><label class="f" for="hBcs">Body condition</label><input type="number" id="hBcs" min="1" max="5" step="0.25" placeholder="Optional"></div></div>
+          <div class="frow"><div><label class="f" for="hNextDue">Next due</label><input type="date" id="hNextDue"></div><div><label class="f" for="hWithdrawal">Meat/milk withdrawal ends</label><input type="date" id="hWithdrawal"></div></div>
+          <label class="f" for="hNotes">Notes</label><textarea id="hNotes" placeholder="Symptoms, response, veterinarian, withdrawal instructions from the label…"></textarea>
+          <div class="btnrow"><button class="btn green" id="saveHealthBtn">Save care record</button><button class="btn" id="clearHealthBtn">Clear form</button><button class="btn danger" id="cancelHealthEditBtn" hidden>Cancel edit</button></div>
+        </div>
+        <div class="panel"><h2>Milk log</h2><p class="sub">A simple daily record for does and ewes in milk.</p>
+          <div class="frow"><div><label class="f" for="mAnimal">Animal</label><select id="mAnimal"></select></div><div><label class="f" for="mDate">Date</label><input type="date" id="mDate"></div></div>
+          <div class="frow"><div><label class="f" for="mAmount">Amount</label><input type="number" id="mAmount" min="0" step="0.1" placeholder="1.5"></div><div><label class="f" for="mUnit">Unit</label><select id="mUnit"><option>quarts</option><option>pints</option><option>cups</option><option>liters</option><option>lb</option></select></div></div>
+          <label class="f" for="mNotes">Notes</label><input type="text" id="mNotes" placeholder="AM/PM, kid-sharing, off feed, cheese batch…">
+          <div class="btnrow"><button class="btn green" id="saveMilkBtn">Save milk entry</button><button class="btn danger" id="cancelMilkEditBtn" hidden>Cancel edit</button></div>
+          <div id="milkList"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Care schedule</h2><p class="sub">Overdue first, then what is coming due and what is still inside a withdrawal window.</p><div id="careSchedule"></div></div>
+        <div class="panel"><h2>Health &amp; care history</h2><p class="sub">Tap a record to edit it. Withdrawal dates are flagged until they pass.</p><div id="healthList"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewMoney" hidden>
+    <div class="cols equal">
+      <div>
+        <div class="panel"><h2 id="moneyFormTitle">Add income or expense</h2><p class="sub">Keep the whole small herd honest: animals, feed, hay, minerals, vet care, milk, fiber and sales.</p>
+          <div class="frow"><div><label class="f" for="tType">Type</label><select id="tType"><option>Expense</option><option>Income</option></select></div><div><label class="f" for="tDate">Date *</label><input type="date" id="tDate"></div></div>
+          <div class="frow"><div><label class="f" for="tCategory">Category</label><select id="tCategory"><option>Animal sale</option><option>Milk / dairy</option><option>Fiber / wool</option><option>Breeding fee</option><option>Feed &amp; grain</option><option>Hay &amp; pasture</option><option>Minerals &amp; supplements</option><option>Vet &amp; medicine</option><option>Hoof &amp; shearing</option><option>Supplies &amp; equipment</option><option>Animal purchase</option><option>Other</option></select></div><div><label class="f" for="tAmount">Amount ($) *</label><input type="number" id="tAmount" min="0" step="0.01" placeholder="0.00"></div></div>
+          <label class="f" for="tAnimal">Linked animal (optional)</label><select id="tAnimal"></select>
+          <label class="f" for="tDesc">Description</label><input type="text" id="tDesc" placeholder="Two wethers sold, 12 round bales, copper bolus…">
+          <div class="btnrow"><button class="btn green" id="saveMoneyBtn">Save entry</button><button class="btn" id="clearMoneyBtn">Clear form</button><button class="btn danger" id="cancelMoneyEditBtn" hidden>Cancel edit</button></div>
+        </div>
+        <div class="panel"><h2>Sales &amp; dispositions</h2><p class="sub">Animals marked sold, died or culled, with any linked sale income found in Money.</p><div id="dispositionList"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Herd profit &amp; loss</h2><p class="sub">This calendar year unless you tap a month in the chart.</p><div id="plSummary"></div><div class="chart-bars" id="moneyChart2"></div><p class="hint" id="moneyChartDetail2">Tap a month for the detail.</p></div>
+        <div class="panel"><h2>Money history</h2><p class="sub">Tap an entry to edit it.</p><div id="moneyList"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewReports" hidden>
+    <div class="cols equal">
+      <div>
+        <div class="panel"><h2>Print reports</h2><p class="sub">Clean paper copies for the barn binder, a buyer, a vet visit or a 4-H record book.</p>
+          <div class="btnrow" style="margin-top:0"><button class="btn primary" id="printHerdBtn">Print herd report</button></div>
+          <label class="f" for="printAnimal">Per-animal record sheet</label><select id="printAnimal"></select>
+          <div class="btnrow"><button class="btn green" id="printAnimalBtn">Print animal sheet</button></div>
+          <p class="hint">Your records stay in this browser on this device. Use JSON Backup below before switching devices or clearing browser data.</p>
+        </div>
+        <div class="panel"><h2>Gestation settings</h2><p class="sub">Defaults for new breedings. Individual breedings can override these.</p>
+          <div class="frow"><div><label class="f" for="setGoatGest">Goat gestation days</label><input type="number" id="setGoatGest" min="130" max="170" step="1"></div><div><label class="f" for="setSheepGest">Sheep gestation days</label><input type="number" id="setSheepGest" min="130" max="170" step="1"></div></div>
+          <div class="btnrow"><button class="btn green" id="saveSettingsBtn">Save settings</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Export &amp; backup</h2><p class="sub">CSV opens in a spreadsheet. JSON Backup restores the complete herd.</p>
+          <div class="btnrow" style="margin-top:0"><button class="btn" id="exportAnimalsCsvBtn">Animals CSV</button><button class="btn" id="exportRecordsCsvBtn">All records CSV</button><button class="btn" id="exportMoneyCsvBtn">Money CSV</button></div>
+          <div class="btnrow"><button class="btn primary" id="backupBtn">Download JSON Backup</button><button class="btn" id="restoreBtn">Restore Backup</button><input type="file" id="jsonFile" accept=".json,application/json" hidden></div>
+          <div id="dataSummary"></div>
+        </div>
+        <div class="panel"><h2>How the flags work</h2><p><b>Breeding due soon</b> appears from 21 days before the calculated due date.</p><p><b>Care overdue</b> uses the Next due date on the newest relevant care record.</p><p><b>Withdrawal active</b> remains visible until the withdrawal end date passes. Always follow the product label and your veterinarian.</p><p><b>Average daily gain</b> is pounds gained per day between the first and latest recorded weights.</p></div>
+      </div>
+    </div>
+  </section>
+  <div id="printArea"></div>
+</main>
+<footer class="cta no-print"><a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const APP_NAME = "Goat & Sheep Herd Record Keeper";
+const LS_KEY = "herdkeeper_v1";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const localToday = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const parseDate = v => { if(!v||typeof v!=="string") return null; const [y,m,d]=v.split("-").map(Number); if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d)) return null; const dt=new Date(y,m-1,d); return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d ? dt : null; };
+const fmtDate = v => { const d=parseDate(v); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—"; };
+const addDays = (v,n) => { const d=parseDate(v); if(!d) return ""; d.setDate(d.getDate()+n); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const daysBetween = (a,b) => { const x=parseDate(a), y=parseDate(b); return x&&y ? Math.round((y-x)/86400000) : null; };
+const daysUntil = v => daysBetween(localToday(), v);
+const money = n => "$" + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const uid = p => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+const num = v => { const n=parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const clampMoney = v => Math.max(0, num(v));
+let toastTimer=null;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),3400); }
+let audioCtx=null;
+function beep(freq=660,dur=.08,type="sine",gain=.06){ if(!S.settings.sound) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(gain,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur);}catch(e){} }
+const chime=()=>{beep(660,.08); setTimeout(()=>beep(880,.1),70);};
+const thud=()=>beep(180,.12,"triangle",.05);
+
+function blankData(){ return { animals:[], breedings:[], births:[], weights:[], health:[], milk:[], transactions:[], settings:{ goatGestation:150, sheepGestation:147, dark:false, sound:true }, sampling:false, snapshot:null }; }
+let bootDataUnreadable=false;
+function load(){ try{ const raw=localStorage.getItem(LS_KEY); if(!raw) return blankData(); const d={...blankData(), ...JSON.parse(raw)}; d.settings={...blankData().settings, ...(d.settings||{})}; return d; }catch(e){ bootDataUnreadable=true; return blankData(); } }
+let S = load();
+let sel = { animal:null, breeding:null, weightAnimal:null, mix:null, moneyMonth:null, growth:null };
+let editing = { animal:null, breeding:null, health:null, milk:null, money:null, weight:null };
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ toast("Storage is full or blocked. Download a JSON Backup from Reports & Data."); } }
+function animalById(id){ return S.animals.find(a=>a.id===id); }
+function animalName(id){ const a=animalById(id); return a ? a.name : "—"; }
+function activeAnimals(){ return S.animals.filter(a=>!["Sold","Died","Culled"].includes(a.status)); }
+function isFemale(a){ return a && ["Doe","Ewe"].includes(a.sex); }
+function isMale(a){ return a && ["Buck","Ram"].includes(a.sex); }
+function dueDate(b){ const gest=Math.min(170,Math.max(130, Number(b.gestationDays)|| (animalById(b.damId)?.species === "Sheep" ? S.settings.sheepGestation : S.settings.goatGestation))); return addDays(b.date, gest); }
+function sortedAnimals(){ return [...S.animals].sort((a,b)=>a.name.localeCompare(b.name)); }
+function ageText(birth){ if(!birth) return "Age unknown"; const days=daysBetween(birth, localToday()); if(days===null||days<0) return "Not born yet"; if(days<60) return `${days} days`; if(days<730) return `${Math.floor(days/30.44)} mo`; return `${(days/365.25).toFixed(1)} yr`; }
+function latestWeight(animalId){ const rows=S.weights.filter(w=>w.animalId===animalId).sort((a,b)=>a.date.localeCompare(b.date)); return rows[rows.length-1]||null; }
+function adg(animalId){ const rows=S.weights.filter(w=>w.animalId===animalId).sort((a,b)=>a.date.localeCompare(b.date)); if(rows.length<2) return null; const first=rows[0], last=rows[rows.length-1]; const days=daysBetween(first.date,last.date); return days>0 ? (last.weight-first.weight)/days : null; }
+function careFlags(){ const latestByKey={}; [...S.health].sort((a,b)=>a.date.localeCompare(b.date)).forEach(h=>{ latestByKey[`${h.animalId}|${h.type}`]=h; }); return Object.values(latestByKey).filter(h=>h.nextDue).map(h=>{ const days=daysUntil(h.nextDue); return {...h, days, flag: days<0 ? "overdue" : days<=14 ? "soon" : "ok"}; }).sort((a,b)=>(a.days??999)-(b.days??999)); }
+function withdrawalFlags(){ return S.health.filter(h=>h.withdrawalEnd && daysUntil(h.withdrawalEnd)>=0).sort((a,b)=>a.withdrawalEnd.localeCompare(b.withdrawalEnd)); }
+function applyTheme(){ document.body.classList.toggle("dark", !!S.settings.dark); $("#themeBtn").classList.toggle("on", !!S.settings.dark); $("#themeBtn").setAttribute("aria-pressed", S.settings.dark ? "true":"false"); }
+function setSoundUI(){ $("#soundBtn").classList.toggle("on", !!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed", S.settings.sound ? "true":"false"); }
+function setSampleUI(){ $("#sampleBar").classList.toggle("show", !!S.sampling); $("#sampleBtn").classList.toggle("on", !!S.sampling); $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true":"false"); }
+
+function optionList(list, selected="", includeBlank="None recorded"){ return `<option value="">${includeBlank}</option>` + list.map(a=>`<option value="${a.id}" ${a.id===selected?"selected":""}>${esc(a.name)}${a.tag?` (${esc(a.tag)})`:""}</option>`).join(""); }
+function fillAnimalSelects(){
+  const animals=sortedAnimals(), females=animals.filter(isFemale), males=animals.filter(isMale);
+  $("#aDam").innerHTML=optionList(females, $("#aDam").value, "No dam recorded");
+  $("#aSire").innerHTML=optionList(males, $("#aSire").value, "No sire recorded");
+  $("#bDam").innerHTML=optionList(females, $("#bDam").value, "Choose dam");
+  $("#bSire").innerHTML=optionList(males, $("#bSire").value, "Choose sire");
+  $("#hAnimal").innerHTML=optionList(animals, $("#hAnimal").value, "Choose animal");
+  $("#mAnimal").innerHTML=optionList(animals.filter(isFemale), $("#mAnimal").value, "Choose animal");
+  $("#wAnimal").innerHTML=optionList(animals, $("#wAnimal").value, "Choose animal");
+  $("#tAnimal").innerHTML=optionList(animals, $("#tAnimal").value, "Whole herd / no animal");
+  $("#printAnimal").innerHTML=optionList(animals, $("#printAnimal").value, "Choose animal");
+  const breedingOptions = [...S.breedings].filter(b=>b.status!=="Completed").sort((a,b)=>b.date.localeCompare(a.date)).map(b=>`<option value="${b.id}">${esc(animalName(b.damId))} × ${esc(animalName(b.sireId))} — bred ${fmtDate(b.date)}</option>`).join("");
+  $("#birthBreeding").innerHTML = breedingOptions || `<option value="">No open breeding recorded yet</option>`;
+}
+function fillGestationFromDam(){ const dam=animalById($("#bDam").value); if(dam && !editing.breeding) $("#bGestation").value = dam.species==="Sheep" ? S.settings.sheepGestation : S.settings.goatGestation; updateBreedingPreview(); }
+function updateBreedingPreview(){ const dam=animalById($("#bDam").value), sire=animalById($("#bSire").value), date=$("#bDate").value, gest=num($("#bGestation").value); $("#breedingPreview").innerHTML = dam&&date&&gest ? `<b>${esc(dam.name)}</b>${sire?` × <b>${esc(sire.name)}</b>`:""} is due around <b>${fmtDate(addDays(date,gest))}</b> (${gest} days).` : "Choose a dam and date to see the expected due date."; }
+function updateAnimalPreview(){ const name=$("#aName").value.trim(); $("#animalPreview").innerHTML = name ? `<b>${esc(name)}</b> will be saved to the register. Add parents now if you know them — the pedigree builds itself.` : "Add the basics, then save. You can attach health, breeding, milk and money records afterward."; }
+
+function statTile(n,l,cls=""){ return `<div class="stat ${cls}"><div class="n">${esc(n)}</div><div class="l">${esc(l)}</div></div>`; }
+function renderTiles(){
+  const active=activeAnimals(), flags=careFlags(), overdue=flags.filter(f=>f.flag==="overdue"), soon=flags.filter(f=>f.flag==="soon");
+  const due=S.breedings.filter(b=>!["Completed","Open / did not settle"].includes(b.status)).map(b=>({...b,due:dueDate(b),days:daysUntil(dueDate(b))})).filter(b=>b.days!==null&&b.days<=30&&b.days>=-7);
+  const year=localToday().slice(0,4); const tx=S.transactions.filter(t=>t.date.startsWith(year)); const inc=tx.filter(t=>t.type==="Income").reduce((s,t)=>s+num(t.amount),0); const exp=tx.filter(t=>t.type==="Expense").reduce((s,t)=>s+num(t.amount),0);
+  const kids=S.births.filter(b=>b.date.startsWith(year)).reduce((s,b)=>s+(b.kids?.length||0),0);
+  $("#dashTiles").innerHTML = [ statTile(active.length,"animals in the herd"), statTile(`${active.filter(a=>a.species==="Goat").length} / ${active.filter(a=>a.species==="Sheep").length}`,"goats / sheep"), statTile(due.length,"due ≤30d / past due",due.length?"warn":""), statTile(overdue.length,"care items overdue",overdue.length?"bad":""), statTile(soon.length,"care due in 14 days",soon.length?"warn":""), statTile(kids,"kids/lambs born this year"), statTile(money(inc-exp),"herd net this year") ].join("");
+}
+function renderDashboard(){
+  renderTiles();
+  const flags=careFlags(); const attention=[];
+  flags.filter(f=>f.flag!=="ok").slice(0,8).forEach(f=>attention.push(`<div class="record clickable" data-open-health="${f.id}"><div class="flagline"><span class="badge ${f.flag}">${f.flag==="overdue"?"Overdue":"Due soon"}</span><b>${esc(animalName(f.animalId))}</b><span>${esc(f.type)} — ${f.flag==="overdue"?`${Math.abs(f.days)} days late`:`due in ${f.days} days`}</span></div><div class="hint">Next due ${fmtDate(f.nextDue)}${f.product?` · ${esc(f.product)}`:""}</div></div>`));
+  withdrawalFlags().slice(0,5).forEach(h=>attention.push(`<div class="record clickable" data-open-health="${h.id}"><div class="flagline"><span class="badge info">Withdrawal active</span><b>${esc(animalName(h.animalId))}</b><span>${esc(h.type)} through ${fmtDate(h.withdrawalEnd)}</span></div><div class="hint">Do not sell milk or meat from this animal until the withdrawal window passes and the label allows it.</div></div>`));
+  $("#attentionList").innerHTML = attention.length ? attention.join("") : `<p class="hint">No overdue care, due-soon care or active withdrawals. Add a Next due date to health records and this list will watch it for you.</p>`;
+  const due=S.breedings.filter(b=>!["Completed","Open / did not settle"].includes(b.status)).map(b=>({...b,due:dueDate(b),days:daysUntil(dueDate(b))})).filter(b=>b.days!==null&&b.days<=45&&b.days>=-14).sort((a,b)=>a.due.localeCompare(b.due));
+  $("#dueList").innerHTML = due.length ? due.map(b=>`<div class="record clickable" data-open-breeding="${b.id}"><div class="flagline"><span class="badge ${b.days<0?"overdue":b.days<=21?"soon":"ok"}">${b.days<0?`${Math.abs(b.days)} days past due`:b.days===0?"Due today":`Due in ${b.days} days`}</span><b>${esc(animalName(b.damId))}</b><span>× ${esc(animalName(b.sireId))}</span></div><div class="hint">Expected ${fmtDate(b.due)} · bred ${fmtDate(b.date)} · ${esc(b.status)}</div></div>`).join("") : `<p class="hint">No breedings are due in the next 45 days. Record a breeding and the due date appears here automatically.</p>`;
+  const items=[];
+  S.births.forEach(b=>items.push({date:b.date,kind:"Birth",text:`${animalName(b.damId)} had ${b.kids?.length||0} kid(s)/lamb(s)`,id:b.id,go:"birth"}));
+  S.health.forEach(h=>items.push({date:h.date,kind:h.type,text:`${animalName(h.animalId)} — ${h.product||h.type}`,id:h.id,go:"health"}));
+  S.weights.forEach(w=>items.push({date:w.date,kind:"Weight",text:`${animalName(w.animalId)} weighed ${w.weight} lb`,id:w.id,go:"weight"}));
+  S.milk.forEach(m=>items.push({date:m.date,kind:"Milk",text:`${animalName(m.animalId)} gave ${m.amount} ${m.unit}`,id:m.id,go:"milk"}));
+  S.transactions.forEach(t=>items.push({date:t.date,kind:t.type,text:`${t.category} — ${money(t.amount)}`,id:t.id,go:"money"}));
+  items.sort((a,b)=>b.date.localeCompare(a.date));
+  $("#recentList").innerHTML = items.length ? items.slice(0,8).map(i=>`<div class="record"><div class="flagline"><span class="badge">${esc(i.kind)}</span><b>${fmtDate(i.date)}</b><span>${esc(i.text)}</span></div></div>`).join("") : `<p class="hint">No activity yet. Add animals, then record the first breeding, treatment or sale.</p>`;
+  renderMix(); renderMoneyChart("#moneyChart","#moneyChartDetail"); renderDashGrowth();
+}
+function renderMix(){
+  const groups=[["Goats",activeAnimals().filter(a=>a.species==="Goat").length,"#34783c"],["Sheep",activeAnimals().filter(a=>a.species==="Sheep").length,"#a86512"]].filter(g=>g[1]>0);
+  const total=activeAnimals().length; const svg=$("#mixDonut"); const center=$("#mixCenter"); const legend=$("#mixLegend");
+  if(!total){ svg.innerHTML=""; center.innerHTML=`<b>0</b><span>animals</span>`; legend.innerHTML=`<span class="hint">Add animals to see the mix.</span>`; return; }
+  // Overlapping role counts are shown as proportional markers against herd size, keeping the center readable.
+  const top=groups.slice(0,5); let start=-90; const arcs=[];
+  top.forEach(([name,count,color],idx)=>{ const frac=count/total; const sweep=Math.max(8, frac*360*.92); const end=start+sweep; const large=sweep>180?1:0; const r=39,cx=50,cy=50; const p1=[cx+r*Math.cos(start*Math.PI/180),cy+r*Math.sin(start*Math.PI/180)], p2=[cx+r*Math.cos(end*Math.PI/180),cy+r*Math.sin(end*Math.PI/180)]; const isSel=sel.mix===name; const mid=(start+end)/2; const off=isSel?2.6:0; const dx=Math.cos(mid*Math.PI/180)*off, dy=Math.sin(mid*Math.PI/180)*off; arcs.push(`<path d="M ${p1[0]+dx} ${p1[1]+dy} A ${r} ${r} 0 ${large} 1 ${p2[0]+dx} ${p2[1]+dy}" fill="none" stroke="${color}" stroke-width="${isSel?13:10}" stroke-linecap="round" data-mix="${esc(name)}" style="cursor:pointer"/>`); start=end+7; });
+  svg.innerHTML=arcs.join(""); const chosen=top.find(g=>g[0]===sel.mix); center.innerHTML = chosen ? `<b>${chosen[1]}</b><span>${esc(chosen[0].toLowerCase())}</span>` : `<b>${total}</b><span>active animals</span>`;
+  legend.innerHTML = top.map(([name,count,color])=>`<button class="legend-btn ${sel.mix===name?"sel":""}" data-mix="${esc(name)}"><span style="color:${color}">●</span> ${esc(name)}: ${count}</button>`).join("");
+  $("#mixMeta").textContent = `${activeAnimals().filter(isFemale).length} breeding females · ${activeAnimals().filter(isMale).length} breeding males · ${activeAnimals().filter(a=>a.sex==="Kid / Lamb").length} youngstock`;
+  svg.querySelectorAll("[data-mix]").forEach(el=>el.addEventListener("click",()=>{ sel.mix = sel.mix===el.dataset.mix ? null : el.dataset.mix; renderMix(); beep(620,.05); }));
+  legend.querySelectorAll("[data-mix]").forEach(el=>el.addEventListener("click",()=>{ sel.mix = sel.mix===el.dataset.mix ? null : el.dataset.mix; renderMix(); beep(620,.05); }));
+}
+function monthKey(date){ return date ? date.slice(0,7) : ""; }
+function lastMonths(n=6){ const out=[]; const d=parseDate(localToday()); d.setDate(1); for(let i=n-1;i>=0;i--){ const x=new Date(d.getFullYear(),d.getMonth()-i,1); out.push(`${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}`); } return out; }
+function monthLabel(k){ const [y,m]=k.split("-").map(Number); return new Date(y,m-1,1).toLocaleDateString(undefined,{month:"short"}); }
+function renderMoneyChart(wrapSel,detailSel){
+  const months=lastMonths(6); const data=months.map(k=>{ const rows=S.transactions.filter(t=>monthKey(t.date)===k); return {key:k, inc:rows.filter(t=>t.type==="Income").reduce((s,t)=>s+num(t.amount),0), exp:rows.filter(t=>t.type==="Expense").reduce((s,t)=>s+num(t.amount),0)}; });
+  const max=Math.max(1,...data.flatMap(d=>[d.inc,d.exp])); const chosen=data.find(d=>d.key===sel.moneyMonth);
+  $(wrapSel).innerHTML = data.map(d=>`<button class="chart-col ${sel.moneyMonth===d.key?"sel":""}" data-month="${d.key}" aria-label="${monthLabel(d.key)} income ${money(d.inc)} expenses ${money(d.exp)}"><span class="chart-pair"><span class="chart-bar" style="height:${Math.max(5,d.inc/max*130)}px"></span><span class="chart-bar exp" style="height:${Math.max(5,d.exp/max*130)}px"></span></span><span class="chart-lab">${monthLabel(d.key)}</span><span class="chart-val">${money(d.inc-d.exp)}</span></button>`).join("");
+  $(detailSel).innerHTML = chosen ? `<b>${monthLabel(chosen.key)}:</b> income ${money(chosen.inc)} · expenses ${money(chosen.exp)} · net <b>${money(chosen.inc-chosen.exp)}</b>.` : "Green is income, gold is expenses. Tap a month to pin its detail.";
+  $$(wrapSel+" [data-month]").forEach(el=>el.addEventListener("click",()=>{ sel.moneyMonth = sel.moneyMonth===el.dataset.month ? null : el.dataset.month; renderDashboard(); renderMoney(); beep(600,.05); }));
+}
+function growthRows(){ return activeAnimals().map(a=>({animal:a,w:latestWeight(a.id),gain:adg(a.id)})).filter(r=>r.w).sort((a,b)=>b.w.weight-a.w.weight); }
+function renderDashGrowth(){
+  const rows=growthRows().slice(0,6); const max=Math.max(1,...rows.map(r=>r.w.weight));
+  $("#dashGrowthChart").innerHTML = rows.length ? rows.map(r=>`<button class="growth-col ${sel.growth===r.animal.id?"sel":""}" data-growth="${r.animal.id}"><span class="chart-val">${r.w.weight} lb</span><span class="growth-bar" style="height:${Math.max(8,r.w.weight/max*130)}px"></span><span class="chart-lab">${esc(r.animal.name)}</span></button>`).join("") : `<p class="hint">Record a weight in Breeding &amp; Births and the growth chart appears here.</p>`;
+  const chosen=rows.find(r=>r.animal.id===sel.growth); $("#dashGrowthDetail").innerHTML = chosen ? `<b>${esc(chosen.animal.name)}:</b> ${chosen.w.weight} lb on ${fmtDate(chosen.w.date)}${chosen.gain!==null?` · average daily gain ${chosen.gain.toFixed(2)} lb/day`:" · add another weight for ADG"}. Tap again to release.` : "Tap a bar for weight and average daily gain.";
+  $$("#dashGrowthChart [data-growth]").forEach(el=>el.addEventListener("click",()=>{ const id=el.dataset.growth; sel.growth = sel.growth===id ? null : id; if(sel.growth){ selectAnimal(id); switchView("Animals"); } renderDashboard(); }));
+}
+function renderAnimals(){
+  fillAnimalSelects();
+  const q=($("#animalSearch").value||"").toLowerCase(), filter=$("#animalFilter").value;
+  let list=sortedAnimals().filter(a=>{ const hay=[a.name,a.tag,a.tattoo,a.breed,a.species,a.sex,a.status].map(x=>String(x||"")).join(" ").toLowerCase(); if(q&&!hay.includes(q)) return false; if(filter==="active") return !["Sold","Died","Culled"].includes(a.status); if(filter==="Goat"||filter==="Sheep") return a.species===filter; if(filter==="female") return isFemale(a); if(filter==="male") return isMale(a); return true; });
+  $("#animalsTableWrap").innerHTML = list.length ? `<table class="list"><thead><tr><th>Animal</th><th>Species / breed</th><th>Status</th><th>Latest weight</th></tr></thead><tbody>${list.map(a=>{ const w=latestWeight(a.id); return `<tr class="clickable ${sel.animal===a.id?"sel":""}" data-animal="${a.id}"><td><b>${esc(a.name)}</b><br><span class="hint">${esc(a.tag||a.tattoo||"No ID")} · ${esc(a.sex)}</span></td><td>${esc(a.species)}<br><span class="hint">${esc(a.breed||"Breed not set")}</span></td><td><span class="badge ${["Sold","Died","Culled"].includes(a.status)?"overdue":a.status==="Bred"?"soon":"ok"}">${esc(a.status)}</span></td><td>${w?`${w.weight} lb<br><span class="hint">${fmtDate(w.date)}</span>`:"—"}</td></tr>`; }).join("")}</tbody></table>` : `<p class="hint">No animals match. Add one with the form, or tap the flask for a sample herd.</p>`;
+  $$("#animalsTableWrap [data-animal]").forEach(row=>row.addEventListener("click",()=>selectAnimal(row.dataset.animal)));
+  $("#animalGlance").innerHTML = [`${activeAnimals().length} active animals`,`${S.animals.length} total register entries`,`${activeAnimals().filter(isFemale).length} breeding females`,`${activeAnimals().filter(isMale).length} breeding males`,`${S.animals.filter(a=>a.status==="Sold").length} sold · ${S.animals.filter(a=>["Died","Culled"].includes(a.status)).length} died/culled`].map(x=>`<div class="record"><b>${esc(x)}</b></div>`).join("");
+  renderAnimalDetail();
+}
+function selectAnimal(id){ sel.animal=id; sel.weightAnimal=id; renderAnimals(); renderBreeding(); }
+function animalRecords(id){ return { breedings:S.breedings.filter(b=>b.damId===id||b.sireId===id), births:S.births.filter(b=>b.damId===id||b.sireId===id||b.kids?.some(k=>k.animalId===id)), weights:S.weights.filter(w=>w.animalId===id).sort((a,b)=>a.date.localeCompare(b.date)), health:S.health.filter(h=>h.animalId===id).sort((a,b)=>b.date.localeCompare(a.date)), milk:S.milk.filter(m=>m.animalId===id).sort((a,b)=>b.date.localeCompare(a.date)), transactions:S.transactions.filter(t=>t.animalId===id).sort((a,b)=>b.date.localeCompare(a.date)) }; }
+function pedBox(title,a,note=""){ return `<div class="ped-box ${title==="This animal"?"self":""}"><b>${esc(title)}</b><span>${a?`${esc(a.name)} — ${esc(a.species)} ${esc(a.breed||"")}`:esc(note||"Not recorded")}</span>${a?`<span>${esc(a.tag||a.tattoo||"No ID")} · ${esc(a.status)}</span>`:""}</div>`; }
+function renderAnimalDetail(){
+  const a=animalById(sel.animal); const wrap=$("#animalDetail"); if(!a){ wrap.innerHTML=`<p class="hint">No animal selected yet.</p>`; return; }
+  const dam=animalById(a.damId), sire=animalById(a.sireId); const r=animalRecords(a.id); const gain=adg(a.id); const lastW=latestWeight(a.id);
+  $("#animalDetailSub").textContent = `${a.name} — ${a.species} ${a.breed||""} · ${a.status}`;
+  wrap.innerHTML = `<div class="flagline" style="margin-bottom:10px"><span class="badge ok">${esc(a.species)}</span><span class="badge">${esc(a.sex)}</span><span class="badge">${esc(a.status)}</span>${lastW?`<span class="badge info">${lastW.weight} lb latest</span>`:""}${gain!==null?`<span class="badge info">ADG ${gain.toFixed(2)} lb/day</span>`:""}</div>
+  <dl class="kv"><dt>Ear tag</dt><dd>${esc(a.tag||"—")}</dd><dt>Tattoo / scrapie</dt><dd>${esc(a.tattoo||"—")}</dd><dt>Registration #</dt><dd>${esc(a.regNo||"—")}</dd><dt>Birth date</dt><dd>${fmtDate(a.birthDate)} (${esc(ageText(a.birthDate))})</dd><dt>Joined herd</dt><dd>${fmtDate(a.acquiredDate)}</dd><dt>Purchase cost</dt><dd>${a.cost?money(a.cost):"—"}</dd></dl>
+  ${a.notes?`<p><b>Notes:</b> ${esc(a.notes)}</p>`:""}
+  <h3>Pedigree</h3><div class="pedigree">${pedBox("This animal",a)}${pedBox("Dam",dam)}${pedBox("Sire",sire)}${pedBox("Maternal grandmother", dam ? animalById(dam.damId) : null, "Not recorded")}${pedBox("Maternal grandfather", dam ? animalById(dam.sireId) : null, "Not recorded")}${pedBox("Paternal grandmother", sire ? animalById(sire.damId) : null, "Not recorded")}${pedBox("Paternal grandfather", sire ? animalById(sire.sireId) : null, "Not recorded")}</div>
+  <h3>History</h3>
+  ${r.breedings.length?`<p><b>Breeding:</b> ${r.breedings.map(b=>`${fmtDate(b.date)} with ${esc(animalName(a.id===b.damId?b.sireId:b.damId))} (${esc(b.status)})`).join("; ")}</p>`:""}
+  ${r.births.length?`<p><b>Births:</b> ${r.births.map(b=>`${fmtDate(b.date)} — ${b.kids?.length||0} born`).join("; ")}</p>`:""}
+  ${r.weights.length?`<p><b>Weights:</b> ${r.weights.map(w=>`${fmtDate(w.date)} ${w.weight} lb`).join("; ")}</p>`:""}
+  ${r.health.length?`<p><b>Health:</b> ${r.health.slice(-5).map(h=>`${fmtDate(h.date)} ${esc(h.type)}${h.product?` — ${esc(h.product)}`:""}`).join("; ")}</p>`:""}
+  ${r.milk.length?`<p><b>Milk:</b> ${r.milk.slice(-5).map(m=>`${fmtDate(m.date)} ${m.amount} ${esc(m.unit)}`).join("; ")}</p>`:""}
+  ${r.transactions.length?`<p><b>Money:</b> ${r.transactions.map(t=>`${fmtDate(t.date)} ${esc(t.category)} ${money(t.amount)}`).join("; ")}</p>`:""}
+  ${!(r.breedings.length||r.births.length||r.weights.length||r.health.length||r.milk.length||r.transactions.length)?`<p class="hint">No linked records yet. Add breeding, health, milk, weight or money records and they collect here.</p>`:""}
+  <div class="btnrow no-print"><button class="btn" id="editAnimalBtn">Edit animal</button><button class="btn" id="printThisAnimalBtn">Print animal sheet</button><button class="btn danger" id="deleteAnimalBtn">Delete animal</button></div>`;
+  $("#editAnimalBtn").addEventListener("click",()=>startEditAnimal(a.id));
+  $("#printThisAnimalBtn").addEventListener("click",()=>printAnimal(a.id));
+  $("#deleteAnimalBtn").addEventListener("click",()=>{ if(confirm(`Delete ${a.name} from the register? Linked records stay, but will show no animal name.`)){ S.animals=S.animals.filter(x=>x.id!==a.id); if(sel.animal===a.id) sel.animal=null; save(); renderAll(); thud(); toast(`${a.name} deleted.`); } });
+}
+function startEditAnimal(id){ const a=animalById(id); if(!a) return; editing.animal=id; $("#animalFormTitle").textContent=`Edit ${a.name}`; $("#aName").value=a.name||""; $("#aSpecies").value=a.species||"Goat"; $("#aBreed").value=a.breed||""; $("#aSex").value=a.sex||"Doe"; $("#aStatus").value=a.status||"Active"; $("#aTag").value=a.tag||""; $("#aTattoo").value=a.tattoo||""; $("#aReg").value=a.regNo||""; $("#aBirth").value=a.birthDate||""; fillAnimalSelects(); $("#aDam").value=a.damId||""; $("#aSire").value=a.sireId||""; $("#aAcquired").value=a.acquiredDate||""; $("#aCost").value=a.cost||""; $("#aNotes").value=a.notes||""; $("#cancelAnimalEditBtn").hidden=false; updateAnimalPreview(); switchView("Animals"); $("#aName").focus(); }
+function clearAnimalForm(){ editing.animal=null; $("#animalFormTitle").textContent="Add an animal"; ["aName","aBreed","aTag","aTattoo","aReg","aBirth","aAcquired","aCost","aNotes"].forEach(id=>$("#"+id).value=""); $("#aSpecies").value="Goat"; $("#aSex").value="Doe"; $("#aStatus").value="Active"; fillAnimalSelects(); $("#cancelAnimalEditBtn").hidden=true; updateAnimalPreview(); }
+function saveAnimal(){ const name=$("#aName").value.trim(); if(!name){ toast("Give the animal a name first."); $("#aName").focus(); return; } const data={name,species:$("#aSpecies").value,breed:$("#aBreed").value.trim(),sex:$("#aSex").value,status:$("#aStatus").value,tag:$("#aTag").value.trim(),tattoo:$("#aTattoo").value.trim(),regNo:$("#aReg").value.trim(),birthDate:$("#aBirth").value,damId:$("#aDam").value,sireId:$("#aSire").value,acquiredDate:$("#aAcquired").value,cost:clampMoney($("#aCost").value),notes:$("#aNotes").value.trim()}; if(editing.animal){ Object.assign(animalById(editing.animal),data); sel.animal=editing.animal; toast(`${name} updated.`); } else { const a={id:uid("animal"),...data}; S.animals.push(a); sel.animal=a.id; toast(`${name} added to the register.`); } save(); clearAnimalForm(); renderAll(); chime(); }
+
+function renderBreeding(){
+  fillAnimalSelects(); updateBreedingPreview();
+  const rows=[...S.breedings].sort((a,b)=>dueDate(b).localeCompare(dueDate(a))).map(b=>{ const due=dueDate(b); const days=daysUntil(due); const births=S.births.filter(x=>x.breedingId===b.id); return `<div class="record clickable ${sel.breeding===b.id?"sel":""}" data-breeding="${b.id}"><div class="flagline"><span class="badge ${b.status==="Completed"?"ok":days!==null&&days<0?"overdue":days!==null&&days<=21?"soon":"info"}">${b.status==="Completed"?`${births.reduce((s,x)=>s+(x.kids?.length||0),0)} born`:days===0?"Due today":days<0?`${Math.abs(days)} days past due`:`Due ${fmtDate(due)}`}</span><b>${esc(animalName(b.damId))}</b><span>× ${esc(animalName(b.sireId))}</span></div><div class="hint">Bred ${fmtDate(b.date)} · ${b.gestationDays} days · ${esc(b.method)} · ${esc(b.status)}${b.notes?` · ${esc(b.notes)}`:""}</div><div class="btnrow" style="margin-top:8px"><button class="btn small" data-edit-breeding="${b.id}">Edit</button><button class="btn small danger" data-del-breeding="${b.id}">Delete</button></div></div>`; }).join("");
+  const birthRows=[...S.births].sort((a,b)=>b.date.localeCompare(a.date)).map(b=>`<div class="record"><div class="flagline"><span class="badge ok">Birth</span><b>${esc(animalName(b.damId))}</b><span>${fmtDate(b.date)} · ${b.kids?.length||0} born · ${esc(b.ease||"")}</span></div><div class="hint">${(b.kids||[]).map(k=>`${esc(k.name||"Unnamed")} (${esc(k.sex)}, ${k.weight||"—"} lb, ${esc(k.vigor||"")})`).join("; ")}</div>${b.notes?`<div class="hint">${esc(b.notes)}</div>`:""}</div>`).join("");
+  $("#breedingList").innerHTML = (rows||"") + (birthRows||"") || `<p class="hint">No breedings or births yet. Record a breeding and expected due dates appear automatically.</p>`;
+  $$("#breedingList [data-breeding]").forEach(el=>el.addEventListener("click",e=>{ if(e.target.closest("button")) return; sel.breeding=el.dataset.breeding; renderBreeding(); }));
+  $$("#breedingList [data-edit-breeding]").forEach(el=>el.addEventListener("click",()=>startEditBreeding(el.dataset.editBreeding)));
+  $$("#breedingList [data-del-breeding]").forEach(el=>el.addEventListener("click",()=>{ S.breedings=S.breedings.filter(b=>b.id!==el.dataset.delBreeding); save(); renderAll(); thud(); toast("Breeding deleted."); }));
+  renderWeights();
+}
+function startEditBreeding(id){ const b=S.breedings.find(x=>x.id===id); if(!b) return; editing.breeding=id; sel.breeding=id; $("#breedingFormTitle").textContent="Edit breeding"; fillAnimalSelects(); $("#bDam").value=b.damId; $("#bSire").value=b.sireId; $("#bDate").value=b.date; $("#bGestation").value=b.gestationDays; $("#bMethod").value=b.method; $("#bStatus").value=b.status; $("#bNotes").value=b.notes||""; $("#cancelBreedingEditBtn").hidden=false; updateBreedingPreview(); switchView("Breeding"); }
+function clearBreedingForm(){ editing.breeding=null; $("#breedingFormTitle").textContent="Record a breeding"; $("#bDate").value=localToday(); $("#bGestation").value=S.settings.goatGestation; $("#bNotes").value=""; $("#bMethod").value="Live cover"; $("#bStatus").value="Exposed"; $("#cancelBreedingEditBtn").hidden=true; fillAnimalSelects(); fillGestationFromDam(); }
+function saveBreeding(){ const damId=$("#bDam").value, sireId=$("#bSire").value, date=$("#bDate").value; if(!damId||!sireId||!date){ toast("Choose a dam, sire and breeding date."); return; } const damRec=animalById(damId); const gestFallback=damRec?.species==="Sheep" ? S.settings.sheepGestation : S.settings.goatGestation; const data={damId,sireId,date,gestationDays:Math.min(170,Math.max(130,num($("#bGestation").value)||gestFallback)),method:$("#bMethod").value,status:$("#bStatus").value,notes:$("#bNotes").value.trim()}; let prevStatus=null; if(editing.breeding){ const rec=S.breedings.find(b=>b.id===editing.breeding); prevStatus=rec?.status; Object.assign(rec,data); toast("Breeding updated."); } else { const b={id:uid("breeding"),...data}; S.breedings.push(b); sel.breeding=b.id; toast(`Breeding saved — due around ${fmtDate(dueDate(b))}.`); } if(damRec && !(editing.breeding && prevStatus==="Completed") && data.status!=="Open / did not settle") damRec.status = data.status==="Completed" ? "Active" : "Bred"; save(); clearBreedingForm(); renderAll(); chime(); }
+function buildKidRows(){ const count=Math.min(8,Math.max(1,parseInt($("#birthCount").value)||1)); $("#birthCount").value=count; $("#kidRows").innerHTML = Array.from({length:count},(_,i)=>`<div class="record"><b>Kid / lamb ${i+1}</b><div class="frow3"><div><label class="f">Name / ID</label><input type="text" data-kid="name" placeholder="Name or tag"></div><div><label class="f">Sex</label><select data-kid="sex"><option>Doe</option><option>Ewe</option><option>Buck</option><option>Ram</option><option>Wether</option></select></div><div><label class="f">Birth weight (lb)</label><input type="number" data-kid="weight" min="0" step="0.1" placeholder="7.5"></div></div><div class="frow"><div><label class="f">Vigor</label><select data-kid="vigor"><option>Strong</option><option>Good</option><option>Weak but nursing</option><option>Needed help</option><option>Stillborn</option></select></div><div><label class="f">Status</label><select data-kid="status"><option>Alive</option><option>Stillborn</option><option>Died</option></select></div></div></div>`).join(""); }
+function saveBirth(){ const breeding=S.breedings.find(b=>b.id===$("#birthBreeding").value); const date=$("#birthDate").value; if(!breeding||!date){ toast("Choose a breeding record and birth date."); return; } if(breeding.status==="Completed"){ toast("That breeding already has a birth recorded — pick an open breeding."); thud(); return; } const wanted=Math.min(8,Math.max(1,parseInt($("#birthCount").value)||1)); if($("#kidRows").children.length!==wanted) buildKidRows(); const kids=[...$("#kidRows").children].map((row,i)=>{ const get=key=>row.querySelector(`[data-kid="${key}"]`)?.value||""; return {name:get("name").trim(),sex:get("sex"),weight:num(get("weight")),vigor:get("vigor"),status:get("status"),animalId:""}; }); const birth={id:uid("birth"),breedingId:breeding.id,damId:breeding.damId,sireId:breeding.sireId,date,ease:$("#birthEase").value,notes:$("#birthNotes").value.trim(),kids}; if($("#birthCreateAnimals").checked){ kids.forEach((kid,i)=>{ if(kid.status!=="Alive") return; const species=animalById(breeding.damId)?.species||"Goat"; const a={id:uid("animal"),name:kid.name||`${animalName(breeding.damId)} ${species==="Goat"?"kid":"lamb"} ${i+1}`,species,breed:animalById(breeding.damId)?.breed||"",sex:["Doe","Ewe"].includes(kid.sex)?kid.sex:(["Buck","Ram"].includes(kid.sex)?kid.sex:(kid.sex==="Wether"?"Wether":"Kid / Lamb")),status:"Active",tag:"",tattoo:"",regNo:"",birthDate:date,damId:breeding.damId,sireId:breeding.sireId,acquiredDate:date,cost:0,notes:`Born ${fmtDate(date)} · ${kid.vigor}`}; S.animals.push(a); kid.animalId=a.id; if(kid.weight) S.weights.push({id:uid("weight"),animalId:a.id,date,weight:kid.weight,kind:"Birth"}); }); } S.births.push(birth); breeding.status="Completed"; const dam=animalById(breeding.damId); if(dam) dam.status="Active"; save(); buildKidRows(); renderAll(); chime(); toast(`Birth recorded — ${kids.filter(k=>k.status==="Alive").length} live kid(s)/lamb(s).`); }
+function renderWeights(){
+  const animalId=$("#wAnimal").value || sel.weightAnimal || sel.animal; if(animalId) $("#wAnimal").value=animalId;
+  const rows=S.weights.filter(w=>w.animalId===animalId).sort((a,b)=>a.date.localeCompare(b.date)); const max=Math.max(1,...rows.map(w=>w.weight));
+  $("#growthChart").innerHTML = rows.length ? rows.map(w=>`<button class="growth-col ${sel.growth===w.id?"sel":""}" data-weight-bar="${w.id}"><span class="chart-val">${w.weight} lb</span><span class="growth-bar" style="height:${Math.max(8,w.weight/max*130)}px"></span><span class="chart-lab">${fmtDate(w.date)}</span></button>`).join("") : `<p class="hint">No weights for this animal yet.</p>`;
+  const gain=adg(animalId); const chosen=rows.find(w=>w.id===sel.growth); $("#growthDetail").innerHTML = chosen ? `<b>${esc(animalName(animalId))}:</b> ${chosen.weight} lb on ${fmtDate(chosen.date)} (${esc(chosen.kind)})${gain!==null?` · overall ADG ${gain.toFixed(2)} lb/day`:""}.` : (rows.length?`Overall average daily gain: <b>${gain!==null?gain.toFixed(2)+" lb/day":"add another weigh-in"}</b>. Tap a bar to pin a weigh-in.`:"Choose an animal with weights to see growth.");
+  $$("#growthChart [data-weight-bar]").forEach(el=>el.addEventListener("click",()=>{ sel.growth = sel.growth===el.dataset.weightBar ? null : el.dataset.weightBar; renderWeights(); beep(600,.05); }));
+  $("#weightList").innerHTML = rows.length ? rows.map(w=>{ const prev=rows[rows.indexOf(w)-1]; const localGain=prev&&daysBetween(prev.date,w.date)>0 ? ((w.weight-prev.weight)/daysBetween(prev.date,w.date)).toFixed(2) : null; return `<div class="record clickable" data-weight="${w.id}"><div class="flagline"><b>${fmtDate(w.date)}</b><span>${w.weight} lb · ${esc(w.kind)}</span>${localGain!==null?`<span class="badge info">${Number(localGain)>=0?"+":""}${localGain} lb/day</span>`:""}</div><div class="btnrow" style="margin-top:8px"><button class="btn small" data-edit-weight="${w.id}">Edit</button><button class="btn small danger" data-del-weight="${w.id}">Delete</button></div></div>`; }).join("") : "";
+  $$("#weightList [data-edit-weight]").forEach(el=>el.addEventListener("click",()=>startEditWeight(el.dataset.editWeight)));
+  $$("#weightList [data-del-weight]").forEach(el=>el.addEventListener("click",()=>{ S.weights=S.weights.filter(w=>w.id!==el.dataset.delWeight); save(); renderAll(); thud(); toast("Weight deleted."); }));
+}
+function startEditWeight(id){ const w=S.weights.find(x=>x.id===id); if(!w) return; editing.weight=id; $("#wAnimal").value=w.animalId; $("#wDate").value=w.date; $("#wWeight").value=w.weight; $("#wKind").value=w.kind; $("#cancelWeightEditBtn").hidden=false; $("#wAnimal").disabled=true; switchView("Breeding"); }
+function saveWeight(){ const animalId=editing.weight ? (S.weights.find(w=>w.id===editing.weight)?.animalId||$("#wAnimal").value) : $("#wAnimal").value, date=$("#wDate").value, weight=num($("#wWeight").value); if(!animalId||!date||weight<=0){ toast("Choose an animal, date and a weight above zero."); return; } const data={animalId,date,weight,kind:$("#wKind").value}; if(editing.weight){ Object.assign(S.weights.find(w=>w.id===editing.weight),data); toast("Weight updated."); } else { S.weights.push({id:uid("weight"),...data}); toast("Weight saved."); } editing.weight=null; $("#cancelWeightEditBtn").hidden=true; $("#wAnimal").disabled=false; save(); renderAll(); chime(); }
+
+function renderHealth(){
+  fillAnimalSelects();
+  const flags=careFlags(); const withdrawals=withdrawalFlags();
+  $("#careSchedule").innerHTML = [...flags.filter(f=>f.flag!=="ok"), ...withdrawals.map(h=>({...h,flag:"withdrawal"}))].slice(0,12).map(f=>`<div class="record clickable" data-health="${f.id}"><div class="flagline"><span class="badge ${f.flag==="withdrawal"?"info":f.flag}">${f.flag==="withdrawal"?"Withdrawal":f.flag==="overdue"?"Overdue":"Due soon"}</span><b>${esc(animalName(f.animalId))}</b><span>${esc(f.type)}</span></div><div class="hint">${f.flag==="withdrawal"?`Withdrawal ends ${fmtDate(f.withdrawalEnd)}`:`Next due ${fmtDate(f.nextDue)} · last done ${fmtDate(f.date)}`}${f.product?` · ${esc(f.product)}`:""}</div></div>`).join("") || `<p class="hint">Nothing overdue, due soon or in withdrawal. Add Next due dates and this schedule watches them.</p>`;
+  const list=[...S.health].sort((a,b)=>b.date.localeCompare(a.date));
+  $("#healthList").innerHTML = list.length ? list.map(h=>{ const dueDays=h.nextDue?daysUntil(h.nextDue):null; const wd=h.withdrawalEnd?daysUntil(h.withdrawalEnd):null; return `<div class="record clickable" data-health="${h.id}"><div class="flagline"><b>${esc(animalName(h.animalId))}</b><span>${esc(h.type)} · ${fmtDate(h.date)}</span>${dueDays!==null&&dueDays<0?`<span class="badge overdue">Overdue</span>`:dueDays!==null&&dueDays<=14?`<span class="badge soon">Due soon</span>`:""}${wd!==null&&wd>=0?`<span class="badge info">Withdrawal to ${fmtDate(h.withdrawalEnd)}</span>`:""}</div><div class="hint">${[h.product,h.dose,h.famacha?`FAMACHA ${h.famacha}`:"",h.bcs?`BCS ${h.bcs}`:"",h.notes].filter(Boolean).map(esc).join(" · ")}</div><div class="btnrow" style="margin-top:8px"><button class="btn small" data-edit-health="${h.id}">Edit</button><button class="btn small danger" data-del-health="${h.id}">Delete</button></div></div>`; }).join("") : `<p class="hint">No health records yet. Start with deworming, hoof trims, vaccinations or a FAMACHA check.</p>`;
+  $$("#viewHealth [data-health]").forEach(el=>el.addEventListener("click",e=>{ if(e.target.closest("button")) return; startEditHealth(el.dataset.health); }));
+  $$("#viewHealth [data-edit-health]").forEach(el=>el.addEventListener("click",()=>startEditHealth(el.dataset.editHealth)));
+  $$("#viewHealth [data-del-health]").forEach(el=>el.addEventListener("click",()=>{ S.health=S.health.filter(h=>h.id!==el.dataset.delHealth); save(); renderAll(); thud(); toast("Care record deleted."); }));
+  const milk=[...S.milk].sort((a,b)=>b.date.localeCompare(a.date));
+  $("#milkList").innerHTML = milk.length ? milk.slice(0,12).map(m=>`<div class="record clickable" data-milk="${m.id}"><div class="flagline"><b>${esc(animalName(m.animalId))}</b><span>${m.amount} ${esc(m.unit)} · ${fmtDate(m.date)}</span></div>${m.notes?`<div class="hint">${esc(m.notes)}</div>`:""}<div class="btnrow" style="margin-top:8px"><button class="btn small" data-edit-milk="${m.id}">Edit</button><button class="btn small danger" data-del-milk="${m.id}">Delete</button></div></div>`).join("") : `<p class="hint">No milk entries yet.</p>`;
+  $$("#viewHealth [data-edit-milk]").forEach(el=>el.addEventListener("click",()=>startEditMilk(el.dataset.editMilk)));
+  $$("#viewHealth [data-del-milk]").forEach(el=>el.addEventListener("click",()=>{ S.milk=S.milk.filter(m=>m.id!==el.dataset.delMilk); save(); renderAll(); thud(); toast("Milk entry deleted."); }));
+}
+function startEditHealth(id){ const h=S.health.find(x=>x.id===id); if(!h) return; editing.health=id; $("#healthFormTitle").textContent=`Edit care for ${animalName(h.animalId)}`; fillAnimalSelects(); $("#hAnimal").value=h.animalId; $("#hDate").value=h.date; $("#hType").value=h.type; $("#hProduct").value=h.product||""; $("#hDose").value=h.dose||""; $("#hFamacha").value=h.famacha||""; $("#hBcs").value=h.bcs||""; $("#hNextDue").value=h.nextDue||""; $("#hWithdrawal").value=h.withdrawalEnd||""; $("#hNotes").value=h.notes||""; $("#cancelHealthEditBtn").hidden=false; switchView("Health"); }
+function clearHealthForm(){ editing.health=null; $("#healthFormTitle").textContent="Add health or care record"; ["hProduct","hDose","hFamacha","hBcs","hNextDue","hWithdrawal","hNotes"].forEach(id=>$("#"+id).value=""); $("#hDate").value=localToday(); $("#hType").value="Deworming"; $("#cancelHealthEditBtn").hidden=true; fillAnimalSelects(); }
+function saveHealth(){ const animalId=$("#hAnimal").value,date=$("#hDate").value; if(!animalId||!date){ toast("Choose an animal and date."); return; } const data={animalId,date,type:$("#hType").value,product:$("#hProduct").value.trim(),dose:$("#hDose").value.trim(),famacha:$("#hFamacha").value,bcs:$("#hBcs").value,nextDue:$("#hNextDue").value,withdrawalEnd:$("#hWithdrawal").value,notes:$("#hNotes").value.trim()}; if(editing.health){ Object.assign(S.health.find(h=>h.id===editing.health),data); toast("Care record updated."); } else { S.health.push({id:uid("health"),...data}); toast("Care record saved."); } save(); clearHealthForm(); renderAll(); chime(); }
+function startEditMilk(id){ const m=S.milk.find(x=>x.id===id); if(!m) return; editing.milk=id; fillAnimalSelects(); $("#mAnimal").value=m.animalId; $("#mDate").value=m.date; $("#mAmount").value=m.amount; $("#mUnit").value=m.unit; $("#mNotes").value=m.notes||""; $("#cancelMilkEditBtn").hidden=false; switchView("Health"); }
+function saveMilk(){ const animalId=$("#mAnimal").value,date=$("#mDate").value,amount=num($("#mAmount").value); if(!animalId||!date||amount<=0){ toast("Choose an animal, date and amount."); return; } const data={animalId,date,amount,unit:$("#mUnit").value,notes:$("#mNotes").value.trim()}; if(editing.milk){ Object.assign(S.milk.find(m=>m.id===editing.milk),data); toast("Milk entry updated."); } else { S.milk.push({id:uid("milk"),...data}); toast("Milk entry saved."); } editing.milk=null; $("#cancelMilkEditBtn").hidden=true; save(); renderAll(); chime(); }
+
+function renderMoney(){
+  fillAnimalSelects(); renderMoneyChart("#moneyChart2","#moneyChartDetail2");
+  const chosen=sel.moneyMonth ? S.transactions.filter(t=>monthKey(t.date)===sel.moneyMonth) : S.transactions.filter(t=>t.date.startsWith(localToday().slice(0,4)));
+  const inc=chosen.filter(t=>t.type==="Income").reduce((s,t)=>s+num(t.amount),0), exp=chosen.filter(t=>t.type==="Expense").reduce((s,t)=>s+num(t.amount),0);
+  const byCat={}; chosen.forEach(t=>{ byCat[t.category]=(byCat[t.category]||0)+(t.type==="Income"?num(t.amount):-num(t.amount)); });
+  $("#plSummary").innerHTML = `<div class="stats-grid" style="margin-top:0">${statTile(money(inc),"income")}${statTile(money(exp),"expenses")}${statTile(money(inc-exp),"net",inc-exp<0?"bad":"")}</div>` + (Object.keys(byCat).length?`<p>${Object.entries(byCat).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).map(([k,v])=>`<span class="badge ${v>=0?"ok":"overdue"}" style="margin:0 5px 6px 0">${esc(k)} ${money(v)}</span>`).join("")}</p>`:`<p class="hint">No money entries in this period yet.</p>`);
+  const list=[...S.transactions].sort((a,b)=>b.date.localeCompare(a.date));
+  $("#moneyList").innerHTML = list.length ? list.map(t=>`<div class="record clickable" data-money="${t.id}"><div class="flagline"><span class="badge ${t.type==="Income"?"ok":"soon"}">${esc(t.type)}</span><b>${esc(t.category)}</b><span class="${t.type==="Income"?"money-pos":"money-neg"}">${money(t.amount)}</span><span>${fmtDate(t.date)}</span></div><div class="hint">${[t.animalId?animalName(t.animalId):"Whole herd",t.description].filter(Boolean).map(esc).join(" · ")}</div><div class="btnrow" style="margin-top:8px"><button class="btn small" data-edit-money="${t.id}">Edit</button><button class="btn small danger" data-del-money="${t.id}">Delete</button></div></div>`).join("") : `<p class="hint">No income or expenses yet. Add the next feed run or animal sale and the P&amp;L builds itself.</p>`;
+  $$("#moneyList [data-edit-money]").forEach(el=>el.addEventListener("click",()=>startEditMoney(el.dataset.editMoney)));
+  $$("#moneyList [data-del-money]").forEach(el=>el.addEventListener("click",()=>{ S.transactions=S.transactions.filter(t=>t.id!==el.dataset.delMoney); save(); renderAll(); thud(); toast("Money entry deleted."); }));
+  const disp=S.animals.filter(a=>["Sold","Died","Culled"].includes(a.status));
+  $("#dispositionList").innerHTML = disp.length ? disp.map(a=>{ const sale=S.transactions.filter(t=>t.animalId===a.id&&t.category==="Animal sale").reduce((s,t)=>s+num(t.amount),0); return `<div class="record clickable" data-disp-animal="${a.id}"><div class="flagline"><span class="badge overdue">${esc(a.status)}</span><b>${esc(a.name)}</b><span>${esc(a.species)} ${esc(a.breed||"")}</span>${sale?`<span class="money-pos">${money(sale)} linked sale</span>`:""}</div><div class="hint">${a.notes?esc(a.notes):"Tap to review this animal's record."}</div></div>`; }).join("") : `<p class="hint">No sold, died or culled animals recorded.</p>`;
+  $$("#dispositionList [data-disp-animal]").forEach(el=>el.addEventListener("click",()=>{ selectAnimal(el.dataset.dispAnimal); switchView("Animals"); }));
+}
+function startEditMoney(id){ const t=S.transactions.find(x=>x.id===id); if(!t) return; editing.money=id; $("#moneyFormTitle").textContent="Edit money entry"; fillAnimalSelects(); $("#tType").value=t.type; $("#tDate").value=t.date; $("#tCategory").value=t.category; $("#tAmount").value=t.amount; $("#tAnimal").value=t.animalId||""; $("#tDesc").value=t.description||""; $("#cancelMoneyEditBtn").hidden=false; switchView("Money"); }
+function clearMoneyForm(){ editing.money=null; $("#moneyFormTitle").textContent="Add income or expense"; $("#tDate").value=localToday(); $("#tAmount").value=""; $("#tDesc").value=""; $("#tType").value="Expense"; $("#tCategory").value="Feed & grain"; $("#cancelMoneyEditBtn").hidden=true; fillAnimalSelects(); }
+function saveMoney(){ const date=$("#tDate").value, amount=clampMoney($("#tAmount").value); if(!date||amount<=0){ toast("Add a date and an amount above zero."); return; } const data={type:$("#tType").value,date,category:$("#tCategory").value,amount,animalId:$("#tAnimal").value,description:$("#tDesc").value.trim()}; if(editing.money){ Object.assign(S.transactions.find(t=>t.id===editing.money),data); toast("Money entry updated."); } else { S.transactions.push({id:uid("money"),...data}); toast("Money entry saved."); } save(); clearMoneyForm(); renderAll(); chime(); }
+
+function renderReports(){ $("#setGoatGest").value=S.settings.goatGestation; $("#setSheepGest").value=S.settings.sheepGestation; $("#dataSummary").innerHTML = [`${S.animals.length} animals`,`${S.breedings.length} breedings`,`${S.births.length} births`,`${S.weights.length} weights`,`${S.health.length} health records`,`${S.milk.length} milk entries`,`${S.transactions.length} money entries`].map(x=>`<div class="record"><b>${esc(x)}</b></div>`).join(""); fillAnimalSelects(); }
+function switchView(name){ $$(".tab").forEach(t=>{ const on=t.dataset.view===name; t.classList.toggle("on",on); t.setAttribute("aria-selected",on?"true":"false"); }); ["Dashboard","Animals","Breeding","Health","Money","Reports"].forEach(v=>$("#view"+v).hidden = v!==name); if(name==="Dashboard") renderDashboard(); if(name==="Animals") renderAnimals(); if(name==="Breeding") renderBreeding(); if(name==="Health") renderHealth(); if(name==="Money") renderMoney(); if(name==="Reports") renderReports(); window.scrollTo({top:0,behavior:"smooth"}); }
+function renderAll(){ setSampleUI(); renderTiles(); renderDashboard(); renderAnimals(); renderBreeding(); renderHealth(); renderMoney(); renderReports(); }
+
+function exportGuard(){ if(S.sampling){ toast("Sample herd is on — turn it off to back up or export your real herd."); thud(); return true; } return false; }
+function download(name, content, type="text/plain"){ const blob=new Blob([content],{type}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),500); }
+function csvCell(v){ return `"${String(v??"").replace(/"/g,'""')}"`; }
+function toCsv(rows){ return rows.map(r=>r.map(csvCell).join(",")).join("\n"); }
+function exportAnimalsCsv(){ if(exportGuard()) return; const rows=[["Name","Species","Breed","Sex/Class","Status","Ear tag","Tattoo/Scrapie","Registration #","Birth date","Dam","Sire","Joined herd","Purchase cost","Latest weight","ADG lb/day","Notes"]]; sortedAnimals().forEach(a=>{ const w=latestWeight(a.id), g=adg(a.id); rows.push([a.name,a.species,a.breed,a.sex,a.status,a.tag,a.tattoo,a.regNo,a.birthDate,animalName(a.damId),animalName(a.sireId),a.acquiredDate,a.cost ?? "",w?w.weight:"",g!==null?g.toFixed(3):"",a.notes]); }); download("herdkeeper-animals.csv",toCsv(rows),"text/csv"); toast("Animal register exported as CSV."); }
+function exportRecordsCsv(){ if(exportGuard()) return; const rows=[["Record type","Date","Animal","Related animal","Details","Amount/Weight","Due/Next date","Notes"]]; S.breedings.forEach(b=>rows.push(["Breeding",b.date,animalName(b.damId),animalName(b.sireId),`${b.method}; ${b.status}`,"",dueDate(b),b.notes])); S.births.forEach(b=>rows.push(["Birth",b.date,animalName(b.damId),animalName(b.sireId),`${b.kids?.length||0} born; ${b.ease}`,"", "",b.notes])); S.weights.forEach(w=>rows.push(["Weight",w.date,animalName(w.animalId),"",w.kind,w.weight,"",""])); S.health.forEach(h=>rows.push(["Health",h.date,animalName(h.animalId),"",`${h.type}; ${h.product||""}; ${h.dose||""}`,"",h.nextDue||h.withdrawalEnd||"",h.notes])); S.milk.forEach(m=>rows.push(["Milk",m.date,animalName(m.animalId),"","",`${m.amount} ${m.unit}`,"",m.notes])); S.transactions.forEach(t=>rows.push([t.type,t.date,t.animalId?animalName(t.animalId):"Whole herd","",t.category,t.amount,"",t.description])); download("herdkeeper-all-records.csv",toCsv(rows),"text/csv"); toast("All herd records exported as CSV."); }
+function exportMoneyCsv(){ if(exportGuard()) return; const rows=[["Date","Type","Category","Animal","Amount","Description"]]; [...S.transactions].sort((a,b)=>a.date.localeCompare(b.date)).forEach(t=>rows.push([t.date,t.type,t.category,t.animalId?animalName(t.animalId):"",t.amount,t.description])); download("herdkeeper-money.csv",toCsv(rows),"text/csv"); toast("Money history exported as CSV."); }
+function printHerd(){ const active=activeAnimals(); const due=S.breedings.filter(b=>!["Completed","Open / did not settle"].includes(b.status)); const flags=careFlags().filter(f=>f.flag!=="ok"); const year=localToday().slice(0,4); const tx=S.transactions.filter(t=>t.date.startsWith(year)); const inc=tx.filter(t=>t.type==="Income").reduce((s,t)=>s+num(t.amount),0), exp=tx.filter(t=>t.type==="Expense").reduce((s,t)=>s+num(t.amount),0);
+  $("#printArea").innerHTML = `<h1>${esc(APP_NAME)} — Herd Report</h1><p>Printed ${fmtDate(localToday())} · ${active.length} active animals · ${S.animals.length} total register entries</p><h2>Dashboard</h2><table><tr><th>Item</th><th>Detail</th></tr><tr><td>Due breedings</td><td>${due.length}</td></tr><tr><td>Care overdue / due soon</td><td>${flags.length}</td></tr><tr><td>${year} income</td><td>${money(inc)}</td></tr><tr><td>${year} expenses</td><td>${money(exp)}</td></tr><tr><td>${year} net</td><td>${money(inc-exp)}</td></tr></table><h2>Animals</h2><table><thead><tr><th>Name</th><th>Species/Breed</th><th>Sex</th><th>Status</th><th>Birth</th><th>Dam × Sire</th><th>Latest weight</th></tr></thead><tbody>${sortedAnimals().map(a=>{const w=latestWeight(a.id);return `<tr><td>${esc(a.name)}<br>${esc(a.tag||a.tattoo||"")}</td><td>${esc(a.species)} ${esc(a.breed||"")}</td><td>${esc(a.sex)}</td><td>${esc(a.status)}</td><td>${fmtDate(a.birthDate)}</td><td>${esc(animalName(a.damId))} × ${esc(animalName(a.sireId))}</td><td>${w?w.weight+" lb":"—"}</td></tr>`;}).join("")}</tbody></table><h2>Breeding due dates</h2><table><thead><tr><th>Dam</th><th>Sire</th><th>Bred</th><th>Due</th><th>Status</th></tr></thead><tbody>${due.map(b=>`<tr><td>${esc(animalName(b.damId))}</td><td>${esc(animalName(b.sireId))}</td><td>${fmtDate(b.date)}</td><td>${fmtDate(dueDate(b))}</td><td>${esc(b.status)}</td></tr>`).join("")||`<tr><td colspan="5">No open breedings</td></tr>`}</tbody></table><h2>Care flags</h2><table><thead><tr><th>Animal</th><th>Type</th><th>Last done</th><th>Next due</th><th>Flag</th></tr></thead><tbody>${flags.map(f=>`<tr><td>${esc(animalName(f.animalId))}</td><td>${esc(f.type)}</td><td>${fmtDate(f.date)}</td><td>${fmtDate(f.nextDue)}</td><td>${esc(f.flag)}</td></tr>`).join("")||`<tr><td colspan="5">No care flags</td></tr>`}</tbody></table>`; window.print(); }
+function printAnimal(id){ const a=animalById(id||$("#printAnimal").value); if(!a){ toast("Choose an animal first."); return; } const r=animalRecords(a.id); const dam=animalById(a.damId), sire=animalById(a.sireId); $("#printArea").innerHTML = `<div class="sheet"><h1>${esc(a.name)} — Animal Record Sheet</h1><p>${esc(APP_NAME)} · Printed ${fmtDate(localToday())}</p><table><tr><th>Field</th><th>Detail</th></tr><tr><td>Species / breed</td><td>${esc(a.species)} ${esc(a.breed||"")}</td></tr><tr><td>Sex / class</td><td>${esc(a.sex)}</td></tr><tr><td>Status</td><td>${esc(a.status)}</td></tr><tr><td>Ear tag</td><td>${esc(a.tag||"—")}</td></tr><tr><td>Tattoo / scrapie</td><td>${esc(a.tattoo||"—")}</td></tr><tr><td>Registration #</td><td>${esc(a.regNo||"—")}</td></tr><tr><td>Birth date</td><td>${fmtDate(a.birthDate)} (${esc(ageText(a.birthDate))})</td></tr><tr><td>Dam × Sire</td><td>${esc(dam?.name||"Not recorded")} × ${esc(sire?.name||"Not recorded")}</td></tr><tr><td>Joined herd</td><td>${fmtDate(a.acquiredDate)}</td></tr><tr><td>Purchase cost</td><td>${a.cost?money(a.cost):"—"}</td></tr><tr><td>Notes</td><td>${esc(a.notes||"—")}</td></tr></table><h2>Weights</h2><table><thead><tr><th>Date</th><th>Weight</th><th>Type</th></tr></thead><tbody>${r.weights.map(w=>`<tr><td>${fmtDate(w.date)}</td><td>${w.weight} lb</td><td>${esc(w.kind)}</td></tr>`).join("")||`<tr><td colspan="3">No weights</td></tr>`}</tbody></table><h2>Health & Care</h2><table><thead><tr><th>Date</th><th>Type</th><th>Product / finding</th><th>Next due</th><th>Withdrawal</th></tr></thead><tbody>${r.health.map(h=>`<tr><td>${fmtDate(h.date)}</td><td>${esc(h.type)}</td><td>${esc(h.product||"")}</td><td>${fmtDate(h.nextDue)}</td><td>${fmtDate(h.withdrawalEnd)}</td></tr>`).join("")||`<tr><td colspan="5">No health records</td></tr>`}</tbody></table><h2>Breeding & Births</h2><table><thead><tr><th>Date</th><th>Partner</th><th>Status / result</th></tr></thead><tbody>${(r.breedings.length||r.births.length)?`${r.breedings.map(b=>`<tr><td>${fmtDate(b.date)}</td><td>${esc(animalName(a.id===b.damId?b.sireId:b.damId))}</td><td>${esc(b.status)} · due ${fmtDate(dueDate(b))}</td></tr>`).join("")}${r.births.map(b=>`<tr><td>${fmtDate(b.date)}</td><td>${esc(animalName(a.id===b.damId?b.sireId:b.damId))}</td><td>${b.kids?.length||0} born · ${esc(b.ease||"")}</td></tr>`).join("")}`:`<tr><td colspan="3">No breeding or birth records</td></tr>`}</tbody></table><h2>Milk & Money</h2><table><thead><tr><th>Date</th><th>Record</th><th>Detail</th></tr></thead><tbody>${r.milk.map(m=>`<tr><td>${fmtDate(m.date)}</td><td>Milk</td><td>${m.amount} ${esc(m.unit)} ${esc(m.notes||"")}</td></tr>`).join("")}${r.transactions.map(t=>`<tr><td>${fmtDate(t.date)}</td><td>${esc(t.type)} — ${esc(t.category)}</td><td>${money(t.amount)} ${esc(t.description||"")}</td></tr>`).join("")||`<tr><td colspan="3">No milk or money records</td></tr>`}</tbody></table></div>`; window.print(); }
+
+function sampleData(){
+  const t=localToday(); const d=n=>addDays(t,n);
+  const animals=[
+    {id:"a_clover",name:"Clover",species:"Goat",breed:"Nubian",sex:"Doe",status:"Bred",tag:"G-014",tattoo:"CLV14",regNo:"",birthDate:d(-1460),damId:"",sireId:"",acquiredDate:d(-1200),cost:350,notes:"Calm milker, strong mothering, kids share well."},
+    {id:"a_juniper",name:"Juniper",species:"Goat",breed:"Nigerian Dwarf",sex:"Doe",status:"Active",tag:"G-021",tattoo:"JUN21",regNo:"",birthDate:d(-1095),damId:"",sireId:"",acquiredDate:d(-900),cost:300,notes:"Small, friendly, easy keeper."},
+    {id:"a_bramble",name:"Bramble",species:"Goat",breed:"Nubian",sex:"Buck",status:"Active",tag:"G-003",tattoo:"BRM03",regNo:"",birthDate:d(-1825),damId:"",sireId:"",acquiredDate:d(-1500),cost:450,notes:"Throws colorful, vigorous kids."},
+    {id:"a_hazel",name:"Hazel",species:"Goat",breed:"Alpine",sex:"Doe",status:"Active",tag:"G-027",tattoo:"HAZ27",regNo:"",birthDate:d(-1280),damId:"a_clover",sireId:"a_bramble",acquiredDate:d(-1280),cost:0,notes:"Clover daughter retained for milk."},
+    {id:"a_poppy",name:"Poppy",species:"Goat",breed:"Nubian",sex:"Kid / Lamb",status:"Active",tag:"G-031",tattoo:"",regNo:"",birthDate:d(-62),damId:"a_clover",sireId:"a_bramble",acquiredDate:d(-62),cost:0,notes:"Twin, bright and nursing well."},
+    {id:"a_pepper",name:"Pepper",species:"Goat",breed:"Nubian",sex:"Kid / Lamb",status:"Active",tag:"G-032",tattoo:"",regNo:"",birthDate:d(-62),damId:"a_clover",sireId:"a_bramble",acquiredDate:d(-62),cost:0,notes:"Twin, slightly smaller at birth."},
+    {id:"a_willow",name:"Willow",species:"Sheep",breed:"Katahdin",sex:"Ewe",status:"Bred",tag:"S-008",tattoo:"WIL08",regNo:"",birthDate:d(-1600),damId:"",sireId:"",acquiredDate:d(-1400),cost:275,notes:"Excellent forage conversion."},
+    {id:"a_aspen",name:"Aspen",species:"Sheep",breed:"Katahdin",sex:"Ewe",status:"Active",tag:"S-011",tattoo:"ASP11",regNo:"",birthDate:d(-1500),damId:"",sireId:"",acquiredDate:d(-1300),cost:260,notes:"Twins most years."},
+    {id:"a_cedar",name:"Cedar",species:"Sheep",breed:"Katahdin",sex:"Ram",status:"Active",tag:"S-002",tattoo:"CED02",regNo:"",birthDate:d(-1900),damId:"",sireId:"",acquiredDate:d(-1600),cost:400,notes:"Easygoing terminal sire."},
+    {id:"a_lark",name:"Lark",species:"Sheep",breed:"Katahdin",sex:"Kid / Lamb",status:"Active",tag:"S-017",tattoo:"",regNo:"",birthDate:d(-88),damId:"a_aspen",sireId:"a_cedar",acquiredDate:d(-88),cost:0,notes:"Fast-growing spring lamb."},
+    {id:"a_wren",name:"Wren",species:"Sheep",breed:"Katahdin",sex:"Kid / Lamb",status:"For sale",tag:"S-018",tattoo:"",regNo:"",birthDate:d(-88),damId:"a_aspen",sireId:"a_cedar",acquiredDate:d(-88),cost:0,notes:"Twin, ready to market."},
+    {id:"a_soldbuck",name:"Rocky",species:"Goat",breed:"Boer cross",sex:"Wether",status:"Sold",tag:"G-009",tattoo:"",regNo:"",birthDate:d(-500),damId:"",sireId:"",acquiredDate:d(-450),cost:125,notes:"Sold as a brush goat."}
+  ];
+  return { animals,
+    breedings:[
+      {id:"br1",damId:"a_clover",sireId:"a_bramble",date:d(-118),gestationDays:150,method:"Live cover",status:"Completed",notes:"Settled on first service."},
+      {id:"br2",damId:"a_hazel",sireId:"a_bramble",date:d(-132),gestationDays:150,method:"Pen breeding",status:"Confirmed pregnant",notes:"Due soon; watch udder and ligaments."},
+      {id:"br3",damId:"a_willow",sireId:"a_cedar",date:d(-104),gestationDays:147,method:"Live cover",status:"Confirmed pregnant",notes:"Ultrasound suggested twins."},
+      {id:"br4",damId:"a_juniper",sireId:"a_bramble",date:d(-18),gestationDays:150,method:"Live cover",status:"Exposed",notes:"Recheck heat in three weeks."},
+      {id:"br5",damId:"a_aspen",sireId:"a_cedar",date:d(-235),gestationDays:147,method:"Live cover",status:"Completed",notes:"Settled and lambed twins."}
+    ],
+    births:[
+      {id:"birth1",breedingId:"br1",damId:"a_clover",sireId:"a_bramble",date:d(-62),ease:"Easy / unassisted",notes:"Both nursing within 20 minutes.",kids:[{name:"Poppy",sex:"Doe",weight:7.8,vigor:"Strong",status:"Alive",animalId:"a_poppy"},{name:"Pepper",sex:"Buck",weight:7.1,vigor:"Good",status:"Alive",animalId:"a_pepper"}]},
+      {id:"birth2",breedingId:"br5",damId:"a_aspen",sireId:"a_cedar",date:d(-88),ease:"Easy / unassisted",notes:"Twins up and nursing quickly.",kids:[{name:"Lark",sex:"Ewe",weight:8.4,vigor:"Strong",status:"Alive",animalId:"a_lark"},{name:"Wren",sex:"Ram",weight:8.9,vigor:"Strong",status:"Alive",animalId:"a_wren"}]}
+    ],
+    weights:[
+      {id:"w1",animalId:"a_poppy",date:d(-62),weight:7.8,kind:"Birth"},{id:"w2",animalId:"a_poppy",date:d(-32),weight:15.6,kind:"30-day"},{id:"w3",animalId:"a_poppy",date:d(-2),weight:24.9,kind:"60-day"},
+      {id:"w4",animalId:"a_pepper",date:d(-62),weight:7.1,kind:"Birth"},{id:"w5",animalId:"a_pepper",date:d(-32),weight:14.2,kind:"30-day"},{id:"w6",animalId:"a_pepper",date:d(-2),weight:22.8,kind:"60-day"},
+      {id:"w7",animalId:"a_lark",date:d(-88),weight:8.4,kind:"Birth"},{id:"w8",animalId:"a_lark",date:d(-58),weight:20.1,kind:"30-day"},{id:"w9",animalId:"a_lark",date:d(-28),weight:31.5,kind:"60-day"},{id:"w10",animalId:"a_lark",date:d(-1),weight:42.0,kind:"90-day"},
+      {id:"w11",animalId:"a_wren",date:d(-88),weight:8.9,kind:"Birth"},{id:"w12",animalId:"a_wren",date:d(-28),weight:33.0,kind:"60-day"},{id:"w13",animalId:"a_wren",date:d(-1),weight:44.5,kind:"90-day"}
+    ],
+    health:[
+      {id:"h1",animalId:"a_clover",date:d(-75),type:"Deworming",product:"Vet-prescribed dewormer",dose:"Per label",famacha:"2",bcs:"3.5",nextDue:d(24),withdrawalEnd:d(-61),notes:"Strong response, milk normal."},
+      {id:"h2",animalId:"a_willow",date:d(-45),type:"Hoof trim",product:"",dose:"",famacha:"",bcs:"3.25",nextDue:d(-5),withdrawalEnd:"",notes:"Slight overgrowth on rear left."},
+      {id:"h3",animalId:"a_aspen",date:d(-10),type:"FAMACHA check",product:"",dose:"",famacha:"2",bcs:"3.5",nextDue:d(11),withdrawalEnd:"",notes:"Bright, good condition."},
+      {id:"h4",animalId:"a_bramble",date:d(-20),type:"Vaccination",product:"CD&T",dose:"Per label",famacha:"",bcs:"3.75",nextDue:d(345),withdrawalEnd:"",notes:"Booster complete."},
+      {id:"h5",animalId:"a_hazel",date:d(-6),type:"Treatment",product:"Vet-prescribed treatment",dose:"Per label",famacha:"",bcs:"",nextDue:"",withdrawalEnd:d(8),notes:"Sample-only record; follow product label."},
+      {id:"h6",animalId:"a_lark",date:d(-30),type:"Body condition",product:"",dose:"",famacha:"2",bcs:"3.5",nextDue:d(16),withdrawalEnd:"",notes:"Growing evenly."}
+    ],
+    milk:[
+      {id:"m1",animalId:"a_clover",date:d(-2),amount:2.5,unit:"quarts",notes:"Morning and evening combined."},{id:"m2",animalId:"a_clover",date:d(-1),amount:2.4,unit:"quarts",notes:"Kids sharing."},{id:"m3",animalId:"a_juniper",date:d(-1),amount:1.2,unit:"quarts",notes:"Small but steady."}
+    ],
+    transactions:[
+      {id:"t1",type:"Expense",date:d(-55),category:"Hay & pasture",amount:180,animalId:"",description:"12 round bales delivered."},
+      {id:"t2",type:"Expense",date:d(-38),category:"Feed & grain",amount:64,animalId:"",description:"Grain and mineral restock."},
+      {id:"t3",type:"Income",date:d(-20),category:"Animal sale",amount:175,animalId:"a_soldbuck",description:"Rocky sold as brush goat."},
+      {id:"t4",type:"Income",date:d(-8),category:"Milk / dairy",amount:48,animalId:"a_clover",description:"Farm-stand milk and cheese share."},
+      {id:"t5",type:"Expense",date:d(-6),category:"Vet & medicine",amount:38,animalId:"a_hazel",description:"Treatment supplies."},
+      {id:"t6",type:"Income",date:d(-1),category:"Fiber / wool",amount:26,animalId:"",description:"Wool sold to a local spinner."}
+    ],
+    settings:{...S.settings}, sampling:true, snapshot:S.snapshot };
+}
+
+function bind(){
+  $$(".tab").forEach(t=>t.addEventListener("click",()=>{ switchView(t.dataset.view); beep(560,.04); }));
+  $("#themeBtn").addEventListener("click",()=>{ S.settings.dark=!S.settings.dark; save(); applyTheme(); beep(S.settings.dark?520:700,.06); });
+  $("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!S.settings.sound; save(); setSoundUI(); toast(S.settings.sound?"Sounds on.":"Sounds off."); if(S.settings.sound) chime(); });
+  $("#sampleBtn").addEventListener("click",()=>{ if(!S.sampling){ S.snapshot=JSON.parse(JSON.stringify({...S,sampling:false,snapshot:null})); const sd=sampleData(); sd.snapshot=S.snapshot; S=sd; toast("Sample herd on — your real records are saved and will return exactly."); } else { if(S.snapshot){ const snap=S.snapshot; const keep={dark:S.settings.dark,sound:S.settings.sound}; S={...snap,settings:{...snap.settings,...keep},sampling:false,snapshot:null}; } else { S=blankData(); } toast("Sample off — your real herd is back, exactly as you left it."); } save(); clearForms(); renderAll(); chime(); });
+  ["aName","aSpecies","aBreed","aSex","aStatus","aTag","aTattoo","aReg","aBirth","aAcquired","aCost","aNotes"].forEach(id=>$("#"+id).addEventListener("input",updateAnimalPreview));
+  $("#animalSearch").addEventListener("input",renderAnimals); $("#animalFilter").addEventListener("change",renderAnimals);
+  $("#saveAnimalBtn").addEventListener("click",saveAnimal); $("#clearAnimalBtn").addEventListener("click",clearAnimalForm); $("#cancelAnimalEditBtn").addEventListener("click",clearAnimalForm);
+  $("#bDam").addEventListener("change",fillGestationFromDam); ["bSire","bDate","bGestation"].forEach(id=>$("#"+id).addEventListener("input",updateBreedingPreview));
+  $("#saveBreedingBtn").addEventListener("click",saveBreeding); $("#clearBreedingBtn").addEventListener("click",clearBreedingForm); $("#cancelBreedingEditBtn").addEventListener("click",clearBreedingForm);
+  $("#buildKidRowsBtn").addEventListener("click",buildKidRows); $("#birthCount").addEventListener("change",buildKidRows); $("#saveBirthBtn").addEventListener("click",saveBirth);
+  $("#wAnimal").addEventListener("change",()=>{ sel.weightAnimal=$("#wAnimal").value; renderWeights(); }); $("#saveWeightBtn").addEventListener("click",saveWeight); $("#cancelWeightEditBtn").addEventListener("click",()=>{ editing.weight=null; $("#cancelWeightEditBtn").hidden=true; $("#wWeight").value=""; $("#wAnimal").disabled=false; });
+  $("#saveHealthBtn").addEventListener("click",saveHealth); $("#clearHealthBtn").addEventListener("click",clearHealthForm); $("#cancelHealthEditBtn").addEventListener("click",clearHealthForm);
+  $("#saveMilkBtn").addEventListener("click",saveMilk); $("#cancelMilkEditBtn").addEventListener("click",()=>{ editing.milk=null; $("#cancelMilkEditBtn").hidden=true; });
+  $("#saveMoneyBtn").addEventListener("click",saveMoney); $("#clearMoneyBtn").addEventListener("click",clearMoneyForm); $("#cancelMoneyEditBtn").addEventListener("click",clearMoneyForm);
+  $("#printHerdBtn").addEventListener("click",printHerd); $("#printAnimalBtn").addEventListener("click",()=>printAnimal());
+  $("#saveSettingsBtn").addEventListener("click",()=>{ S.settings.goatGestation=Math.min(170,Math.max(130,num($("#setGoatGest").value)||150)); S.settings.sheepGestation=Math.min(170,Math.max(130,num($("#setSheepGest").value)||147)); save(); renderAll(); toast("Gestation settings saved."); chime(); });
+  $("#exportAnimalsCsvBtn").addEventListener("click",exportAnimalsCsv); $("#exportRecordsCsvBtn").addEventListener("click",exportRecordsCsv); $("#exportMoneyCsvBtn").addEventListener("click",exportMoneyCsv);
+  $("#backupBtn").addEventListener("click",()=>{ if(exportGuard()) return; download("herdkeeper-backup.json", JSON.stringify({animals:S.animals,breedings:S.breedings,births:S.births,weights:S.weights,health:S.health,milk:S.milk,transactions:S.transactions,settings:S.settings},null,1),"application/json"); toast("Complete herd backup downloaded."); });
+  $("#restoreBtn").addEventListener("click",()=>$("#jsonFile").click());
+  $("#jsonFile").addEventListener("change",()=>{ const file=$("#jsonFile").files[0]; if(!file) return; const reader=new FileReader(); reader.onload=()=>{ try{ const raw=JSON.parse(reader.result); if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw new Error("bad"); const next={...blankData(),...raw}; next.settings={...blankData().settings,...(raw.settings||{})}; const dateOk=v=>typeof v==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!!parseDate(v); const clean=(list,dated)=>{ if(!Array.isArray(list)) throw new Error("bad"); const seen=new Set(); return list.filter(r=>r&&typeof r==="object"&&typeof r.id==="string"&&(!dated||dateOk(r.date))&&!seen.has(r.id)&&seen.add(r.id)); }; next.animals=clean(next.animals,false); ["breedings","births","weights","health","milk","transactions"].forEach(k=>{ next[k]=clean(next[k],true); }); next.sampling=false; next.snapshot=null; if(S.sampling){ S.sampling=false; S.snapshot=null; } S=next; save(); clearForms(); renderAll(); toast("Backup restored — the complete herd is back."); chime(); }catch(e){ toast("That file doesn't look like a Herd Record Keeper backup."); } $("#jsonFile").value=""; }; reader.readAsText(file); });
+  document.addEventListener("click",e=>{ const h=e.target.closest("[data-open-health]"); if(h) startEditHealth(h.dataset.openHealth); const b=e.target.closest("[data-open-breeding]"); if(b) startEditBreeding(b.dataset.openBreeding); });
+}
+function clearForms(){ clearAnimalForm(); clearBreedingForm(); clearHealthForm(); clearMoneyForm(); $("#aBirth").value=""; $("#birthDate").value=localToday(); $("#wDate").value=localToday(); $("#mDate").value=localToday(); buildKidRows(); }
+function init(){ $("#brandName").textContent=APP_NAME; applyTheme(); setSoundUI(); bind(); clearForms(); renderAll(); if(S.sampling) setSampleUI(); if(bootDataUnreadable) toast("Your saved herd data couldn't be read, so the app started with an empty herd. Restore a JSON backup under Reports & Data if you have one."); }
+init();
+</script>
+</body>
+</html>
