@@ -535,7 +535,7 @@ $("#csvFile").addEventListener("change", e => {
         const holes = holeIdx.map((ci,k) => ({ par: pars[k] || 3, score: Math.max(1, parseInt(r[ci],10) || pars[k] || 3) }));
         const total = holes.reduce((a,h)=>a+h.score,0);
         const sig = holes.map(h=>h.score).join(",");
-        const dup = S.rounds.some(x => x.date === date && x.course === course && x.layout === layout && roundScore(x) === total && x.holes.map(h=>h.score).join(",") === sig);
+        const dup = S.rounds.some(x => x.date === date && (x.course||"").toLowerCase() === course.toLowerCase() && (x.layout||"").toLowerCase() === layout.toLowerCase() && roundScore(x) === total && x.holes.map(h=>h.score).join(",") === sig);
         if(dup){ skipped++; return; }
         S.rounds.push({ id: uid(), date, course, layout, holes, created: Date.now() }); added++;
       });
