@@ -118,10 +118,10 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
   <div class="samplebar" id="sampleBar"><b>Sample data is on.</b> This is a made-up server's shifts (two jobs, eight weeks) so you can see everything working. Your real shifts come back exactly as they were when you tap the flask again.</div>
   <div class="stats-grid" id="statTiles"></div>
   <div class="tabs no-print" role="tablist">
-    <button class="tab on" id="tabShifts">Shifts</button>
-    <button class="tab" id="tabAdd">Add a shift</button>
-    <button class="tab" id="tabStats">Stats &amp; tax year</button>
-    <button class="tab" id="tabJobs">Jobs</button>
+    <button class="tab on" id="tabShifts" role="tab" aria-selected="true">Shifts</button>
+    <button class="tab" id="tabAdd" role="tab" aria-selected="false">Add a shift</button>
+    <button class="tab" id="tabStats" role="tab" aria-selected="false">Stats &amp; tax year</button>
+    <button class="tab" id="tabJobs" role="tab" aria-selected="false">Jobs</button>
   </div>
 
   <section id="viewShifts">
@@ -285,6 +285,7 @@ const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
 const clone = o => JSON.parse(JSON.stringify(o));
 const money = n => "$" + (Math.round((+n || 0) * 100) / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const money0 = n => "$" + Math.round(+n || 0).toLocaleString("en-US");
+const localToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
 const fmtD = iso => { if(!iso) return ""; const p = iso.split("-"); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : iso; };
 const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -338,14 +339,16 @@ function applyTheme(){
   const dark = S.theme ? S.theme === "dark" : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.body.classList.toggle("dark", dark);
   $("#themeBtn").classList.toggle("on", dark);
+  $("#themeBtn").setAttribute("aria-pressed", dark ? "true" : "false");
+  $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false");
 }
-function applySound(){ $("#soundBtn").classList.toggle("on", !!S.sound); $("#soundBtn").style.opacity = S.sound ? "1" : ".55"; }
+function applySound(){ $("#soundBtn").classList.toggle("on", !!S.sound); $("#soundBtn").style.opacity = S.sound ? "1" : ".55"; $("#soundBtn").setAttribute("aria-pressed", S.sound ? "true" : "false"); }
 $("#themeBtn").addEventListener("click", ()=>{ S.theme = document.body.classList.contains("dark") ? "light" : "dark"; applyTheme(); save(); tick(); });
 $("#soundBtn").addEventListener("click", ()=>{ S.sound = !S.sound; applySound(); save(); if(S.sound) tick(); });
 
 /* ---------- tabs ---------- */
 const VIEWS = [["#tabShifts","#viewShifts"],["#tabAdd","#viewAdd"],["#tabStats","#viewStats"],["#tabJobs","#viewJobs"]];
-function showTab(tabSel){ VIEWS.forEach(([t,v])=>{ $(t).classList.toggle("on", t===tabSel); $(v).hidden = t!==tabSel; }); }
+function showTab(tabSel){ VIEWS.forEach(([t,v])=>{ const on = t===tabSel; $(t).classList.toggle("on", on); $(t).setAttribute("aria-selected", on ? "true" : "false"); $(v).hidden = !on; }); }
 VIEWS.forEach(([t])=> $(t).addEventListener("click", ()=>{ showTab(t); tick(); }));
 
 /* ---------- tiles ---------- */
@@ -501,7 +504,7 @@ $("#hrsDown").addEventListener("click", ()=>{ formHours = Math.max(0.5, formHour
 $("#hrsUp").addEventListener("click", ()=>{ formHours = Math.min(24, formHours + 0.5); formPreview(); tick(); });
 function resetForm(){
   S.editId = null; $("#cancelEditBtn").hidden = true; $("#formTitle").textContent = "Add a shift";
-  $("#inDate").value = new Date().toISOString().slice(0,10);
+  $("#inDate").value = localToday();
   $("#inRole").value = ""; $("#inWage").value = ""; $("#inSales").value = ""; $("#inCash").value = "";
   $("#inCard").value = ""; $("#inTipOut").value = ""; $("#inCovers").value = ""; $("#inNote").value = "";
   formHours = 6; renderJobSelect(); formPreview();
@@ -723,6 +726,7 @@ function sampleData(){
 function setSampleUI(){
   $("#sampleBar").classList.toggle("show", !!S.sampling);
   $("#sampleBtn").classList.toggle("on", !!S.sampling);
+  $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false");
 }
 $("#sampleBtn").addEventListener("click", ()=>{
   if(!S.sampling){
@@ -743,7 +747,7 @@ function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix()
 load();
 $("#brandName").textContent = BRAND;
 applyTheme(); applySound(); setSampleUI();
-$("#inDate").value = new Date().toISOString().slice(0,10);
+$("#inDate").value = localToday();
 if(S.sampling && !S.snapshot) S.snapshot = { shifts: [], jobs: [], selShift: null };
 renderAll();
 </script>
