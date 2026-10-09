@@ -140,7 +140,16 @@
   .steps{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px}
   .steps li{display:flex;gap:12px;align-items:flex-start;background:var(--panel2);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
   .steps input[type="checkbox"]{width:24px;height:24px;flex:0 0 auto;margin-top:2px;accent-color:var(--accent2)}
-  .steps .checked{text-decoration:line-through;color:var(--muted)}
+  .steps .checked{text-decoration:line-through;color:var(--ink);opacity:.78}
+  /* Docs progress */
+  .doc-progress{font-size:15px;font-weight:600;color:var(--accent);margin:0 0 10px}
+  .dp-track{display:block;background:var(--soft);border:1.5px solid var(--line);border-radius:999px;height:16px;overflow:hidden;margin-top:6px}
+  .dp-fill{display:block;height:100%;background:var(--good);border-radius:999px;transition:width .2s ease}
+  /* Sound off state */
+  .snd-muted{display:none}
+  .hbtn.snd-off{opacity:.55}
+  .hbtn.snd-off .snd-waves{display:none}
+  .hbtn.snd-off .snd-muted{display:block}
   .steps .del{margin-left:auto}
   footer.foot{margin-top:26px;color:var(--muted);font-size:15px;text-align:center}
   footer.foot .pill{margin-top:10px}
@@ -174,7 +183,7 @@
       <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
       <button class="hbtn" id="sampleBtn" type="button" aria-pressed="false" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v5.5L4.8 18a2.4 2.4 0 0 0 2.1 3.5h10.2a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 15h9"/></svg></button>
       <button class="hbtn" id="themeBtn" type="button" aria-pressed="false" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2z"/></svg></button>
-      <button class="hbtn" id="soundBtn" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="snd-waves" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+      <button class="hbtn" id="soundBtn" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="snd-waves" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/><path class="snd-muted" d="M16.2 9.8l5.3 5.3M21.5 9.8l-5.3 5.3"/></svg></button>
     </div>
   </header>
 
@@ -272,17 +281,18 @@
       <div class="minibars" id="aleBars"></div>
       <div class="detail" id="aleDetail"><h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p></div>
       <form class="entry" id="aleForm">
-        <label>Date<input type="date" id="a_date" required></label>
+        <label>Date<input type="date" id="a_date"></label>
         <label>Category
           <select id="a_category"><option>Lodging</option><option>Meals</option><option>Mileage / fuel</option><option>Laundry</option><option>Pet boarding</option><option>Other</option></select>
         </label>
-        <label>Amount ($)<input type="number" id="a_amount" min="0" step="0.01" required placeholder="0.00"></label>
+        <label>Amount ($)<input type="number" id="a_amount" min="0" step="0.01" placeholder="0.00"></label>
         <label>Reimbursed?
           <select id="a_reimbursed"><option>Not yet</option><option>Submitted</option><option>Reimbursed</option></select>
         </label>
         <label class="full">Note <span>(optional)</span><input type="text" id="a_note" placeholder="e.g. Hotel night 3 of 9"></label>
         <div class="btnrow full"><button class="btn" type="submit" id="aleSave">Add expense</button><button class="btn ghost" type="button" id="aleCancel" hidden>Cancel edit</button></div>
       </form>
+      <p id="aleError" role="alert" style="display:none;margin:8px 0 0;font-size:15px;font-weight:600;color:var(--danger)"></p>
       <ul class="entries" id="aleList"></ul>
       <div class="empty" id="aleEmpty">No ALE expenses yet.</div>
     </section>
@@ -299,7 +309,7 @@
         <label>How
           <select id="m_method"><option>Phone</option><option>Email</option><option>Letter / mail</option><option>In person</option><option>Portal message</option></select>
         </label>
-        <label>Next step <span>(optional)</span><input type="text" id="m_next" placeholder="e.g. Send final invoice by Friday"></label>
+        <label>Next step <span>(optional)</span><input type="text" id="m_next" placeholder="e.g. Send final invoice"></label>
         <label class="full">What was said<textarea id="m_summary" required placeholder="Short summary in your own words"></textarea></label>
         <div class="btnrow full"><button class="btn" type="submit" id="commSave">Add log entry</button><button class="btn ghost" type="button" id="commCancel" hidden>Cancel edit</button></div>
       </form>
@@ -311,6 +321,7 @@
     <section class="card span2" aria-labelledby="docH">
       <h2 id="docH">Document checklist</h2>
       <p class="sub">The paperwork a self-managed claim usually runs on. Check items off as you gather or send them, and add your own.</p>
+      <div class="doc-progress" id="docProgress" aria-live="polite"></div>
       <ul class="steps" id="docList"></ul>
       <form class="entry" id="docForm">
         <label class="full">Add your own document<input type="text" id="d_name" required placeholder="e.g. Engineer report"></label>
@@ -319,7 +330,10 @@
       <div class="btnrow" style="margin-top:14px">
         <button class="btn" type="button" id="printBtn">Print claim packet</button>
         <button class="btn ghost" type="button" id="exportBtn">Download data backup (JSON)</button>
+        <button class="btn ghost" type="button" id="importBtn">Import backup (JSON)</button>
       </div>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <p id="importMsg" role="alert" style="display:none;margin:10px 0 0;font-size:15px;font-weight:600;color:var(--danger)"></p>
       <p class="sub" style="margin-top:10px">The printable packet gathers your claim overview, bucket figures, contents lines, ALE, communications, and this checklist onto clean pages for a folder, a contractor, or a professional you consult.</p>
     </section>
   </main>
@@ -420,21 +434,26 @@ function beep(freq){
 
 /* ---------- Bucket math ---------- */
 function bucketCalc(b){
-  var covered = b.limit > 0 ? Math.min(b.rcv, b.limit) : b.rcv;
-  var netPayable = Math.max(covered - b.deductible, 0);
-  var paid = b.acvPaid + b.depRecovered + b.suppPaid;
-  var withheld = Math.max(b.depreciation - b.depRecovered, 0);
-  var unclaimed = Math.max(netPayable - paid - withheld, 0);
-  var gap = b.contractor - b.rcv;
-  var overLimit = b.limit > 0 ? Math.max(b.rcv - b.limit, 0) : 0;
-  return { covered:covered, netPayable:netPayable, paid:paid, withheld:withheld, unclaimed:unclaimed, gap:gap, overLimit:overLimit };
+  var f = {};
+  ["limit","deductible","rcv","depreciation","acvPaid","depRecovered","suppPaid","contractor"].forEach(function(k){ f[k] = Math.max(num(b[k]), 0); });
+  var covered = f.limit > 0 ? Math.min(f.rcv, f.limit) : f.rcv;
+  var netPayable = Math.max(covered - f.deductible, 0);
+  var paid = f.acvPaid + f.depRecovered + f.suppPaid;
+  var withheldRaw = f.depreciation - f.depRecovered;
+  var withheld = Math.max(withheldRaw, 0);
+  var unclaimedRaw = netPayable - paid - withheld;
+  var unclaimed = Math.max(unclaimedRaw, 0);
+  var gap = f.contractor - f.rcv;
+  var overLimit = f.limit > 0 ? Math.max(f.rcv - f.limit, 0) : 0;
+  return { covered:covered, netPayable:netPayable, paid:paid, withheld:withheld, unclaimed:unclaimed, gap:gap, overLimit:overLimit,
+    unclaimedFloored: unclaimedRaw < 0, withheldFloored: withheldRaw < 0, f:f };
 }
 function totals(){
   var t = { rcv:0, deductible:0, paid:0, withheld:0, unclaimed:0, contractor:0, netPayable:0 };
   BUCKETS.forEach(function(cfg){
     var b = state.buckets[cfg.id], c = bucketCalc(b);
-    t.rcv += b.rcv; t.deductible += b.deductible; t.paid += c.paid;
-    t.withheld += c.withheld; t.unclaimed += c.unclaimed; t.contractor += b.contractor; t.netPayable += c.netPayable;
+    t.rcv += Math.max(num(b.rcv), 0); t.deductible += Math.max(num(b.deductible), 0); t.paid += c.paid;
+    t.withheld += c.withheld; t.unclaimed += c.unclaimed; t.contractor += Math.max(num(b.contractor), 0); t.netPayable += c.netPayable;
   });
   return t;
 }
@@ -483,6 +502,7 @@ function renderBucketSummaries(){
       + "<div><span>Still unclaimed (entered figures)</span><b>" + money(c.unclaimed) + "</b></div>"
       + "<div><span>Contractor vs. insurer gap</span><b>" + money(c.gap) + "</b></div>";
     if(c.overLimit > 0) html += "<div><span>Estimate above entered limit</span><b>" + money(c.overLimit) + "</b></div>";
+    if(c.unclaimedFloored) html += "<div><span>Still-unclaimed floored at $0 — paid plus withheld exceeds the entered estimate, so nothing further shows as unclaimed in these figures.</span></div>";
     el.innerHTML = html;
   });
 }
@@ -515,35 +535,48 @@ function renderDashboard(){
       : (dl <= 30 ? "Deadline is close. This is the withheld amount still unclaimed based on the numbers you entered."
       : "Withheld and not yet recovered, based on entered numbers."));
   }
-  var aleSpent = aleTotal(), aleLimit = state.buckets.lossOfUse.limit;
+  var aleSpent = aleTotal(), aleLimit = Math.max(num(state.buckets.lossOfUse.limit), 0);
   setText("kAleLeft", aleLimit > 0 ? money(Math.max(aleLimit - aleSpent, 0)) : money(0));
   setText("kAleNote", aleLimit > 0
     ? "Spent " + money(aleSpent) + " of the " + money(aleLimit) + " loss-of-use limit you entered (" + Math.round(aleSpent / aleLimit * 100) + "%)."
     : "Enter a loss-of-use limit on the coverage card to measure ALE burn.");
 
-  /* Waterfall */
+  /* Waterfall — widths are scaled against the larger of the composed total and the
+     entered payable total, so segment widths can never run past 100% of the bar
+     even when supplements push paid + withheld above net payable. */
   var wf = document.getElementById("waterfall");
   var totalComp = comp.reduce(function(s,c){ return s + c.value; }, 0);
+  var wfScale = Math.max(totalComp, t.netPayable + t.deductible);
+  /* Remember keyboard focus so re-rendering doesn't drop it (Enter/Space parity). */
+  var wfAe = document.activeElement;
+  var wfFocusIdx = (wfAe && wfAe.classList && wfAe.classList.contains("wfseg")) ? wfAe.getAttribute("data-wfidx") : null;
   wf.innerHTML = "";
   if(totalComp <= 0){
+    selWaterfall = null;
     wf.innerHTML = "<div style='padding:18px;font-size:15px;color:var(--muted)'>Enter estimate, deductible, and payment figures on the coverage cards and the waterfall will build itself here.</div>";
+    document.getElementById("wfDetail").innerHTML = "<h3>Tap a waterfall segment</h3><p>Each segment shows its dollars and what the figure means in plain language. Tap again to release it.</p>";
   } else {
     comp.forEach(function(c, i){
       if(c.value <= 0) return;
       var btn = document.createElement("button");
       btn.type = "button"; btn.className = "wfseg" + (selWaterfall === i ? " sel" : "");
-      btn.style.background = c.color; btn.style.width = Math.max(c.value / totalComp * 100, 3) + "%";
+      btn.setAttribute("data-wfidx", i);
+      btn.style.background = c.color; btn.style.width = Math.min(Math.max(c.value / wfScale * 100, 3), 100) + "%";
       btn.setAttribute("aria-pressed", selWaterfall === i ? "true" : "false");
       btn.setAttribute("aria-label", c.label + " " + money(c.value));
       btn.innerHTML = "<span class='amt'>" + money(c.value) + "</span><span class='lbl'>" + esc(c.label) + "</span>";
-      if(c.value / totalComp * 100 < 10) btn.classList.add("narrow");
+      if(c.value / wfScale * 100 < 10) btn.classList.add("narrow");
       btn.addEventListener("click", function(){ selWaterfall = (selWaterfall === i ? null : i); beep(selWaterfall === null ? 440 : 720); renderDashboard(); });
       wf.appendChild(btn);
     });
     if(selWaterfall !== null && comp[selWaterfall]){
       var c2 = comp[selWaterfall];
       document.getElementById("wfDetail").innerHTML = "<h3>" + esc(c2.label) + " — " + money(c2.value) + "</h3><p>" + esc(c2.note) + "</p><p>Share of entered dollars: " + Math.round(c2.value / totalComp * 100) + "%.</p>";
+    } else {
+      selWaterfall = null;
+      document.getElementById("wfDetail").innerHTML = "<h3>Tap a waterfall segment</h3><p>Each segment shows its dollars and what the figure means in plain language. Tap again to release it.</p>";
     }
+    if(wfFocusIdx !== null){ var wfb = wf.querySelector("[data-wfidx='" + wfFocusIdx + "']"); if(wfb) wfb.focus(); }
   }
   document.getElementById("wfLegend").innerHTML = comp.map(function(c){
     return "<span><span class='sw' style='background:" + c.color + "'></span>" + esc(c.label) + "</span>";
@@ -562,6 +595,8 @@ function arcPath(cx, cy, r, a0, a1){
 function renderDonut(comp, totalComp){
   var host = document.getElementById("donutHost");
   var under = document.getElementById("donutUnder");
+  var dAe = document.activeElement;
+  var dFocus = (dAe && dAe.classList && dAe.classList.contains("seg")) ? dAe.getAttribute("data-seg") : null;
   document.getElementById("donutLegend").innerHTML = comp.map(function(c){
     return "<span><span class='sw' style='background:" + c.color + "'></span>" + esc(c.label) + " " + money(c.value) + "</span>";
   }).join("");
@@ -583,9 +618,23 @@ function renderDonut(comp, totalComp){
   });
   var centerLabel = selDonut !== null && comp[selDonut] ? comp[selDonut].label : "Entered total";
   var centerVal = selDonut !== null && comp[selDonut] ? money(comp[selDonut].value) : money(totalComp);
-  var fs = centerVal.length > 10 ? 15 : (centerVal.length > 8 ? 17 : 20);
-  svg += "<text x='110' y='104' text-anchor='middle' font-size='" + fs + "' font-weight='800' fill='var(--accent)'>" + esc(centerVal) + "</text>"
-    + "<text x='110' y='126' text-anchor='middle' font-size='15' fill='var(--muted)'>" + esc(centerLabel) + "</text></svg>";
+  var fs = centerVal.length > 10 ? 13 : (centerVal.length > 8 ? 16 : 20);
+  /* Wrap the label to at most two short lines so it always fits inside the hole
+     (hole is ~104 units wide; ~7 units per char at 15px keeps lines under it). */
+  var cwords = centerLabel.split(" "), clines = [""];
+  cwords.forEach(function(w){
+    var cur = clines[clines.length - 1];
+    var next = cur ? cur + " " + w : w;
+    if(next.length <= 13 || !cur) clines[clines.length - 1] = next;
+    else if(clines.length < 2) clines.push(w);
+    else clines[1] += " " + w;
+  });
+  var vy = clines.length > 1 ? 98 : 104;
+  svg += "<text x='110' y='" + vy + "' text-anchor='middle' font-size='" + fs + "' font-weight='800' fill='var(--accent)'>" + esc(centerVal) + "</text>";
+  clines.forEach(function(ln, li){
+    svg += "<text x='110' y='" + (vy + 22 + li * 16) + "' text-anchor='middle' font-size='14' fill='var(--muted)'>" + esc(ln) + "</text>";
+  });
+  svg += "</svg>";
   host.innerHTML = svg;
   under.textContent = selDonut !== null && comp[selDonut]
     ? comp[selDonut].label + ": " + money(comp[selDonut].value)
@@ -595,31 +644,43 @@ function renderDonut(comp, totalComp){
     g.addEventListener("click", pick);
     g.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); pick(); } });
   });
+  if(dFocus !== null){ var dg = host.querySelector(".seg[data-seg='" + dFocus + "']"); if(dg) dg.focus(); }
 }
 
 function renderGap(){
   var host = document.getElementById("gapRows");
+  var gAe = document.activeElement;
+  var gFocus = (gAe && gAe.classList && gAe.classList.contains("gaprow")) ? gAe.getAttribute("data-gidx") : null;
   host.innerHTML = "";
   var maxV = 1;
-  BUCKETS.forEach(function(cfg){ var b = state.buckets[cfg.id]; maxV = Math.max(maxV, b.rcv, b.contractor); });
+  BUCKETS.forEach(function(cfg){ var b = state.buckets[cfg.id]; maxV = Math.max(maxV, Math.max(num(b.rcv), 0), Math.max(num(b.contractor), 0)); });
   BUCKETS.forEach(function(cfg, i){
     var b = state.buckets[cfg.id], c = bucketCalc(b);
     var row = document.createElement("button");
     row.type = "button"; row.className = "gaprow" + (selGap === i ? " sel" : "");
+    row.setAttribute("data-gidx", i);
     row.setAttribute("aria-pressed", selGap === i ? "true" : "false");
     row.innerHTML = "<span class='gname'>" + cfg.name + "</span>"
-      + "<span class='gapbar'><span>Insurer est.</span><span class='gap-track'><span class='gap-fill ins' style='display:block;width:" + (b.rcv / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.rcv) + "</span></span>"
-      + "<span class='gapbar'><span>Contractor</span><span class='gap-track'><span class='gap-fill con' style='display:block;width:" + (b.contractor / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.contractor) + "</span></span>"
+      + "<span class='gapbar'><span>Insurer est.</span><span class='gap-track'><span class='gap-fill ins' style='display:block;width:" + (Math.max(num(b.rcv), 0) / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.rcv) + "</span></span>"
+      + "<span class='gapbar'><span>Contractor</span><span class='gap-track'><span class='gap-fill con' style='display:block;width:" + (Math.max(num(b.contractor), 0) / maxV * 100) + "%'></span></span><span class='gap-amt'>" + money(b.contractor) + "</span></span>"
       + "<span class='gap-note'>Gap: " + money(c.gap) + (c.gap > 0 ? " — contractor figure is higher than the insurer estimate you entered." : (c.gap < 0 ? " — contractor figure is below the insurer estimate you entered." : " — figures match.")) + "</span>";
     row.addEventListener("click", function(){
       selGap = (selGap === i ? null : i); beep(selGap === null ? 440 : 720);
-      document.getElementById("gapDetail").innerHTML = selGap === null
-        ? "<h3>Tap a coverage row</h3><p>See the gap between the insurer estimate you entered and the contractor figure you entered for that bucket.</p>"
-        : "<h3>" + cfg.name + "</h3><p>Insurer RCV estimate entered: " + money(b.rcv) + ". Contractor actual/bid entered: " + money(b.contractor) + ".</p><p>Gap: " + money(c.gap) + ". Status: " + esc(b.status) + ". A gap on paper is a documentation prompt — final invoices and receipts are what usually close it in a claim file.</p>";
       renderGap();
     });
     host.appendChild(row);
   });
+  /* Detail panel is a pure function of selection state — repainted on every render
+     so it can never show stale numbers after data changes (sample off, import, edits). */
+  var gd = document.getElementById("gapDetail");
+  if(selGap !== null && BUCKETS[selGap]){
+    var cfg2 = BUCKETS[selGap], b2 = state.buckets[cfg2.id], c2 = bucketCalc(b2);
+    gd.innerHTML = "<h3>" + cfg2.name + "</h3><p>Insurer RCV estimate entered: " + money(b2.rcv) + ". Contractor actual/bid entered: " + money(b2.contractor) + ".</p><p>Gap: " + money(c2.gap) + ". Status: " + esc(b2.status) + ". A gap on paper is a documentation prompt — final invoices and receipts are what usually close it in a claim file.</p>";
+  } else {
+    if(selGap !== null) selGap = null;
+    gd.innerHTML = "<h3>Tap a coverage row</h3><p>See the gap between the insurer estimate you entered and the contractor figure you entered for that bucket.</p>";
+  }
+  if(gFocus !== null){ var gb = host.querySelector("[data-gidx='" + gFocus + "']"); if(gb) gb.focus(); }
 }
 </script>
 <script>
@@ -633,6 +694,8 @@ function roomTotals(){
 function renderContents(){
   var list = document.getElementById("contentsList");
   var bars = document.getElementById("roomBars");
+  var rAe = document.activeElement;
+  var rFocus = (rAe && rAe.classList && rAe.classList.contains("minibar")) ? rAe.getAttribute("data-room") : null;
   var rooms = roomTotals();
   var grand = rooms.reduce(function(s,r){ return s + r.total; }, 0);
   var maxV = Math.max(1, rooms.length ? rooms[0].total : 0);
@@ -643,18 +706,30 @@ function renderContents(){
     rooms.forEach(function(r){
       var btn = document.createElement("button");
       btn.type = "button"; btn.className = "minibar" + (selRoom === r.room ? " sel" : "");
+      btn.setAttribute("data-room", r.room);
       btn.setAttribute("aria-pressed", selRoom === r.room ? "true" : "false");
       btn.innerHTML = "<span class='mbname'>" + esc(r.room) + "</span><span class='mb-track'><span class='mb-fill' style='display:block;width:" + (r.total / maxV * 100) + "%'></span></span><span class='mb-amt'>" + money(r.total) + "</span>";
       btn.addEventListener("click", function(){
         selRoom = (selRoom === r.room ? null : r.room); beep(selRoom === null ? 440 : 720);
-        document.getElementById("roomDetail").innerHTML = selRoom === null
-          ? "<h3>Tap a room bar</h3><p>Filter the list to that room and see its replacement-cost total. Tap again to show everything.</p>"
-          : "<h3>" + esc(r.room) + "</h3><p>Replacement cost entered for this room: " + money(r.total) + " of " + money(grand) + " across all rooms.</p>";
         renderContents();
       });
       bars.appendChild(btn);
     });
   }
+  /* Room detail derives from selection state on every render (no stale panels). */
+  var rd = document.getElementById("roomDetail");
+  if(selRoom !== null){
+    var rm = rooms.filter(function(r){ return r.room === selRoom; })[0];
+    if(rm){
+      rd.innerHTML = "<h3>" + esc(rm.room) + "</h3><p>Replacement cost entered for this room: " + money(rm.total) + " of " + money(grand) + " across all rooms.</p>";
+    } else {
+      selRoom = null;
+      rd.innerHTML = "<h3>Tap a room bar</h3><p>Filter the list to that room and see its replacement-cost total. Tap again to show everything.</p>";
+    }
+  } else {
+    rd.innerHTML = "<h3>Tap a room bar</h3><p>Filter the list to that room and see its replacement-cost total. Tap again to show everything.</p>";
+  }
+  if(rFocus){ var rb = bars.querySelector("[data-room='" + CSS.escape(rFocus) + "']"); if(rb) rb.focus(); }
   var items = selRoom ? state.contents.filter(function(it){ return it.room === selRoom; }) : state.contents;
   document.getElementById("contentsEmpty").style.display = state.contents.length ? "none" : "block";
   list.innerHTML = items.map(function(it){
@@ -718,7 +793,9 @@ function resetForm(formId, saveId, cancelId, label){
 function renderAle(){
   var list = document.getElementById("aleList");
   var bars = document.getElementById("aleBars");
-  var limit = state.buckets.lossOfUse.limit, spent = aleTotal();
+  var aAe = document.activeElement;
+  var aFocus = (aAe && aAe.classList && aAe.classList.contains("minibar")) ? aAe.getAttribute("data-ale") : null;
+  var limit = Math.max(num(state.buckets.lossOfUse.limit), 0), spent = aleTotal();
   var byCat = {};
   state.ale.forEach(function(a){ byCat[a.category] = (byCat[a.category] || 0) + num(a.amount); });
   var cats = Object.keys(byCat).map(function(c){ return { cat:c, total:byCat[c] }; }).sort(function(a,b){ return b.total - a.total; });
@@ -726,28 +803,42 @@ function renderAle(){
   bars.innerHTML = "";
   var burnBtn = document.createElement("button");
   burnBtn.type = "button"; burnBtn.className = "minibar" + (selAle === "__burn" ? " sel" : "");
+  burnBtn.setAttribute("data-ale", "__burn");
   burnBtn.innerHTML = "<span class='mbname'>Total burn vs. limit</span><span class='mb-track'><span class='mb-fill ale' style='display:block;width:" + (limit > 0 ? Math.min(spent / limit * 100, 100) : 0) + "%'></span></span><span class='mb-amt'>" + money(spent) + (limit > 0 ? " / " + money(limit) : "") + "</span>";
   burnBtn.addEventListener("click", function(){
     selAle = (selAle === "__burn" ? null : "__burn"); beep(selAle === null ? 440 : 720);
-    document.getElementById("aleDetail").innerHTML = "<h3>ALE burn</h3><p>" + (limit > 0
-      ? "You entered " + money(spent) + " of ALE spending against a " + money(limit) + " loss-of-use limit (" + Math.round(spent / limit * 100) + "% used, " + money(Math.max(limit - spent, 0)) + " remaining on paper)."
-      : "Enter a loss-of-use limit on the coverage card above to measure burn.") + " Keep lodging and meal receipts together — they are the records usually requested for ALE.</p>";
     renderAle();
   });
   bars.appendChild(burnBtn);
   cats.forEach(function(c){
     var btn = document.createElement("button");
     btn.type = "button"; btn.className = "minibar" + (selAle === c.cat ? " sel" : "");
+    btn.setAttribute("data-ale", c.cat);
     btn.innerHTML = "<span class='mbname'>" + esc(c.cat) + "</span><span class='mb-track'><span class='mb-fill ale' style='display:block;width:" + (c.total / maxV * 100) + "%'></span></span><span class='mb-amt'>" + money(c.total) + "</span>";
     btn.addEventListener("click", function(){
       selAle = (selAle === c.cat ? null : c.cat); beep(selAle === null ? 440 : 720);
-      document.getElementById("aleDetail").innerHTML = selAle === null
-        ? "<h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p>"
-        : "<h3>" + esc(c.cat) + "</h3><p>Entered spending: " + money(c.total) + (limit > 0 ? " — " + Math.round(c.total / limit * 100) + "% of the entered loss-of-use limit." : ".") + "</p>";
       renderAle();
     });
     bars.appendChild(btn);
   });
+  /* ALE detail derives from selection state on every render (no stale panels). */
+  var ad = document.getElementById("aleDetail");
+  if(selAle === "__burn"){
+    ad.innerHTML = "<h3>ALE burn</h3><p>" + (limit > 0
+      ? "You entered " + money(spent) + " of ALE spending against a " + money(limit) + " loss-of-use limit (" + Math.round(spent / limit * 100) + "% used, " + money(Math.max(limit - spent, 0)) + " remaining on paper)."
+      : "Enter a loss-of-use limit on the coverage card above to measure burn.") + " Keep lodging and meal receipts together — they are the records usually requested for ALE.</p>";
+  } else if(selAle !== null){
+    var selCat = cats.filter(function(x){ return x.cat === selAle; })[0];
+    if(selCat){
+      ad.innerHTML = "<h3>" + esc(selCat.cat) + "</h3><p>Entered spending: " + money(selCat.total) + (limit > 0 ? " — " + Math.round(selCat.total / limit * 100) + "% of the entered loss-of-use limit." : ".") + "</p>";
+    } else {
+      selAle = null;
+      ad.innerHTML = "<h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p>";
+    }
+  } else {
+    ad.innerHTML = "<h3>ALE burn</h3><p>Add expenses below to see spending by category against the loss-of-use limit.</p>";
+  }
+  if(aFocus){ var ab = bars.querySelector("[data-ale='" + CSS.escape(aFocus) + "']"); if(ab) ab.focus(); }
   document.getElementById("aleEmpty").style.display = state.ale.length ? "none" : "block";
   var sorted = state.ale.slice().sort(function(a,b){ return (a.date || "").localeCompare(b.date || ""); });
   list.innerHTML = sorted.map(function(a){
@@ -776,6 +867,12 @@ function renderComms(){
 /* ---------- Documents ---------- */
 function renderDocs(){
   var list = document.getElementById("docList");
+  var doneCount = state.docs.filter(function(d){ return d.done; }).length;
+  var totalDocs = state.docs.length;
+  var pct = totalDocs > 0 ? Math.round(doneCount / totalDocs * 100) : 0;
+  document.getElementById("docProgress").innerHTML = totalDocs > 0
+    ? doneCount + " of " + totalDocs + " documents ready<span class='dp-track'><span class='dp-fill' style='width:" + pct + "%'></span></span>"
+    : "No documents in the checklist yet.";
   list.innerHTML = "";
   state.docs.forEach(function(d){
     var li = document.createElement("li");
@@ -833,14 +930,23 @@ function wireForms(){
 
   document.getElementById("aleForm").addEventListener("submit", function(e){
     e.preventDefault();
+    var errEl = document.getElementById("aleError");
+    var dateVal = document.getElementById("a_date").value;
+    var amtRaw = document.getElementById("a_amount").value;
+    function aleFail(msg, fieldId){
+      errEl.textContent = msg; errEl.style.display = "block";
+      document.getElementById(fieldId).focus(); beep(330);
+    }
+    if(!dateVal){ aleFail("Enter the date of this ALE expense, then press Add expense again.", "a_date"); return; }
+    if(amtRaw === "" || isNaN(parseFloat(amtRaw)) || num(amtRaw) <= 0){ aleFail("Enter an amount greater than $0 for this ALE expense.", "a_amount"); return; }
+    errEl.textContent = ""; errEl.style.display = "none";
     var data = {
-      date: document.getElementById("a_date").value,
+      date: dateVal,
       category: document.getElementById("a_category").value,
-      amount: num(document.getElementById("a_amount").value),
+      amount: num(amtRaw),
       reimbursed: document.getElementById("a_reimbursed").value,
       note: document.getElementById("a_note").value.trim()
     };
-    if(!data.date) return;
     if(editing.ale){ var it = state.ale.filter(function(x){ return x.id === editing.ale; })[0]; if(it) Object.assign(it, data); editing.ale = null; }
     else { data.id = uid(); state.ale.push(data); }
     save(); beep(760); resetForm("aleForm", "aleSave", "aleCancel", "Add expense");
@@ -909,7 +1015,8 @@ function buildPacket(){
     html += "<table><tr><th>Date</th><th>Who</th><th>How</th><th>What was said</th><th>Next step</th></tr>"
       + state.comms.map(function(m){ return "<tr><td>" + esc(fmtDate(m.date)) + "</td><td>" + esc(m.who) + "</td><td>" + esc(m.method) + "</td><td>" + esc(m.summary) + "</td><td>" + esc(m.next) + "</td></tr>"; }).join("") + "</table>";
   } else html += "<p>No communications recorded.</p>";
-  html += "<h2>Document checklist</h2><ul>"
+  html += "<h2>Document checklist</h2>"
+    + "<p><b>" + state.docs.filter(function(d){ return d.done; }).length + " of " + state.docs.length + " documents ready.</b></p><ul>"
     + state.docs.map(function(d){ return "<li>" + (d.done ? "☑ " : "☐ ") + esc(d.name) + "</li>"; }).join("") + "</ul>"
     + "<div class='disc'><strong>Disclaimer:</strong> This packet is an organizational and educational record only. It is not legal, insurance, or financial advice and is not a substitute for a licensed public adjuster or an attorney. Deadlines shown are user-entered — confirm them against your policy and insurer letters. For a large, denied, or disputed claim, consider consulting a licensed public adjuster or attorney in your area.</div>";
   document.getElementById("packet").innerHTML = html;
@@ -951,13 +1058,62 @@ function sampleState(){
   return s;
 }
 function setStatus(msg){ document.getElementById("statusLine").textContent = msg || ""; }
+/* ---------- Backup import ---------- */
+var IMPORT_BUCKET_FIELDS = ["limit","deductible","rcv","depreciation","acvPaid","depRecovered","suppPaid","contractor"];
+function backupProblem(d){
+  if(!d || typeof d !== "object" || Array.isArray(d)) return "That file is not a claim tracker backup (no data object found).";
+  if(!d.claim || typeof d.claim !== "object" || Array.isArray(d.claim)) return "That file is not a claim tracker backup (claim details are missing).";
+  if(!d.buckets || typeof d.buckets !== "object" || Array.isArray(d.buckets)) return "That backup is missing its coverage figures.";
+  for(var i = 0; i < BUCKETS.length; i++){
+    var bk = d.buckets[BUCKETS[i].id];
+    if(!bk || typeof bk !== "object" || Array.isArray(bk)) return "That backup is missing the " + BUCKETS[i].name + " coverage figures.";
+    for(var j = 0; j < IMPORT_BUCKET_FIELDS.length; j++){
+      var f = IMPORT_BUCKET_FIELDS[j];
+      if(!(f in bk) || bk[f] === null || bk[f] === "" || isNaN(parseFloat(bk[f]))) return "That backup has a coverage figure (" + f + ") that is not a number.";
+    }
+  }
+  var arrs = ["contents","ale","comms","docs"];
+  for(var a = 0; a < arrs.length; a++){ if(!Array.isArray(d[arrs[a]])) return "That backup is missing its " + arrs[a] + " list."; }
+  return null;
+}
+function sanitizeBackup(d){
+  var s = blankState();
+  ["insurer","claimNo","lossDate","lossType","address","adjuster","deadline","deadline2Label","deadline2"].forEach(function(k){
+    s.claim[k] = d.claim[k] == null ? "" : String(d.claim[k]);
+  });
+  BUCKETS.forEach(function(cfg){
+    var src = d.buckets[cfg.id];
+    IMPORT_BUCKET_FIELDS.forEach(function(f){ s.buckets[cfg.id][f] = Math.max(num(src[f]), 0); });
+    s.buckets[cfg.id].status = STATUSES.indexOf(src.status) >= 0 ? src.status : "Not started";
+  });
+  s.contents = d.contents.filter(function(x){ return x && typeof x === "object"; }).map(function(x){
+    return { id: x.id ? String(x.id) : uid(), item: String(x.item || ""), room: String(x.room || ""), brand: String(x.brand || ""), age: x.age == null ? "" : x.age, cost: Math.max(num(x.cost), 0), proof: String(x.proof || ""), replaced: String(x.replaced || "Not replaced yet"), submitted: String(x.submitted || "Not submitted") };
+  });
+  s.ale = d.ale.filter(function(x){ return x && typeof x === "object"; }).map(function(x){
+    return { id: x.id ? String(x.id) : uid(), date: String(x.date || ""), category: String(x.category || "Other"), amount: Math.max(num(x.amount), 0), reimbursed: String(x.reimbursed || "Not yet"), note: String(x.note || "") };
+  });
+  s.comms = d.comms.filter(function(x){ return x && typeof x === "object"; }).map(function(x){
+    return { id: x.id ? String(x.id) : uid(), date: String(x.date || ""), who: String(x.who || "Other"), method: String(x.method || "Phone"), next: String(x.next || ""), summary: String(x.summary || "") };
+  });
+  s.docs = d.docs.filter(function(x){ return x && typeof x === "object" && String(x.name || "").trim(); }).map(function(x){
+    return { id: x.id ? String(x.id) : uid(), name: String(x.name), done: !!x.done, custom: !!x.custom };
+  });
+  return s;
+}
+
 function setSample(on){
   var btn = document.getElementById("sampleBtn");
   if(on){
     try {
       if(localStorage.getItem(LS_BACKUP) === null) localStorage.setItem(LS_BACKUP, JSON.stringify(state));
+      if(localStorage.getItem(LS_BACKUP) === null) throw new Error("backup snapshot was not written");
       localStorage.setItem(LS_SAMPLE, "1");
-    } catch(e){ storageOK = false; document.getElementById("storageWarn").style.display = "block"; }
+    } catch(e){
+      /* Never overwrite real data without a snapshot — abort sample mode entirely. */
+      storageOK = false; document.getElementById("storageWarn").style.display = "block";
+      setStatus("Sample data was not loaded: this browser could not save a backup of your entries first, so nothing was changed.");
+      return;
+    }
     state = sampleState(); sampleMode = true; save();
     setStatus("Sample claim loaded. Your own entries are saved and will come back exactly as you left them when you turn sample data off.");
   } else {
@@ -988,7 +1144,12 @@ function wireHeader(){
   themeBtn.setAttribute("aria-pressed", initial === "dark" ? "true" : "false");
   themeBtn.addEventListener("click", function(){ applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark"); beep(600); });
   var soundBtn = document.getElementById("soundBtn");
-  function paintSound(){ soundBtn.setAttribute("aria-pressed", soundOn() ? "true" : "false"); }
+  function paintSound(){
+    var on = soundOn();
+    soundBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    soundBtn.classList.toggle("snd-off", !on);
+    soundBtn.title = on ? "Sound: on — tap to mute" : "Sound: off — tap to unmute";
+  }
   paintSound();
   soundBtn.addEventListener("click", function(){
     try { localStorage.setItem(LS_SOUND, soundOn() ? "0" : "1"); } catch(e){}
@@ -1002,6 +1163,53 @@ function wireHeader(){
     aEl.href = URL.createObjectURL(blob); aEl.download = "claim-tracker-backup.json"; aEl.click();
     setTimeout(function(){ URL.revokeObjectURL(aEl.href); }, 400);
     beep(700);
+  });
+  var importMsg = document.getElementById("importMsg");
+  function importFail(msg){
+    importMsg.textContent = msg; importMsg.style.display = "block"; beep(330);
+  }
+  document.getElementById("importBtn").addEventListener("click", function(){
+    if(sampleMode){
+      importFail("Sample data is on. Turn sample data off first — that restores your own entries — then import your backup.");
+      document.getElementById("importBtn").scrollIntoView({ block:"center" });
+      return;
+    }
+    importMsg.textContent = ""; importMsg.style.display = "none";
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", function(ev){
+    var file = ev.target.files && ev.target.files[0];
+    ev.target.value = "";
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onerror = function(){ importFail("That file could not be read. Nothing was changed."); };
+    reader.onload = function(){
+      var parsed = null;
+      try { parsed = JSON.parse(String(reader.result)); }
+      catch(e){ importFail("That file is not readable backup data (invalid JSON). Nothing was changed."); return; }
+      var problem = backupProblem(parsed);
+      if(problem){ importFail(problem + " Nothing was changed."); return; }
+      var clean = sanitizeBackup(parsed);
+      var summary = "Replace ALL current data with this backup?\n\n"
+        + "Contents lines: " + clean.contents.length + "\n"
+        + "ALE entries: " + clean.ale.length + "\n"
+        + "Communications log entries: " + clean.comms.length + "\n"
+        + "Checklist documents: " + clean.docs.length + "\n\n"
+        + "Your current entries will be replaced. This cannot be undone.";
+      if(!window.confirm(summary)) { setStatus("Import cancelled — nothing was changed."); return; }
+      state = clean;
+      try { localStorage.removeItem(LS_BACKUP); localStorage.setItem(LS_SAMPLE, "0"); } catch(e){}
+      sampleMode = false;
+      document.getElementById("sampleBtn").setAttribute("aria-pressed", "false");
+      selWaterfall = selDonut = selGap = selRoom = selAle = null;
+      editing = { contents:null, ale:null, comms:null };
+      save();
+      buildClaimForm(); buildBuckets(); renderAll();
+      importMsg.textContent = ""; importMsg.style.display = "none";
+      setStatus("Backup imported — the data on this device now matches the file.");
+      beep(760);
+    };
+    reader.readAsText(file);
   });
   window.addEventListener("beforeprint", buildPacket);
 }
