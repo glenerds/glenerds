@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Disc golf score log, lifetime stats tracker, round history and disc bag — no account, no subscription</title>
+<style>
+:root{
+  --bg:#f2f5f1; --card:#ffffff; --ink:#1c2420; --muted:#5d6d64; --line:#dce5dd;
+  --green:#1d7a3d; --green-soft:#e2f2e6; --accent:#2563eb; --accent-ink:#ffffff;
+  --warn:#c2410c; --warn-soft:#fdeeda; --chip:#eef3ee; --shadow:0 1px 3px rgba(20,40,25,.10);
+  --input:#ffffff;
+}
+body.dark{
+  --bg:#121814; --card:#1b241d; --ink:#e7efe8; --muted:#9db3a4; --line:#2c3a30;
+  --green:#4cc36e; --green-soft:#1d3323; --accent:#5b8def; --chip:#243028;
+  --warn:#f59e6c; --warn-soft:#3a2716; --shadow:0 1px 3px rgba(0,0,0,.4); --input:#232f26;
+}
+*{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust:100%; }
+body{ margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--ink); font-size:16px; line-height:1.45; }
+button{ font:inherit; cursor:pointer; }
+input,select,textarea{ font:inherit; color:var(--ink); }
+header.top{ max-width:1180px; margin:0 auto; padding:14px 16px 6px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.logo{ width:44px; height:44px; border-radius:12px; background:var(--green); display:flex; align-items:center; justify-content:center; flex:none; }
+.logo svg{ width:26px; height:26px; }
+.brand h1{ font-size:24px; margin:0; line-height:1.1; }
+.brand p{ margin:2px 0 0; color:var(--muted); font-size:15px; }
+.top-actions{ margin-left:auto; display:flex; gap:8px; align-items:center; }
+.icon-btn{ width:44px; height:44px; border-radius:12px; border:1px solid var(--line); background:var(--card); display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); }
+.icon-btn svg{ width:22px; height:22px; stroke:var(--ink); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.icon-btn.on{ background:var(--green-soft); border-color:var(--green); }
+.icon-btn.on svg{ stroke:var(--green); }
+.more-apps{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--ink); text-decoration:none; font-weight:600; font-size:15px; box-shadow:var(--shadow); }
+.more-apps svg{ width:18px; height:18px; stroke:var(--accent); fill:none; stroke-width:2; }
+main{ max-width:1180px; margin:0 auto; padding:6px 16px 40px; }
+.samplebar{ display:none; background:var(--warn-soft); border:1px solid var(--warn); color:var(--ink); border-radius:12px; padding:10px 14px; margin:8px 0; font-size:15px; }
+.samplebar.show{ display:block; }
+.samplebar b{ color:var(--warn); }
+.stats-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin:10px 0; }
+.stat{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); }
+.stat .n{ font-size:26px; font-weight:800; line-height:1.1; }
+.stat .l{ color:var(--muted); font-size:15px; }
+.cols{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:14px; align-items:start; }
+@media (max-width:860px){ .cols{ grid-template-columns:minmax(0,1fr); } }
+.panel{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow); margin-bottom:14px; }
+.panel h2{ margin:0 0 4px; font-size:19px; }
+.panel .sub{ color:var(--muted); font-size:15px; margin:0 0 12px; }
+.tabs{ display:flex; gap:8px; margin:10px 0 14px; flex-wrap:wrap; }
+.tab{ padding:10px 18px; border-radius:999px; border:1px solid var(--line); background:var(--card); font-weight:700; min-height:44px; }
+.tab.on{ background:var(--green); color:#fff; border-color:var(--green); }
+label.f{ display:block; font-weight:600; font-size:15px; margin:12px 0 5px; }
+input[type=text],input[type=date],input[type=number],select,textarea{ width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--input); font-size:16px; }
+.frow{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media (max-width:560px){ .frow{ grid-template-columns:1fr; } }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 18px; min-height:46px; border-radius:11px; border:1px solid var(--line); background:var(--chip); color:var(--ink); font-weight:700; font-size:16px; }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+.btn.green{ background:var(--green); border-color:var(--green); color:#fff; }
+.btn.danger{ color:#b91c1c; }
+body.dark .btn.danger{ color:#f87171; }
+.btnrow{ display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+.hint{ color:var(--muted); font-size:15px; }
+.holegrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:8px; margin-top:8px; }
+.hole{ border:1.5px solid var(--line); border-radius:12px; padding:8px; background:var(--input); }
+.hole .hn{ font-weight:800; font-size:15px; display:flex; justify-content:space-between; align-items:center; }
+.hole .hn .cls{ font-size:13px; font-weight:700; padding:1px 8px; border-radius:999px; background:var(--chip); }
+.stepper{ display:flex; align-items:center; gap:6px; margin-top:6px; }
+.stepper button{ width:44px; height:44px; border-radius:10px; border:1.5px solid var(--line); background:var(--card); font-size:20px; font-weight:800; }
+.stepper .v{ flex:1; text-align:center; font-size:19px; font-weight:800; }
+.stepper .tag{ font-size:13px; color:var(--muted); width:34px; }
+.seg-legend{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.seg-legend .li{ font-size:14px; padding:4px 10px; border-radius:999px; background:var(--chip); }
+.seg-legend .li b{ font-size:14px; }
+.donut-wrap{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.donut-box{ position:relative; width:190px; height:190px; flex:none; }
+.donut-box svg{ width:190px; height:190px; }
+.donut-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 44px; pointer-events:none; }
+.donut-center b{ font-size:24px; line-height:1; }
+.donut-center span{ font-size:13px; color:var(--muted); }
+table.list{ width:100%; border-collapse:collapse; font-size:15px; }
+table.list th{ text-align:left; color:var(--muted); font-weight:600; padding:8px 6px; border-bottom:2px solid var(--line); font-size:14px; }
+table.list td{ padding:9px 6px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr.clickable{ cursor:pointer; }
+tr.clickable:hover td{ background:var(--chip); }
+tr.sel td{ background:var(--green-soft); }
+.pos{ color:var(--green); font-weight:700; } .neg{ color:var(--warn); font-weight:700; }
+.bars{ display:flex; flex-direction:column; gap:7px; margin-top:6px; }
+.bar-row{ display:grid; grid-template-columns:110px 1fr 52px; gap:8px; align-items:center; font-size:15px; }
+.bar-track{ height:16px; border-radius:8px; background:var(--chip); overflow:hidden; }
+.bar-fill{ height:100%; background:var(--green); border-radius:8px; }
+.chips{ display:flex; gap:6px; flex-wrap:wrap; }
+.chip{ padding:6px 12px; border-radius:999px; background:var(--chip); border:1px solid var(--line); font-size:14px; font-weight:600; }
+.chip.on{ background:var(--green); color:#fff; border-color:var(--green); }
+.toast{ position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(20px); background:#1c2420; color:#fff; padding:12px 18px; border-radius:12px; font-size:15px; opacity:0; pointer-events:none; transition:.25s; max-width:92vw; text-align:center; z-index:50; box-shadow:0 6px 24px rgba(0,0,0,.3); }
+.toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+.detail-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(86px,1fr)); gap:6px; margin-top:8px; }
+.dcell{ border:1px solid var(--line); border-radius:9px; padding:6px; text-align:center; font-size:14px; background:var(--input); }
+.dcell b{ font-size:17px; display:block; }
+footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:center; }
+#printReport{ display:none; }
+@media print{
+  body{ background:#fff; } header.top,.tabs,.samplebar,.no-print,footer.cta,.toast{ display:none !important; }
+  main{ max-width:100%; } .panel{ box-shadow:none; break-inside:avoid; }
+  #printReport{ display:block; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v9"/><path d="M12 7c3 0 6 1.2 6 1.2S15 9.5 12 9.5 6 8.2 6 8.2 9 7 12 7Z"/><path d="M8 21c0-3 1.8-5 4-5s4 2 4 5"/><path d="M5 21h14"/></svg></div>
+  <div class="brand"><h1 id="brandName">BasketLog</h1><p>Disc golf round log &amp; lifetime stats — no account, no subscription</p></div>
+  <div class="top-actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+    <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
+    <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg></button>
+    <button class="icon-btn" id="soundBtn" title="Sounds" aria-label="Toggle sounds"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path class="sw" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
+<main>
+  <div class="samplebar" id="sampleBar"><b>Sample data is on.</b> This is a made-up player's history so you can see everything working. Your real rounds come back exactly as they were when you tap the flask again.</div>
+  <div class="stats-grid" id="statTiles"></div>
+  <div class="tabs no-print" role="tablist">
+    <button class="tab on" id="tabRounds">Rounds</button>
+    <button class="tab" id="tabAdd">Add a round</button>
+    <button class="tab" id="tabStats">Lifetime stats</button>
+    <button class="tab" id="tabBag">Disc bag</button>
+  </div>
+
+  <section id="viewRounds">
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Your rounds</h2>
+          <p class="sub">Newest first. Tap a round to see the full card. Every round stays here forever — nothing hides behind a subscription.</p>
+          <div class="btnrow no-print" style="margin:0 0 12px">
+            <button class="btn" id="importBtn">Import UDisc CSV</button>
+            <button class="btn" id="exportCsvBtn">Export CSV</button>
+            <button class="btn" id="backupBtn">Backup</button>
+            <button class="btn" id="restoreBtn">Restore</button>
+            <input type="file" id="csvFile" accept=".csv,text/csv" hidden>
+            <input type="file" id="jsonFile" accept=".json,application/json" hidden>
+          </div>
+          <div id="roundsTableWrap"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" id="roundDetailPanel">
+          <h2>Round detail</h2>
+          <p class="sub" id="roundDetailSub">Tap any round on the left to see every hole.</p>
+          <div id="roundDetail"></div>
+        </div>
+        <div class="panel">
+          <h2>Scoring mix</h2>
+          <p class="sub">Every hole you've ever logged, by result. Tap a slice to pin it.</p>
+          <div class="donut-wrap">
+            <div class="donut-box"><svg id="mixDonut" viewBox="0 0 100 100" role="img" aria-label="Scoring mix chart"></svg><div class="donut-center" id="mixCenter"></div></div>
+            <div class="seg-legend" id="mixLegend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewAdd" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Add a round</h2>
+          <p class="sub">Course and layout are just names you type — no course database, no GPS, works for any course on Earth.</p>
+          <div class="frow">
+            <div><label class="f" for="inCourse">Course</label><input type="text" id="inCourse" placeholder="e.g. Maple Hill"></div>
+            <div><label class="f" for="inLayout">Layout</label><input type="text" id="inLayout" placeholder="e.g. Blues, Long tees"></div>
+          </div>
+          <div class="frow">
+            <div><label class="f" for="inDate">Date</label><input type="date" id="inDate"></div>
+            <div><label class="f" for="inHoles">Holes</label><select id="inHoles"><option>9</option><option selected>18</option><option>24</option><option>27</option></select></div>
+          </div>
+          <label class="f">Quick par set</label>
+          <div class="chips" id="parChips">
+            <button class="chip" data-parset="3">All par 3</button>
+            <button class="chip" data-parset="mix">Typical mix (mostly 3s)</button>
+            <button class="chip" data-parset="4">All par 4</button>
+          </div>
+          <div class="btnrow"><button class="btn green" id="saveRoundBtn">Save round</button><button class="btn" id="resetFormBtn">Clear form</button></div>
+          <p class="hint" id="formTotal" style="margin-top:10px"></p>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Hole by hole</h2>
+          <p class="sub">Set each hole's par, then tap + / − for your throws. Score starts at par — usually just a tap or two per hole.</p>
+          <div class="holegrid" id="holeGrid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewStats" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Score trend</h2>
+          <p class="sub">Your score vs par, round by round. Tap any dot to see that round.</p>
+          <div id="trendWrap"></div>
+          <p class="hint" id="trendDetail">Tap a dot for the round behind it.</p>
+        </div>
+        <div class="panel">
+          <h2>Best rounds</h2>
+          <p class="sub">Your lowest scores vs par, ever.</p>
+          <div id="bestWrap"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>By course</h2>
+          <p class="sub">Tap a course to filter your rounds list to it.</p>
+          <div id="courseWrap"></div>
+        </div>
+        <div class="panel">
+          <h2>Print your stats</h2>
+          <p class="sub">A clean one-page lifetime summary: totals, scoring mix, best rounds, course averages.</p>
+          <div class="btnrow no-print"><button class="btn primary" id="printBtn">Print stats report</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewBag" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel">
+          <h2>Add a disc</h2>
+          <p class="sub">Your bag, your discs. Flight numbers are the four on the disc (speed / glide / turn / fade) — leave blank if unsure.</p>
+          <label class="f" for="dName">Disc name</label><input type="text" id="dName" placeholder="e.g. Innova Destroyer">
+          <div class="frow">
+            <div><label class="f" for="dType">Type</label><select id="dType"><option>Distance driver</option><option>Fairway driver</option><option>Midrange</option><option>Putt &amp; approach</option></select></div>
+            <div><label class="f" for="dPlastic">Plastic / note</label><input type="text" id="dPlastic" placeholder="e.g. Star, 172g"></div>
+          </div>
+          <div class="frow">
+            <div><label class="f" for="dSpeed">Speed</label><input type="number" id="dSpeed" min="1" max="14" step="0.5"></div>
+            <div><label class="f" for="dGlide">Glide</label><input type="number" id="dGlide" min="1" max="7" step="0.5"></div>
+          </div>
+          <div class="frow">
+            <div><label class="f" for="dTurn">Turn</label><input type="number" id="dTurn" min="-5" max="2" step="0.5"></div>
+            <div><label class="f" for="dFade">Fade</label><input type="number" id="dFade" min="0" max="6" step="0.5"></div>
+          </div>
+          <div class="btnrow"><button class="btn green" id="addDiscBtn">Add to bag</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>In your bag</h2>
+          <p class="sub">Tap a disc to mark it in or out of the bag.</p>
+          <div class="bars" id="bagBars"></div>
+          <div id="bagWrap" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div id="printReport"></div>
+</main>
+<footer class="cta">
+  <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+  <p class="hint" style="margin-top:12px">BasketLog keeps everything in this browser on this device — no account, no cloud, no subscription. Back up now and then from the Rounds tab.</p>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+"use strict";
+const BRAND = "BasketLog";
+const LS_KEY = "basketlog_v1";
+const $ = s => document.querySelector(s);
+const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const clone = o => JSON.parse(JSON.stringify(o));
+const fmtD = iso => { if(!iso) return ""; const p = iso.split("-"); return p.length===3 ? `${p[1]}/${p[2]}/${p[0]}` : iso; };
+const sgn = n => n===0 ? "E" : (n>0 ? "+"+n : String(n));
+
+const blankState = () => ({ rounds: [], discs: [], sampling:false, snapshot:null, theme:null, sound:true, selRound:null, courseFilter:"" });
+let S = blankState();
+let _saveWarned = false;
+function load(){ try{ const raw = localStorage.getItem(LS_KEY); if(raw){ const d = JSON.parse(raw); if(d && Array.isArray(d.rounds) && Array.isArray(d.discs)) S = Object.assign(blankState(), d); } }catch(e){} }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ if(!_saveWarned){ _saveWarned = true; toast("Couldn't save — this browser's storage may be full. Use Backup in the Rounds tab to keep a copy."); } } }
+
+let AC = null;
+function beep(freq, dur, type, gain){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === "suspended") AC.resume();
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type || "sine"; o.frequency.value = freq;
+    g.gain.setValueAtTime(gain || 0.08, AC.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + (dur || 0.12));
+    o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime + (dur || 0.12));
+  }catch(e){}
+}
+const tick = () => beep(660, .07, "triangle", .06);
+const chime = () => { beep(660,.1,"sine",.07); setTimeout(()=>beep(880,.14,"sine",.07), 90); };
+const thud = () => beep(180, .12, "sine", .08);
+
+let toastTimer = null;
+function toast(msg){ const t = $("#toast"); t.innerText = msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove("show"), 3400); }
+
+/* ---------- round math ---------- */
+function roundPar(r){ return r.holes.reduce((a,h)=>a + (h.par||0), 0); }
+function roundScore(r){ return r.holes.reduce((a,h)=>a + (h.score||0), 0); }
+function roundDiff(r){ return roundScore(r) - roundPar(r); }
+const CLASSES = [
+  { key:"ace",    label:"Aces",        color:"#f59e0b" },
+  { key:"eagle",  label:"Eagles",      color:"#2563eb" },
+  { key:"birdie", label:"Birdies",     color:"#1d7a3d" },
+  { key:"par",    label:"Pars",        color:"#64748b" },
+  { key:"bogey",  label:"Bogeys",      color:"#c2410c" },
+  { key:"double", label:"Doubles+",    color:"#7c2d12" }
+];
+function holeClass(h){
+  const d = (h.score||0) - (h.par||0);
+  if(h.score === 1) return "ace";
+  if(d <= -2) return "eagle";
+  if(d === -1) return "birdie";
+  if(d === 0) return "par";
+  if(d === 1) return "bogey";
+  return "double";
+}
+function allHoles(){ return S.rounds.flatMap(r => r.holes); }
+function classCounts(){
+  const c = {}; CLASSES.forEach(k => c[k.key] = 0);
+  allHoles().forEach(h => c[holeClass(h)]++);
+  return c;
+}
+
+/* ---------- header ---------- */
+function applyTheme(){
+  const dark = S.theme ? S.theme === "dark" : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.body.classList.toggle("dark", dark);
+  $("#themeBtn").classList.toggle("on", dark);
+}
+function applySound(){ $("#soundBtn").classList.toggle("on", !!S.sound); $("#soundBtn").style.opacity = S.sound ? "1" : ".55"; }
+$("#themeBtn").addEventListener("click", ()=>{ S.theme = document.body.classList.contains("dark") ? "light" : "dark"; applyTheme(); save(); tick(); });
+$("#soundBtn").addEventListener("click", ()=>{ S.sound = !S.sound; applySound(); save(); if(S.sound) tick(); });
+
+/* ---------- tabs ---------- */
+const VIEWS = [["#tabRounds","#viewRounds"],["#tabAdd","#viewAdd"],["#tabStats","#viewStats"],["#tabBag","#viewBag"]];
+function showTab(tabSel){
+  VIEWS.forEach(([t,v])=>{ $(t).classList.toggle("on", t===tabSel); $(v).hidden = t!==tabSel; });
+  tick();
+}
+VIEWS.forEach(([t,v])=> $(t).addEventListener("click", ()=>showTab(t)));
+
+/* ---------- stat tiles ---------- */
+function renderTiles(){
+  const rounds = S.rounds.length;
+  const holes = allHoles().length;
+  const c = classCounts();
+  const diffs = S.rounds.map(roundDiff);
+  const avg = rounds ? (diffs.reduce((a,b)=>a+b,0)/rounds) : 0;
+  const best = rounds ? Math.min(...diffs) : 0;
+  const discs = S.discs.filter(d=>d.inBag).length;
+  const tiles = [
+    [rounds, "Lifetime rounds"],
+    [holes, "Holes logged"],
+    [rounds ? sgn(Math.round(avg*10)/10) : "—", "Avg vs par / round"],
+    [rounds ? sgn(best) : "—", "Best round vs par"],
+    [c.birdie + c.eagle + c.ace, "Birdies or better"],
+    [c.ace, "Aces"],
+    [discs, "Discs in the bag"]
+  ];
+  $("#statTiles").innerHTML = tiles.map(t=>`<div class="stat"><div class="n">${t[0]}</div><div class="l">${t[1]}</div></div>`).join("");
+}
+
+/* ---------- rounds list + detail ---------- */
+function renderRounds(){
+  let rounds = [...S.rounds].sort((a,b)=> (b.date||"").localeCompare(a.date||"") || (b.created||0)-(a.created||0));
+  if(S.courseFilter) rounds = rounds.filter(r => r.course === S.courseFilter);
+  const wrap = $("#roundsTableWrap");
+  if(!S.rounds.length){
+    wrap.innerHTML = `<p class="hint">No rounds yet. Tap <b>Add a round</b> to log your first, or <b>Import UDisc CSV</b> to bring in your history. Or tap the flask up top to explore with sample data.</p>`;
+  } else if(!rounds.length){
+    wrap.innerHTML = `<p class="hint">No rounds at ${esc(S.courseFilter)} yet. <button class="chip" id="clearFilterBtn">Show all courses</button></p>`;
+    $("#clearFilterBtn").addEventListener("click", ()=>{ S.courseFilter=""; renderRounds(); });
+  } else {
+    wrap.innerHTML = `<table class="list"><thead><tr><th>Date</th><th>Course</th><th>Score</th><th>Vs par</th></tr></thead><tbody>${
+      rounds.map(r=>{ const d = roundDiff(r); return `<tr class="clickable ${S.selRound===r.id?"sel":""}" data-round="${r.id}"><td>${fmtD(r.date)}</td><td><b>${esc(r.course)}</b>${r.layout?`<br><span class="hint">${esc(r.layout)}</span>`:""}</td><td>${roundScore(r)} / ${roundPar(r)}</td><td class="${d<0?"pos":d>0?"neg":""}">${sgn(d)}</td></tr>`; }).join("")
+    }</tbody></table>`;
+    wrap.querySelectorAll("[data-round]").forEach(tr => tr.addEventListener("click", ()=>{ S.selRound = tr.dataset.round; save(); renderRounds(); renderDetail(); tick(); }));
+  }
+  renderTiles();
+}
+function renderDetail(){
+  const r = S.rounds.find(x => x.id === S.selRound);
+  const box = $("#roundDetail"), sub = $("#roundDetailSub");
+  if(!r){ box.innerHTML = ""; sub.textContent = "Tap any round on the left to see every hole."; return; }
+  const d = roundDiff(r), c = {};
+  r.holes.forEach(h => { const k = holeClass(h); c[k] = (c[k]||0)+1; });
+  const mixTxt = CLASSES.filter(k=>c[k.key]).map(k=>`${c[k.key]} ${k.label.toLowerCase()}`).join(" · ");
+  sub.textContent = `${fmtD(r.date)} — ${r.course}${r.layout ? " · " + r.layout : ""}`;
+  box.innerHTML = `
+    <p style="margin:0 0 4px"><b style="font-size:20px">${roundScore(r)} throws</b> on par ${roundPar(r)} — <span class="${d<0?"pos":d>0?"neg":""}"><b>${sgn(d)}</b></span></p>
+    <p class="hint" style="margin:0 0 8px">${mixTxt || ""}</p>
+    <div class="detail-grid">${r.holes.map((h,i)=>{ const hc = CLASSES.find(k=>k.key===holeClass(h)); return `<div class="dcell">H${i+1} · par ${h.par}<b style="color:${hc.color}">${h.score}</b>${h.putts!=null?`<span class="hint">${h.putts} putts</span>`:""}</div>`; }).join("")}</div>
+    ${r.note ? `<p style="margin:10px 0 0">${esc(r.note)}</p>` : ""}
+    <div class="btnrow no-print"><button class="btn danger" id="delRoundBtn">Delete this round</button></div>`;
+  $("#delRoundBtn").addEventListener("click", ()=>{
+    if(!confirm("Delete this round for good?")) return;
+    S.rounds = S.rounds.filter(x => x.id !== r.id);
+    if(S.selRound === r.id) S.selRound = null;
+    save(); renderAll(); thud(); toast("Round deleted.");
+  });
+}
+
+/* ---------- scoring mix donut ---------- */
+let mixSel = null;
+function renderMix(){
+  const counts = classCounts();
+  const total = Object.values(counts).reduce((a,b)=>a+b,0);
+  const svg = $("#mixDonut"), center = $("#mixCenter"), legend = $("#mixLegend");
+  if(!total){
+    svg.innerHTML = `<circle cx="50" cy="50" r="38" fill="none" stroke="var(--line)" stroke-width="13"/>`;
+    center.innerHTML = `<b>—</b><span>no holes yet</span>`;
+    legend.innerHTML = `<span class="hint">Log a round and your lifetime mix shows up here.</span>`;
+    return;
+  }
+  const R = 38, C = 2*Math.PI*R;
+  let acc = 0, parts = "";
+  CLASSES.forEach(k => {
+    const n = counts[k.key]; if(!n) return;
+    const frac = n/total, len = Math.max(frac*C - 1.2, 0.6);
+    const sel = mixSel === k.key;
+    const rr = sel ? R - 2 : R;
+    const cc = 2*Math.PI*rr;
+    const llen = Math.max(frac*cc - 1.2, 0.6);
+    parts += `<circle cx="50" cy="50" r="${rr}" fill="none" stroke="${k.color}" stroke-width="${sel?15:13}" stroke-dasharray="${llen} ${cc-llen}" stroke-dashoffset="${-acc*cc}" transform="rotate(-90 50 50)" data-seg="${k.key}" style="cursor:pointer" opacity="${mixSel && !sel ? .45 : 1}"><title>${k.label}: ${n}</title></circle>`;
+    acc += frac;
+  });
+  svg.innerHTML = parts;
+  svg.querySelectorAll("[data-seg]").forEach(el => el.addEventListener("click", ()=>{
+    mixSel = mixSel === el.dataset.seg ? null : el.dataset.seg;
+    renderMix(); tick();
+  }));
+  const selK = CLASSES.find(k => k.key === mixSel);
+  if(selK && counts[selK.key]){
+    center.innerHTML = `<b>${Math.round(counts[selK.key]/total*100)}%</b><span>${selK.label.toLowerCase()} (${counts[selK.key]})</span>`;
+  } else {
+    const bird = counts.birdie + counts.eagle + counts.ace;
+    center.innerHTML = `<b>${Math.round(bird/total*100)}%</b><span>birdie or better</span>`;
+  }
+  legend.innerHTML = CLASSES.filter(k=>counts[k.key]).map(k=>`<span class="li" style="${mixSel===k.key?"outline:2px solid "+k.color:""}"><b style="color:${k.color}">●</b> ${k.label} — ${counts[k.key]} (${Math.round(counts[k.key]/total*100)}%)</span>`).join("");
+}
+</script>
+<script>
+/* ---------- add-round form ---------- */
+let formHoles = []; // {par, score}
+function seedForm(n, mode){
+  formHoles = [];
+  for(let i=0;i<n;i++){
+    let par = 3;
+    if(mode === "4") par = 4;
+    if(mode === "mix") par = (i % 7 === 3) ? 4 : 3;
+    formHoles.push({ par, score: par });
+  }
+  renderFormGrid();
+}
+function renderFormGrid(){
+  $("#holeGrid").innerHTML = formHoles.map((h,i)=>{
+    const hc = CLASSES.find(k => k.key === holeClass(h));
+    return `<div class="hole"><div class="hn">Hole ${i+1}<span class="cls" style="color:${hc.color}">${hc.label.replace("Doubles+","Dbl+")}</span></div>
+    <div class="stepper"><span class="tag">Par</span><button data-p="-1" data-i="${i}" aria-label="par down">−</button><span class="v">${h.par}</span><button data-p="1" data-i="${i}" aria-label="par up">+</button></div>
+    <div class="stepper"><span class="tag">Score</span><button data-s="-1" data-i="${i}" aria-label="score down">−</button><span class="v">${h.score}</span><button data-s="1" data-i="${i}" aria-label="score up">+</button></div></div>`;
+  }).join("");
+  $("#holeGrid").querySelectorAll("button").forEach(b => b.addEventListener("click", ()=>{
+    const i = +b.dataset.i;
+    if(b.dataset.p) formHoles[i].par = Math.min(6, Math.max(2, formHoles[i].par + (+b.dataset.p)));
+    if(b.dataset.s) formHoles[i].score = Math.min(15, Math.max(1, formHoles[i].score + (+b.dataset.s)));
+    renderFormGrid(); tick();
+  }));
+  const tp = formHoles.reduce((a,h)=>a+h.par,0), ts = formHoles.reduce((a,h)=>a+h.score,0);
+  $("#formTotal").innerHTML = formHoles.length ? `Right now: <b>${ts} throws</b> on par ${tp} (<b>${sgn(ts-tp)}</b>)` : "";
+}
+$("#inHoles").addEventListener("change", e => seedForm(+e.target.value, "3"));
+$("#parChips").querySelectorAll("[data-parset]").forEach(ch => ch.addEventListener("click", ()=>{ seedForm(+$("#inHoles").value, ch.dataset.parset); tick(); }));
+$("#resetFormBtn").addEventListener("click", ()=>{ $("#inCourse").value = ""; $("#inLayout").value = ""; seedForm(+$("#inHoles").value, "3"); });
+$("#saveRoundBtn").addEventListener("click", ()=>{
+  const course = $("#inCourse").value.trim();
+  if(!course){ toast("Give the course a name first — any name you like."); $("#inCourse").focus(); return; }
+  if(!formHoles.length){ toast("Set the holes first."); return; }
+  const r = { id: uid(), date: $("#inDate").value || new Date().toISOString().slice(0,10), course, layout: $("#inLayout").value.trim(), holes: formHoles.map(h=>({par:h.par, score:h.score})), created: Date.now() };
+  S.rounds.push(r); S.selRound = r.id;
+  save(); renderAll(); chime(); showTab("#tabRounds");
+  toast(`Saved — ${roundScore(r)} on par ${roundPar(r)} (${sgn(roundDiff(r))}). It's yours forever now.`);
+});
+
+/* ---------- CSV import/export ---------- */
+function parseCSV(text){
+  const rows = []; let row = [], cell = "", q = false;
+  for(let i=0;i<text.length;i++){
+    const ch = text[i];
+    if(q){ if(ch === '"'){ if(text[i+1] === '"'){ cell += '"'; i++; } else q = false; } else cell += ch; }
+    else if(ch === '"') q = true;
+    else if(ch === ","){ row.push(cell); cell = ""; }
+    else if(ch === "\n" || ch === "\r"){ if(ch === "\r" && text[i+1] === "\n") i++; row.push(cell); cell = ""; if(row.length > 1 || row[0] !== "") rows.push(row); row = []; }
+    else cell += ch;
+  }
+  if(cell !== "" || row.length){ row.push(cell); rows.push(row); }
+  return rows;
+}
+$("#importBtn").addEventListener("click", ()=> $("#csvFile").click());
+$("#csvFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const rows = parseCSV(String(rd.result));
+      if(rows.length < 2) throw new Error("empty");
+      const head = rows[0].map(h => h.trim());
+      const iPlayer = head.indexOf("PlayerName"), iCourse = head.indexOf("CourseName"), iLayout = head.indexOf("LayoutName"), iDate = head.indexOf("Date");
+      const holeIdx = head.map((h,i)=> /^Hole\d+$/.test(h) ? i : -1).filter(i => i >= 0);
+      if(iCourse < 0 || !holeIdx.length) throw new Error("not udisc");
+      const parRow = rows.find(r => (r[iPlayer]||"").trim().toLowerCase() === "par");
+      const pars = parRow ? holeIdx.map(i => parseInt(parRow[i], 10) || 3) : holeIdx.map(()=>3);
+      const byPlayer = {};
+      rows.slice(1).forEach(r => {
+        const pn = (r[iPlayer]||"").trim();
+        if(!pn || pn.toLowerCase() === "par") return;
+        (byPlayer[pn] = byPlayer[pn] || []).push(r);
+      });
+      const names = Object.keys(byPlayer);
+      if(!names.length) throw new Error("no rounds");
+      const me = names.sort((a,b)=> byPlayer[b].length - byPlayer[a].length)[0];
+      if(S.sampling && S.snapshot){ S.rounds = S.snapshot.rounds; S.discs = S.snapshot.discs; S.selRound = S.snapshot.selRound; S.snapshot = null; S.sampling = false; setSampleUI(); toast("Sample mode turned off so the import lands in your real log."); }
+      let added = 0, skipped = 0;
+      byPlayer[me].forEach(r => {
+        const date = (r[iDate]||"").trim().slice(0,10);
+        const course = (r[iCourse]||"").trim() || "Unnamed course";
+        const layout = iLayout >= 0 ? (r[iLayout]||"").trim() : "";
+        const holes = holeIdx.map((ci,k) => ({ par: pars[k] || 3, score: Math.max(1, parseInt(r[ci],10) || pars[k] || 3) }));
+        const total = holes.reduce((a,h)=>a+h.score,0);
+        const sig = holes.map(h=>h.score).join(",");
+        const dup = S.rounds.some(x => x.date === date && (x.course||"").toLowerCase() === course.toLowerCase() && (x.layout||"").toLowerCase() === layout.toLowerCase() && roundScore(x) === total && x.holes.map(h=>h.score).join(",") === sig);
+        if(dup){ skipped++; return; }
+        S.rounds.push({ id: uid(), date, course, layout, holes, created: Date.now() }); added++;
+      });
+      save(); renderAll();
+      toast(added ? `Imported ${added} round${added===1?"":"s"} for ${me}${skipped ? ` — skipped ${skipped} duplicate${skipped===1?"":"s"}` : ""}.` : "Those rounds are already in your log — nothing new to add.");
+      if(added) chime();
+    }catch(err){ toast("That file doesn't look like a UDisc CSV export. In UDisc: You → Rounds → Export to CSV."); }
+    e.target.value = "";
+  };
+  rd.readAsText(f);
+});
+function download(name, content, type){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+$("#exportCsvBtn").addEventListener("click", ()=>{
+  if(!S.rounds.length){ toast("No rounds to export yet."); return; }
+  const maxH = Math.max(...S.rounds.map(r => r.holes.length));
+  const head = ["PlayerName","CourseName","LayoutName","Date","Total","+/-", ...Array.from({length:maxH},(_,i)=>"Hole"+(i+1))];
+  const lines = [head.join(",")];
+  [...S.rounds].sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach(r => {
+    const cells = ["Me", `"${(r.course||"").replace(/"/g,'""')}"`, `"${(r.layout||"").replace(/"/g,'""')}"`, r.date, roundScore(r), roundDiff(r), ...r.holes.map(h=>h.score)];
+    while(cells.length < head.length) cells.push("");
+    lines.push(cells.join(","));
+  });
+  download("basketlog-rounds.csv", lines.join("\n"), "text/csv");
+  toast("Your full history, exported. It opens in any spreadsheet — and imports right back into UDisc-style tools.");
+});
+$("#backupBtn").addEventListener("click", ()=>{ download("basketlog-backup.json", JSON.stringify({ rounds: S.rounds, discs: S.discs }, null, 1), "application/json"); toast("Backup downloaded — rounds and bag in one file."); });
+$("#restoreBtn").addEventListener("click", ()=> $("#jsonFile").click());
+$("#jsonFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(String(rd.result));
+      const rounds = Array.isArray(d) ? d : d.rounds, discs = Array.isArray(d) ? [] : d.discs;
+      if(!Array.isArray(rounds)) throw new Error("bad");
+      const normR = rounds.map(r => {
+        if(!r || typeof r !== "object" || !Array.isArray(r.holes) || !r.holes.length) throw new Error("bad round");
+        return { id: uid(), date: String(r.date||"").slice(0,10), course: String(r.course||"Unnamed course"), layout: String(r.layout||""), note: String(r.note||""), created: +r.created || Date.now(),
+          holes: r.holes.map(h => ({ par: Math.min(6, Math.max(2, +h.par || 3)), score: Math.min(15, Math.max(1, +h.score || 3)), ...(h.putts != null ? { putts: Math.max(0, +h.putts || 0) } : {}) })) };
+      });
+      const normD = (Array.isArray(discs) ? discs : []).filter(x => x && typeof x === "object").map(x => ({ id: uid(), name: String(x.name||"Disc"), type: String(x.type||"Midrange"), plastic: String(x.plastic||""), speed: x.speed, glide: x.glide, turn: x.turn, fade: x.fade, inBag: x.inBag !== false }));
+      if(S.sampling && S.snapshot){ S.rounds = S.snapshot.rounds; S.discs = S.snapshot.discs; S.snapshot = null; S.sampling = false; $("#sampleBar").classList.remove("show"); $("#sampleBtn").classList.remove("on"); toast("Sample mode turned off so the restored data lands in your real log."); }
+      const sigOf = r => `${r.date}|${r.course}|${r.layout}|${roundScore(r)}|${r.holes.map(h=>h.score).join(",")}`;
+      const freshR = normR.filter(r => !S.rounds.some(x => sigOf(x) === sigOf(r)));
+      const freshD = normD.filter(d => !S.discs.some(x => x.name === d.name && x.type === d.type));
+      const skippedN = (normR.length - freshR.length) + (normD.length - freshD.length);
+      S.rounds = S.rounds.concat(freshR); S.discs = S.discs.concat(freshD);
+      save(); renderAll(); chime(); toast(`Restored ${freshR.length} round${freshR.length===1?"":"s"}${freshD.length ? ` and ${freshD.length} discs` : ""}${skippedN ? ` — skipped ${skippedN} already in your log` : ""}.`);
+    }catch(err){ toast("That file doesn't look like a BasketLog backup."); }
+    e.target.value = "";
+  };
+  rd.readAsText(f);
+});
+
+/* ---------- lifetime stats view ---------- */
+function renderStats(){
+  const wrap = $("#trendWrap");
+  const rounds = [...S.rounds].sort((a,b)=> (a.date||"").localeCompare(b.date||"") || (a.created||0)-(b.created||0));
+  if(rounds.length < 2){
+    wrap.innerHTML = `<p class="hint">Log or import at least two rounds and your trend appears here.</p>`;
+  } else {
+    const W = 560, H = 200, PL = 34, PR = 10, PT = 14, PB = 22;
+    const diffs = rounds.map(roundDiff);
+    let lo = Math.min(-2, ...diffs), hi = Math.max(2, ...diffs);
+    const X = i => PL + (W-PL-PR) * (rounds.length === 1 ? .5 : i/(rounds.length-1));
+    const Y = v => PT + (H-PT-PB) * (1 - (v-lo)/((hi-lo) || 1));
+    const zeroY = Y(0);
+    const pts = rounds.map((r,i)=> `${X(i)},${Y(roundDiff(r))}`).join(" ");
+    wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Score trend chart">
+      <line x1="${PL}" y1="${zeroY}" x2="${W-PR}" y2="${zeroY}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="2" y="${zeroY+4}" font-size="11" fill="var(--muted)">par</text>
+      <polyline points="${pts}" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linejoin="round"/>
+      ${rounds.map((r,i)=>`<circle cx="${X(i)}" cy="${Y(roundDiff(r))}" r="6" fill="var(--card)" stroke="var(--green)" stroke-width="2.5" data-dot="${r.id}" style="cursor:pointer"><title>${fmtD(r.date)} ${esc(r.course)} ${sgn(roundDiff(r))}</title></circle>`).join("")}
+    </svg>`;
+    wrap.querySelectorAll("[data-dot]").forEach(c => c.addEventListener("click", ()=>{
+      const r = S.rounds.find(x => x.id === c.dataset.dot); if(!r) return;
+      S.selRound = r.id; save(); renderRounds(); renderDetail();
+      $("#trendDetail").innerHTML = `<b>${fmtD(r.date)}</b> — ${esc(r.course)}${r.layout ? " · " + esc(r.layout) : ""}: ${roundScore(r)} on par ${roundPar(r)} (<b>${sgn(roundDiff(r))}</b>). Full card is in the Rounds tab.`;
+      tick();
+    }));
+  }
+  const best = [...S.rounds].sort((a,b)=> roundDiff(a)-roundDiff(b) || roundScore(a)-roundScore(b)).slice(0,5);
+  $("#bestWrap").innerHTML = best.length ? `<table class="list"><thead><tr><th>Date</th><th>Course</th><th>Score</th><th>Vs par</th></tr></thead><tbody>${best.map(r=>`<tr><td>${fmtD(r.date)}</td><td><b>${esc(r.course)}</b></td><td>${roundScore(r)} / ${roundPar(r)}</td><td class="pos">${sgn(roundDiff(r))}</td></tr>`).join("")}</tbody></table>` : `<p class="hint">No rounds yet.</p>`;
+  const byCourse = {};
+  S.rounds.forEach(r => { (byCourse[r.course] = byCourse[r.course] || []).push(r); });
+  const courses = Object.entries(byCourse).sort((a,b)=> b[1].length - a[1].length);
+  $("#courseWrap").innerHTML = courses.length ? `<table class="list"><thead><tr><th>Course</th><th>Rounds</th><th>Avg</th><th>Best</th></tr></thead><tbody>${courses.map(([name, rs])=>{
+    const avg = rs.reduce((a,r)=>a+roundDiff(r),0)/rs.length, bst = Math.min(...rs.map(roundDiff));
+    return `<tr class="clickable ${S.courseFilter===name?"sel":""}" data-course="${esc(name)}"><td><b>${esc(name)}</b></td><td>${rs.length}</td><td>${sgn(Math.round(avg*10)/10)}</td><td class="pos">${sgn(bst)}</td></tr>`; }).join("")}</tbody></table><p class="hint">Tap a course again in the Rounds tab to clear the filter.</p>` : `<p class="hint">No courses yet.</p>`;
+  $("#courseWrap").querySelectorAll("[data-course]").forEach(tr => tr.addEventListener("click", ()=>{
+    S.courseFilter = S.courseFilter === tr.dataset.course ? "" : tr.dataset.course;
+    renderStats(); renderRounds(); showTab("#tabRounds"); tick();
+  }));
+}
+$("#printBtn").addEventListener("click", ()=>{
+  const c = classCounts(), total = Object.values(c).reduce((a,b)=>a+b,0);
+  const rounds = S.rounds.length;
+  const avg = rounds ? sgn(Math.round(S.rounds.reduce((a,r)=>a+roundDiff(r),0)/rounds*10)/10) : "—";
+  const best = [...S.rounds].sort((a,b)=> roundDiff(a)-roundDiff(b)).slice(0,5);
+  const byCourse = {};
+  S.rounds.forEach(r => { (byCourse[r.course] = byCourse[r.course] || []).push(r); });
+  $("#printReport").innerHTML = `<h2>${BRAND} — lifetime stats</h2>
+    <p>${rounds} rounds · ${total} holes · average ${avg} vs par · ${c.ace} aces · ${c.birdie + c.eagle} birdies/eagles</p>
+    <h3>Scoring mix</h3><p>${CLASSES.filter(k=>c[k.key]).map(k=>`${k.label}: ${c[k.key]} (${Math.round(c[k.key]/total*100)}%)`).join(" · ")}</p>
+    <h3>Best rounds</h3>${best.map(r=>`<p>${fmtD(r.date)} — ${esc(r.course)}: ${roundScore(r)} on par ${roundPar(r)} (${sgn(roundDiff(r))})</p>`).join("")}
+    <h3>By course</h3>${Object.entries(byCourse).map(([n,rs])=>`<p>${esc(n)} — ${rs.length} rounds, avg ${sgn(Math.round(rs.reduce((a,r)=>a+roundDiff(r),0)/rs.length*10)/10)}</p>`).join("")}`;
+  window.print();
+});
+
+/* ---------- disc bag ---------- */
+$("#addDiscBtn").addEventListener("click", ()=>{
+  const name = $("#dName").value.trim();
+  if(!name){ toast("Name the disc first."); $("#dName").focus(); return; }
+  const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+  S.discs.push({ id: uid(), name, type: $("#dType").value, plastic: $("#dPlastic").value.trim(), speed: num("#dSpeed"), glide: num("#dGlide"), turn: num("#dTurn"), fade: num("#dFade"), inBag: true });
+  $("#dName").value = ""; $("#dPlastic").value = "";
+  save(); renderBag(); chime(); toast(`${name} is in the bag.`);
+});
+function renderBag(){
+  const types = ["Distance driver","Fairway driver","Midrange","Putt & approach"];
+  const inBag = S.discs.filter(d => d.inBag);
+  const max = Math.max(1, ...types.map(t => inBag.filter(d => d.type === t).length));
+  $("#bagBars").innerHTML = types.map(t => {
+    const n = inBag.filter(d => d.type === t).length;
+    return `<div class="bar-row"><span>${t.split(" ")[0] === "Putt" ? "Putters" : t.replace(" driver","") + (t.includes("driver") ? "s" : "")}</span><div class="bar-track"><div class="bar-fill" style="width:${Math.round(n/max*100)}%"></div></div><b>${n}</b></div>`;
+  }).join("");
+  $("#bagWrap").innerHTML = S.discs.length ? `<table class="list"><thead><tr><th>Disc</th><th>Type</th><th>Flight</th><th></th></tr></thead><tbody>${S.discs.map(d => `<tr class="clickable ${d.inBag ? "sel" : ""}" data-disc="${d.id}"><td><b>${esc(d.name)}</b>${d.plastic ? `<br><span class="hint">${esc(d.plastic)}</span>` : ""}</td><td>${esc(d.type)}</td><td>${[d.speed,d.glide,d.turn,d.fade].map(v => v == null ? "–" : v).join(" / ")}</td><td>${d.inBag ? "In bag" : "On shelf"}</td></tr>`).join("")}</tbody></table><p class="hint">Tap a row to move a disc in or out of the bag. Long-press isn't a thing here — to remove a disc entirely, tap it out of the bag first, then use its Remove button.</p><div class="btnrow">${S.discs.filter(d=>!d.inBag).map(d => `<button class="btn danger" data-del-disc="${d.id}">Remove ${esc(d.name)}</button>`).join("")}</div>`
+    : `<p class="hint">No discs yet — add your first above.</p>`;
+  $("#bagWrap").querySelectorAll("[data-disc]").forEach(tr => tr.addEventListener("click", ()=>{
+    const d = S.discs.find(x => x.id === tr.dataset.disc); if(!d) return;
+    d.inBag = !d.inBag; save(); renderBag(); renderTiles(); tick();
+  }));
+  $("#bagWrap").querySelectorAll("[data-del-disc]").forEach(b => b.addEventListener("click", ()=>{
+    const d = S.discs.find(x => x.id === b.dataset.delDisc); if(!d) return;
+    if(!confirm(`Remove ${d.name} for good?`)) return;
+    S.discs = S.discs.filter(x => x.id !== d.id); save(); renderBag(); renderTiles(); thud();
+  }));
+}
+
+/* ---------- sample data ---------- */
+function mulberry(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function sampleData(){
+  const rnd = mulberry(20261009);
+  const courses = [
+    { course: "Lemon Lake County Park", layout: "Red", pars: [3,3,4,3,3,3,4,3,3,3,3,4,3,3,3,3,4,3] },
+    { course: "Brown Deer Park", layout: "Original", pars: [3,3,3,4,3,3,3,3,4,3,3,3,3,4,3,3,3,3] },
+    { course: "France Park", layout: "Main", pars: [3,4,3,3,3,3,3,4,3,3,3,3,4,3,3,3,3,4] }
+  ];
+  const rounds = [];
+  let day = new Date(2026, 3, 12);
+  for(let i=0;i<16;i++){
+    const c = courses[i % 3];
+    const birdieP = 0.12 + i*0.004, bogeyP = 0.30 - i*0.006, doubleP = 0.09 - i*0.002;
+    const holes = c.pars.map(par => {
+      const r = rnd();
+      let s;
+      if(r < 0.006) s = 1;                                   // ace, rare
+      else if(r < 0.012) s = par - 2;                        // eagle, rarer still
+      else if(r < 0.012 + birdieP) s = par - 1;              // birdie
+      else if(r < 0.012 + birdieP + bogeyP) s = par + 1;     // bogey
+      else if(r < 0.012 + birdieP + bogeyP + doubleP) s = par + 2; // double
+      else if(r < 0.012 + birdieP + bogeyP + doubleP + 0.015) s = par + 3;
+      else s = par;
+      return { par, score: Math.max(1, s) };
+    });
+    rounds.push({ id: uid(), date: day.toISOString().slice(0,10), course: c.course, layout: c.layout, holes, created: day.getTime() });
+    day = new Date(day.getTime() + (9 + Math.floor(rnd()*8)) * 86400000);
+  }
+  const discs = [
+    { id: uid(), name: "Innova Destroyer", type: "Distance driver", plastic: "Star, 172g", speed: 12, glide: 5, turn: -1, fade: 3, inBag: true },
+    { id: uid(), name: "Discraft Buzzz", type: "Midrange", plastic: "ESP, 178g", speed: 5, glide: 4, turn: -1, fade: 1, inBag: true },
+    { id: uid(), name: "Dynamic Discs Judge", type: "Putt & approach", plastic: "Classic, 174g", speed: 2, glide: 4, turn: 0, fade: 1, inBag: true },
+    { id: uid(), name: "Innova Leopard3", type: "Fairway driver", plastic: "GStar, 170g", speed: 7, glide: 5, turn: -2, fade: 1, inBag: true },
+    { id: uid(), name: "MVP Volt", type: "Fairway driver", plastic: "Neutron, 173g", speed: 8, glide: 5, turn: -0.5, fade: 2, inBag: false },
+    { id: uid(), name: "Latitude 64 River", type: "Fairway driver", plastic: "Opto, 169g", speed: 7, glide: 7, turn: -1, fade: 1, inBag: true }
+  ];
+  return { rounds, discs };
+}
+function setSampleUI(){
+  $("#sampleBar").classList.toggle("show", !!S.sampling);
+  $("#sampleBtn").classList.toggle("on", !!S.sampling);
+}
+$("#sampleBtn").addEventListener("click", ()=>{
+  if(!S.sampling){
+    S.snapshot = { rounds: clone(S.rounds), discs: clone(S.discs), selRound: S.selRound };
+    const sd = sampleData();
+    S.rounds = sd.rounds; S.discs = sd.discs; S.selRound = sd.rounds[sd.rounds.length-1].id;
+    S.sampling = true; setSampleUI(); save(); renderAll(); chime();
+    toast("Sample data on — 16 rounds and a full bag. Your real log comes back exactly when you tap the flask again.");
+  } else {
+    if(S.snapshot){ S.rounds = S.snapshot.rounds; S.discs = S.snapshot.discs; S.selRound = S.snapshot.selRound; S.snapshot = null; }
+    S.sampling = false; setSampleUI(); save(); renderAll(); tick();
+    toast("Sample off — your real log is back, exactly as you left it.");
+  }
+});
+
+/* ---------- render all / init ---------- */
+function renderAll(){ renderTiles(); renderRounds(); renderDetail(); renderMix(); renderStats(); renderBag(); }
+load();
+$("#brandName").textContent = BRAND;
+document.title = document.title; // brand-free by design
+applyTheme(); applySound(); setSampleUI();
+$("#inDate").value = new Date().toISOString().slice(0,10);
+seedForm(18, "3");
+if(S.sampling && !S.snapshot){ /* reload mid-sample without snapshot guard */ S.snapshot = { rounds: [], discs: [], selRound: null }; }
+renderAll();
+</script>
+</body>
+</html>
