@@ -209,6 +209,16 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
           <p><b>Tax time.</b> Federal law now lets tipped workers deduct qualified tips (up to $25,000 a year, tax years 2025–2028). The IRS expects you to keep daily tip records — this is that record, with cash and card kept separate because only voluntary charged/cash tips count. This app is a logbook, not tax advice; check IRS Publication 531 and your own tax pro for your situation.</p>
           <p><b>Your best shifts.</b> Weekday patterns, best jobs, best sections — the numbers that tell you which shifts to pick up and which to give away.</p>
         </div>
+        <div class="panel">
+          <h2>Your record so far</h2>
+          <p class="sub">Every shift you've logged, at a glance.</p>
+          <div id="addGlance"></div>
+        </div>
+        <div class="panel">
+          <h2>Tax-year standing</h2>
+          <p class="sub">Qualified tips (cash + card) against the $25,000 deduction cap.</p>
+          <div id="addTax"></div>
+        </div>
       </div>
     </div>
   </section>
@@ -691,13 +701,32 @@ $("#addJobBtn").addEventListener("click", ()=>{
   $("#jName").value = ""; $("#jRole").value = ""; $("#jWage").value = "";
   save(); renderJobs(); renderJobSelect(); chime(); toast(`${name} added — log its first shift anytime.`);
 });
+function renderAddSide(){
+  const g = $("#addGlance"), t = $("#addTax"); if(!g || !t) return;
+  const all = S.shifts;
+  const avg = all.length ? sum(all, s => trueHourly(s))/all.length : 0;
+  const best = all.length ? Math.max(...all.map(netPay)) : 0;
+  g.innerHTML = all.length ? `
+    <div class="kv"><span>Shifts logged</span><b>${all.length}</b></div>
+    <div class="kv"><span>Total kept after tip-outs</span><b>${money(sum(all, netPay))}</b></div>
+    <div class="kv"><span>Average true $/hr</span><b>$${avg.toFixed(2)}</b></div>
+    <div class="kv"><span>Best shift ever</span><b>${money0(best)}</b></div>`
+    : `<p class="hint">Nothing logged yet — your totals land here after the first shift.</p>`;
+  const year = String(new Date().getFullYear());
+  const qualified = sum(all.filter(s => (s.date||"").startsWith(year)), grossTips);
+  const pct = Math.min(100, Math.round(qualified/25000*100));
+  t.innerHTML = `
+    <div class="kv"><span>${year} qualified tips so far</span><b>${money(qualified)}</b></div>
+    <div class="bar-row" style="margin-top:8px"><span>Tips vs cap</span><div class="bar-track"><div class="bar-fill gold" style="width:${pct}%"></div></div><b>${pct}%</b></div>
+    <p class="hint" style="margin:6px 0 0">${pct}% of the $25,000 cap. Full breakdown in Stats &amp; tax year.</p>`;
+}
 function renderJobsGlance(){
   const wrap = $("#jobsGlance"); if(!wrap) return;
   if(!S.jobs.length){ wrap.innerHTML = `<p class="hint">Add your jobs in the Jobs tab — each one gets its own true $/hr here.</p>`; return; }
   wrap.innerHTML = S.jobs.map(j => {
     const list = S.shifts.filter(s => s.jobId === j.id || s.jobName === j.name);
     const avg = list.length ? sum(list, trueHourly)/list.length : 0;
-    return `<div class="kv"><span><b>${esc(j.name)}</b>${j.role ? ` · ${esc(j.role)}` : ""} — ${list.length} shift${list.length===1?"":"s"}</span><b>${list.length ? "$"+avg.toFixed(2)+"/hr" : "—"}</b></div>`;
+    return `<div class="kv"><span><b>${esc(j.name)}</b>${j.role ? ` · ${esc(j.role)}` : ""} — ${list.length} shift${list.length===1?"":"s"} · avg <b>${list.length ? "$"+avg.toFixed(2)+"/hr" : "—"}</b></span></div>`;
   }).join("");
 }
 function renderJobs(){
@@ -762,7 +791,7 @@ $("#sampleBtn").addEventListener("click", ()=>{
 });
 
 /* ---------- render all / init ---------- */
-function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix(); renderEarnChart(); renderJobsGlance(); renderStats(); renderJobs(); renderJobSelect(); formPreview(); }
+function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix(); renderEarnChart(); renderJobsGlance(); renderAddSide(); renderStats(); renderJobs(); renderJobSelect(); formPreview(); }
 load();
 $("#brandName").textContent = BRAND;
 applyTheme(); applySound(); setSampleUI();
