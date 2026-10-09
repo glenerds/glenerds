@@ -699,7 +699,8 @@ $("#printBtn").addEventListener("click",()=>{
   window.print();
 });
 
-function render(){ renderCheckin(); renderCalendar(); renderTrend(); renderWeekday(); renderCorr(); renderYear(); renderGoals(); renderManage(); }
+function render(){ renderCheckin(); renderCalendar(); renderTrend(); renderWeekday(); renderCorr(); renderYear(); renderGoals(); renderManage();
+  $("#footLine").textContent = Object.keys(S.entries).length+" days logged on this device. Current month: "+curMonth+"."; }
 
 /* init */
 maybeLock();
@@ -707,7 +708,6 @@ applyTheme();
 if (S.meta.snapshot){ $("#sampleBtn").setAttribute("aria-pressed","true"); }
 $("#soundBtn").classList.toggle("snd-off", S.settings.sound===false);
 $("#soundBtn").setAttribute("aria-pressed", S.settings.sound!==false);
-$("#footLine").textContent = Object.keys(S.entries).length+" days logged on this device. Current month: "+curMonth+".";
 $("#yearPick").value = new Date().getFullYear();
 render();
 </script>
