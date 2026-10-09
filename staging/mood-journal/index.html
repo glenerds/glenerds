@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mood Tracker & Journal — Daily Mood Log, Activity Patterns, Year in Pixels</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --panel:#ffffff; --panel2:#eef1f8; --ink:#182038; --muted:#5c657c;
+    --line:#d9deeb; --accent:#e05a8d; --accent2:#3157c4; --good:#14884f; --bad:#c92f2f; --warn:#c77400;
+    --bar:#e05a8d; --sel:#3157c4; --shadow:0 8px 24px rgba(24,32,56,.08);
+  }
+  [data-theme="dark"]{
+    --bg:#10131f; --panel:#1a1f33; --panel2:#242b45; --ink:#eef1fa; --muted:#a6aec4;
+    --line:#333c5e; --accent:#f07bab; --accent2:#7ea0f8; --good:#45c98a; --bad:#ff7a72; --warn:#f2a950;
+    --bar:#f07bab; --sel:#7ea0f8; --shadow:0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .logo-badge{width:44px;height:44px;border-radius:12px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--panel);border:1px solid var(--line)}
+  .brand{font-size:26px;font-weight:800;letter-spacing:.2px;line-height:1.05}
+  .sub{color:var(--muted);font-size:15px;line-height:1.25}
+  .hbtns{display:flex;gap:8px;margin-left:auto;align-items:center;flex-wrap:wrap}
+  .hbtn{min-width:44px;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--panel);font-size:15px;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:var(--ink);box-shadow:var(--shadow);cursor:pointer}
+  .hbtn[aria-pressed="true"]{background:var(--panel2);border-color:var(--accent2)}
+  .hbtn svg{width:22px;height:22px;display:block}
+  .hbtn:focus-visible,.btn:focus-visible,.mood:focus-visible,.opbtn:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .snd-muted{display:none}
+  .hbtn.snd-off{opacity:.55}
+  .hbtn.snd-off .snd-waves{display:none}
+  .hbtn.snd-off .snd-muted{display:block}
+  .pill{font-weight:700;font-size:15px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin:12px 0}
+  .panel h2{margin:0 0 4px;font-size:20px}
+  .panel .hint{color:var(--muted);font-size:15px;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;align-items:start}
+  .grid > .panel{margin:0}
+  .colstack{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .colstack > .panel{margin:0}
+  .moods{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .mood{min-width:64px;min-height:64px;padding:6px 4px;border-radius:16px;border:2px solid var(--line);background:var(--panel);cursor:pointer;font-size:24px;line-height:1.1;color:var(--ink)}
+  .mood small{display:block;font-size:15px;font-weight:700;margin-top:2px}
+  .mood[aria-pressed="true"]{border-color:var(--accent);background:var(--panel2);box-shadow:0 0 0 3px var(--accent) inset}
+  .mood:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .chipsRow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .chip{min-height:44px;padding:8px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--panel);cursor:pointer;font-size:15px;font-weight:600;color:var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--accent2);border-color:var(--accent2);color:#fff}
+  .chip:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+  .btn{min-height:44px;padding:10px 16px;border-radius:12px;border:1px solid var(--accent2);background:var(--accent2);color:#fff;font-weight:700;font-size:15px;cursor:pointer}
+  .btn.ghost{background:var(--panel);color:var(--ink);border-color:var(--line)}
+  .btn.danger{background:var(--bad);border-color:var(--bad)}
+  .btn.small{min-height:38px;padding:6px 12px;font-size:15px}
+  label{font-weight:700;font-size:15px}
+  input[type="text"],input[type="date"],select,textarea{width:100%;min-height:44px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:15px}
+  textarea{min-height:60px;resize:vertical}
+  .scales{margin:10px 0}
+  .scaleRow{display:grid;grid-template-columns:100px 1fr 40px;gap:10px;align-items:center;margin:8px 0}
+  input[type="range"]{width:100%;accent-color:var(--accent2);height:34px}
+  #calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  #calGrid .cw{font-weight:700;text-align:center;color:var(--muted);font-size:15px;padding:4px 0}
+  .cal{aspect-ratio:1;border-radius:8px;border:1.5px solid var(--line);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--panel);padding:0}
+  .cal.out{opacity:.35;cursor:default}
+  .cal[data-mood]{color:#fff;font-weight:800;text-shadow:0 1px 2px rgba(0,0,0,.45)}
+  .cal.today{box-shadow:0 0 0 3px var(--accent2)}
+  .cal.sel{outline:3px solid var(--accent);outline-offset:1px}
+  .cal:focus-visible{outline:3px solid var(--accent2);outline-offset:1px}
+  #yearGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+  .ym h3{margin:0 0 6px;font-size:15px}
+  .ym .cells{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .yc{aspect-ratio:1;border-radius:3px;background:var(--panel2);width:100%;display:block}
+  .barRow{display:grid;grid-template-columns:130px 1fr 58px;gap:8px;align-items:center;margin:5px 0;font-size:15px}
+  .barRow .lbl{font-weight:600;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .barRow .tr{height:20px;background:var(--panel2);border-radius:6px;overflow:hidden}
+  .barRow .tr i{display:block;height:100%;background:var(--bar)}
+  .barRow .pct{text-align:right;color:var(--muted);font-size:15px}
+  .corrRow{display:grid;grid-template-columns:1fr 1fr 64px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:15px}
+  .corrRow:last-child{border-bottom:0}
+  svg.chart{width:100%;height:auto;display:block}
+  .note{color:var(--muted);font-size:15px}
+  .goal{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:var(--panel)}
+  .goal .gt{font-weight:800;font-size:17px}
+  .goal .prog{height:14px;background:var(--panel2);border-radius:7px;overflow:hidden;margin:8px 0}
+  .goal .prog i{display:block;height:100%;background:var(--good)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1;min-width:160px}
+  #status{min-height:22px;font-size:15px;color:var(--muted);margin-top:10px}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  #dayEntries .ent{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+  #dayEntries .ent .row b{font-size:16px}
+  .printOnly{display:none}
+  @media (max-width:640px){
+    .brand{font-size:22px}
+    .scaleRow{grid-template-columns:80px 1fr 36px}
+    .barRow{grid-template-columns:105px 1fr 50px}
+    .mood{min-width:56px;min-height:56px;font-size:21px}
+  }
+  @media print{
+    :root,[data-theme="dark"]{--bg:#fff;--panel:#fff;--panel2:#f2f2f2;--ink:#111;--muted:#444;--line:#bbb;--accent:#a03;--accent2:#224;--bar:#a03;--good:#064;--bad:#a00;--warn:#850}
+    body{background:#fff;color:#111}
+    .appOnly{display:none !important}
+    .printOnly{display:block;font-family:Georgia,serif;max-width:720px;margin:0 auto;padding:20px}
+    .printOnly table{width:100%;border-collapse:collapse}
+    .printOnly td,.printOnly th{border:1px solid #999;padding:6px 8px;text-align:left}
+  }
+</style>
+</head>
+<body>
+<div id="lockScreen" style="display:none;max-width:420px;margin:80px auto;padding:20px">
+  <h1 style="font-size:22px">🔒 MoodLog is locked</h1>
+  <p>Enter your local passcode to open your journal.</p>
+  <input id="lk" type="password" style="width:100%;min-height:44px;font-size:16px;padding:8px" autocomplete="off">
+  <button id="lkb" style="margin-top:12px;min-height:44px;padding:10px 18px;font-size:16px;border-radius:10px;cursor:pointer">Unlock</button>
+  <p id="lkm" style="color:#c00"></p>
+</div>
+<div class="wrap appOnly">
+  <header>
+    <svg class="logo-badge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-6.5-4-9-8.6C1.2 8 3.2 4.8 6.4 4.8c2 0 3.4 1.1 4.1 2.4l1.5 3 1.5-3c.7-1.3 2.1-2.4 4.1-2.4 3.2 0 5.2 3.2 3.4 6.6C18.5 16 12 20 12 20z" style="display:none"/><path d="M4 14.5c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3"/><circle cx="12" cy="12" r="9"/><path d="M8 9.5h.01M16 9.5h.01"/></svg>
+    <div>
+      <div class="brand">MoodLog</div>
+      <div class="sub">Mood Tracker &amp; Journal</div>
+    </div>
+    <nav class="hbtns" aria-label="App tools">
+      <a class="hbtn pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button class="hbtn" id="sampleBtn" type="button" aria-pressed="false" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v5.5L4.8 18a2.4 2.4 0 0 0 2.1 3.5h10.2a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 15h9"/></svg></button>
+      <button class="hbtn" id="darkBtn" type="button" aria-pressed="false" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2z"/></svg></button>
+      <button class="hbtn" id="soundBtn" type="button" aria-pressed="true" title="Sound on/off" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z"/><path class="snd-waves" d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/><path class="snd-muted" d="M16.2 9.8l5.3 5.3M21.5 9.8l-5.3 5.3"/></svg></button>
+    </nav>
+  </header>
+
+  <section class="panel" aria-label="Check in">
+    <h2 id="checkinTitle">How are you feeling?</h2>
+    <p class="hint" id="checkinHint">Tap a mood, add activities, save. Backfill or fix any day below.</p>
+    <div class="row">
+      <label for="entryDate">Day</label>
+      <input type="date" id="entryDate" style="max-width:190px">
+      <button class="btn ghost" id="todayBtn" type="button" style="display:none">Back to today</button>
+    </div>
+    <div class="moods" id="moodRow" role="group" aria-label="Pick a mood"></div>
+    <div class="scales" id="scaleRows"></div>
+    <div id="actGroups"></div>
+    <label for="noteText">Note (optional)</label>
+    <textarea id="noteText" placeholder="What happened today?"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveEntry" type="button">Save entry</button>
+      <button class="btn ghost" id="quickSave" type="button">Quick save (mood only)</button>
+    </div>
+    <div id="status" aria-live="polite"></div>
+  </section>
+
+  <div class="grid">
+    <div class="colstack">
+      <section class="panel" aria-label="Calendar">
+        <h2>📅 Calendar</h2>
+        <p class="hint">Tap any day to view, edit, or backfill it.</p>
+        <div class="row" style="margin-bottom:10px">
+          <button class="btn ghost" id="prevMonth" type="button">◀ Prev</button>
+          <input type="month" id="monthPick" aria-label="Pick a month" style="max-width:180px">
+          <button class="btn ghost" id="nextMonth" type="button">Next ▶</button>
+        </div>
+        <div id="calGrid" aria-label="Month calendar"></div>
+        <div id="dayEntries"></div>
+      </section>
+      <section class="panel" aria-label="What lifts your mood">
+        <h2>🎯 What lifts your mood?</h2>
+        <p class="hint">Average mood on days with each activity vs all days. Based on your own entries — patterns, not proof.</p>
+        <div id="corrList"></div>
+      </section>
+    </div>
+    <div class="colstack">
+      <section class="panel" aria-label="Your mood over time">
+        <h2>📈 Your mood over time</h2>
+        <div id="trendChart"></div>
+        <div id="weekdayChart" style="margin-top:14px"></div>
+      </section>
+      <section class="panel" aria-label="Year in pixels">
+        <h2>🎨 Year in pixels</h2>
+        <div class="row" style="margin-bottom:10px">
+          <label for="yearPick">Year</label>
+          <input type="number" id="yearPick" min="2000" max="2100" step="1" style="max-width:110px">
+        </div>
+        <div id="yearGrid"></div>
+      </section>
+    </div>
+  </div>
+
+  <section class="panel" aria-label="Goals">
+    <h2>✅ Goals</h2>
+    <p class="hint">Tie a goal to an activity — e.g. “Exercise 3× per week”. Progress counts entries in the current period.</p>
+    <div id="goalList"></div>
+    <div class="row" style="margin-top:12px">
+      <div class="grow"><label for="goalName">Goal name</label><input type="text" id="goalName" placeholder="Exercise 3× per week"></div>
+      <div><label for="goalAct">Activity</label><select id="goalAct"></select></div>
+      <div><label for="goalTimes">Times</label><input type="number" id="goalTimes" min="1" step="1" value="3" style="max-width:90px"></div>
+      <div><label for="goalPeriod">Period</label><select id="goalPeriod"><option value="week">per week</option><option value="month">per month</option></select></div>
+      <button class="btn" id="goalAdd" type="button">Add goal</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Moods, activities and scales">
+    <h2>🧩 Your moods, activities &amp; scales</h2>
+    <p class="hint">Unlimited — make them yours. Changes apply to new entries; past entries keep the names they were saved with.</p>
+    <div class="row">
+      <div class="grow"><label for="newMoodLabel">Mood name</label><input type="text" id="newMoodLabel" placeholder="Calm"></div>
+      <div><label for="newMoodEmoji">Emoji</label><input type="text" id="newMoodEmoji" maxlength="4" placeholder="😌" style="max-width:80px"></div>
+      <div><label for="newMoodScore">Score (1–10)</label><input type="number" id="newMoodScore" min="1" max="10" step="1" value="6" style="max-width:100px"></div>
+      <button class="btn" id="moodAdd" type="button">Add mood</button>
+    </div>
+    <div id="moodManage" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:16px">
+      <div class="grow"><label for="newGroup">New group</label><input type="text" id="newGroup" placeholder="Health"></div>
+      <button class="btn" id="groupAdd" type="button">Add group</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="grow"><label for="newAct">Activity name</label><input type="text" id="newAct" placeholder="Gym"></div>
+      <div><label for="newActGroup">Group</label><select id="newActGroup"></select></div>
+      <button class="btn" id="actAdd" type="button">Add activity</button>
+    </div>
+    <div id="actManage" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:16px">
+      <div class="grow"><label for="newScale">New scale (e.g. Sleep 0–10)</label><input type="text" id="newScale" placeholder="Sleep"></div>
+      <button class="btn" id="scaleAdd" type="button">Add scale</button>
+    </div>
+    <div id="scaleManage" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:16px">
+      <label for="passcode">Local passcode (optional)</label>
+      <input type="text" id="passcode" maxlength="20" placeholder="leave blank = off" style="max-width:200px">
+      <button class="btn ghost" id="passSet" type="button">Set / clear</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Data Import Export">
+    <h2>💾 Your data</h2>
+    <p class="hint">Everything is stored only in this browser, on this device. Nothing leaves your device. Regular backups are on you — export now and then.</p>
+    <div class="row">
+      <button class="btn" id="csvBtn" type="button">Export CSV</button>
+      <button class="btn ghost" id="jsonExp" type="button">Export JSON backup</button>
+      <label class="btn ghost" style="display:inline-flex;align-items:center;margin:0">Import JSON<input type="file" id="jsonImp" accept=".json,application/json" class="sr"></label>
+      <button class="btn ghost" id="printBtn" type="button" aria-label="Print monthly report">🖨️ Monthly report</button>
+      <button class="btn danger" id="clearBtn" type="button">Clear all</button>
+    </div>
+    <div id="dataStatus" aria-live="polite" class="note" style="margin-top:8px"></div>
+  </section>
+
+  <div class="panel" style="text-align:center">
+    <div style="font-weight:800">MoodLog — Mood Tracker &amp; Journal</div>
+    <div class="note">Data stays in your browser on this device (localStorage). No account, no sync, no bank link. Works offline. This app is a personal journal, not a medical tool.</div>
+    <div class="note" id="footLine"></div>
+  </div>
+  <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin:0 0 16px">See more apps</a>
+</div>
+
+<div class="printOnly" id="printRoot"></div>
+
+<script>
+"use strict";
+/* MoodLog — single-file offline mood & activity micro-journal.
+   Data: { entries:{ 'YYYY-MM-DD': {moodId, scaleVals:{scaleId:val}, acts:[actId...], note, ts} },
+           moods:[{id,label,emoji,score}], groups:[{id,name}], acts:[{id,name,groupId}],
+           scales:[{id,name}], goals:[{id,name,actId,times,period}], settings:{dark,sound},
+           meta:{version, sampleLockHash, snapshot, passcode} } */
+const LS = "moodlog.v1";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[<>&"']/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function num(n){ return (Number.isFinite(+n)?+n:0); }
+function avg(a){ return a.length ? a.reduce((x,y)=>x+y,0)/a.length : null; }
+function beep(f){ try{ if(S.settings.sound===false) return; const C=window.AudioContext||window.webkitAudioContext; if(!C) return; const c=new C(),o=c.createOscillator(),g=c.createGain(); o.type="sine"; o.frequency.value=f||620; g.gain.setValueAtTime(.06,c.currentTime); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.15); o.connect(g); g.connect(c.destination); o.start(); o.stop(c.currentTime+.16); }catch(e){} }
+
+const DEF_MOODS = [
+  {id:"m1",label:"Awful",emoji:"😖",score:1},{id:"m2",label:"Bad",emoji:"🙁",score:2},{id:"m3",label:"Meh",emoji:"😐",score:3},
+  {id:"m4",label:"Okay",emoji:"🙂",score:4},{id:"m5",label:"Good",emoji:"😊",score:5},{id:"m6",label:"Great",emoji:"🤩",score:6}
+];
+const DEF_GROUPS = [ {id:"g1",name:"Health"},{id:"g2",name:"Fun"},{id:"g3",name:"Life"} ];
+const DEF_ACTS = [
+  {id:"a1",name:"Exercise",groupId:"g1"},{id:"a2",name:"Good sleep",groupId:"g1"},{id:"a3",name:"Healthy food",groupId:"g1"},
+  {id:"a4",name:"Friends",groupId:"g2"},{id:"a5",name:"Hobby",groupId:"g2"},{id:"a6",name:"Outside",groupId:"g2"},
+  {id:"a7",name:"Work",groupId:"g3"},{id:"a8",name:"Family",groupId:"g3"},{id:"a9",name:"Errands",groupId:"g3"}
+];
+function defaults(){ return {
+  entries:{}, moods:DEF_MOODS.map(x=>({...x})), groups:DEF_GROUPS.map(x=>({...x})), acts:DEF_ACTS.map(x=>({...x})),
+  scales:[{id:"s1",name:"Energy"}], goals:[],
+  settings:{dark:null,sound:true}, meta:{version:1, sampleLockHash:null, snapshot:null, passcode:""} };
+}
+function load(){
+  try{ const raw=localStorage.getItem(LS); if(!raw) return defaults(); const d=JSON.parse(raw); if(!d||typeof d!=="object") return defaults();
+    const df=defaults(); d.entries=d.entries&&typeof d.entries==="object"?d.entries:{};
+    for(const k of ["moods","groups","acts","scales","goals"]) d[k]=Array.isArray(d[k])?d[k]:df[k];
+    d.settings={...df.settings,...(d.settings||{})}; d.meta={...df.meta,...(d.meta||{})}; return d;
+  }catch(e){ return defaults(); }
+}
+let S = load();
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){} }
+function hashStr(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))>>>0; } return String(h); }
+function moodOf(id){ return S.moods.find(m=>m.id===id) || null; }
+function actOf(id){ return S.acts.find(a=>a.id===id) || null; }
+function groupOf(id){ return S.groups.find(g=>g.id===id) || null; }
+function scaleOf(id){ return S.scales.find(s=>s.id===id) || null; }
+function entryScore(d){ const e=S.entries[d]; if(!e) return null; const m=moodOf(e.moodId); return m? m.score : null; }
+function moodColor(score){ const t=[[1,"#7a4fd0"],[2,"#5b83d6"],[3,"#9aa7bd"],[4,"#62b06a"],[5,"#2e9e5b"],[6,"#f2a03d"],[8,"#e8722a"],[10,"#e05a8d"]]; for(const [m,c] of t) if(score<=m) return c; return "#e05a8d"; }
+const WD=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+/* ---------- draft ---------- */
+let draftMood=null, draftActs=new Set(), draftSeeded=false;
+function resetDraft(){ draftMood=null; draftActs=new Set(); draftSeeded=false; }
+function addOption(sel,val,label){ const o=document.createElement("option"); o.value=val; o.textContent=label; sel.appendChild(o); }
+function renderCheckin(){
+  $("#entryDate").value = $("#entryDate").value || todayISO();
+  const d=$("#entryDate").value;
+  $("#todayBtn").style.display = d===todayISO() ? "none" : "";
+  const ex=S.entries[d];
+  const row=$("#moodRow"); row.innerHTML="";
+  for (const m of S.moods){
+    const b=document.createElement("button"); b.type="button"; b.className="mood"; b.dataset.id=m.id;
+    b.setAttribute("aria-pressed", draftMood===m.id || (!draftMood && ex && ex.moodId===m.id) ? "true":"false");
+    b.innerHTML=esc(m.emoji)+"<small>"+esc(m.label)+"</small>";
+    b.addEventListener("click",()=>{ draftMood=m.id; beep(560); renderCheckin(); });
+    row.appendChild(b);
+  }
+  // scales
+  const sr=$("#scaleRows"); sr.innerHTML="";
+  for (const sc of S.scales){
+    const wrap=document.createElement("div"); wrap.className="scaleRow";
+    const cur = ex && ex.scaleVals && Number.isFinite(ex.scaleVals[sc.id]) ? ex.scaleVals[sc.id] : 5;
+    wrap.innerHTML='<label for="sc_'+esc(sc.id)+'">'+esc(sc.name)+'</label><input type="range" id="sc_'+esc(sc.id)+'" min="0" max="10" step="1" value="'+cur+'"><span id="sv_'+esc(sc.id)+'">'+cur+'</span>';
+    sr.appendChild(wrap);
+    wrap.querySelector("input").addEventListener("input",ev=>{ document.getElementById("sv_"+sc.id).textContent=ev.target.value; });
+  }
+  // activities by group
+  const ag=$("#actGroups"); ag.innerHTML="";
+  const order=[...S.groups, {id:"__none", name:"Other"}];
+  for (const g of order){
+    const inG=S.acts.filter(a=> (g.id==="__none" ? !groupOf(a.groupId) : a.groupId===g.id) );
+    if(!inG.length) continue;
+    const h=document.createElement("div"); h.innerHTML="<label>"+esc(g.name)+"</label>"; ag.appendChild(h);
+    const chips=document.createElement("div"); chips.className="chipsRow";
+    for (const a of inG){
+      const on = (draftSeeded? draftActs : new Set(ex?(ex.acts||[]):[])).has(a.id);
+      const c=document.createElement("button"); c.type="button"; c.className="chip"; c.dataset.id=a.id;
+      c.setAttribute("aria-pressed", on?"true":"false"); c.textContent=a.name;
+      c.addEventListener("click",()=>{ toggleDraftAct(a.id); beep(600); });
+      chips.appendChild(c);
+    }
+    ag.appendChild(chips);
+  }
+  $("#noteText").value = draftActs.size||draftMood ? $("#noteText").value : (ex? (ex.note||"") : "");
+  updateCheckinTitle(d, !!ex);
+}
+function toggleDraftAct(id){ if(!draftSeeded){ const ex2=S.entries[$("#entryDate").value]; draftActs=new Set(ex2?(ex2.acts||[]):[]); draftSeeded=true; } if(draftActs.has(id)) draftActs.delete(id); else draftActs.add(id); renderCheckin(); }
+function syncDraftFromEntry(){
+  const d=$("#entryDate").value, ex=S.entries[d];
+  if (!draftMood && ex){ draftMood=ex.moodId; }
+}
+function updateCheckinTitle(d, exists){
+  const t=todayISO();
+  $("#checkinTitle").textContent = d===t ? "How are you feeling today?" : "How were you feeling on "+d+"?";
+  $("#checkinHint").textContent = exists ? "You already logged this day — saving replaces it." : "Tap a mood, add activities, save. Backfill or fix any day below.";
+}
+function collectScaleVals(){ const out={}; for(const sc of S.scales){ const el=document.getElementById("sc_"+sc.id); if(el) out[sc.id]=num(el.value); } return out; }
+function saveEntry(quick){
+  const d=$("#entryDate").value || todayISO();
+  syncDraftFromEntry();
+  const moodId = draftMood || (S.entries[d]&&S.entries[d].moodId) || null;
+  if (!moodId){ $("#status").textContent="Pick a mood first 🙂"; beep(300); return; }
+  const ex=S.entries[d];
+  S.entries[d]={ moodId, scaleVals: quick? (ex?ex.scaleVals||{}:{}) : collectScaleVals(),
+    acts: quick? (ex?ex.acts||[]:[]) : (draftSeeded? [...draftActs] : (ex? [...(ex.acts||[])] : [])), note: quick? (ex? (ex.note||"") : "") : $("#noteText").value, ts: Date.now() };
+  save(); resetDraft(); curMonth=d.slice(0,7); selDate=d; render();
+  $("#status").textContent="Saved "+d+" ✓"; beep(760);
+}
+$("#saveEntry").addEventListener("click",()=>saveEntry(false));
+$("#quickSave").addEventListener("click",()=>saveEntry(true));
+$("#entryDate").addEventListener("change",()=>{ resetDraft(); $("#noteText").value=""; selDate=$("#entryDate").value; curMonth=selDate.slice(0,7); render(); });
+$("#todayBtn").addEventListener("click",()=>{ $("#entryDate").value=todayISO(); resetDraft(); $("#noteText").value=""; selDate=todayISO(); curMonth=selDate.slice(0,7); render(); });
+
+/* ---------- theme & sound ---------- */
+function applyTheme(){ const dark = S.settings.dark===null ? window.matchMedia("(prefers-color-scheme: dark)").matches : !!S.settings.dark; document.documentElement.setAttribute("data-theme",dark?"dark":"light"); $("#darkBtn").setAttribute("aria-pressed",dark); }
+$("#darkBtn").addEventListener("click",()=>{ const nowDark=document.documentElement.getAttribute("data-theme")==="dark"; S.settings.dark=!nowDark; applyTheme(); save(); beep(520); });
+$("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!(S.settings.sound!==false); $("#soundBtn").classList.toggle("snd-off",!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed",S.settings.sound); save(); beep(700); });
+
+/* ---------- sample data ---------- */
+function snapshotKey(){ const copy={...S, meta:{...S.meta, sampleLockHash:null, snapshot:null}}; return hashStr(JSON.stringify(copy.entries)+"|"+S.moods.length+"|"+S.acts.length); }
+function sampleData(){
+  const d=defaults();
+  const acts=["a1","a2","a3","a4","a5","a6","a7","a8","a9"], moods=["m1","m2","m3","m4","m5","m6"];
+  const notes=["","","","Busy but good day.","Quiet evening.","Rough morning, better later.",""];
+  for(let i=89;i>=0;i--){
+    const dt=new Date(); dt.setDate(dt.getDate()-i);
+    const iso=dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0")+"-"+String(dt.getDate()).padStart(2,"0");
+    if ((i*7)%11===0) continue; // some skipped days
+    const hasA = (i*13)%3!==0, hasE = (i*7)%5!==0;
+    const base = 3 + (hasA?0.9:0) + (hasE?0.7:0) + ((i*29)%17)/17*1.4;
+    const mi = Math.max(0, Math.min(5, Math.round(base-1)));
+    const picked=[]; if(hasA) picked.push("a1"); if(hasE) picked.push("a2"); if((i*11)%4===0) picked.push("a4","a6");
+    d.entries[iso]={ moodId:moods[mi], scaleVals:{s1:Math.max(0,Math.min(10, Math.round(base+2)))}, acts:[...new Set(picked)], note:notes[i%notes.length], ts:Date.now()-i*86400000 };
+  }
+  d.goals=[{id:"g-a",name:"Exercise 3× per week",actId:"a1",times:3,period:"week"},{id:"g-b",name:"Outside 5× per week",actId:"a6",times:5,period:"week"}];
+  return d;
+}
+$("#sampleBtn").addEventListener("click",()=>{
+  const btn=$("#sampleBtn");
+  if (btn.getAttribute("aria-pressed")==="true"){
+    if (S.meta.snapshot){
+      const snap=S.meta.snapshot; S=JSON.parse(JSON.stringify(snap)); save();
+    }
+    btn.setAttribute("aria-pressed","false"); resetDraft(); selDate=todayISO(); curMonth=selDate.slice(0,7); render();
+    $("#status").textContent="Your data is back, exactly as you left it."; beep(520);
+    return;
+  }
+  const preSample = JSON.parse(JSON.stringify(S)); preSample.meta.snapshot = null;
+  const keepSettings = S.settings, keepPass = S.meta.passcode||"";
+  S = sampleData();
+  S.meta.snapshot = preSample;
+  S.settings = keepSettings; S.meta.passcode = keepPass;
+  S.meta.sampleLockHash = hashStr(JSON.stringify(preSample.entries)+"|"+preSample.moods.length+"|"+preSample.acts.length);
+  save(); btn.setAttribute("aria-pressed","true"); resetDraft(); selDate=todayISO(); curMonth=selDate.slice(0,7); render();
+  $("#status").textContent="Sample data on — your real journal is saved and comes back untouched when you tap the flask again."; beep(700);
+});
+
+/* ---------- calendar ---------- */
+let curMonth = todayISO().slice(0,7), selDate = todayISO();
+$("#monthPick").addEventListener("change",()=>{ if($("#monthPick").value){ curMonth=$("#monthPick").value; render(); }});
+$("#prevMonth").addEventListener("click",()=>{ const [y,m]=curMonth.split("-").map(Number); const d=new Date(y,m-2,1); curMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); render(); });
+$("#nextMonth").addEventListener("click",()=>{ const [y,m]=curMonth.split("-").map(Number); const d=new Date(y,m,1); curMonth=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0"); render(); });
+function renderCalendar(){
+  $("#monthPick").value=curMonth;
+  const [y,m]=curMonth.split("-").map(Number);
+  const first=new Date(y,m-1,1); const lead=(first.getDay()+6)%7; const days=new Date(y,m,0).getDate();
+  const g=$("#calGrid"); g.innerHTML="";
+  for(const w of WD){ const el=document.createElement("div"); el.className="cw"; el.textContent=w; g.appendChild(el); }
+  for(let i=0;i<lead;i++){ const el=document.createElement("span"); el.className="cal out"; g.appendChild(el); }
+  for(let dN=1;dN<=days;dN++){
+    const iso=curMonth+"-"+String(dN).padStart(2,"0");
+    const b=document.createElement("button"); b.type="button"; b.className="cal"; b.textContent=dN;
+    const sc=entryScore(iso), e=S.entries[iso];
+    if(e&&sc!==null){ b.dataset.mood="1"; b.style.background=moodColor(sc); b.title=(moodOf(e.moodId)||{}).label||""; }
+    if(iso===todayISO()) b.classList.add("today");
+    if(iso===selDate) b.classList.add("sel");
+    b.setAttribute("aria-label", iso+(e?" logged":""));
+    b.addEventListener("click",()=>{ selDate=iso; $("#entryDate").value=iso; resetDraft(); render(); });
+    g.appendChild(b);
+  }
+  renderDayEntries();
+}
+function renderDayEntries(){
+  const box=$("#dayEntries"); box.innerHTML="";
+  const e=S.entries[selDate];
+  const h=document.createElement("h3"); h.style.margin="14px 0 4px"; h.textContent=selDate===todayISO()? "Today ("+selDate+")" : selDate; box.appendChild(h);
+  if(!e){ const p=document.createElement("p"); p.className="note"; p.textContent="Nothing logged this day yet. Use the check-in at the top to backfill it."; box.appendChild(p); return; }
+  const m=moodOf(e.moodId);
+  const div=document.createElement("div"); div.className="ent";
+  const actNames=(e.acts||[]).map(id=>{ const a=actOf(id); return a?a.name:id; });
+  const scaleTxt=S.scales.map(sc=>{ const v=e.scaleVals&&e.scaleVals[sc.id]; return Number.isFinite(v)? esc(sc.name)+": "+v : ""; }).filter(Boolean).join(" · ");
+  div.innerHTML="<div class='row'><b>"+esc(m?m.emoji+" "+m.label:"(mood removed)")+"</b>"+(actNames.length? "<span>"+actNames.map(esc).join(", ")+"</span>":"")+"</div>"+
+    (scaleTxt? "<div>"+scaleTxt+"</div>":"") + (e.note? "<div>"+esc(e.note)+"</div>":"") +
+    "<div class='row' style='margin-top:8px'><button class='btn ghost small' data-act='edit'>✏️ Edit</button><button class='btn danger small' data-act='del'>🗑 Delete entry</button></div>";
+  div.querySelector("[data-act=edit]").addEventListener("click",()=>{ $("#entryDate").value=selDate; resetDraft(); syncDraftFromEntry(); $("#noteText").value=e.note||""; render(); window.scrollTo({top:0,behavior:"smooth"}); });
+  div.querySelector("[data-act=del]").addEventListener("click",()=>{ if(confirm("Delete the entry for "+selDate+"? This cannot be undone.")){ delete S.entries[selDate]; save(); if($("#entryDate").value===selDate){ resetDraft(); $("#noteText").value=""; } render(); } });
+  box.appendChild(div);
+}
+
+/* ---------- charts ---------- */
+function monthSeries(monthIso){
+  const [y,m]=monthIso.split("-").map(Number); const days=new Date(y,m,0).getDate(); const pts=[];
+  for(let dN=1;dN<=days;dN++){ const iso=monthIso+"-"+String(dN).padStart(2,"0"); pts.push({d:dN, iso, v:entryScore(iso)}); }
+  return pts;
+}
+let selTrend=null;
+function renderTrend(){
+  const pts=monthSeries(curMonth).filter(p=>p.v!==null);
+  const box=$("#trendChart");
+  if(!pts.length){ box.innerHTML="<p class='note'>No entries this month yet — log a day and your trend appears here.</p>"; selTrend=null; return; }
+  const W=640,H=210,P=30, max=10.5,min=0.5;
+  const x=i=> P + i*(W-2*P)/Math.max(1,(pts.length-1));
+  const yv=v=> H-P - (v-min)*(H-2*P)/(max-min);
+  let path="", dots="";
+  pts.forEach((p,i)=>{ const cx=x(i), cy=yv(p.v); path+=(i?"L":"M")+cx.toFixed(1)+","+cy.toFixed(1)+" ";
+    const on = selTrend===p.iso;
+    dots+='<circle data-t="'+p.iso+'" cx="'+cx+'" cy="'+cy+'" r="'+(on?9:6)+'" fill="'+moodColor(p.v)+'" stroke="'+(on?"#111":"#fff")+'" stroke-width="'+(on?2.5:1.5)+'" style="cursor:pointer"><title>'+p.iso+": "+p.v+"</title></circle>";
+    if(on) dots+='<text x="'+cx+'" y="'+(cy-14)+'" text-anchor="middle" font-size="15" fill="currentColor">'+p.v+'</text>'; });
+  let grid="";
+  for(const gv of [2,4,6,8,10]){ const gy=yv(gv); grid+='<line x1="'+P+'" x2="'+(W-P)+'" y1="'+gy+'" y2="'+gy+'" style="stroke:var(--line)" stroke-dasharray="3 4"/><text x="'+(P-6)+'" y="'+(gy+4)+'" text-anchor="end" font-size="15" style="fill:var(--muted)">'+gv+'</text>'; }
+  box.innerHTML='<svg class="chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Daily mood trend">'+grid+'<path d="'+path+'" fill="none" stroke="var(--accent)" stroke-width="2.5"/>'+dots+"</svg>"+
+    (selTrend? "<p class='note'>"+selTrend+": mood score "+(entryScore(selTrend)??"—")+" (click again to clear)</p>" : "<p class='note'>Mood per day, 1–10. Click a dot to spotlight it.</p>");
+  box.querySelectorAll("circle[data-t]").forEach(c=>c.addEventListener("click",()=>{ selTrend = selTrend===c.dataset.t? null : c.dataset.t; if(selTrend){ selDate=selTrend; $("#entryDate").value=selTrend; resetDraft(); } renderTrend(); renderCalendar(); renderCheckin(); }));
+}
+function renderWeekday(){
+  const byWd=[[],[],[],[],[],[],[]]; let any=false;
+  for(const [iso,e] of Object.entries(S.entries)){ const sc=entryScore(iso); if(sc===null) continue; const dow=(new Date(iso+"T12:00:00").getDay()+6)%7; byWd[dow].push(sc); any=true; }
+  const box=$("#weekdayChart");
+  if(!any){ box.innerHTML=""; return; }
+  let rows="";
+  byWd.forEach((arr,i)=>{ const a=avg(arr); rows+='<div class="barRow"><span class="lbl">'+WD[i]+'</span><span class="tr"><i style="width:'+(a===null?0:Math.round(a*10))+'%"></i></span><span class="pct">'+(a===null?"—":a.toFixed(1))+'</span></div>'; });
+  box.innerHTML="<h3 style='margin:0 0 6px;font-size:17px'>Average mood by weekday</h3>"+rows;
+}
+let selCorr=null;
+function renderCorr(){
+  const all=[]; for(const iso of Object.keys(S.entries)){ const sc=entryScore(iso); if(sc!==null) all.push(sc); }
+  const overall=avg(all); const box=$("#corrList");
+  if(overall===null){ box.innerHTML="<p class='note'>Log a few days and this fills in.</p>"; return; }
+  const stats=[];
+  for(const a of S.acts){
+    const withV=[], withoutV=[];
+    for(const [iso,e] of Object.entries(S.entries)){ const sc=entryScore(iso); if(sc===null) continue; ((e.acts||[]).includes(a.id)?withV:withoutV).push(sc); }
+    if(withV.length<3) continue;
+    stats.push({id:a.id,name:a.name, wa:avg(withV), wo:avg(withoutV), n:withV.length, diff:avg(withV)-avg(withoutV)});
+  }
+  stats.sort((p,q)=>q.diff-p.diff);
+  if(!stats.length){ box.innerHTML="<p class='note'>Needs at least 3 days with an activity — keep logging 🙂</p>"; return; }
+  box.innerHTML="";
+  for(const s of stats){
+    const row=document.createElement("div"); row.className="corrRow";
+    row.style.cursor="pointer"; row.style.outline = selCorr===s.id? "3px solid var(--accent)":"none"; row.style.outlineOffset="1px"; row.style.borderRadius="8px";
+    row.innerHTML="<span style='font-weight:700'>"+esc(s.name)+"</span><span class='note'>avg "+s.wa.toFixed(1)+" with · "+(s.wo===null?"—":s.wo.toFixed(1))+" without · "+s.n+" days</span><b style='color:"+(s.diff>=0?"var(--good)":"var(--bad)")+"'>"+(s.diff>=0?"+":"")+s.diff.toFixed(1)+"</b>";
+    row.addEventListener("click",()=>{ selCorr = selCorr===s.id? null : s.id; renderCorr(); });
+    box.appendChild(row);
+  }
+  const f=document.createElement("p"); f.className="note";
+  f.textContent="Association, not causation — "+all.length+" logged days. Click a row to spotlight it.";
+  f.style.display = selCorr? "block":"none";
+  box.appendChild(f);
+}
+
+/* ---------- year in pixels ---------- */
+function renderYear(){
+  const y=num($("#yearPick").value)||new Date().getFullYear();
+  const g=$("#yearGrid"); g.innerHTML="";
+  const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  for(let m=0;m<12;m++){
+    const wrap=document.createElement("div"); wrap.className="ym";
+    const cells=document.createElement("span"); cells.className="cells";
+    const days=new Date(y,m+1,0).getDate();
+    for(let dN2=1;dN2<=days;dN2++){ const iso=y+"-"+String(m+1).padStart(2,"0")+"-"+String(dN2).padStart(2,"0"); const sc=entryScore(iso);
+      const c=document.createElement("i"); c.className="yc"; if(sc!==null) c.style.background=moodColor(sc); c.title=iso; cells.appendChild(c); }
+    wrap.innerHTML="<h3>"+MN[m]+"</h3>"; wrap.appendChild(cells); g.appendChild(wrap);
+  }
+}
+$("#yearPick").addEventListener("change",renderYear);
+
+/* ---------- goals ---------- */
+function syncGoalAct(){
+  const sel=$("#goalAct"); sel.innerHTML=""; if(!S.acts.length){ addOption(sel,"","(add an activity first)"); return; }
+  for(const a of S.acts) addOption(sel,a.id,a.name);
+}
+function periodRange(period){
+  const t=new Date(); const iso=[];
+  if(period==="week"){ const dow=(t.getDay()+6)%7; t.setDate(t.getDate()-dow); for(let i=0;i<7;i++){ const d=new Date(t); d.setDate(t.getDate()+i); iso.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")); } }
+  else { const y=t.getFullYear(), m=t.getMonth(); const days=new Date(y,m+1,0).getDate(); for(let dN=1;dN<=days;dN++) iso.push(y+"-"+String(m+1).padStart(2,"0")+"-"+String(dN).padStart(2,"0")); }
+  return iso;
+}
+function renderGoals(){
+  const box=$("#goalList"); box.innerHTML="";
+  if(!S.goals.length){ box.innerHTML="<p class='note'>No goals yet.</p>"; }
+  for(const g of S.goals){
+    const days=periodRange(g.period); let count=0;
+    for(const iso of days){ const e=S.entries[iso]; if(e&&(e.acts||[]).includes(g.actId)) count++; }
+    const pct=Math.min(100, Math.round(count/Math.max(1,g.times)*100));
+    const div=document.createElement("div"); div.className="goal"; const a=actOf(g.actId);
+    div.innerHTML="<div class='row'><span class='gt'>"+esc(g.name)+"</span><span class='note'>"+count+" of "+g.times+" this "+g.period+(a?" · "+esc(a.name):" (activity removed)")+"</span></div>"+
+      "<div class='prog'><i style='width:"+pct+"%'></i></div>"+
+      "<div class='row'><b>"+(count>=g.times? "✓ Done — nice work!" : (g.times-count)+" to go")+"</b><span class='grow'></span><button class='btn danger small' data-del='1'>Delete</button></div>";
+    div.querySelector("[data-del]").addEventListener("click",()=>{ if(confirm("Delete goal “"+g.name+"”?")){ S.goals=S.goals.filter(x=>x.id!==g.id); save(); renderGoals(); } });
+    box.appendChild(div);
+  }
+  syncGoalAct();
+}
+$("#goalAdd").addEventListener("click",()=>{
+  const name=$("#goalName").value.trim(), actId=$("#goalAct").value, times=Math.max(1,num($("#goalTimes").value)||1), period=$("#goalPeriod").value;
+  if(!name){ alert("Give the goal a name first."); return; }
+  if(!actId){ alert("Add an activity first, then tie the goal to it."); return; }
+  S.goals.push({id:"g"+Date.now(), name, actId, times, period});
+  $("#goalName").value=""; save(); renderGoals(); beep(760);
+});
+
+/* ---------- manage moods / acts / scales ---------- */
+function uid(p){ return p+Date.now().toString(36)+Math.floor(Math.random()*999); }
+function renderManage(){
+  const mm=$("#moodManage"); mm.innerHTML="";
+  for(const m of S.moods){
+    const chip=document.createElement("span"); chip.className="chip"; chip.style.cursor="default";
+    chip.textContent=m.emoji+" "+m.label+" ("+m.score+") ";
+    const x=document.createElement("button"); x.type="button"; x.className="btn danger small"; x.textContent="×"; x.setAttribute("aria-label","Remove mood "+m.label);
+    x.addEventListener("click",()=>{ if(S.moods.length<=1){ alert("Keep at least one mood."); return; } if(confirm("Remove mood “"+m.label+"”? Past entries keep showing but lose this mood's score.")){ S.moods=S.moods.filter(z=>z.id!==m.id); save(); render(); } });
+    chip.appendChild(x); mm.appendChild(chip);
+  }
+  const gag=$("#newActGroup"); gag.innerHTML=""; for(const g of S.groups) addOption(gag,g.id,g.name); addOption(gag,"__none","Other");
+  const am=$("#actManage"); am.innerHTML="";
+  for(const a of S.acts){
+    const g=groupOf(a.groupId);
+    const chip=document.createElement("span"); chip.className="chip"; chip.style.cursor="default";
+    chip.textContent=a.name+(g?" · "+g.name:"");
+    const x=document.createElement("button"); x.type="button"; x.className="btn danger small"; x.textContent="×"; x.setAttribute("aria-label","Remove activity "+a.name);
+    x.addEventListener("click",()=>{ if(confirm("Remove activity “"+a.name+"”?")){ S.acts=S.acts.filter(z=>z.id!==a.id); save(); render(); } });
+    chip.appendChild(x); am.appendChild(chip);
+  }
+  const sm=$("#scaleManage"); sm.innerHTML="";
+  for(const sc of S.scales){
+    const chip=document.createElement("span"); chip.className="chip"; chip.style.cursor="default";
+    chip.textContent=sc.name+" (0–10)";
+    const x=document.createElement("button"); x.type="button"; x.className="btn danger small"; x.textContent="×"; x.setAttribute("aria-label","Remove scale "+sc.name);
+    x.addEventListener("click",()=>{ if(confirm("Remove scale “"+sc.name+"”?")){ S.scales=S.scales.filter(z=>z.id!==sc.id); save(); render(); } });
+    chip.appendChild(x); sm.appendChild(chip);
+  }
+}
+$("#moodAdd").addEventListener("click",()=>{
+  const label=$("#newMoodLabel").value.trim(), emoji=$("#newMoodEmoji").value.trim()||"🙂", score=Math.max(1,Math.min(10,num($("#newMoodScore").value)||1));
+  if(!label){ alert("Name the mood first."); return; }
+  S.moods.push({id:uid("m"),label,emoji,score}); S.moods.sort((a,b)=>a.score-b.score);
+  $("#newMoodLabel").value=""; $("#newMoodEmoji").value=""; save(); render(); beep(700);
+});
+$("#groupAdd").addEventListener("click",()=>{
+  const name=$("#newGroup").value.trim(); if(!name){ alert("Name the group first."); return; }
+  S.groups.push({id:uid("g"),name}); $("#newGroup").value=""; save(); render(); beep(700);
+});
+$("#actAdd").addEventListener("click",()=>{
+  const name=$("#newAct").value.trim(); if(!name){ alert("Name the activity first."); return; }
+  const gid=$("#newActGroup").value;
+  S.acts.push({id:uid("a"),name,groupId:gid==="__none"? "" : gid}); $("#newAct").value=""; save(); render(); beep(700);
+});
+$("#scaleAdd").addEventListener("click",()=>{
+  const name=$("#newScale").value.trim(); if(!name){ alert("Name the scale first."); return; }
+  S.scales.push({id:uid("s"),name}); $("#newScale").value=""; save(); render(); beep(700);
+});
+$("#passSet").addEventListener("click",()=>{
+  const v=$("#passcode").value.trim(); S.meta.passcode=v; save(); $("#passcode").value="";
+  $("#dataStatus").textContent = v? "Local passcode set. It's stored on this device only and just keeps casual eyes out — it is not encryption." : "Passcode cleared.";
+});
+
+/* ---------- lock screen ---------- */
+let unlocked=false;
+function maybeLock(){
+  if(!S.meta.passcode || unlocked) return;
+  try{ if(sessionStorage.getItem("moodlog.unlocked")==="1"){ unlocked=true; return; } }catch(e){}
+  const w=document.querySelector(".wrap"); if(w) w.style.display="none";
+  const ls=document.getElementById("lockScreen"); ls.style.display="block";
+  const go=()=>{ const v=document.getElementById("lk").value; if(v===S.meta.passcode){ unlocked=true; try{ sessionStorage.setItem("moodlog.unlocked","1"); }catch(e){} location.reload(); } else { document.getElementById("lkm").textContent="That's not it — try again."; } };
+  document.getElementById("lkb").addEventListener("click",go);
+  document.getElementById("lk").addEventListener("keydown",e=>{ if(e.key==="Enter") go(); });
+  throw new Error("locked");
+}
+
+/* ---------- data ---------- */
+function download(name, text, type){
+  const blob=new Blob([text],{type}); const url=URL.createObjectURL(blob); const a=document.createElement("a");
+  a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),800);
+}
+$("#csvBtn").addEventListener("click",()=>{
+  const head=["date","mood","score","activities","scales","note"];
+  const lines=[head.join(",")];
+  const q=v=>'"'+String(v??"").replace(/"/g,'""').replace(/\r?\n/g,' ')+'"';
+  for(const iso of Object.keys(S.entries).sort()){
+    const e=S.entries[iso], m=moodOf(e.moodId);
+    const acts=(e.acts||[]).map(id=>{ const a=actOf(id); return a?a.name:id; }).join("; ");
+    const scales=S.scales.map(sc=>{ const v=e.scaleVals&&e.scaleVals[sc.id]; return Number.isFinite(v)? sc.name+"="+v : ""; }).filter(Boolean).join("; ");
+    lines.push([iso, m?m.label:"", m?m.score:"", acts, scales, e.note||""].map(q).join(","));
+  }
+  download("moodlog-export.csv", lines.join("\n"), "text/csv");
+  $("#dataStatus").textContent="CSV exported — one row per logged day."; beep(760);
+});
+$("#jsonExp").addEventListener("click",()=>{ download("moodlog-backup.json", JSON.stringify(S,null,1), "application/json"); $("#dataStatus").textContent="JSON backup exported."; beep(760); });
+$("#jsonImp").addEventListener("change",ev=>{
+  const f=ev.target.files[0]; ev.target.value=""; if(!f) return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result);
+      if(!d||typeof d!=="object"||!d.entries||typeof d.entries!=="object") throw new Error("shape");
+      const okObj=v=>v&&typeof v==="object"&&!Array.isArray(v);
+      const okArr=(v,f)=>Array.isArray(v)? v.filter(f) : null;
+      const clean={ entries:{}, moods:null, groups:null, acts:null, scales:null, goals:null };
+      for (const [k,v] of Object.entries(d.entries)){ if(!okObj(v)) continue;
+        clean.entries[k]={ moodId: typeof v.moodId==="string"? v.moodId : "", scaleVals: okObj(v.scaleVals)? Object.fromEntries(Object.entries(v.scaleVals).filter(([,n])=>Number.isFinite(+n)).map(([id,n])=>[id,+n])) : {}, acts: Array.isArray(v.acts)? v.acts.filter(x=>typeof x==="string") : [], note: typeof v.note==="string"? v.note : "", ts: Number.isFinite(+v.ts)? +v.ts : 0 }; }
+      clean.moods=okArr(d.moods, m=>okObj(m)&&typeof m.id==="string"&&typeof m.label==="string");
+      clean.groups=okArr(d.groups, g=>okObj(g)&&typeof g.id==="string"&&typeof g.name==="string");
+      clean.acts=okArr(d.acts, a=>okObj(a)&&typeof a.id==="string"&&typeof a.name==="string");
+      clean.scales=okArr(d.scales, x=>okObj(x)&&typeof x.id==="string"&&typeof x.name==="string");
+      clean.goals=okArr(d.goals, x=>okObj(x)&&typeof x.id==="string");
+      S={...defaults(), ...d, entries: clean.entries, settings:{...defaults().settings,...(d.settings||{})}, meta:{...defaults().meta,...(d.meta||{})}};
+      for (const k of ["moods","groups","acts","scales","goals"]) if(clean[k]) S[k]=clean[k];
+      save(); resetDraft(); selDate=todayISO(); curMonth=selDate.slice(0,7); render();
+      $("#dataStatus").textContent="Import done — "+Object.keys(S.entries).length+" days restored."; beep(760);
+    }catch(e){ $("#dataStatus").textContent="That file doesn't look like a MoodLog backup — nothing was changed."; } };
+  r.readAsText(f);
+});
+$("#clearBtn").addEventListener("click",()=>{
+  if($("#sampleBtn").getAttribute("aria-pressed")==="true"){ $("#dataStatus").textContent="Sample data is on — turn it off with the flask button first (clearing now would only clear the demo)."; return; }
+  if(!confirm("Clear ALL your MoodLog data on this device? This cannot be undone.")) return;
+  const keep=S.settings; S=defaults(); S.settings=keep; save();
+  resetDraft(); selDate=todayISO(); curMonth=selDate.slice(0,7); render();
+  $("#dataStatus").textContent="All data cleared."; beep(420);
+});
+$("#printBtn").addEventListener("click",()=>{
+  const [y,m]=curMonth.split("-").map(Number); const days=new Date(y,m,0).getDate();
+  let rows=""; let count=0; const scores=[];
+  for(let dN=1;dN<=days;dN++){ const iso=curMonth+"-"+String(dN).padStart(2,"0"); const e=S.entries[iso]; if(!e) continue; count++;
+    const mo=moodOf(e.moodId); const sc=mo?mo.score:null; if(sc!==null) scores.push(sc);
+    const acts=(e.acts||[]).map(id=>{ const a=actOf(id); return a?esc(a.name):""; }).filter(Boolean).join(", ");
+    rows+="<tr><td>"+iso+"</td><td>"+esc(mo?mo.label+" ("+sc+")":"")+"</td><td>"+acts+"</td><td>"+esc(e.note||"")+"</td></tr>"; }
+  const a2=avg(scores);
+  $("#printRoot").innerHTML="<h1>MoodLog — monthly report</h1><p>Month: "+curMonth+" · Entries: "+count+" · Average mood: "+(a2===null?"—":a2.toFixed(1))+" / 10</p><table><tr><th>Date</th><th>Mood</th><th>Activities</th><th>Note</th></tr>"+(rows||"<tr><td colspan='4'>No entries this month.</td></tr>")+"</table><p>Printed from MoodLog on this device. Personal journal — not a medical record.</p>";
+  window.print();
+});
+
+function render(){ renderCheckin(); renderCalendar(); renderTrend(); renderWeekday(); renderCorr(); renderYear(); renderGoals(); renderManage(); }
+
+/* init */
+maybeLock();
+applyTheme();
+if (S.meta.snapshot){ $("#sampleBtn").setAttribute("aria-pressed","true"); }
+$("#soundBtn").classList.toggle("snd-off", S.settings.sound===false);
+$("#soundBtn").setAttribute("aria-pressed", S.settings.sound!==false);
+$("#footLine").textContent = Object.keys(S.entries).length+" days logged on this device. Current month: "+curMonth+".";
+$("#yearPick").value = new Date().getFullYear();
+render();
+</script>
+</body>
+</html>
