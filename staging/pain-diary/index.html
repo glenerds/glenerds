@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pain diary, symptom tracker, medication log and printable doctor report</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f3f5f7; --card:#ffffff; --ink:#21303c; --muted:#5f7282; --line:#d5dee5;
+  --accent:#6854a6; --accent-dark:#4e3d86; --accent-soft:#eeeafd; --teal:#0f766e; --teal-soft:#e2f3f0;
+  --gold:#9a6508; --gold-soft:#fff1cf; --red:#b42318; --red-soft:#fde8e4; --orange:#a44a12; --orange-soft:#ffead9;
+  --green:#247245; --green-soft:#e3f2e7; --chip:#edf2f5; --input:#ffffff; --shadow:0 1px 3px rgba(31,48,60,.13);
+}
+body.dark{
+  color-scheme:dark;
+  --bg:#10151d; --card:#1b232e; --ink:#eef4f7; --muted:#b6c5cf; --line:#354454;
+  --accent:#b9a6ff; --accent-dark:#d2c6ff; --accent-soft:#2d2750; --teal:#62d1c5; --teal-soft:#173d3a;
+  --gold:#f0bc62; --gold-soft:#40351d; --red:#ff9d94; --red-soft:#472722; --orange:#ffb27a; --orange-soft:#482f1e;
+  --green:#86d89c; --green-soft:#1f3d2c; --chip:#273341; --input:#242f3c; --shadow:0 1px 3px rgba(0,0,0,.48);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+input,select,textarea{font:inherit;color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.82}
+header.top{max-width:1220px;margin:0 auto;padding:14px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;color:#fff}
+body.dark .logo{color:#171126}
+.logo svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand h1{font-size:24px;margin:0;line-height:1.1;color:var(--ink)}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);color:var(--ink)}
+.icon-btn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn.on{background:var(--accent-soft);border-color:var(--accent)}
+.icon-btn.on svg{stroke:var(--accent)}
+.more-apps{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;box-shadow:var(--shadow)}
+.more-apps svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2}
+main{max-width:1220px;margin:0 auto;padding:6px 16px 40px}
+.samplebar{display:none;background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:15px}
+.samplebar.show{display:block}.samplebar b{color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);color:var(--ink)}
+.stat .n{font-size:24px;font-weight:800;line-height:1.15;color:var(--ink)}
+.stat .l{color:var(--muted);font-size:15px}.stat.warn .n{color:var(--gold)}.stat.bad .n{color:var(--red)}
+.tabs{display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap}
+.tab{padding:10px 17px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;min-height:44px}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.dark .tab.on{color:#171126}
+.cols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:14px;align-items:start}
+.cols.equal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:900px){.cols,.cols.equal{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;color:var(--ink)}
+.panel h2{margin:0 0 4px;font-size:19px;color:var(--ink)}.panel h3{margin:16px 0 6px;font-size:17px;color:var(--ink)}.panel .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+label.f{display:block;font-weight:600;font-size:15px;margin:12px 0 5px;color:var(--ink)}
+input[type=text],input[type=date],input[type=time],input[type=number],select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--input);color:var(--ink);font-size:16px}
+textarea{min-height:78px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.frow,.frow3{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 18px;min-height:46px;border-radius:11px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:16px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.teal{background:var(--teal);border-color:var(--teal);color:#fff}.btn.danger{color:var(--red)}.btn.small{min-height:40px;padding:0 13px;font-size:15px}
+body.dark .btn.primary,body.dark .btn.teal{color:#10151d}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hint{color:var(--muted);font-size:15px}.tiny{color:var(--muted);font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:600;min-height:40px}.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}body.dark .chip.on{color:#171126}
+.check-grid{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.check-chip{position:relative;display:inline-flex;align-items:center;min-height:42px;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--chip);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+.check-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.check-chip:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);outline:2px solid var(--accent);outline-offset:1px}
+.check-chip:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.severity-box{background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:14px;padding:14px;color:var(--ink)}
+.severity-control{display:grid;grid-template-columns:48px minmax(0,1fr) 48px 74px;gap:10px;align-items:center}
+.step-btn{width:48px;height:48px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:24px;font-weight:800}
+.severity-value{font-size:30px;font-weight:900;text-align:center;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px}
+input[type=range]{width:100%;accent-color:var(--accent);min-height:44px}
+.scale-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:15px;margin-top:2px}
+.record{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:8px 0;background:var(--card);color:var(--ink);width:100%;text-align:left}
+.record.sel{outline:3px solid var(--gold);background:var(--gold-soft)}
+.record.clickable{cursor:pointer}.record-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.record-head b{font-size:16px;color:var(--ink)}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-size:15px;font-weight:700;background:var(--chip);color:var(--ink);white-space:nowrap}
+.badge.sev-low{background:var(--green-soft);color:var(--green)}.badge.sev-mid{background:var(--gold-soft);color:var(--gold)}.badge.sev-high{background:var(--orange-soft);color:var(--orange)}.badge.sev-severe{background:var(--red-soft);color:var(--red)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:7px 12px;font-size:15px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600;color:var(--ink)}
+@media(max-width:560px){.kv{grid-template-columns:1fr}.kv dd{margin-bottom:5px}.severity-control{grid-template-columns:48px minmax(0,1fr) 48px}.severity-value{grid-column:1/-1}}
+table.list{width:100%;border-collapse:collapse;font-size:15px;color:var(--ink)}table.list th{text-align:left;color:var(--muted);font-weight:600;padding:8px 6px;border-bottom:2px solid var(--line);font-size:15px}table.list td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+.heat-1{background:var(--green-soft);color:var(--green)}.heat-2{background:var(--gold-soft);color:var(--gold)}.heat-3{background:var(--orange-soft);color:var(--orange)}.heat-4{background:var(--red-soft);color:var(--red)}
+.trend-wrap{overflow-x:auto;padding:8px 2px 2px}.trend{display:flex;align-items:flex-end;gap:4px;min-height:212px;padding:14px 4px 4px;border-bottom:1px solid var(--line);min-width:0}.trend-col{flex:1;min-width:7px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--ink);background:none;border:0;padding:4px 1px}.trend-bar{width:min(34px,90%);border-radius:6px 6px 0 0;min-height:4px;background:var(--accent)}.trend-bar.none{display:none}.trend-bar.zero{width:9px;height:9px;min-height:9px;border-radius:50%;background:var(--gold);align-self:center}.trend-col.sel .trend-bar{outline:3px solid var(--gold);outline-offset:2px;transform:translateY(-4px);background:var(--gold)}.trend-lab{font-size:15px;color:var(--muted);white-space:nowrap}.trend-val{font-size:15px;font-weight:700;color:var(--ink)}
+.hbar-list{display:grid;gap:8px}.hbar{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(120px,1.6fr) minmax(76px,.45fr);gap:9px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:8px}.hbar.sel{outline:3px solid var(--gold);background:var(--gold-soft)}.hbar-name{font-size:15px;font-weight:700;color:var(--ink)}.hbar-track{height:20px;background:var(--chip);border-radius:999px;overflow:hidden}.hbar-fill{height:100%;background:var(--teal);border-radius:999px}.hbar.sel .hbar-fill{background:var(--gold)}.hbar-val{font-size:15px;font-weight:700;color:var(--ink);text-align:right}
+.donut-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.donut-box{position:relative;width:200px;height:200px;flex:none}.donut-box svg{width:200px;height:200px}.donut-seg{cursor:pointer;stroke:var(--card);stroke-width:1.4}.donut-seg.sel{stroke:var(--gold);stroke-width:3}.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 52px;pointer-events:none;color:var(--ink)}.donut-center b{font-size:22px;line-height:1.05;color:var(--ink)}.donut-center span{font-size:15px;color:var(--muted)}
+.seg-legend{display:flex;flex-wrap:wrap;gap:6px}.legend-btn{font-size:15px;padding:7px 11px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-weight:600}.legend-btn.sel{outline:3px solid var(--gold);background:var(--gold-soft)}
+.detail-box{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink)}
+.notice{background:var(--teal-soft);border:1px solid var(--teal);border-radius:12px;padding:12px 14px;color:var(--ink);font-size:15px}.notice b{color:var(--teal)}
+.report-preview{background:#fff;color:#17242e;border:1.5px solid var(--line);border-radius:12px;padding:18px;font-size:15px}.report-preview h2,.report-preview h3{color:#17242e}.report-preview table{width:100%;border-collapse:collapse;font-size:15px}.report-preview th,.report-preview td{border-bottom:1px solid #cbd5dd;padding:5px;text-align:left;color:#17242e}.report-preview .foot{color:#526674;font-size:15px;border-top:1px solid #cbd5dd;margin-top:16px;padding-top:8px}
+footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#1c2420;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;max-width:92vw;text-align:center;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.3)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#printArea{display:none}
+@media print{body{background:#fff;color:#111}header.top,.tabs,.samplebar,.no-print,footer.cta,.toast,main>section{display:none!important}main{max-width:100%;padding:0}.panel{box-shadow:none;break-inside:avoid}#printArea{display:block;color:#111}#printArea h1{font-size:26px;margin:0 0 6px}#printArea h2{font-size:20px;margin:18px 0 6px}#printArea h3{font-size:17px;margin:14px 0 4px}#printArea table{width:100%;border-collapse:collapse;font-size:11.5pt}#printArea th,#printArea td{border-bottom:1px solid #bbb;padding:5px;text-align:left}#printArea .foot{color:#555;border-top:1px solid #bbb;margin-top:18px;padding-top:8px;font-size:10.5pt}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18.5h16M6 18.5v-5.2M10 18.5V8.8M14 18.5v-7.6M18 18.5V5.8"/><path d="M5.2 11.4 9.4 7l3.4 2.7 5-4.4"/></svg></div>
+  <div class="brand"><h1 id="brandName">Pain Diary &amp; Doctor Report</h1><p>Daily pain, medication, trigger and function records — offline on this device</p></div>
+  <div class="top-actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+    <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
+    <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg></button>
+    <button class="icon-btn" id="soundBtn" title="Sounds" aria-label="Toggle sounds"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
+<main>
+  <div class="samplebar" id="sampleBar"><b>Sample diary is on.</b> Made-up entries show the diary, charts and doctor report working together. Tap the flask again and your real diary returns exactly as you left it.</div>
+  <div class="stats-grid" id="dashTiles"></div>
+  <div class="tabs no-print" role="tablist">
+    <button class="tab on" data-view="Dashboard" role="tab" aria-selected="true">Dashboard</button>
+    <button class="tab" data-view="Log" role="tab" aria-selected="false">Log Entry</button>
+    <button class="tab" data-view="History" role="tab" aria-selected="false">History</button>
+    <button class="tab" data-view="Charts" role="tab" aria-selected="false">Charts</button>
+    <button class="tab" data-view="Stats" role="tab" aria-selected="false">Stats</button>
+    <button class="tab" data-view="Report" role="tab" aria-selected="false">Report &amp; Data</button>
+  </div>
+
+  <section id="viewDashboard">
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>Severity trend</h2><p class="sub">Average recorded severity for the last 14 days. Tap a day to inspect it.</p><div id="dashTrend"></div><p class="hint" id="dashTrendDetail">Tap a day for its entries.</p></div>
+        <div class="panel"><h2>Recent entries</h2><p class="sub">Your newest pain records, newest first.</p><div id="recentList"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Medication outcomes you recorded</h2><p class="sub">Tap a slice or label to pin that outcome.</p><div class="donut-wrap"><div class="donut-box"><svg id="dashMedDonut" viewBox="0 0 100 100" role="img" aria-label="Medication outcome chart"></svg><div class="donut-center" id="dashMedCenter"></div></div><div><div class="seg-legend" id="dashMedLegend"></div><p class="hint" id="dashMedMeta"></p></div></div></div>
+        <div class="panel"><h2>Patterns at a glance</h2><p class="sub">The locations and triggers appearing most often in your records.</p><h3>Body locations</h3><div class="hbar-list" id="dashLocations"></div><h3>Triggers</h3><div class="hbar-list" id="dashTriggers"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewLog" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2 id="entryFormTitle">Log a pain entry</h2><p class="sub">Record what happened in your own words. Edit any entry later from History.</p>
+          <div class="frow"><div><label class="f" for="eDate">Date *</label><input type="date" id="eDate"></div><div><label class="f" for="eTime">Time</label><input type="time" id="eTime"></div></div>
+          <label class="f" for="eSeverity">Pain severity (0–10)</label>
+          <div class="severity-box"><div class="severity-control"><button class="step-btn" id="sevMinus" type="button" aria-label="Decrease severity">−</button><input type="range" id="eSeverity" min="0" max="10" step="1" value="5" aria-label="Pain severity"><button class="step-btn" id="sevPlus" type="button" aria-label="Increase severity">+</button><div class="severity-value" id="sevValue">5</div></div><div class="scale-labels"><span>0 · none</span><span>5 · moderate</span><span>10 · worst recorded</span></div></div>
+          <label class="f">Body location(s)</label><div class="check-grid" id="locationChecks"></div>
+          <div class="frow"><div><label class="f" for="eCustomLocation">Other location(s)</label><input type="text" id="eCustomLocation" placeholder="Comma separated"></div><div><label class="f" for="eSleep">Sleep quality</label><select id="eSleep"><option value="">Not recorded</option><option>Poor</option><option>Fair</option><option>Good</option><option>Excellent</option></select></div></div>
+          <label class="f">Pain character</label><div class="check-grid" id="characterChecks"></div>
+          <label class="f">Trigger(s)</label><div class="check-grid" id="triggerChecks"></div>
+          <label class="f" for="eCustomTrigger">Other trigger(s)</label><input type="text" id="eCustomTrigger" placeholder="Comma separated">
+        </div>
+        <div class="panel"><h2>Medication and daily function</h2><p class="sub">These are your records only — the app does not recommend medication or treatment.</p>
+          <div class="frow"><div><label class="f" for="eMedication">Medication taken</label><input type="text" id="eMedication" placeholder="Name you used"></div><div><label class="f" for="eDose">Dose / amount</label><input type="text" id="eDose" placeholder="As recorded"></div></div>
+          <div class="frow"><div><label class="f" for="eEffect">Recorded effect</label><select id="eEffect"><option>Not recorded</option><option>Helped a lot</option><option>Helped a little</option><option>No change</option><option>Made worse</option></select></div><div><label class="f" for="eImpact">Activity / function impact (0–10)</label><input type="number" id="eImpact" min="0" max="10" step="1" value="0"></div></div>
+          <label class="f" for="eMood">Mood note</label><input type="text" id="eMood" placeholder="Short note in your own words">
+          <label class="f" for="eNote">Notes</label><textarea id="eNote" placeholder="What was happening, what you were doing, and anything you want to discuss at an appointment…"></textarea>
+          <div class="btnrow"><button class="btn primary" id="saveEntryBtn">Save entry</button><button class="btn" id="clearEntryBtn">Clear form</button><button class="btn danger" id="cancelEditBtn" hidden>Cancel edit</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Entry preview</h2><p class="sub">A quick read-back before and after you save.</p><div class="detail-box" id="entryPreview">Choose a date and severity, then save the entry.</div></div>
+        <div class="panel"><h2>Honest notes</h2><p><b>Diary and report tool only.</b> This app records what you enter and prints summaries of those records.</p><p>It does not diagnose a condition, explain a cause, recommend medication, or replace medical care. This is not medical advice.</p><p>Your entries stay in this browser on this device. Download a JSON backup before changing devices or clearing browser data.</p></div>
+        <div class="panel"><h2>Quick totals</h2><p class="sub">Updates as soon as an entry is saved.</p><div id="quickTotals"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewHistory" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>History</h2><p class="sub">Unlimited history. Tap an entry to inspect it, or use Edit to change it.</p>
+          <div class="frow3"><div><label class="f" for="historyPeriod">Period</label><select id="historyPeriod"><option value="all">All history</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select></div><div><label class="f" for="historyLocation">Location</label><select id="historyLocation"><option value="all">All locations</option></select></div><div><label class="f" for="historySearch">Search</label><input type="text" id="historySearch" placeholder="Medication, trigger, note…"></div></div>
+          <div id="historyList" style="margin-top:12px"></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Entry detail</h2><p class="sub" id="historyDetailSub">Tap an entry to see every field.</p><div id="historyDetail"></div></div>
+        <div class="panel"><h2>History summary</h2><p class="sub">For the period and location currently selected.</p><div id="historySummary"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewCharts" hidden>
+    <div class="panel"><h2>Severity trend</h2><p class="sub">Daily averages. Tap a day to pin its exact numbers below.</p><div class="chips" role="group" aria-label="Trend period"><button class="chip trend-range on" data-range="30">30 days</button><button class="chip trend-range" data-range="90">90 days</button></div><div id="trendChart"></div><p class="hint" id="trendDetail">Tap a day for the detail.</p></div>
+    <div class="cols equal">
+      <div>
+        <div class="panel"><h2>Severity by body location</h2><p class="sub">Average severity for entries that name each location. Tap a row to pin it.</p><div class="hbar-list" id="locationChart"></div><p class="hint" id="locationDetail">Tap a location for its detail.</p></div>
+        <div class="panel"><h2>Trigger frequency</h2><p class="sub">How often each trigger appears in your entries. Tap a row to pin it.</p><div class="hbar-list" id="triggerChart"></div><p class="hint" id="triggerDetail">Tap a trigger for its detail.</p></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Medication-response breakdown</h2><p class="sub">Outcomes exactly as you recorded them. Tap a slice or label to pin it.</p><div class="donut-wrap"><div class="donut-box"><svg id="medDonut" viewBox="0 0 100 100" role="img" aria-label="Medication response chart"></svg><div class="donut-center" id="medCenter"></div></div><div><div class="seg-legend" id="medLegend"></div><p class="hint" id="medMeta"></p></div></div></div>
+        <div class="panel"><h2>What the charts mean</h2><p>These charts summarize <b>your entries only</b>. They do not diagnose a condition, prove a cause, or show that a medication or activity caused an outcome.</p><p>Use them as a record to review and discuss with a qualified clinician. This is not medical advice.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewStats" hidden>
+    <div class="panel"><h2>Period summaries</h2><p class="sub">Weekly and monthly summaries are calculated from the period you choose.</p><label class="f" for="statsPeriod">Summary period</label><select id="statsPeriod"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last 12 months</option><option value="all">All history</option></select><div class="stats-grid" id="statsTiles"></div></div>
+    <div class="cols equal">
+      <div>
+        <div class="panel"><h2>Weekly summary</h2><p class="sub">Average severity, highest entry and high-pain days by week.</p><div id="weeklyStats"></div></div>
+        <div class="panel"><h2>Monthly summary</h2><p class="sub">The same records rolled up by calendar month.</p><div id="monthlyStats"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Best and hardest days</h2><p class="sub">Ranked by the day’s average recorded severity.</p><div id="bestWorstStats"></div></div>
+        <div class="panel"><h2>Location heat summary</h2><p class="sub">Color follows the average severity in your records. It is a display summary, not a diagnosis.</p><div id="locationHeat"></div></div>
+        <div class="panel"><h2>Medication outcomes</h2><p class="sub">Counts by medication and the effect you recorded.</p><div id="medStats"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewReport" hidden>
+    <div class="cols equal">
+      <div>
+        <div class="panel"><h2>Printable doctor report</h2><p class="sub">Unlimited prints. Choose the period, review the sheet, then print it.</p>
+          <label class="f" for="patientName">Patient name (optional)</label><input type="text" id="patientName" placeholder="Name to print on the report">
+          <label class="f" for="reportPeriod">Report period</label><select id="reportPeriod"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last 12 months</option><option value="all">All history</option><option value="custom">Custom dates</option></select>
+          <div class="frow"><div><label class="f" for="reportFrom">From</label><input type="date" id="reportFrom"></div><div><label class="f" for="reportTo">To</label><input type="date" id="reportTo"></div></div>
+          <div class="btnrow"><button class="btn primary" id="buildReportBtn">Build report preview</button><button class="btn teal" id="printReportBtn">Print report</button></div>
+          <p class="hint">The report prints your entered records and summaries. It does not add a diagnosis or treatment recommendation.</p>
+        </div>
+        <div class="panel"><h2>Honest notes</h2><p><b>Diary and report tool only.</b> It does not diagnose, explain causes, recommend medication or treatment, or replace medical care. This is not medical advice.</p><p>Medication names, doses and effects in the report are the words and outcomes you entered. Discuss medication and treatment questions with a qualified clinician.</p><p>Flags and charts summarize dates and numbers you recorded. An overdue flag, trend or trigger pattern does not prove a cause.</p></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Export &amp; backup</h2><p class="sub">CSV opens in a spreadsheet. JSON Backup restores the complete diary.</p>
+          <div class="btnrow" style="margin-top:0"><button class="btn" id="exportCsvBtn">Download CSV</button><button class="btn primary" id="backupBtn">Download JSON Backup</button></div>
+          <div class="btnrow"><button class="btn" id="restoreBtn">Restore Backup</button><input type="file" id="jsonFile" accept=".json,application/json" hidden></div>
+          <div id="dataSummary"></div>
+        </div>
+        <div class="panel"><h2>How your data works</h2><p><b>Storage:</b> entries are saved in this browser’s local storage on this device only.</p><p><b>Restore:</b> restoring a backup asks for your confirmation first, then replaces the complete diary after each record is checked. Records without a valid date or ID are skipped; duplicate IDs are dropped. Restore is blocked while sample data is on, and only backups made by this app are accepted.</p><p><b>Sample data:</b> the flask snapshots your real diary, shows a made-up diary, and restores your snapshot exactly when tapped again.</p><p><b>Exports:</b> exports and backups are blocked while sample data is on, so a made-up diary cannot be mistaken for your real records.</p></div>
+      </div>
+    </div>
+    <div class="panel"><h2>Report preview</h2><p class="sub">The same sheet that will print.</p><div class="report-preview" id="reportPreview">Choose a period and build the report.</div></div>
+  </section>
+  <div id="printArea"></div>
+</main>
+<footer class="cta no-print"><a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a></footer>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const APP_NAME = "Pain Diary & Doctor Report";
+const LS_KEY = "paindiary_v1";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const localToday = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const parseDate = v => { if(!v||typeof v!=="string") return null; const [y,m,d]=v.split("-").map(Number); if(!Number.isFinite(y)||!Number.isFinite(m)||!Number.isFinite(d)) return null; const dt=new Date(y,m-1,d); return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d ? dt : null; };
+const fmtDate = v => { const d=parseDate(v); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—"; };
+const fmtShort = v => { const d=parseDate(v); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric"}) : "—"; };
+const addDays = (v,n) => { const d=parseDate(v); if(!d) return ""; d.setDate(d.getDate()+n); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+const daysBetween = (a,b) => { const x=parseDate(a), y=parseDate(b); return x&&y ? Math.round((y-x)/86400000) : null; };
+const uid = p => `${p}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`;
+const num = v => { const n=parseFloat(v); return Number.isFinite(n) ? n : 0; };
+const clampInt = (v,min,max,fallback=0) => { const n=Math.round(num(v)); return Number.isFinite(n) ? Math.min(max,Math.max(min,n)) : fallback; };
+const avg = list => list.length ? list.reduce((a,b)=>a+num(b),0)/list.length : 0;
+const round1 = n => Math.round((num(n)+Number.EPSILON)*10)/10;
+const csvSafe = v => { const s=String(v ?? ""); return /^[=+\-@]/.test(s) ? `'${s}` : s; };
+const LOCATIONS = ["Head","Neck","Shoulders","Upper back","Lower back","Chest","Abdomen","Hips","Knees","Legs","Arms","Hands","Feet","Jaw","Whole body"];
+const CHARACTERS = ["Aching","Sharp","Burning","Throbbing","Stabbing","Tingling","Stiff","Cramping","Shooting","Dull"];
+const TRIGGERS = ["Stress","Poor sleep","Weather change","Activity","Sitting","Standing","Exercise","Food","Screen time","Travel","Missed medication","Unknown"];
+const EFFECTS = ["Helped a lot","Helped a little","No change","Made worse","Not recorded"];
+const EFFECT_COLORS = {"Helped a lot":"#247245","Helped a little":"#0f766e","No change":"#9a6508","Made worse":"#b42318","Not recorded":"#6854a6"};
+let toastTimer=null, audioCtx=null, bootDataUnreadable=false;
+let S = load();
+let editing = {entry:null};
+let sel = {trend:null, trendDash:null, location:null, trigger:null, med:null, historyEntry:null, trendRange:30};
+let trendRange = 30;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),3400); }
+function beep(freq=660,dur=.08,type="sine",gain=.055){ if(!S.settings.sound) return; try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(gain,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur); o.connect(g).connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+dur); }catch(e){} }
+function chime(){ beep(740,.07,"sine",.05); setTimeout(()=>beep(980,.06,"sine",.04),65); }
+function thud(){ beep(180,.09,"triangle",.06); }
+function prefersDark(){ try{ return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }catch(e){ return false; } }
+function blankData(){ return {entries:[], settings:{dark:prefersDark(), sound:true, patientName:""}, sampling:false, snapshot:null}; }
+function cleanText(v,max=500){ return typeof v === "string" ? v.trim().slice(0,max) : ""; }
+function cleanList(v, maxItems=20){
+  let list=[];
+  if(Array.isArray(v)) list=v;
+  else if(typeof v === "string") list=v.split(",");
+  const seen=new Set();
+  return list.map(x=>cleanText(x,60)).filter(x=>x && !seen.has(x) && seen.add(x)).slice(0,maxItems);
+}
+function normalizeEntry(raw){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  if(typeof raw.id !== "string" || !raw.id.trim()) return null;
+  if(typeof raw.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw.date) || !parseDate(raw.date)) return null;
+  const time = typeof raw.time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(raw.time) ? raw.time : "00:00";
+  return {
+    id: raw.id.trim().slice(0,90),
+    date: raw.date,
+    time,
+    severity: clampInt(raw.severity,0,10,0),
+    locations: cleanList(raw.locations,24),
+    characters: cleanList(raw.characters,20),
+    triggers: cleanList(raw.triggers,24),
+    medication: cleanText(raw.medication,100),
+    dose: cleanText(raw.dose,80),
+    effect: EFFECTS.includes(raw.effect) ? raw.effect : "Not recorded",
+    activityImpact: clampInt(raw.activityImpact,0,10,0),
+    sleep: ["Poor","Fair","Good","Excellent"].includes(raw.sleep) ? raw.sleep : "",
+    moodNote: cleanText(raw.moodNote,240),
+    note: cleanText(raw.note,1200)
+  };
+}
+function normalizeState(raw, nested=false){
+  if(!raw || typeof raw !== "object" || Array.isArray(raw)) return blankData();
+  const base = blankData();
+  const settingsIn = raw.settings && typeof raw.settings === "object" && !Array.isArray(raw.settings) ? raw.settings : {};
+  const next = {
+    entries: [],
+    settings: {
+      dark: typeof settingsIn.dark === "boolean" ? settingsIn.dark : base.settings.dark,
+      sound: typeof settingsIn.sound === "boolean" ? settingsIn.sound : true,
+      patientName: cleanText(settingsIn.patientName,90)
+    },
+    sampling: !nested && raw.sampling === true,
+    snapshot: null
+  };
+  if(Array.isArray(raw.entries)){
+    const seen = new Set();
+    raw.entries.forEach(r=>{ const e=normalizeEntry(r); if(e && !seen.has(e.id)){ seen.add(e.id); next.entries.push(e); } });
+  }
+  if(!nested && raw.snapshot && typeof raw.snapshot === "object" && !Array.isArray(raw.snapshot)){
+    next.snapshot = normalizeState(raw.snapshot, true);
+    next.snapshot.sampling = false;
+    next.snapshot.snapshot = null;
+  }
+  if(next.sampling && !next.snapshot) next.sampling = false;
+  return next;
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return blankData();
+    return normalizeState(JSON.parse(raw));
+  }catch(e){ bootDataUnreadable = true; return blankData(); }
+}
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ toast("Storage is full or blocked. Download a JSON Backup from Report & Data."); } }
+function sortedEntries(list=S.entries){ return [...list].sort((a,b)=>`${b.date} ${b.time}`.localeCompare(`${a.date} ${a.time}`)); }
+function entryById(id){ return S.entries.find(e=>e.id===id); }
+function dateSet(entries=S.entries){ return new Set(entries.map(e=>e.date)); }
+function periodEntries(days, entries=S.entries){
+  if(days === "all") return [...entries];
+  const n = parseInt(days,10);
+  if(!Number.isFinite(n)) return [...entries];
+  const start = addDays(localToday(), -(n-1));
+  return entries.filter(e=>e.date >= start && e.date <= localToday());
+}
+function dayAggregates(entries=S.entries){
+  const map = new Map();
+  entries.forEach(e=>{
+    if(!map.has(e.date)) map.set(e.date,{date:e.date, entries:[], avg:0, max:0});
+    const d = map.get(e.date); d.entries.push(e); d.max = Math.max(d.max, e.severity);
+  });
+  [...map.values()].forEach(d=>{ d.avg = avg(d.entries.map(e=>e.severity)); d.count = d.entries.length; });
+  return [...map.values()].sort((a,b)=>a.date.localeCompare(b.date));
+}
+function severityClass(v){ return v >= 9 ? "sev-severe" : v >= 7 ? "sev-high" : v >= 4 ? "sev-mid" : "sev-low"; }
+function severityBadge(v){ return `<span class="badge ${severityClass(v)}">${round1(v)} / 10</span>`; }
+function entryTitle(e){ return `${fmtDate(e.date)}${e.time && e.time !== "00:00" ? ` · ${esc(e.time)}` : ""}`; }
+function sampleSaveWarning(){ if(S.sampling) toast("Sample diary is on — entries made now are discarded when you turn sample off."); }
+function sampleExportGuard(){
+  if(S.sampling){ toast("Sample diary is on — turn it off to back up or export your real diary."); thud(); return true; }
+  return false;
+}
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function sampleData(){
+  const rand = mulberry32(20261009);
+  const pick = arr => arr[Math.floor(rand()*arr.length)];
+  const locSets = [["Lower back"],["Head"],["Neck","Shoulders"],["Lower back","Hips"],["Knees"],["Upper back","Shoulders"],["Legs"],["Jaw","Head"],["Whole body"],["Abdomen"]];
+  const meds = [["Ibuprofen","200 mg"],["Acetaminophen","500 mg"],["Prescription medication","As directed"],["",""]];
+  const entries=[];
+  let id=1;
+  for(let offset=119; offset>=0; offset--){
+    const date = addDays(localToday(), -offset);
+    const must = offset <= 1;
+    if(!must && rand() < .27) continue;
+    const count = rand() < .18 ? 2 : 1;
+    for(let k=0;k<count;k++){
+      const loc = pick(locSets);
+      const wave = Math.sin(offset/9)*1.15;
+      const flare = (offset % 23 === 4 || offset % 31 === 9) ? 2.1 : 0;
+      let sev = Math.round(4.6 + wave + flare + (rand()*2.4-1.1) + (loc.includes("Whole body") ? .8 : 0));
+      sev = Math.max(1, Math.min(10, sev));
+      const triggers = [];
+      if(sev >= 7) triggers.push(pick(["Poor sleep","Stress","Weather change"]));
+      if(rand() < .48) triggers.push(pick(["Sitting","Activity","Exercise","Screen time","Travel","Standing"]));
+      if(!triggers.length) triggers.push(pick(["Unknown","Stress","Poor sleep"]));
+      const med = sev >= 5 && rand() < .72 ? pick(meds) : ["",""];
+      const effect = med[0] ? pick(["Helped a lot","Helped a little","Helped a little","No change","No change","Made worse"]) : "Not recorded";
+      const chars = loc.includes("Head") ? pick([["Throbbing","Aching"],["Sharp","Throbbing"],["Dull","Aching"]]) : pick([["Aching"],["Sharp","Stiff"],["Burning","Tingling"],["Cramping","Aching"],["Shooting","Aching"]]);
+      entries.push({
+        id:`sample_e${id++}`,
+        date,
+        time: k ? "18:40" : pick(["07:45","08:20","12:15","16:30","20:10"]),
+        severity: sev,
+        locations: loc,
+        characters: chars,
+        triggers: [...new Set(triggers)],
+        medication: med[0],
+        dose: med[1],
+        effect,
+        activityImpact: Math.max(0, Math.min(10, sev - 1 + Math.round(rand()*2-1))),
+        sleep: sev >= 8 ? pick(["Poor","Fair"]) : pick(["Fair","Good","Good","Excellent"]),
+        moodNote: sev >= 8 ? "Hard to focus" : (sev >= 6 ? "Tired and frustrated" : "Mostly steady"),
+        note: sev >= 8 ? "Pain interrupted planned activities." : (sev >= 6 ? "Needed extra breaks during the day." : "Managed usual routine with pacing.")
+      });
+    }
+  }
+  const out = blankData();
+  out.settings = {...S.settings};
+  out.entries = entries;
+  out.sampling = true;
+  out.snapshot = null;
+  return out;
+}
+function applyTheme(){ document.body.classList.toggle("dark", !!S.settings.dark); $("#themeBtn").classList.toggle("on", !!S.settings.dark); $("#themeBtn").setAttribute("aria-pressed", S.settings.dark ? "true" : "false"); }
+function setSoundUI(){ $("#soundBtn").classList.toggle("on", !!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed", S.settings.sound ? "true" : "false"); }
+function setSampleUI(){ $("#sampleBar").classList.toggle("show", !!S.sampling); $("#sampleBtn").classList.toggle("on", !!S.sampling); $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false"); }
+function switchView(name){
+  $$(".tab").forEach(t=>{ const on=t.dataset.view===name; t.classList.toggle("on",on); t.setAttribute("aria-selected",on?"true":"false"); });
+  ["Dashboard","Log","History","Charts","Stats","Report"].forEach(v=>{ const el=$("#view"+v); if(el) el.hidden = v !== name; });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function recordCard(e, detailTarget){
+  const loc = e.locations.length ? e.locations.join(", ") : "Location not recorded";
+  return `<button type="button" class="record clickable ${sel.historyEntry===e.id?"sel":""}" data-entry="${e.id}" data-detail-target="${detailTarget||""}"><span class="record-head"><b>${entryTitle(e)}</b>${severityBadge(e.severity)}<span class="badge">${esc(loc)}</span></span><br><span class="hint">${esc(e.characters.join(", ") || "Character not recorded")} · Impact ${e.activityImpact}/10${e.medication ? ` · ${esc(e.medication)} — ${esc(e.effect)}` : ""}</span>${e.note?`<br>${esc(e.note)}`:""}</button>`;
+}
+function bindRecordCards(scope){
+  $$(`${scope} [data-entry]`).forEach(el=>el.addEventListener("click",()=>{
+    sel.historyEntry = sel.historyEntry === el.dataset.entry ? null : el.dataset.entry;
+    renderHistory();
+    if(el.dataset.detailTarget !== "dashboard") switchView("History");
+  }));
+}
+function renderTiles(){
+  const entries = sortedEntries();
+  const daily = dayAggregates();
+  // Averages are day-weighted (each logged day counts once, from its daily average) so the tiles match the trend chart.
+  const dayAvg = days => {
+    const list = days === "all" ? daily : daily.filter(d=>d.date >= addDays(localToday(),-(days-1)) && d.date <= localToday());
+    return list.length ? round1(avg(list.map(d=>d.avg))) : "—";
+  };
+  const worst = daily.length ? [...daily].sort((a,b)=>b.avg-a.avg || b.max-a.max || b.count-a.count)[0] : null;
+  const dates = dateSet();
+  let streak = 0;
+  let cursor = dates.has(localToday()) ? localToday() : (dates.has(addDays(localToday(),-1)) ? addDays(localToday(),-1) : "");
+  while(cursor && dates.has(cursor)){ streak++; cursor = addDays(cursor,-1); }
+  const tiles = [
+    {n: entries.length, l:"entries logged", cls:""},
+    {n: dayAvg(7), l:"avg severity · 7 days", cls:""},
+    {n: dayAvg(30), l:"avg severity · 30 days", cls:""},
+    {n: dayAvg("all"), l:"avg severity · all time", cls:""},
+    {n: worst ? `${round1(worst.avg)} on ${fmtShort(worst.date)}` : "—", l:"hardest day by average", cls: worst && worst.avg >= 7 ? "bad" : ""},
+    {n: streak ? `${streak} day${streak===1?"":"s"}` : "0 days", l:"current logging streak", cls:""}
+  ];
+  $("#dashTiles").innerHTML = tiles.map(t=>`<div class="stat ${t.cls}"><div class="n">${t.n}</div><div class="l">${t.l}</div></div>`).join("");
+}
+function trendHTML(entries, days, selectedKey, prefix){
+  const daily = new Map(dayAggregates(entries).map(d=>[d.date,d]));
+  const cols=[];
+  for(let i=days-1;i>=0;i--){
+    const date = addDays(localToday(), -i);
+    const d = daily.get(date);
+    const val = d ? d.avg : 0;
+    const labelStep = days <= 14 ? 3 : days <= 30 ? 5 : 15;
+    const label = (i % labelStep === 0 || i === 0) ? fmtShort(date) : "";
+    const barCls = !d ? "none" : (val > 0 ? "" : "zero");
+    const barH = !d ? 0 : (val > 0 ? Math.max(6,val*15) : 8);
+    cols.push(`<button type="button" class="trend-col ${selectedKey===date?"sel":""}" data-trend="${prefix}|${date}" aria-label="${fmtDate(date)} average severity ${d?round1(val):"no entry"}"><span class="trend-val">${d?round1(val):"·"}</span><span class="trend-bar ${barCls}" style="height:${barH}px"></span><span class="trend-lab">${label}</span></button>`);
+  }
+  return `<div class="trend-wrap"><div class="trend">${cols.join("")}</div></div>`;
+}
+function bindTrend(scope, detailId, detailPrefix){
+  $$(`${scope} [data-trend]`).forEach(el=>el.addEventListener("click",()=>{
+    const [prefix,date] = el.dataset.trend.split("|");
+    if(prefix === "dash"){ sel.trendDash = sel.trendDash === date ? null : date; }
+    else { sel.trend = sel.trend === date ? null : date; }
+    renderAll();
+  }));
+}
+function trendDetail(date){
+  if(!date) return "Tap a day for its entries.";
+  const list = sortedEntries(S.entries.filter(e=>e.date===date));
+  if(!list.length) return `${fmtDate(date)} — no entry recorded.`;
+  return `${fmtDate(date)} — ${list.length} entr${list.length===1?"y":"ies"}, average ${round1(avg(list.map(e=>e.severity)))}/10, highest ${Math.max(...list.map(e=>e.severity))}/10. Locations: ${esc([...new Set(list.flatMap(e=>e.locations))].join(", ") || "not recorded")}.`;
+}
+function aggregateBy(list, keyFn){
+  const map = new Map();
+  list.forEach(e=>{
+    keyFn(e).forEach(key=>{
+      if(!key) return;
+      if(!map.has(key)) map.set(key,{name:key,count:0,total:0,max:0,entries:[]});
+      const r=map.get(key); r.count++; r.total += e.severity; r.max=Math.max(r.max,e.severity); r.entries.push(e);
+    });
+  });
+  return [...map.values()].map(r=>({...r,avg:avg(r.entries.map(e=>e.severity))}));
+}
+function hbarHTML(rows, selectedName, kind, mode){
+  if(!rows.length) return `<p class="hint">No records yet.</p>`;
+  const max = Math.max(...rows.map(r=> mode==="avg" ? r.avg : r.count), 1);
+  return rows.map(r=>{
+    const val = mode==="avg" ? r.avg : r.count;
+    const pct = Math.max(4, val/max*100);
+    const valText = mode==="avg" ? `${round1(r.avg)} avg · ${r.count}×` : `${r.count}× · ${round1(r.avg)} avg`;
+    return `<button type="button" class="hbar ${selectedName===r.name?"sel":""}" data-hbar="${kind}|${encodeURIComponent(r.name)}"><span class="hbar-name">${esc(r.name)}</span><span class="hbar-track"><span class="hbar-fill" style="width:${pct}%"></span></span><span class="hbar-val">${valText}</span></button>`;
+  }).join("");
+}
+function bindHbars(scope){
+  $$(`${scope} [data-hbar]`).forEach(el=>el.addEventListener("click",()=>{
+    const [kind,encName] = el.dataset.hbar.split("|");
+    let name = encName || "";
+    try{ name = decodeURIComponent(name); }catch(e){}
+    if(kind==="location") sel.location = sel.location===name ? null : name;
+    if(kind==="trigger") sel.trigger = sel.trigger===name ? null : name;
+    renderAll();
+  }));
+}
+function polar(cx,cy,r,deg){ const rad=(deg-90)*Math.PI/180; return [cx+r*Math.cos(rad), cy+r*Math.sin(rad)]; }
+function annularPath(cx,cy,rOuter,rInner,start,end){
+  if(end-start >= 359.9){
+    return `M ${cx} ${cy-rOuter} A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy+rOuter} A ${rOuter} ${rOuter} 0 1 1 ${cx} ${cy-rOuter} Z M ${cx} ${cy-rInner} A ${rInner} ${rInner} 0 1 0 ${cx} ${cy+rInner} A ${rInner} ${rInner} 0 1 0 ${cx} ${cy-rInner} Z`;
+  }
+  const [sx,sy]=polar(cx,cy,rOuter,start), [ex,ey]=polar(cx,cy,rOuter,end), [ix,iy]=polar(cx,cy,rInner,end), [ox,oy]=polar(cx,cy,rInner,start);
+  const large = end-start > 180 ? 1 : 0;
+  return `M ${sx} ${sy} A ${rOuter} ${rOuter} 0 ${large} 1 ${ex} ${ey} L ${ix} ${iy} A ${rInner} ${rInner} 0 ${large} 0 ${ox} ${oy} Z`;
+}
+function donutData(){
+  // Medication outcomes count only entries where a medication was recorded; unmedicated entries are excluded from this chart's base.
+  const counts = Object.fromEntries(EFFECTS.map(x=>[x,0]));
+  S.entries.forEach(e=>{ if(!e.medication) return; counts[e.effect in counts ? e.effect : "Not recorded"]++; });
+  return EFFECTS.map(name=>({name,count:counts[name],color:EFFECT_COLORS[name]})).filter(r=>r.count>0);
+}
+function largestRemainderPcts(rows, total){
+  if(!total) return rows.map(()=>0);
+  const raw = rows.map(r=>r.count/total*100);
+  const out = raw.map(v=>Math.floor(v));
+  let left = 100 - out.reduce((a,b)=>a+b,0);
+  const order = rows.map((r,i)=>({i, frac:raw[i]-out[i], count:r.count})).sort((a,b)=>b.frac-a.frac || b.count-a.count || a.i-b.i);
+  for(let k=0;k<order.length && left>0;k++,left--) out[order[k].i]++;
+  return out;
+}
+function renderDonut(svgSel, centerSel, legendSel, metaSel){
+  const rows = donutData();
+  const total = rows.reduce((a,r)=>a+r.count,0);
+  const svg = $(svgSel), center = $(centerSel), legend = $(legendSel), meta = $(metaSel);
+  if(!svg || !center || !legend || !meta) return;
+  if(!total){
+    svg.innerHTML = `<circle cx="50" cy="50" r="39" fill="none" stroke="var(--line)" stroke-width="16"></circle>`;
+    center.innerHTML = `<b>0</b><span>medicated entries</span>`;
+    legend.innerHTML = "";
+    meta.textContent = "Medication outcomes appear after an entry with a medication is logged.";
+    return;
+  }
+  const pcts = largestRemainderPcts(rows, total);
+  let angle = 0;
+  svg.innerHTML = rows.map(r=>{
+    const sweep = r.count/total*360;
+    const start = angle, end = angle + sweep; angle = end;
+    const mid = (start+end)/2;
+    const [tx,ty] = polar(50,50,3.6,mid);
+    const selected = sel.med === r.name;
+    return `<path class="donut-seg ${selected?"sel":""}" data-med="${esc(r.name)}" d="${annularPath(50,50,47,31,start,end)}" fill="${r.color}" transform="${selected?`translate(${tx-50} ${ty-50})`:""}"><title>${esc(r.name)}: ${r.count}</title></path>`;
+  }).join("");
+  const selectedRow = rows.find(r=>r.name===sel.med);
+  const selectedPct = selectedRow ? pcts[rows.indexOf(selectedRow)] : 0;
+  center.innerHTML = selectedRow ? `<b>${selectedRow.count}</b><span>${esc(selectedRow.name)}</span>` : `<b>${total}</b><span>medicated entries</span>`;
+  legend.innerHTML = rows.map((r,i)=>`<button type="button" class="legend-btn ${sel.med===r.name?"sel":""}" data-med="${esc(r.name)}">${esc(r.name)} · ${r.count} · ${pcts[i]}%</button>`).join("");
+  meta.textContent = selectedRow ? `${selectedRow.name}: ${selectedRow.count} of ${total} medicated entries (${selectedPct}%). Tap again to release.` : `Counts and percentages cover the ${total} entries where you recorded a medication. Tap a slice or label to pin an outcome.`;
+  document.querySelectorAll(`${svgSel} [data-med], ${legendSel} [data-med]`).forEach(el=>el.addEventListener("click",()=>{
+    sel.med = sel.med === el.dataset.med ? null : el.dataset.med;
+    renderAll();
+  }));
+}
+function renderDashboard(){
+  renderTiles();
+  $("#dashTrend").innerHTML = trendHTML(S.entries,14,sel.trendDash,"dash");
+  bindTrend("#viewDashboard","","dash");
+  $("#dashTrendDetail").textContent = trendDetail(sel.trendDash);
+  const recent = sortedEntries().slice(0,6);
+  $("#recentList").innerHTML = recent.length ? recent.map(e=>recordCard(e,"dashboard")).join("") : `<p class="hint">No entries yet. Tap Log Entry, or use the flask to explore a sample diary.</p>`;
+  bindRecordCards("#viewDashboard");
+  renderDonut("#dashMedDonut","#dashMedCenter","#dashMedLegend","#dashMedMeta");
+  const locRows = aggregateBy(S.entries,e=>e.locations).sort((a,b)=>b.count-a.count || b.avg-a.avg).slice(0,5);
+  const trigRows = aggregateBy(S.entries,e=>e.triggers).sort((a,b)=>b.count-a.count || b.avg-a.avg).slice(0,5);
+  $("#dashLocations").innerHTML = hbarHTML(locRows,sel.location,"location","count");
+  $("#dashTriggers").innerHTML = hbarHTML(trigRows,sel.trigger,"trigger","count");
+  bindHbars("#viewDashboard");
+}
+function buildCheckboxes(containerSel, values){
+  $(containerSel).innerHTML = values.map(v=>`<label class="check-chip"><input type="checkbox" value="${esc(v)}">${esc(v)}</label>`).join("");
+}
+function checkedValues(containerSel){ return $$(`${containerSel} input:checked`).map(x=>x.value); }
+function splitCustom(v){ return cleanList(v,24); }
+function setChecks(containerSel, values){
+  const set = new Set(values || []);
+  $$(`${containerSel} input`).forEach(x=>{ x.checked = set.has(x.value); });
+  const standard = new Set($$(`${containerSel} input`).map(x=>x.value));
+  return [...set].filter(x=>!standard.has(x));
+}
+function updateSeverityUI(){
+  const v = clampInt($("#eSeverity").value,0,10,0);
+  $("#eSeverity").value = v;
+  $("#sevValue").textContent = v;
+  updateEntryPreview();
+}
+function updateEntryPreview(){
+  const locs = [...checkedValues("#locationChecks"), ...splitCustom($("#eCustomLocation").value)];
+  const trigs = [...checkedValues("#triggerChecks"), ...splitCustom($("#eCustomTrigger").value)];
+  $("#entryPreview").innerHTML = `<div class="record-head"><b>${fmtDate($("#eDate").value || localToday())}</b>${severityBadge(clampInt($("#eSeverity").value,0,10,0))}</div><p><b>Locations:</b> ${esc(locs.join(", ") || "Not selected")}</p><p><b>Character:</b> ${esc(checkedValues("#characterChecks").join(", ") || "Not selected")}</p><p><b>Triggers:</b> ${esc(trigs.join(", ") || "Not selected")}</p><p><b>Medication:</b> ${esc($("#eMedication").value || "Not recorded")}${$("#eDose").value?` · ${esc($("#eDose").value)}`:""} · ${esc($("#eEffect").value)}</p>`;
+}
+function clearEntryForm(){
+  editing.entry = null;
+  $("#entryFormTitle").textContent = "Log a pain entry";
+  $("#saveEntryBtn").textContent = "Save entry";
+  $("#cancelEditBtn").hidden = true;
+  $("#eDate").value = localToday();
+  $("#eTime").value = "";
+  $("#eSeverity").value = 5;
+  ["#eCustomLocation","#eCustomTrigger","#eMedication","#eDose","#eMood","#eNote"].forEach(s=>{ $(s).value=""; });
+  $("#eEffect").value = "Not recorded";
+  $("#eImpact").value = 0;
+  $("#eSleep").value = "";
+  ["#locationChecks","#characterChecks","#triggerChecks"].forEach(s=>setChecks(s,[]));
+  updateSeverityUI();
+}
+function fillEntryForm(e){
+  editing.entry = e.id;
+  $("#entryFormTitle").textContent = "Edit pain entry";
+  $("#saveEntryBtn").textContent = "Save changes";
+  $("#cancelEditBtn").hidden = false;
+  $("#eDate").value = e.date; $("#eTime").value = e.time === "00:00" ? "" : e.time; $("#eSeverity").value = e.severity;
+  const locExtra = setChecks("#locationChecks", e.locations); $("#eCustomLocation").value = locExtra.join(", ");
+  setChecks("#characterChecks", e.characters);
+  const trigExtra = setChecks("#triggerChecks", e.triggers); $("#eCustomTrigger").value = trigExtra.join(", ");
+  $("#eMedication").value = e.medication; $("#eDose").value = e.dose; $("#eEffect").value = e.effect;
+  $("#eImpact").value = e.activityImpact; $("#eSleep").value = e.sleep || ""; $("#eMood").value = e.moodNote; $("#eNote").value = e.note;
+  updateSeverityUI();
+}
+function saveEntry(){
+  const date = $("#eDate").value;
+  if(!date || !parseDate(date)){ toast("Choose a valid date first."); $("#eDate").focus(); return; }
+  const data = {
+    date,
+    time: $("#eTime").value || "00:00",
+    severity: clampInt($("#eSeverity").value,0,10,0),
+    locations: cleanList([...checkedValues("#locationChecks"), ...splitCustom($("#eCustomLocation").value)],24),
+    characters: checkedValues("#characterChecks"),
+    triggers: cleanList([...checkedValues("#triggerChecks"), ...splitCustom($("#eCustomTrigger").value)],24),
+    medication: cleanText($("#eMedication").value,100),
+    dose: cleanText($("#eDose").value,80),
+    effect: EFFECTS.includes($("#eEffect").value) ? $("#eEffect").value : "Not recorded",
+    activityImpact: clampInt($("#eImpact").value,0,10,0),
+    sleep: $("#eSleep").value || "",
+    moodNote: cleanText($("#eMood").value,240),
+    note: cleanText($("#eNote").value,1200)
+  };
+  if(editing.entry){
+    const rec = entryById(editing.entry);
+    if(rec) Object.assign(rec,data);
+    sel.historyEntry = editing.entry;
+    toast("Entry updated.");
+  } else {
+    const e = {id:uid("entry"),...data};
+    S.entries.push(e);
+    sel.historyEntry = e.id;
+    toast("Entry saved.");
+  }
+  save(); clearEntryForm(); renderAll(); chime(); sampleSaveWarning();
+}
+function renderQuickTotals(){
+  const entries=S.entries;
+  const locRows=aggregateBy(entries,e=>e.locations).sort((a,b)=>b.count-a.count);
+  const trigRows=aggregateBy(entries,e=>e.triggers).sort((a,b)=>b.count-a.count);
+  $("#quickTotals").innerHTML = entries.length ? `<dl class="kv"><dt>Entries</dt><dd>${entries.length}</dd><dt>Average severity</dt><dd>${round1(avg(entries.map(e=>e.severity)))}/10</dd><dt>Most logged location</dt><dd>${esc(locRows[0]?.name || "—")}</dd><dt>Most logged trigger</dt><dd>${esc(trigRows[0]?.name || "—")}</dd></dl>` : `<p class="hint">Totals appear after the first entry.</p>`;
+}
+function filteredHistory(){
+  let list = sortedEntries();
+  const period = $("#historyPeriod").value;
+  if(period !== "all"){
+    const start = addDays(localToday(), -(parseInt(period,10)-1));
+    list = list.filter(e=>e.date >= start && e.date <= localToday());
+  }
+  const loc = $("#historyLocation").value;
+  if(loc && loc !== "all") list = list.filter(e=>e.locations.includes(loc));
+  const q = cleanText($("#historySearch").value,80).toLowerCase();
+  if(q) list = list.filter(e=>[e.date,e.time,e.locations.join(" "),e.characters.join(" "),e.triggers.join(" "),e.medication,e.dose,e.effect,e.sleep,e.moodNote,e.note].join(" ").toLowerCase().includes(q));
+  return list;
+}
+function renderHistory(){
+  const select = $("#historyLocation");
+  const previous = select.value || "all";
+  const locations = [...new Set(S.entries.flatMap(e=>e.locations))].sort();
+  select.innerHTML = `<option value="all">All locations</option>` + locations.map(l=>`<option value="${esc(l)}">${esc(l)}</option>`).join("");
+  select.value = locations.includes(previous) ? previous : "all";
+  const list = filteredHistory();
+  $("#historyList").innerHTML = list.length ? list.map(e=>recordCard(e,"history")).join("") : `<p class="hint">No entries match these filters.</p>`;
+  $$("#viewHistory [data-entry]").forEach(el=>el.addEventListener("click",()=>{
+    sel.historyEntry = sel.historyEntry === el.dataset.entry ? null : el.dataset.entry;
+    renderHistory();
+  }));
+  const e = entryById(sel.historyEntry);
+  if(e && list.some(x=>x.id===e.id)){
+    $("#historyDetailSub").textContent = "Every field recorded for this entry.";
+    $("#historyDetail").innerHTML = `<div class="record-head"><b>${entryTitle(e)}</b>${severityBadge(e.severity)}</div><dl class="kv" style="margin-top:10px"><dt>Locations</dt><dd>${esc(e.locations.join(", ") || "Not recorded")}</dd><dt>Character</dt><dd>${esc(e.characters.join(", ") || "Not recorded")}</dd><dt>Triggers</dt><dd>${esc(e.triggers.join(", ") || "Not recorded")}</dd><dt>Medication</dt><dd>${esc(e.medication || "Not recorded")}${e.dose?` · ${esc(e.dose)}`:""}</dd><dt>Recorded effect</dt><dd>${esc(e.effect)}</dd><dt>Activity impact</dt><dd>${e.activityImpact}/10</dd><dt>Sleep</dt><dd>${esc(e.sleep || "Not recorded")}</dd><dt>Mood note</dt><dd>${esc(e.moodNote || "—")}</dd><dt>Notes</dt><dd>${esc(e.note || "—")}</dd></dl><div class="btnrow"><button class="btn primary small" id="editEntryBtn">Edit entry</button><button class="btn danger small" id="deleteEntryBtn">Delete entry</button></div>`;
+    $("#editEntryBtn").addEventListener("click",()=>{ fillEntryForm(e); switchView("Log"); toast("Entry loaded for editing."); });
+    $("#deleteEntryBtn").addEventListener("click",()=>{
+      if(confirm(`Delete the entry from ${fmtDate(e.date)}?`)){
+        S.entries = S.entries.filter(x=>x.id!==e.id);
+        if(editing.entry===e.id) clearEntryForm();
+        sel.historyEntry = null;
+        save(); renderAll(); thud(); toast("Entry deleted.");
+      }
+    });
+  } else {
+    $("#historyDetailSub").textContent = "Tap an entry to see every field.";
+    $("#historyDetail").innerHTML = `<p class="hint">No entry is selected.</p>`;
+  }
+  $("#historySummary").innerHTML = list.length ? `<dl class="kv"><dt>Showing</dt><dd>${list.length} entries</dd><dt>Average severity</dt><dd>${round1(avg(list.map(e=>e.severity)))}/10</dd><dt>Highest severity</dt><dd>${Math.max(...list.map(e=>e.severity))}/10</dd><dt>Average activity impact</dt><dd>${round1(avg(list.map(e=>e.activityImpact)))}/10</dd></dl>` : `<p class="hint">No summary for this filter.</p>`;
+}
+function renderCharts(){
+  $$(".trend-range").forEach(b=>b.classList.toggle("on", parseInt(b.dataset.range,10)===trendRange));
+  $("#trendChart").innerHTML = trendHTML(S.entries, trendRange, sel.trend, "main");
+  bindTrend("#viewCharts","","main");
+  $("#trendDetail").textContent = trendDetail(sel.trend);
+  const locRows = aggregateBy(S.entries,e=>e.locations).sort((a,b)=>b.avg-a.avg || b.count-a.count);
+  const trigRows = aggregateBy(S.entries,e=>e.triggers).sort((a,b)=>b.count-a.count || b.avg-a.avg);
+  $("#locationChart").innerHTML = hbarHTML(locRows, sel.location, "location", "avg");
+  $("#triggerChart").innerHTML = hbarHTML(trigRows, sel.trigger, "trigger", "count");
+  bindHbars("#viewCharts");
+  const loc = locRows.find(r=>r.name===sel.location);
+  $("#locationDetail").textContent = loc ? `${loc.name}: ${loc.count} entries, average ${round1(loc.avg)}/10, highest ${loc.max}/10.` : "Tap a location for its detail.";
+  const trig = trigRows.find(r=>r.name===sel.trigger);
+  $("#triggerDetail").textContent = trig ? `${trig.name}: appears in ${trig.count} entries, average severity ${round1(trig.avg)}/10.` : "Tap a trigger for its detail.";
+  renderDonut("#medDonut","#medCenter","#medLegend","#medMeta");
+}
+function startOfWeek(dateStr){
+  const d = parseDate(dateStr); if(!d) return "";
+  const day = (d.getDay()+6)%7;
+  d.setDate(d.getDate()-day);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function aggregatePeriods(entries, kind){
+  const map = new Map();
+  entries.forEach(e=>{
+    const key = kind === "week" ? startOfWeek(e.date) : e.date.slice(0,7);
+    if(!map.has(key)) map.set(key,[]);
+    map.get(key).push(e);
+  });
+  return [...map.entries()].sort((a,b)=>b[0].localeCompare(a[0])).map(([key,list])=>{
+    const daily = dayAggregates(list);
+    return {key, label: kind==="week" ? `Week of ${fmtDate(key)}` : parseDate(`${key}-01`).toLocaleDateString(undefined,{month:"long",year:"numeric"}), count:list.length, days:daily.length, avg:avg(list.map(e=>e.severity)), max:Math.max(...list.map(e=>e.severity)), highDays:daily.filter(d=>d.avg>=7).length};
+  });
+}
+function periodTable(rows){
+  if(!rows.length) return `<p class="hint">No entries in this period.</p>`;
+  return `<table class="list"><thead><tr><th>Period</th><th>Entries</th><th>Avg</th><th>High days</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(r.label)}<br><span class="hint">${r.days} day${r.days===1?"":"s"} logged</span></td><td>${r.count}</td><td>${round1(r.avg)}/10<br><span class="hint">max ${r.max}/10</span></td><td>${r.highDays}</td></tr>`).join("")}</tbody></table>`;
+}
+function renderStats(){
+  const entries = periodEntries($("#statsPeriod").value);
+  const daily = dayAggregates(entries);
+  const best = daily.length ? [...daily].sort((a,b)=>a.avg-b.avg || a.max-b.max)[0] : null;
+  const worst = daily.length ? [...daily].sort((a,b)=>b.avg-a.avg || b.max-a.max)[0] : null;
+  $("#statsTiles").innerHTML = [
+    {n:entries.length,l:"entries in period"},{n:daily.length,l:"days logged"},{n:entries.length?round1(avg(entries.map(e=>e.severity))):"—",l:"average severity"},{n:entries.length?Math.max(...entries.map(e=>e.severity)):"—",l:"highest entry"},{n:entries.length?round1(avg(entries.map(e=>e.activityImpact))):"—",l:"avg activity impact"}
+  ].map(t=>`<div class="stat"><div class="n">${t.n}</div><div class="l">${t.l}</div></div>`).join("");
+  $("#weeklyStats").innerHTML = periodTable(aggregatePeriods(entries,"week"));
+  $("#monthlyStats").innerHTML = periodTable(aggregatePeriods(entries,"month"));
+  $("#bestWorstStats").innerHTML = daily.length ? `<dl class="kv"><dt>Lowest-average day</dt><dd>${fmtDate(best.date)} · ${round1(best.avg)}/10 average</dd><dt>Highest-average day</dt><dd>${fmtDate(worst.date)} · ${round1(worst.avg)}/10 average</dd><dt>Highest single entry</dt><dd>${Math.max(...entries.map(e=>e.severity))}/10</dd></dl>` : `<p class="hint">No days in this period.</p>`;
+  const locRows = aggregateBy(entries,e=>e.locations).sort((a,b)=>b.avg-a.avg || b.count-a.count);
+  $("#locationHeat").innerHTML = locRows.length ? `<table class="list"><thead><tr><th>Location</th><th>Entries</th><th>Average</th></tr></thead><tbody>${locRows.map(r=>`<tr><td class="${r.avg>=8?"heat-4":r.avg>=6?"heat-3":r.avg>=4?"heat-2":"heat-1"}">${esc(r.name)}</td><td>${r.count}</td><td>${round1(r.avg)}/10</td></tr>`).join("")}</tbody></table>` : `<p class="hint">No locations recorded in this period.</p>`;
+  const medMap = new Map();
+  entries.filter(e=>e.medication).forEach(e=>{
+    const key = `${e.medication}||${e.dose}||${e.effect}`;
+    if(!medMap.has(key)) medMap.set(key,{medication:e.medication,dose:e.dose,effect:e.effect,count:0,total:0});
+    const r=medMap.get(key); r.count++; r.total += e.severity;
+  });
+  const medRows=[...medMap.values()].sort((a,b)=>b.count-a.count || a.medication.localeCompare(b.medication));
+  $("#medStats").innerHTML = medRows.length ? `<table class="list"><thead><tr><th>Medication</th><th>Entries</th><th>Outcome recorded</th></tr></thead><tbody>${medRows.map(r=>`<tr><td>${esc(r.medication)}${r.dose?`<br><span class="hint">${esc(r.dose)}</span>`:""}</td><td>${r.count}</td><td>${esc(r.effect)}<br><span class="hint">avg pain ${round1(r.total/r.count)}/10</span></td></tr>`).join("")}</tbody></table>` : `<p class="hint">No medication entries in this period.</p>`;
+}
+function reportEntries(){
+  const mode = $("#reportPeriod").value;
+  if(mode === "custom"){
+    const from = $("#reportFrom").value, to = $("#reportTo").value;
+    return sortedEntries(S.entries.filter(e=>(!from || e.date >= from) && (!to || e.date <= to)));
+  }
+  if(mode === "all") return sortedEntries();
+  return sortedEntries(periodEntries(mode));
+}
+function reportRangeText(list){
+  if(!list.length) return "No entries in the selected period";
+  const dates = list.map(e=>e.date).sort();
+  return `${fmtDate(dates[0])} to ${fmtDate(dates[dates.length-1])}`;
+}
+function summaryTable(list){
+  const daily = dayAggregates(list);
+  return `<table><tbody><tr><th>Entries</th><td>${list.length}</td><th>Days logged</th><td>${daily.length}</td></tr><tr><th>Average severity</th><td>${list.length?round1(avg(list.map(e=>e.severity))):"—"}/10</td><th>Highest severity</th><td>${list.length?Math.max(...list.map(e=>e.severity)):"—"}/10</td></tr><tr><th>Average activity impact</th><td>${list.length?round1(avg(list.map(e=>e.activityImpact))):"—"}/10</td><th>High-pain days (avg ≥7)</th><td>${daily.filter(d=>d.avg>=7).length}</td></tr></tbody></table>`;
+}
+function buildReportHTML(){
+  const list = reportEntries();
+  const daily = dayAggregates(list);
+  const locRows = aggregateBy(list,e=>e.locations).sort((a,b)=>b.count-a.count || b.avg-a.avg);
+  const trigRows = aggregateBy(list,e=>e.triggers).sort((a,b)=>b.count-a.count || b.avg-a.avg);
+  const medRows = aggregateBy(list.filter(e=>e.medication), e=>[`${e.medication}${e.dose?` (${e.dose})`:""} — ${e.effect}`]).sort((a,b)=>b.count-a.count);
+  const name = S.settings.patientName || "Name not entered";
+  return `<h1>${esc(APP_NAME)}</h1><p><b>Patient:</b> ${esc(name)}<br><b>Report period:</b> ${esc(reportRangeText(list))}<br><b>Generated:</b> ${fmtDate(localToday())}</p><h2>Summary</h2>${summaryTable(list)}<h2>Severity by day</h2>${daily.length?`<table><thead><tr><th>Date</th><th>Entries</th><th>Average</th><th>Highest</th></tr></thead><tbody>${daily.map(d=>`<tr><td>${fmtDate(d.date)}</td><td>${d.count}</td><td>${round1(d.avg)}/10</td><td>${d.max}/10</td></tr>`).join("")}</tbody></table>`:`<p>No daily summary for this period.</p>`}<h2>Body locations</h2>${locRows.length?`<table><thead><tr><th>Location</th><th>Entries</th><th>Average severity</th><th>Highest</th></tr></thead><tbody>${locRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td><td>${round1(r.avg)}/10</td><td>${r.max}/10</td></tr>`).join("")}</tbody></table>`:`<p>No locations recorded.</p>`}<h2>Triggers recorded</h2>${trigRows.length?`<table><thead><tr><th>Trigger</th><th>Entries</th><th>Average severity</th></tr></thead><tbody>${trigRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.count}</td><td>${round1(r.avg)}/10</td></tr>`).join("")}</tbody></table>`:`<p>No triggers recorded.</p>`}<h2>Medication log and recorded effect</h2>${list.some(e=>e.medication)?`<table><thead><tr><th>Date</th><th>Medication</th><th>Dose</th><th>Recorded effect</th><th>Pain</th></tr></thead><tbody>${list.filter(e=>e.medication).map(e=>`<tr><td>${fmtDate(e.date)}</td><td>${esc(e.medication)}</td><td>${esc(e.dose || "—")}</td><td>${esc(e.effect)}</td><td>${e.severity}/10</td></tr>`).join("")}</tbody></table>`:`<p>No medication entries in this period.</p>`}<h2>Detailed entries</h2>${list.length?`<table><thead><tr><th>Date</th><th>Pain</th><th>Locations</th><th>Character / triggers</th><th>Function, sleep and notes</th></tr></thead><tbody>${list.map(e=>`<tr><td>${fmtDate(e.date)}${e.time&&e.time!=="00:00"?`<br>${esc(e.time)}`:""}</td><td>${e.severity}/10</td><td>${esc(e.locations.join(", ") || "—")}</td><td>${esc(e.characters.join(", ") || "—")}<br>${esc(e.triggers.join(", ") || "—")}</td><td>Impact ${e.activityImpact}/10 · Sleep ${esc(e.sleep || "—")}<br>${esc(e.moodNote || "")}${e.moodNote&&e.note?" · ":""}${esc(e.note || "")}</td></tr>`).join("")}</tbody></table>`:`<p>No entries in this period.</p>`}<p class="foot">This report is a diary summary of records entered by the patient. It does not diagnose a condition, explain a cause, or recommend medication or treatment. This is not medical advice. Discuss medication and treatment questions with a qualified clinician.</p>`;
+}
+function renderReport(){
+  S.settings.patientName = cleanText($("#patientName").value,90);
+  const html = buildReportHTML();
+  $("#reportPreview").innerHTML = html;
+  $("#printArea").innerHTML = html;
+}
+function renderData(){
+  const first = S.entries.length ? sortedEntries()[S.entries.length-1].date : "";
+  const last = S.entries.length ? sortedEntries()[0].date : "";
+  $("#dataSummary").innerHTML = `<dl class="kv" style="margin-top:12px"><dt>Entries stored</dt><dd>${S.entries.length}</dd><dt>Date range</dt><dd>${S.entries.length?`${fmtDate(first)} to ${fmtDate(last)}`:"No entries yet"}</dd><dt>Mode</dt><dd>${S.sampling?"Sample diary":"Your diary"}</dd><dt>Storage</dt><dd>This browser, this device</dd></dl>`;
+}
+function renderAll(){
+  renderDashboard();
+  renderQuickTotals();
+  renderHistory();
+  renderCharts();
+  renderStats();
+  renderReport();
+  renderData();
+  setSampleUI();
+}
+function download(name, content, type){
+  const blob = new Blob([content], {type});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 800);
+}
+function toCsv(rows){
+  return rows.map(row=>row.map(v=>`"${String(csvSafe(v)).replace(/"/g,'""')}"`).join(",")).join("\n");
+}
+function exportCsv(){
+  if(sampleExportGuard()) return;
+  const rows = [["Date","Time","Severity","Locations","Character","Triggers","Medication","Dose","Recorded effect","Activity impact","Sleep","Mood note","Notes"]];
+  sortedEntries().forEach(e=>rows.push([e.date,e.time,e.severity,e.locations.join("; "),e.characters.join("; "),e.triggers.join("; "),e.medication,e.dose,e.effect,e.activityImpact,e.sleep,e.moodNote,e.note]));
+  download("paindiary-entries.csv", toCsv(rows), "text/csv");
+  toast("Pain diary exported as CSV.");
+}
+function backupJson(){
+  if(sampleExportGuard()) return;
+  download("paindiary-backup.json", JSON.stringify({app:"paindiary", version:1, exported:localToday(), entries:S.entries, settings:S.settings}, null, 1), "application/json");
+  toast("Complete pain diary backup downloaded.");
+}
+function restoreBackup(file){
+  // Never restore over the sample snapshot: the real diary lives only in S.snapshot while sampling.
+  if(S.sampling){ toast("Sample diary is on — turn it off before restoring a backup."); thud(); $("#jsonFile").value = ""; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const raw = JSON.parse(reader.result);
+      if(!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("bad");
+      if(raw.app !== "paindiary" || raw.version !== 1){ toast("That backup is not from this Pain Diary app, or its version is not supported."); thud(); $("#jsonFile").value = ""; return; }
+      if(!Array.isArray(raw.entries)) throw new Error("bad");
+      // Restore is a documented full replacement: after validation, the restored entries replace the current diary — only after the user confirms.
+      const next = normalizeState(raw);
+      const dropped = raw.entries.length - next.entries.length;
+      if(!confirm(`Restore this backup? It will replace ALL ${S.entries.length} current ${S.entries.length===1?"entry":"entries"} with ${next.entries.length} checked ${next.entries.length===1?"record":"records"} from the file${dropped?`, skipping ${dropped} invalid or duplicate ${dropped===1?"record":"records"}`:""}. This cannot be undone.`)){ $("#jsonFile").value = ""; return; }
+      S = next;
+      S.sampling = false; S.snapshot = null;
+      save(); clearEntryForm(); sel.historyEntry = null; renderAll(); applyTheme(); setSoundUI();
+      toast(`Backup restored — diary replaced with ${next.entries.length} checked ${next.entries.length===1?"record":"records"}${dropped?`; ${dropped} skipped`:""}.`);
+      chime();
+    }catch(e){
+      toast("That file doesn't look like a Pain Diary backup.");
+      thud();
+    }
+    $("#jsonFile").value = "";
+  };
+  reader.readAsText(file);
+}
+function toggleSample(){
+  if(!S.sampling){
+    S.snapshot = JSON.parse(JSON.stringify({...S, sampling:false, snapshot:null}));
+    const sd = sampleData();
+    sd.snapshot = S.snapshot;
+    sd.settings = {...S.settings};
+    S = sd;
+    toast("Sample diary on — your real records are saved and will return exactly.");
+  } else {
+    if(S.snapshot){
+      const snap = S.snapshot;
+      const keep = {dark:S.settings.dark, sound:S.settings.sound};
+      S = {...snap, settings:{...snap.settings, ...keep}, sampling:false, snapshot:null};
+    } else {
+      S = blankData();
+    }
+    toast("Sample off — your real diary is back, exactly as you left it.");
+  }
+  sel = {trend:null, trendDash:null, location:null, trigger:null, med:null, historyEntry:null, trendRange:trendRange};
+  save(); clearEntryForm(); renderAll(); applyTheme(); setSoundUI(); chime();
+}
+function bind(){
+  $$(".tab").forEach(t=>t.addEventListener("click",()=>{ switchView(t.dataset.view); beep(620,.035,"sine",.028); }));
+  $("#themeBtn").addEventListener("click",()=>{ S.settings.dark=!S.settings.dark; save(); applyTheme(); beep(S.settings.dark?520:700,.06); });
+  $("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!S.settings.sound; save(); setSoundUI(); toast(S.settings.sound?"Sounds on.":"Sounds off."); if(S.settings.sound) chime(); });
+  $("#sampleBtn").addEventListener("click",toggleSample);
+  $("#sevMinus").addEventListener("click",()=>{ $("#eSeverity").value = clampInt($("#eSeverity").value,0,10,0)-1; updateSeverityUI(); beep(500,.04); });
+  $("#sevPlus").addEventListener("click",()=>{ $("#eSeverity").value = clampInt($("#eSeverity").value,0,10,0)+1; updateSeverityUI(); beep(760,.04); });
+  $("#eSeverity").addEventListener("input",updateSeverityUI);
+  ["#eDate","#eTime","#eCustomLocation","#eCustomTrigger","#eMedication","#eDose","#eEffect","#eImpact","#eSleep","#eMood","#eNote"].forEach(s=>{ $(s).addEventListener("input",updateEntryPreview); $(s).addEventListener("change",updateEntryPreview); });
+  ["#locationChecks","#characterChecks","#triggerChecks"].forEach(s=>$(s).addEventListener("change",updateEntryPreview));
+  $("#saveEntryBtn").addEventListener("click",saveEntry);
+  $("#clearEntryBtn").addEventListener("click",()=>{ clearEntryForm(); toast("Entry form cleared."); });
+  $("#cancelEditBtn").addEventListener("click",()=>{ clearEntryForm(); toast("Edit canceled."); });
+  ["#historyPeriod","#historyLocation"].forEach(s=>$(s).addEventListener("change",renderHistory));
+  $("#historySearch").addEventListener("input",renderHistory);
+  $$(".trend-range").forEach(b=>b.addEventListener("click",()=>{ trendRange=parseInt(b.dataset.range,10)||30; sel.trendRange=trendRange; sel.trend=null; renderCharts(); }));
+  $("#statsPeriod").addEventListener("change",renderStats);
+  ["#reportPeriod","#reportFrom","#reportTo"].forEach(s=>$(s).addEventListener("change",renderReport));
+  $("#patientName").addEventListener("input",()=>{ S.settings.patientName=cleanText($("#patientName").value,90); save(); renderReport(); });
+  $("#buildReportBtn").addEventListener("click",()=>{ renderReport(); toast("Report preview built."); chime(); });
+  $("#printReportBtn").addEventListener("click",()=>{ renderReport(); setTimeout(()=>window.print(),60); });
+  $("#exportCsvBtn").addEventListener("click",exportCsv);
+  $("#backupBtn").addEventListener("click",backupJson);
+  $("#restoreBtn").addEventListener("click",()=>$("#jsonFile").click());
+  $("#jsonFile").addEventListener("change",()=>{ const f=$("#jsonFile").files[0]; if(f) restoreBackup(f); });
+}
+function init(){
+  $("#brandName").textContent = APP_NAME;
+  buildCheckboxes("#locationChecks", LOCATIONS);
+  buildCheckboxes("#characterChecks", CHARACTERS);
+  buildCheckboxes("#triggerChecks", TRIGGERS);
+  applyTheme(); setSoundUI(); bind();
+  $("#patientName").value = S.settings.patientName || "";
+  clearEntryForm(); renderAll();
+  if(S.sampling) setSampleUI();
+  if(bootDataUnreadable) toast("Your saved diary data couldn't be read, so the app started with an empty diary. Restore a JSON backup under Report & Data if you have one.");
+}
+init();
+</script>
+</body>
+</html>
