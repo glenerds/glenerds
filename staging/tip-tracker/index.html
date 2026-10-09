@@ -107,7 +107,7 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
 <body>
 <header class="top">
   <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M9.2 9.2c.6-1 1.6-1.4 2.8-1.4 1.5 0 2.7.8 2.7 2 0 2.9-5.5 1.6-5.5 4.3 0 1.2 1.3 2 2.9 2 1.3 0 2.3-.5 2.9-1.5"/></svg></div>
-  <div class="brand"><h1 id="brandName">TipTally</h1><p>Tip &amp; shift income tracker for tipped workers — no account, no subscription</p></div>
+  <div class="brand"><h1 id="brandName">TipRecord</h1><p>Tip &amp; shift income tracker for tipped workers — no account, no subscription</p></div>
   <div class="top-actions">
     <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
     <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
@@ -153,6 +153,11 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
             <div class="donut-box"><svg id="mixDonut" viewBox="0 0 100 100" role="img" aria-label="Income mix chart"></svg><div class="donut-center" id="mixCenter"></div></div>
             <div class="seg-legend" id="mixLegend"></div>
           </div>
+        </div>
+        <div class="panel">
+          <h2>Your jobs at a glance</h2>
+          <p class="sub">Where each job actually lands per hour.</p>
+          <div id="jobsGlance"></div>
         </div>
         <div class="panel">
           <h2>Last 14 shifts</h2>
@@ -273,13 +278,13 @@ footer.cta{ max-width:1180px; margin:0 auto; padding:0 16px 34px; text-align:cen
 </main>
 <footer class="cta">
   <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
-  <p class="hint" style="margin-top:12px">TipTally keeps everything in this browser on this device — no account, no cloud, no subscription. Your earnings stay yours. Back up now and then from the Shifts tab.</p>
+  <p class="hint" style="margin-top:12px">TipRecord keeps everything in this browser on this device — no account, no cloud, no subscription. Your earnings stay yours. Back up now and then from the Shifts tab.</p>
 </footer>
 <div class="toast" id="toast" role="status"></div>
 <script>
 "use strict";
-const BRAND = "TipTally";
-const LS_KEY = "tiptally_v1";
+const BRAND = "TipRecord";
+const LS_KEY = "tiprecord_v1";
 const $ = s => document.querySelector(s);
 const uid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36).slice(2,10) + Date.now().toString(36);
 const esc = s => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -593,7 +598,7 @@ $("#jsonFile").addEventListener("change", e => {
       freshJ.forEach(j => S.jobs.push(j));
       freshS.forEach(r => { const j = S.jobs.find(x => x.name === r.jobName); if(j) r.jobId = j.id; S.shifts.push(r); });
       save(); renderAll(); chime(); toast(`Restored ${freshS.length} shift${freshS.length===1?"":"s"}${freshJ.length ? ` and ${freshJ.length} jobs` : ""}${normS.length-freshS.length ? ` — skipped ${normS.length-freshS.length} already logged` : ""}.`);
-    }catch(err){ toast("That file doesn't look like a TipTally backup."); }
+    }catch(err){ toast("That file doesn't look like a TipRecord backup."); }
     e.target.value = "";
   };
   rd.readAsText(f);
@@ -673,7 +678,7 @@ $("#printBtn").addEventListener("click", ()=>{
     <p>${ss.length} shifts · ${sum(ss, s => +s.hours).toFixed(1)} hours · wages ${money(sum(ss, wagePay))} · cash tips ${money(sum(ss, s => +s.cash || 0))} · card tips ${money(sum(ss, s => +s.card || 0))} · tip-outs −${money(sum(ss, s => +s.tipOut || 0))} · <b>total kept ${money(sum(ss, netPay))}</b></p>
     <h3>By job</h3>${Object.entries(byJob).map(([n,list])=>`<p>${esc(n)} — ${list.length} shifts, ${money(sum(list, netPay))} kept, avg $${(sum(list, trueHourly)/(list.length||1)).toFixed(2)}/hr</p>`).join("")}
     <h3>Best shifts</h3>${best.map(s=>`<p>${fmtD(s.date)} — ${esc(s.jobName)}: ${money(netPay(s))} ($${trueHourly(s).toFixed(2)}/hr)</p>`).join("")}
-    <p>Generated from the worker's own TipTally log. A personal record, not tax advice.</p>`;
+    <p>Generated from the worker's own TipRecord log. A personal record, not tax advice.</p>`;
   window.print();
 });
 
@@ -686,6 +691,15 @@ $("#addJobBtn").addEventListener("click", ()=>{
   $("#jName").value = ""; $("#jRole").value = ""; $("#jWage").value = "";
   save(); renderJobs(); renderJobSelect(); chime(); toast(`${name} added — log its first shift anytime.`);
 });
+function renderJobsGlance(){
+  const wrap = $("#jobsGlance"); if(!wrap) return;
+  if(!S.jobs.length){ wrap.innerHTML = `<p class="hint">Add your jobs in the Jobs tab — each one gets its own true $/hr here.</p>`; return; }
+  wrap.innerHTML = S.jobs.map(j => {
+    const list = S.shifts.filter(s => s.jobId === j.id || s.jobName === j.name);
+    const avg = list.length ? sum(list, trueHourly)/list.length : 0;
+    return `<div class="kv"><span><b>${esc(j.name)}</b>${j.role ? ` · ${esc(j.role)}` : ""} — ${list.length} shift${list.length===1?"":"s"}</span><b>${list.length ? "$"+avg.toFixed(2)+"/hr" : "—"}</b></div>`;
+  }).join("");
+}
 function renderJobs(){
   const wrap = $("#jobWrap");
   if(!S.jobs.length){ wrap.innerHTML = `<p class="hint">No jobs yet. Add the places you work on the left.</p>`; return; }
@@ -748,7 +762,7 @@ $("#sampleBtn").addEventListener("click", ()=>{
 });
 
 /* ---------- render all / init ---------- */
-function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix(); renderEarnChart(); renderStats(); renderJobs(); renderJobSelect(); formPreview(); }
+function renderAll(){ renderTiles(); renderShifts(); renderDetail(); renderMix(); renderEarnChart(); renderJobsGlance(); renderStats(); renderJobs(); renderJobSelect(); formPreview(); }
 load();
 $("#brandName").textContent = BRAND;
 applyTheme(); applySound(); setSampleUI();
