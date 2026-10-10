@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sobriety Day Counter & Recovery Tracker — SoberCount</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f2f6f4; --card:#ffffff; --ink:#1e2d27; --muted:#5b6f66; --line:#d3e0d9;
+  --accent:#177a5c; --accent-dark:#0f5c45; --accent-soft:#e0f2ea; --teal:#0f766e; --teal-soft:#e0f2ef;
+  --gold:#9a6508; --gold-soft:#fff1cf; --red:#b42318; --red-soft:#fde8e4; --amber:#a44a12; --amber-soft:#ffead9;
+  --green:#247245; --green-soft:#e3f2e7; --chip:#ebf2ee; --input:#ffffff; --shadow:0 1px 3px rgba(25,48,40,.13);
+  --sel:#c8870a;
+}
+body.dark{
+  color-scheme:dark;
+  --bg:#0e1512; --card:#1a2420; --ink:#edf5f1; --muted:#aec2b8; --line:#33463d;
+  --accent:#4fd1a5; --accent-dark:#8fe3c3; --accent-soft:#173a2e; --teal:#62d1c5; --teal-soft:#173d3a;
+  --gold:#f0bc62; --gold-soft:#40351d; --red:#ff9d94; --red-soft:#472722; --amber:#ffb27a; --amber-soft:#482f1e;
+  --green:#86d89c; --green-soft:#1f3d2c; --chip:#26332c; --input:#232f29; --shadow:0 1px 3px rgba(0,0,0,.48);
+  --sel:#f0bc62;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+button{font:inherit;cursor:pointer;color:var(--ink)}
+input,select,textarea{font:inherit;color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.82}
+header.top{max-width:1220px;margin:0 auto;padding:14px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{width:44px;height:44px;border-radius:12px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex:none;color:#fff}
+body.dark .logo{color:#0c1a14}
+.logo svg{width:27px;height:27px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.brand h1{font-size:24px;margin:0;line-height:1.1;color:var(--ink)}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.top-actions{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow);color:var(--ink)}
+.icon-btn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn.on{background:var(--accent-soft);border-color:var(--accent)}
+.icon-btn.on svg{stroke:var(--accent)}
+.more-apps{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;box-shadow:var(--shadow)}
+.more-apps svg{width:18px;height:18px;stroke:var(--accent);fill:none;stroke-width:2}
+main{max-width:1220px;margin:0 auto;padding:6px 16px 40px}
+.samplebar{display:none;background:var(--gold-soft);border:1px solid var(--gold);color:var(--ink);border-radius:12px;padding:10px 14px;margin:8px 0;font-size:15px}
+.samplebar.show{display:block}.samplebar b{color:var(--gold)}
+.form-sample-note{display:none;background:var(--gold-soft);border:1px solid var(--gold);border-radius:12px;padding:10px 14px;margin:0 0 12px;color:var(--ink);font-size:16px}
+.form-sample-note.show{display:block}.form-sample-note b{color:var(--gold)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:var(--shadow);color:var(--ink)}
+.stat .n{font-size:24px;font-weight:800;line-height:1.15;color:var(--ink)}
+.stat .l{color:var(--muted);font-size:15px}.stat.good .n{color:var(--green)}
+.tabs{display:flex;gap:8px;margin:10px 0 14px;flex-wrap:wrap}
+.tab{padding:10px 17px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;min-height:44px}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.dark .tab.on{color:#0c1a14}
+.cols{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);gap:14px;align-items:start}
+.cols.equal{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:900px){.cols,.cols.equal{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;color:var(--ink)}
+.panel h2{margin:0 0 4px;font-size:19px;color:var(--ink)}.panel h3{margin:16px 0 6px;font-size:17px;color:var(--ink)}.panel .sub{color:var(--muted);font-size:15px;margin:0 0 12px}
+label.f{display:block;font-weight:600;font-size:15px;margin:12px 0 5px;color:var(--ink)}
+input[type=text],input[type=date],input[type=time],input[type=datetime-local],input[type=number],select,textarea{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--input);color:var(--ink);font-size:16px}
+textarea{min-height:70px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+@media(max-width:620px){.frow,.frow3{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:0 18px;min-height:46px;border-radius:11px;border:1px solid var(--line);background:var(--chip);color:var(--ink);font-weight:700;font-size:16px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}.btn.teal{background:var(--teal);border-color:var(--teal);color:#fff}.btn.danger{color:var(--red)}.btn.small{min-height:40px;padding:0 13px;font-size:15px}
+body.dark .btn.primary,body.dark .btn.teal{color:#0c1a14}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hint{color:var(--muted);font-size:15px}.tiny{color:var(--muted);font-size:15px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:999px;background:var(--chip);border:1px solid var(--line);color:var(--ink);font-size:15px;font-weight:600;min-height:40px}.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}body.dark .chip.on{color:#0c1a14}
+.radio-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:6px}
+.radio-chip{position:relative;display:inline-flex;align-items:center;min-height:42px;padding:8px 13px;border:1px solid var(--line);border-radius:999px;background:var(--chip);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+.radio-chip input{position:absolute;opacity:0;width:1px;height:1px}
+.radio-chip:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent-dark);outline:2px solid var(--accent);outline-offset:1px}
+.radio-chip:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+.record{border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:8px 0;background:var(--card);color:var(--ink);width:100%;text-align:left}
+.record.sel{outline:3px solid var(--sel);background:var(--gold-soft)}
+.record.clickable{cursor:pointer}.record-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.record-head b{font-size:16px;color:var(--ink)}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:3px 9px;font-size:15px;font-weight:700;background:var(--chip);color:var(--ink);white-space:nowrap}
+.badge.good{background:var(--green-soft);color:var(--green)}.badge.warn{background:var(--gold-soft);color:var(--gold)}.badge.high{background:var(--amber-soft);color:var(--amber)}.badge.severe{background:var(--red-soft);color:var(--red)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:7px 12px;font-size:15px}.kv dt{color:var(--muted)}.kv dd{margin:0;font-weight:600;color:var(--ink)}
+@media(max-width:560px){.kv{grid-template-columns:1fr}.kv dd{margin-bottom:5px}}
+table.list{width:100%;border-collapse:collapse;font-size:15px;color:var(--ink)}table.list th{text-align:left;color:var(--muted);font-weight:600;padding:8px 6px;border-bottom:2px solid var(--line);font-size:15px}table.list td{padding:9px 6px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink)}
+.hero-gauge{display:grid;justify-items:center;gap:4px;padding:4px 0 2px}
+.gauge-box{position:relative;width:min(330px,100%);aspect-ratio:1}
+.gauge-box svg{width:100%;height:100%;display:block}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 26%;pointer-events:none;color:var(--ink)}
+.gauge-center .big{font-size:52px;font-weight:900;line-height:1;color:var(--ink)}
+.gauge-center .cap{font-size:15px;color:var(--muted);margin-top:3px}
+.gauge-center .hm{font-size:17px;font-weight:700;color:var(--accent-dark);margin-top:5px}
+.tracker-card{border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin:10px 0;background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+.tracker-card .tc-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tracker-card .tc-days{font-size:30px;font-weight:900;color:var(--accent-dark);line-height:1.05}
+.tracker-card .tc-why{color:var(--muted);font-size:15px;margin-top:5px}
+.mile-ladder{display:grid;gap:7px}
+.mile{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:var(--card);color:var(--ink)}
+.mile.earned{border-color:var(--green);background:var(--green-soft)}
+.mile.next{border-color:var(--sel);outline:2px solid var(--sel);background:var(--gold-soft)}
+.mile .m-ic{width:30px;height:30px;border-radius:50%;background:var(--chip);display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--muted);font-size:15px}
+.mile.earned .m-ic{background:var(--green);color:#fff}
+.mile.next .m-ic{background:var(--sel);color:#fff}
+body.dark .mile.earned .m-ic,body.dark .mile.next .m-ic{color:#10151d}
+.mile .m-name{font-weight:700;font-size:15px;color:var(--ink)}
+.mile .m-when{font-size:15px;color:var(--muted);text-align:right}
+.trend-wrap{overflow-x:auto;padding:8px 2px 2px}.trend{display:flex;align-items:flex-end;gap:4px;min-height:212px;padding:14px 10px 4px;border-bottom:1px solid var(--line);min-width:0}.trend-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;color:var(--ink);background:none;border:0;padding:4px 1px}.trend-bar{width:100%;max-width:34px;border-radius:6px 6px 0 0;min-height:4px;background:var(--accent)}.trend-bar.none{display:none}.trend-bar.zero{width:9px;height:9px;min-height:9px;border-radius:50%;background:var(--muted);align-self:center}.trend-col.sel .trend-bar{outline:3px solid var(--sel);outline-offset:2px;transform:translateY(-4px);background:var(--sel)}.trend-lab{font-size:15px;color:var(--muted);white-space:nowrap;line-height:18px;min-height:18px}.trend-val{font-size:15px;font-weight:700;color:var(--ink)}
+.hbar-list{display:grid;gap:8px}.hbar{display:grid;grid-template-columns:minmax(105px,.8fr) minmax(120px,1.6fr) minmax(76px,.45fr);gap:9px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:8px}.hbar.sel{outline:3px solid var(--sel);background:var(--gold-soft)}.hbar-name{font-size:15px;font-weight:700;color:var(--ink)}.hbar-track{height:20px;background:var(--chip);border-radius:999px;overflow:hidden}.hbar-fill{display:block;height:100%;background:var(--teal);border-radius:999px}.hbar.sel .hbar-fill{background:var(--sel)}.hbar-val{font-size:15px;font-weight:700;color:var(--ink);text-align:right}
+.donut-stack{display:grid;gap:12px;justify-items:center}.donut-box{position:relative;width:min(330px,100%);aspect-ratio:1}.donut-box svg{width:100%;height:100%;display:block}.donut-seg{cursor:pointer;stroke:var(--card);stroke-width:1.4}.donut-seg.sel{stroke:var(--sel);stroke-width:3}.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 26%;pointer-events:none;color:var(--ink)}.donut-center b{font-size:30px;line-height:1.05;color:var(--ink)}.donut-center span{font-size:15px;color:var(--muted)}.donut-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}.outcome-total{grid-column:1/-1;font-size:15px;color:var(--muted)}.outcome-total b{color:var(--ink)}.outcome-card{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"name val" "track track";row-gap:5px;align-items:center;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:11px;padding:9px 10px;cursor:pointer}.outcome-card.sel{outline:3px solid var(--sel);background:var(--gold-soft)}.outcome-card .hbar-name{grid-area:name}.outcome-card .hbar-track{grid-area:track;height:14px}.outcome-card .hbar-val{grid-area:val}.donut-stack .hint{width:100%;margin:0}@media(max-width:380px){.donut-grid{grid-template-columns:1fr}}
+.heat-wrap{overflow-x:auto;padding:4px 0}
+.heat{display:grid;grid-template-columns:repeat(15,minmax(30px,1fr));gap:4px;min-width:480px}
+.heat-cell{min-height:44px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:2px}
+.heat-cell.yes{background:var(--green);border-color:var(--green);color:#fff}
+body.dark .heat-cell.yes{color:#10151d}
+.heat-cell.today{outline:3px solid var(--sel);outline-offset:1px}
+.heat-cell.future{opacity:.45}
+.detail-box{background:var(--chip);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--ink)}
+.notice{background:var(--teal-soft);border:1px solid var(--teal);border-radius:12px;padding:12px 14px;color:var(--ink);font-size:15px}.notice b{color:var(--teal)}
+.motive{background:var(--accent-soft);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;color:var(--ink);font-size:17px;font-weight:600;text-align:center}
+.report-preview{background:#fff;color:#17242e;border:1.5px solid var(--line);border-radius:12px;padding:18px;font-size:15px}.report-preview h2,.report-preview h3{color:#17242e}.report-preview table{width:100%;border-collapse:collapse;font-size:15px}.report-preview th,.report-preview td{border-bottom:1px solid #cbd5dd;padding:5px;text-align:left;color:#17242e}.report-preview .foot{color:#526674;font-size:15px;border-top:1px solid #cbd5dd;margin-top:16px;padding-top:8px}
+.empty-note{border:1.5px dashed var(--line);border-radius:12px;padding:16px;color:var(--muted);font-size:15px;text-align:center}
+footer.cta{max-width:1220px;margin:0 auto;padding:0 16px 34px;text-align:center}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:#1c2420;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;max-width:92vw;text-align:center;z-index:50;box-shadow:0 6px 24px rgba(0,0,0,.3)}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#printArea{display:none}
+@media print{body{background:#fff;color:#111}header.top,.tabs,.samplebar,.no-print,footer.cta,.toast,main>section{display:none!important}main{max-width:100%;padding:0}.panel{box-shadow:none;break-inside:avoid}#printArea{display:block;color:#111}#printArea h1{font-size:26px;margin:0 0 6px}#printArea h2{font-size:20px;margin:18px 0 6px}#printArea h3{font-size:17px;margin:14px 0 4px}#printArea table{width:100%;border-collapse:collapse;font-size:11.5pt}#printArea th,#printArea td{border-bottom:1px solid #bbb;padding:5px;text-align:left}#printArea .foot{color:#555;border-top:1px solid #bbb;margin-top:18px;padding-top:8px;font-size:10.5pt}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.5V12l3 2"/></svg></div>
+  <div class="brand"><h1 id="brandName">SoberCount</h1><p>Sobriety day counters, pledges, milestones and urges — offline on this device</p></div>
+  <div class="top-actions">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a>
+    <button class="icon-btn" id="sampleBtn" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M11 3v5.5L5.2 17a2.3 2.3 0 0 0 2 3.4h9.6a2.3 2.3 0 0 0 2-3.4L13 8.5V3"/><path d="M8.5 14h7"/></svg></button>
+    <button class="icon-btn" id="themeBtn" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2Z"/></svg></button>
+    <button class="icon-btn" id="soundBtn" title="Sounds" aria-label="Toggle sounds"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+  </div>
+</header>
+<main>
+  <div class="samplebar" id="sampleBar"><b>Sample data is on.</b> Made-up trackers show how the counters, pledge, charts and milestone report work together. Tap the flask again and your real data returns exactly as you left it.</div>
+  <nav class="tabs no-print" role="tablist" aria-label="Views">
+    <button class="tab" data-view="Dashboard" role="tab">Dashboard</button>
+    <button class="tab" data-view="Trackers" role="tab">Trackers</button>
+    <button class="tab" data-view="Log" role="tab">Log urge</button>
+    <button class="tab" data-view="History" role="tab">History</button>
+    <button class="tab" data-view="Charts" role="tab">Charts</button>
+    <button class="tab" data-view="Stats" role="tab">Stats</button>
+    <button class="tab" data-view="Report" role="tab">Milestone Report</button>
+  </nav>
+
+  <section id="viewDashboard">
+    <div id="dashTiles" class="stats-grid"></div>
+    <div id="dashMotive"></div>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>Your counters</h2><p class="sub">Every tracker you add shows here — no limit. Tap a tracker to see its milestones.</p><div id="dashTrackers"></div></div>
+        <div class="panel"><h2>Daily pledge</h2><p class="sub">One tap a day. Pledges are kept per tracker, and today stays open until midnight.</p><div id="dashPledge"></div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Longest counter</h2><p class="sub">Your longest current streak, measured against its next milestone.</p><div id="dashGauge"></div></div>
+        <div class="panel"><h2>Money &amp; time saved</h2><p class="sub">Where your saved money is coming from. Tap a slice or bar to pin it.</p><div id="dashDonut"></div></div>
+      </div>
+    </div>
+    <div class="panel"><h2>Recent activity</h2><p class="sub">The latest pledges, urges and resets across your trackers.</p><div id="dashRecent"></div></div>
+  </section>
+
+  <section id="viewTrackers" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2 id="trackerFormTitle">Add a tracker</h2><p class="sub">Track anything you are quitting — alcohol, vaping, gambling, social media, sugar, or your own custom entry. Add as many as you need.</p>
+          <div class="form-sample-note" id="formSampleNote"><b>Sample data is on.</b> Changes made now are thrown away when sample is turned off.</div>
+          <label class="f">What are you quitting?</label><div class="radio-chips" id="presetChips"></div>
+          <label class="f" for="fName">Name</label><input type="text" id="fName" maxlength="60" placeholder="e.g. Alcohol">
+          <div class="frow"><div><label class="f" for="fQuitDate">Quit date</label><input type="date" id="fQuitDate"></div><div><label class="f" for="fQuitTime">Quit time</label><input type="time" id="fQuitTime"></div></div>
+          <div class="frow"><div><label class="f" for="fCost">Cost per day ($)</label><input type="number" id="fCost" min="0" step="0.01" placeholder="0.00"></div><div><label class="f" for="fMins">Time per day (minutes)</label><input type="number" id="fMins" min="0" step="1" placeholder="0"></div></div>
+          <label class="f" for="fReason">Your reason (your “why”)</label><textarea id="fReason" maxlength="400" placeholder="Why this matters to you — shown on your counter to keep it close."></textarea>
+          <input type="hidden" id="fId">
+          <div class="btnrow"><button class="btn primary" id="saveTrackerBtn">Save tracker</button><button class="btn" id="clearTrackerBtn">Clear form</button></div>
+        </div>
+        <div class="panel"><h2>Record a reset</h2><p class="sub">A reset restarts a counter and is kept in the history — no judgment, just an honest record you can learn from.</p>
+          <label class="f" for="rTracker">Tracker</label><select id="rTracker"></select>
+          <div class="frow"><div><label class="f" for="rDate">Reset date</label><input type="date" id="rDate"></div><div><label class="f" for="rTime">Reset time</label><input type="time" id="rTime"></div></div>
+          <label class="f" for="rNote">Note (optional)</label><input type="text" id="rNote" maxlength="200" placeholder="What happened, in your own words">
+          <div class="btnrow"><button class="btn teal" id="saveResetBtn">Record reset</button></div>
+        </div>
+      </div>
+      <div>
+        <div class="panel"><h2>Your trackers</h2><p class="sub">Tap a tracker to open its milestone ladder. Edit or delete from the tracker detail.</p><div id="trackerList"></div></div>
+        <div class="panel" id="trackerDetailPanel"><h2>Tracker detail</h2><div id="trackerDetail"><p class="hint">Pick a tracker above to see milestones, pledges and its reset history.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewLog" hidden>
+    <div class="cols equal">
+      <div class="panel"><h2>Log an urge</h2><p class="sub">Jot it down while it is fresh. Time defaults to now.</p>
+        <label class="f" for="uTracker">Tracker (optional)</label><select id="uTracker"></select>
+        <div class="frow"><div><label class="f" for="uDate">Date</label><input type="date" id="uDate"></div><div><label class="f" for="uTime">Time</label><input type="time" id="uTime"></div></div>
+        <label class="f">Intensity (1–10)</label>
+        <div class="chip" style="display:block;padding:14px">
+          <div style="display:grid;grid-template-columns:48px minmax(0,1fr) 48px 74px;gap:10px;align-items:center">
+            <button type="button" class="btn" id="uMinus" aria-label="Lower intensity" style="min-height:48px;font-size:22px">−</button>
+            <input type="range" id="uIntensity" min="1" max="10" step="1" value="5" aria-label="Urge intensity">
+            <button type="button" class="btn" id="uPlus" aria-label="Raise intensity" style="min-height:48px;font-size:22px">+</button>
+            <div id="uIntensityVal" style="font-size:30px;font-weight:900;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px">5</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:15px;margin-top:4px"><span>Mild</span><span>Strongest</span></div>
+        </div>
+        <label class="f">Trigger</label><div class="radio-chips" id="uTriggers"></div>
+        <label class="f" for="uTriggerCustom">Custom trigger</label><input type="text" id="uTriggerCustom" maxlength="60" placeholder="If none of the above fits">
+        <label class="f">What helped</label><div class="radio-chips" id="uHelpeds"></div>
+        <label class="f" for="uHelpedCustom">Custom — what helped</label><input type="text" id="uHelpedCustom" maxlength="60" placeholder="If none of the above fits">
+        <label class="f" for="uNote">Note</label><textarea id="uNote" maxlength="500" placeholder="Anything worth remembering about this one"></textarea>
+        <input type="hidden" id="uId">
+        <div class="btnrow"><button class="btn primary" id="saveUrgeBtn">Save urge</button><button class="btn" id="clearUrgeBtn">Clear form</button></div>
+      </div>
+      <div class="panel"><h2>Latest urges</h2><p class="sub">Your most recent entries. Tap one to load it back into the form for editing.</p><div id="recentUrges"></div></div>
+    </div>
+  </section>
+
+  <section id="viewHistory" hidden>
+    <div class="panel"><h2>History</h2><p class="sub">Every pledge, urge and reset, newest first. Search or narrow by tracker and type.</p>
+      <div class="frow3"><div><label class="f" for="hSearch">Search text</label><input type="text" id="hSearch" placeholder="trigger, note, tracker…"></div><div><label class="f" for="hTracker">Tracker</label><select id="hTracker"></select></div><div><label class="f" for="hType">Type</label><select id="hType"><option value="all">All types</option><option value="pledge">Pledges</option><option value="urge">Urges</option><option value="reset">Resets</option></select></div></div>
+      <div id="historyList" style="margin-top:12px"></div>
+    </div>
+  </section>
+
+  <section id="viewCharts" hidden>
+    <div class="cols">
+      <div>
+        <div class="panel"><h2>Urge intensity trend</h2><p class="sub">Strongest urge each day. Tap a day to pin it; tap again to release.</p>
+          <div class="chips" id="trendToggle" style="margin-bottom:8px"><button class="chip" data-days="30">30 days</button><button class="chip" data-days="90">90 days</button></div>
+          <div class="trend-wrap"><div class="trend" id="urgeTrend"></div></div>
+          <div class="detail-box" id="trendDetail" style="margin-top:10px">Days with no urges logged stay empty — an empty day is a quiet day, not a failure.</div>
+        </div>
+        <div class="panel"><h2>Urges by trigger</h2><p class="sub">What tends to show up before an urge. Tap a bar to pin it.</p><div class="hbar-list" id="triggerBars"></div><div class="detail-box" id="triggerDetail" style="margin-top:10px">Tap any bar to pin its numbers here.</div></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Pledge calendar</h2><p class="sub">The last 90 days across all trackers. Filled days have at least one pledge.</p><div class="heat-wrap"><div class="heat" id="pledgeHeat"></div></div><div class="detail-box" id="pledgeHeatDetail" style="margin-top:10px">Tap any day to see what was pledged.</div></div>
+        <div class="panel"><h2>Money saved by month</h2><p class="sub">Money not spent during your current streaks, month by month. Tap a month to pin it.</p><div class="trend-wrap"><div class="trend" id="moneyTrend"></div></div><div class="detail-box" id="moneyDetail" style="margin-top:10px">Money saved is estimated from the daily cost you set on each tracker.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewStats" hidden>
+    <div id="statsTiles" class="stats-grid"></div>
+    <div class="cols">
+      <div class="panel"><h2>Per-tracker stats</h2><p class="sub">Current streaks, best streaks, pledges and urges for every tracker.</p><div id="statsTable"></div></div>
+      <div>
+        <div class="panel"><h2>Pledges by weekday</h2><p class="sub">Which days of the week you show up for yourself. Tap a day to pin it.</p><div class="hbar-list" id="weekdayBars"></div><div class="detail-box" id="weekdayDetail" style="margin-top:10px">Every weekday bar counts pledges across all trackers.</div></div>
+        <div class="panel"><h2>Urges by what helped</h2><p class="sub">What you noted as helpful, counted across your logged urges. Tap a slice or bar to pin it.</p><div id="helpedDonut"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="viewReport" hidden>
+    <div class="cols">
+      <div class="panel"><h2>Milestone report</h2><p class="sub">A printable summary of your counters, milestones, pledges and savings. Print as many copies as you like — printing here is always unlimited.</p>
+        <div class="btnrow" style="margin-top:0"><button class="btn primary" id="printBtn">Print report</button></div>
+        <h3>Preview</h3><div class="report-preview" id="reportPreview"></div>
+      </div>
+      <div>
+        <div class="panel"><h2>Backup &amp; export</h2><p class="sub">Your data lives only in this browser. A JSON backup is the way to keep it safe or move it — it is always included, never locked.</p>
+          <div class="btnrow" style="margin-top:0"><button class="btn teal" id="backupBtn">Download JSON backup</button><button class="btn" id="restoreBtn">Restore from backup</button><input type="file" id="restoreFile" accept="application/json,.json" hidden></div>
+          <div class="btnrow"><button class="btn" id="csvUrgesBtn">Export urges (CSV)</button><button class="btn" id="csvPledgesBtn">Export pledges (CSV)</button></div>
+          <p class="tiny">Restoring asks for confirmation first, then replaces everything after each record is checked. Only backups made by SoberCount are accepted, and restore is blocked while sample data is on.</p>
+        </div>
+        <div class="panel"><h2>How your data works</h2><p><b>Storage:</b> everything is saved in this browser's local storage on this device only. Nothing is sent anywhere and there is no account.</p><p><b>Backup:</b> download a JSON backup to keep your counters safe — restoring it on any device brings everything back.</p><p><b>Sample data:</b> the flask button snapshots your real data, shows a made-up example, and restores your snapshot exactly when tapped again.</p><p><b>Exports:</b> backups and CSV exports are blocked while sample data is on, so the example can never be mistaken for your real records.</p></div>
+        <div class="notice"><b>A note on what this app is:</b> SoberCount is a counter and diary tool. It is not medical advice and does not provide treatment, detox, or withdrawal guidance. If you are in crisis, call or text <b>988</b> (US Suicide and Crisis Lifeline). For support with quitting, a doctor, counselor, or a local support group can help in ways an app cannot.</div>
+      </div>
+    </div>
+  </section>
+  <div id="printArea"></div>
+</main>
+<footer class="cta no-print"><a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>More Apps</a></footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+"use strict";
+const APP_NAME = "SoberCount";
+const LS_KEY = "sobercount_v1";
+const BACKUP_APP = "sobercount";
+const BACKUP_VERSION = 1;
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+let toastTimer = null, audioCtx = null, bootDataUnreadable = false;
+const sel = { trendDay:null, trendDays:30, trigger:null, weekday:null, moneyMonth:null, helped:null, donutTracker:null, historyItem:null, detailTracker:null };
+let pledgedMap = {};
+
+function esc(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c])); }
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),3400); }
+function ensureAudio(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); }catch(e){} return audioCtx; }
+function beep(freq=660,dur=.08,type="sine",gain=.055){ if(!S.settings.sound) return; const ctx=ensureAudio(); if(!ctx) return; try{ const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type; o.frequency.value=freq; g.gain.setValueAtTime(gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+dur); o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime+dur); }catch(e){} }
+function chime(){ beep(660,.09); setTimeout(()=>beep(880,.12),90); }
+function thud(){ beep(180,.14,"triangle",.06); }
+document.addEventListener("pointerdown", ()=>ensureAudio(), {capture:true});
+
+function pad2(n){ return String(n).padStart(2,"0"); }
+function localToday(d=new Date()){ return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`; }
+function addDays(iso, n){ const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+n); return localToday(d); }
+function fmtDate(iso){ if(!iso) return "—"; const d=new Date(iso+"T00:00:00"); return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }
+function fmtShort(iso){ const d=new Date(iso+"T00:00:00"); return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString(undefined,{month:"short",day:"numeric"}); }
+function fmtTime(ts){ return new Date(ts).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }
+function toTs(date, time){ const t=/^\d{2}:\d{2}/.test(time||"") ? time : "00:00"; const ts=Date.parse(`${date}T${t}`); return Number.isFinite(ts)?ts:Date.now(); }
+function tsToDateInput(ts){ return localToday(new Date(ts)); }
+function tsToTimeInput(ts){ const d=new Date(ts); return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`; }
+function fmtMoney(n){ return "$" + (Math.round(n*100)/100).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDur(mins){ if(mins < 60) return `${Math.round(mins)}m`; const h=mins/60; if(h<48) return `${(Math.round(h*10)/10).toLocaleString()}h`; return `${Math.round(h/24).toLocaleString()} days`; }
+function round1(n){ return Math.round(n*10)/10; }
+function uid(prefix){ return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,8)}`; }
+function prefersDark(){ try{ return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches; }catch(e){ return false; } }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+const PRESETS = ["Alcohol","Smoking / vaping","Smoking","Cannabis","Gambling","Social media","Sugar","Caffeine","Gaming"];
+const TRIGGERS = ["Stress","Social event","Boredom","Habit / routine cue","Tired","Celebration","Work pressure","Loneliness","Anger","Seeing others use"];
+const HELPEDS = ["Went for a walk","Called or texted someone","Drank water / ate something","Deep breathing","Left the situation","Waited it out","Exercise","Meeting or support group"];
+const MILESTONES = [
+  {days:1,label:"24 hours"},{days:3,label:"3 days"},{days:7,label:"1 week"},{days:14,label:"2 weeks"},
+  {days:30,label:"1 month"},{days:60,label:"2 months"},{days:90,label:"3 months"},{days:180,label:"6 months"},
+  {days:270,label:"9 months"},{years:1,label:"1 year"}
+];
+const MOTIVES = [
+  "One day at a time is enough.",
+  "Every day on the counter is a day you chose.",
+  "Small steady steps add up to a long way.",
+  "You do not have to feel ready to keep going.",
+  "Progress counts even when it feels quiet.",
+  "The streak you protect today protects you back.",
+  "Be proud of ordinary days done well.",
+  "An urge is weather: notice it, let it move on.",
+  "Each clean day is proof you can do this.",
+  "Rest is part of the work, not a break from it.",
+  "Asking for support is a strength, not a detour.",
+  "Today only asks for today.",
+  "Do today well; tomorrow can wait its turn.",
+  "You have already done the hardest part: starting."
+];
+
+function blankData(){
+  return { settings:{ dark:prefersDark(), sound:true }, trackers:[], pledges:[], urges:[], resets:[], sampling:false, snapshot:null };
+}
+function num(v, fallback=0){ const n = typeof v === "number" ? v : parseFloat(v); return Number.isFinite(n) && n >= 0 ? n : fallback; }
+function sanitizeTracker(r){
+  if(!r || typeof r !== "object" || !r.id || !r.name) return null;
+  const quitAt = Number(r.quitAt);
+  if(!Number.isFinite(quitAt) || quitAt <= 0) return null;
+  return { id:String(r.id), name:String(r.name).slice(0,60), quitAt, dailyCost:num(r.dailyCost), dailyMins:Math.round(num(r.dailyMins)), reason:String(r.reason||"").slice(0,400), createdAt:Number.isFinite(Number(r.createdAt))?Number(r.createdAt):quitAt };
+}
+function sanitizePledge(r){
+  if(!r || typeof r !== "object" || !r.id || !r.trackerId || !/^\d{4}-\d{2}-\d{2}$/.test(r.date||"")) return null;
+  const [yy,mm,dd]=r.date.split("-").map(Number); const probe=new Date(yy, mm-1, dd);
+  if(probe.getFullYear()!==yy || probe.getMonth()!==mm-1 || probe.getDate()!==dd) return null;
+  return { id:String(r.id), trackerId:String(r.trackerId), date:r.date };
+}
+function sanitizeUrge(r){
+  if(!r || typeof r !== "object" || !r.id) return null;
+  const ts = Number(r.ts);
+  if(!Number.isFinite(ts) || ts <= 0) return null;
+  const intensity = Math.round(num(r.intensity, 5));
+  if(intensity < 1 || intensity > 10) return null;
+  return { id:String(r.id), trackerId:r.trackerId?String(r.trackerId):null, ts, intensity, trigger:String(r.trigger||"").slice(0,60), helped:String(r.helped||"").slice(0,60), note:String(r.note||"").slice(0,500) };
+}
+function sanitizeReset(r){
+  if(!r || typeof r !== "object" || !r.id || !r.trackerId) return null;
+  const ts = Number(r.ts);
+  if(!Number.isFinite(ts) || ts <= 0) return null;
+  return { id:String(r.id), trackerId:String(r.trackerId), ts, note:String(r.note||"").slice(0,200) };
+}
+function okId(v){ return typeof v === "string" && /^[A-Za-z0-9_-]{1,80}$/.test(v); }
+function normalizeState(raw, nested){
+  const next = blankData();
+  if(!raw || typeof raw !== "object") return next;
+  if(raw.settings && typeof raw.settings === "object") next.settings = { dark: typeof raw.settings.dark === "boolean" ? raw.settings.dark : prefersDark(), sound: typeof raw.settings.sound === "boolean" ? raw.settings.sound : true };
+  const keep = (list, san) => { const seen = new Set(); return (Array.isArray(raw[list]) ? raw[list] : []).map(san).filter(r => r && !seen.has(r.id) && seen.add(r.id)); };
+  next.trackers = keep("trackers", sanitizeTracker);
+  next.pledges = keep("pledges", sanitizePledge);
+  next.urges = keep("urges", sanitizeUrge);
+  next.resets = keep("resets", sanitizeReset);
+  /* ids are rendered into HTML attributes — replace any unsafe id, keeping record links intact */
+  const remap = new Map();
+  next.trackers.forEach(t=>{ if(!okId(t.id)){ if(!remap.has(t.id)) remap.set(t.id, uid("trk")); t.id = remap.get(t.id); } });
+  const fixRef = r => { if(r.trackerId && remap.has(r.trackerId)) r.trackerId = remap.get(r.trackerId); return r; };
+  next.pledges = next.pledges.map(fixRef); next.urges = next.urges.map(fixRef); next.resets = next.resets.map(fixRef);
+  next.pledges.forEach(r=>{ if(!okId(r.id)) r.id = uid("plg"); });
+  next.urges.forEach(r=>{ if(!okId(r.id)) r.id = uid("urg"); });
+  next.resets.forEach(r=>{ if(!okId(r.id)) r.id = uid("rst"); });
+  next.sampling = !!raw.sampling;
+  if(!nested && raw.snapshot && typeof raw.snapshot === "object" && !Array.isArray(raw.snapshot)){
+    next.snapshot = normalizeState(raw.snapshot, true);
+    next.snapshot.sampling = false;
+    next.snapshot.snapshot = null;
+  }
+  if(next.sampling && !next.snapshot) next.sampling = false;
+  return next;
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return blankData();
+    return normalizeState(JSON.parse(raw));
+  }catch(e){ bootDataUnreadable = true; return blankData(); }
+}
+let S = load();
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ toast("Storage is full or blocked. Download a JSON Backup from the Milestone Report tab."); } }
+</script>
+<script>
+"use strict";
+/* ---------- domain helpers ---------- */
+const DONUT_COLORS = ["#177a5c","#c8870a","#4e79a7","#b42318","#6854a6","#0f766e","#a44a12","#3d7a3a","#86519c","#5b6f66"];
+function trackerById(id){ return S.trackers.find(t=>t.id===id); }
+function resetsFor(id){ return S.resets.filter(r=>r.trackerId===id).sort((a,b)=>a.ts-b.ts); }
+function effectiveStart(t){ let start=t.quitAt; resetsFor(t.id).forEach(r=>{ if(r.ts>start) start=r.ts; }); return start; }
+function segments(t){
+  const bounds=[t.quitAt, ...resetsFor(t.id).map(r=>r.ts)].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
+  const now=Date.now(); const segs=[];
+  for(let i=0;i<bounds.length;i++){ const end = i<bounds.length-1 ? bounds[i+1] : now; if(end>bounds[i]) segs.push({start:bounds[i], end}); }
+  return segs;
+}
+function longestStreakDays(t){ return segments(t).reduce((m,s)=>Math.max(m, Math.floor((s.end-s.start)/864e5)), 0); }
+function streakParts(t, now=Date.now()){ const start=effectiveStart(t); const ms=Math.max(0, now-start); return { start, ms, days:Math.floor(ms/864e5), hours:Math.floor(ms%864e5/36e5), mins:Math.floor(ms%36e5/6e4) }; }
+function moneySaved(t, now=Date.now()){ return t.dailyCost * (Math.max(0, now-effectiveStart(t))/864e5); }
+function timeSavedMins(t, now=Date.now()){ return t.dailyMins * (Math.max(0, now-effectiveStart(t))/864e5); }
+function pledgesFor(id){ return S.pledges.filter(p=>p.trackerId===id); }
+function pledgedToday(id){ const today=localToday(); return S.pledges.some(p=>p.trackerId===id && p.date===today); }
+function pledgeStreak(id){
+  const days=new Set(pledgesFor(id).map(p=>p.date));
+  let cur=localToday(); if(!days.has(cur)) cur=addDays(cur,-1);
+  let streak=0; while(days.has(cur)){ streak++; cur=addDays(cur,-1); }
+  return streak;
+}
+function addYearsISO(iso, y){
+  const [Y,M,D]=iso.split("-").map(Number); const ny=Y+y;
+  const leap=(ny%4===0 && ny%100!==0) || ny%400===0;
+  const nd=(M===2 && D===29 && !leap) ? 28 : D;
+  return `${ny}-${pad2(M)}-${pad2(nd)}`;
+}
+function calDaysBetween(aIso, bIso){
+  const a=aIso.split("-").map(Number), b=bIso.split("-").map(Number);
+  return Math.round((Date.UTC(b[0],b[1]-1,b[2])-Date.UTC(a[0],a[1]-1,a[2]))/864e5);
+}
+function milestoneCandidates(startIso){
+  const c=[];
+  MILESTONES.forEach(m=>{
+    if(m.years){ const date=addYearsISO(startIso, m.years); c.push({days:calDaysBetween(startIso, date), date, label:m.label}); }
+    else c.push({days:m.days, date:addDays(startIso, m.days), label:m.label});
+  });
+  for(let d=400; d<=5000; d+=100) c.push({days:d, date:addDays(startIso, d), label:`${d.toLocaleString()} days`});
+  for(let y=2; y<=15; y++){ const date=addYearsISO(startIso, y); c.push({days:calDaysBetween(startIso, date), date, label:`${y} years`}); }
+  return c.sort((a,b)=>a.days-b.days).filter((v,i,a)=>i===0 || v.days!==a[i-1].days);
+}
+function milestoneStatus(streakDays, startIso){
+  const cands=milestoneCandidates(startIso);
+  const earned=cands.filter(m=>streakDays>=m.days);
+  const next=cands.find(m=>streakDays<m.days) || null;
+  const upcoming = next ? cands.slice(cands.indexOf(next), cands.indexOf(next)+3) : [];
+  return { earned, next, upcoming };
+}
+function motiveOfDay(){
+  const now=new Date();
+  const dayIndex = Math.floor((now - new Date(now.getFullYear(),0,0)) / 864e5);
+  return MOTIVES[dayIndex % MOTIVES.length];
+}
+function sampleExportGuard(){
+  if(S.sampling){ toast("Sample data is on — turn it off to back up or export your real records."); thud(); return true; }
+  return false;
+}
+function sampleSaveWarning(){ if(S.sampling) toast("Sample data is on — changes made now are discarded when you turn sample off."); }
+
+/* ---------- selection / view switching ---------- */
+function applyTheme(){ document.body.classList.toggle("dark", !!S.settings.dark); $("#themeBtn").classList.toggle("on", !!S.settings.dark); $("#themeBtn").setAttribute("aria-pressed", S.settings.dark ? "true" : "false"); }
+function setSoundUI(){ $("#soundBtn").classList.toggle("on", !!S.settings.sound); $("#soundBtn").setAttribute("aria-pressed", S.settings.sound ? "true" : "false"); }
+function setSampleUI(){ $("#sampleBar").classList.toggle("show", !!S.sampling); $("#sampleBtn").classList.toggle("on", !!S.sampling); $("#sampleBtn").setAttribute("aria-pressed", S.sampling ? "true" : "false"); const note=$("#formSampleNote"); if(note) note.classList.toggle("show", !!S.sampling); }
+function switchView(name){
+  $$(".tab").forEach(t=>{ const on=t.dataset.view===name; t.classList.toggle("on",on); t.setAttribute("aria-selected",on?"true":"false"); });
+  ["Dashboard","Trackers","Log","History","Charts","Stats","Report"].forEach(v=>{ const el=$("#view"+v); if(el) el.hidden = v !== name; });
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+/* ---------- dashboard ---------- */
+function statTile(n, l, cls=""){ return `<div class="stat ${cls}"><div class="n">${n}</div><div class="l">${l}</div></div>`; }
+function renderDashTiles(){
+  const wrap=$("#dashTiles"); if(!wrap) return;
+  const now=Date.now();
+  const totalDays = S.trackers.reduce((a,t)=>a+streakParts(t,now).days, 0);
+  const totalMoney = S.trackers.reduce((a,t)=>a+moneySaved(t,now), 0);
+  let nextTxt="—", nextLbl="Next milestone";
+  let best=null;
+  S.trackers.forEach(t=>{ const p=streakParts(t,now); const d=p.days; const nx=milestoneStatus(d, tsToDateInput(p.start)).next; if(nx){ const left=nx.days-d; if(!best || left<best.left) best={left, label:nx.label, name:t.name}; } });
+  if(best) nextTxt = best.left<=0 ? "Today" : `${best.left} day${best.left===1?"":"s"}`;
+  wrap.innerHTML = [
+    statTile(S.trackers.length, "Active trackers"),
+    statTile(totalDays.toLocaleString(), "Clean days across trackers", "good"),
+    statTile(fmtMoney(totalMoney), "Money saved so far"),
+    statTile(nextTxt, best ? `${nextLbl} · ${esc(best.name)} — ${esc(best.label)}` : nextLbl)
+  ].join("");
+  $("#dashMotive").innerHTML = S.trackers.length ? `<div class="motive">${esc(motiveOfDay())}</div>` : "";
+}
+function trackerCard(t, compact){
+  const p=streakParts(t);
+  const nx=milestoneStatus(p.days, tsToDateInput(p.start)).next;
+  const pledged=pledgedToday(t.id);
+  return `<div class="tracker-card">
+    <div class="tc-head"><b style="font-size:17px">${esc(t.name)}</b><span class="badge ${pledged?"good":"warn"}">${pledged?"Pledged today":"Not pledged today"}</span>${nx?`<span class="badge">Next: ${esc(nx.label)} in ${Math.max(0,nx.days-p.days)}d</span>`:`<span class="badge good">Every milestone passed</span>`}</div>
+    <div class="tc-days">${p.days.toLocaleString()} <span style="font-size:17px;font-weight:700">days</span> <span style="font-size:16px;font-weight:700;color:var(--muted)">${p.hours}h ${p.mins}m</span></div>
+    <div class="hint">Sober since ${fmtDate(tsToDateInput(effectiveStart(t)))} · ${fmtMoney(moneySaved(t))} and ${fmtDur(timeSavedMins(t))} saved</div>
+    ${t.reason && !compact ? `<div class="tc-why">“${esc(t.reason)}”</div>` : ""}
+    <div class="btnrow">
+      <button class="btn ${pledged?"":"primary"} small" data-act="pledge" data-id="${t.id}" ${pledged?"disabled":""}>${pledged?"Pledged ✓":"Pledge today"}</button>
+      <button class="btn small" data-act="detail" data-id="${t.id}">Milestones</button>
+      <button class="btn small" data-act="logUrgeFor" data-id="${t.id}">Log urge</button>
+    </div></div>`;
+}
+function renderDashTrackers(){
+  const wrap=$("#dashTrackers");
+  wrap.innerHTML = S.trackers.length ? [...S.trackers].sort((a,b)=>streakParts(b).ms-streakParts(a).ms).map(t=>trackerCard(t,true)).join("")
+    : `<div class="empty-note">No trackers yet. Add your first counter — it takes a few seconds.<br><br><button class="btn primary" data-act="gotoTrackers">Add a tracker</button></div>`;
+}
+function renderDashPledge(){
+  const wrap=$("#dashPledge");
+  if(!S.trackers.length){ wrap.innerHTML = `<p class="hint">Pledges appear once you have a tracker.</p>`; return; }
+  wrap.innerHTML = S.trackers.map(t=>{
+    const pledged=pledgedToday(t.id); const streak=pledgeStreak(t.id);
+    return `<div class="record"><span class="record-head"><b>${esc(t.name)}</b><span class="badge ${pledged?"good":"warn"}">${pledged?"Pledged today":"Awaiting today's pledge"}</span><span class="badge">${streak} day pledge streak</span></span><div class="btnrow"><button class="btn ${pledged?"":"primary"} small" data-act="pledge" data-id="${t.id}" ${pledged?"disabled":""}>${pledged?"Pledged ✓":"I pledge today"}</button></div></div>`;
+  }).join("");
+}
+function polar(cx, cy, rad, deg){ const r=deg*Math.PI/180; return [cx+rad*Math.cos(r), cy+rad*Math.sin(r)]; }
+function gaugeSVG(pct){
+  const cx=55, cy=55, R=50, r=37;
+  const p0=polar(cx,cy,R,-90), p1=polar(cx,cy,R,90), p2=polar(cx,cy,R,270), p3=polar(cx,cy,R,90.01);
+  const trackPath=`M ${p0[0]} ${p0[1]} A ${R} ${R} 0 1 1 ${p1[0]} ${p1[1]} A ${R} ${R} 0 1 1 ${p0[0]} ${p0[1]}`;
+  const endDeg=-90 + Math.max(0.004, Math.min(1, pct))*359.99;
+  const q0=polar(cx,cy,R,-90), q1=polar(cx,cy,R,endDeg);
+  const large=(endDeg+90)>180?1:0;
+  const arcPath=`M ${q0[0]} ${q0[1]} A ${R} ${R} 0 ${large} 1 ${q1[0]} ${q1[1]}`;
+  return `<svg viewBox="-6 -6 122 122" role="img" aria-label="Progress to next milestone"><path d="${trackPath}" fill="none" stroke="var(--chip)" stroke-width="11"/><path d="${arcPath}" fill="none" stroke="var(--accent)" stroke-width="11" stroke-linecap="round"/></svg>`;
+}
+function renderDashGauge(){
+  const wrap=$("#dashGauge");
+  if(!S.trackers.length){ wrap.innerHTML = `<div class="empty-note">Your longest counter appears here once you add a tracker.</div>`; return; }
+  const primary=[...S.trackers].sort((a,b)=>streakParts(b).ms-streakParts(a).ms)[0];
+  const p=streakParts(primary);
+  const st=milestoneStatus(p.days, tsToDateInput(p.start));
+  const pct = st.next ? Math.min(1, p.days/st.next.days) : 1;
+  const nextLine = st.next ? `${esc(st.next.label)} in ${Math.max(0, st.next.days-p.days)} day${st.next.days-p.days===1?"":"s"}` : "All milestones passed";
+  wrap.innerHTML = `<div class="hero-gauge"><div class="gauge-box">${gaugeSVG(pct)}<div class="gauge-center"><span class="big">${p.days.toLocaleString()}</span><span class="cap">days sober — ${esc(primary.name)}</span><span class="hm">${p.hours}h ${p.mins}m and counting</span></div></div><div class="hint" style="text-align:center">Next milestone: ${nextLine}<br>${st.earned.length} milestone${st.earned.length===1?"":"s"} earned so far</div></div>`;
+}
+function donutData(){
+  const entries=S.trackers.map((t,i)=>({key:t.id, label:t.name, value:moneySaved(t), color:DONUT_COLORS[i%DONUT_COLORS.length]})).filter(v=>v.value>0);
+  const total=entries.reduce((a,v)=>a+v.value,0);
+  if(total<=0) return { entries:[], total:0, arcs:[], pcts:[] };
+  const raw=entries.map(v=>v.value/total*100);
+  const base=raw.map(Math.floor);
+  let rem=100-base.reduce((a,b)=>a+b,0);
+  const order=raw.map((r,i)=>[r-base[i], i]).sort((a,b)=>b[0]-a[0]);
+  for(let k=0;k<rem;k++) base[order[k%order.length][1]]++;
+  const R=49, r=32, cx=56, cy=56;
+  let ang=-90; const arcs=[];
+  entries.forEach((v,i)=>{
+    const frac=v.value/total;
+    const a0=ang; const a1=ang + (entries.length===1 ? 359.99 : frac*360); ang+=frac*360;
+    const large=(a1-a0)>180?1:0;
+    const [ox0,oy0]=polar(cx,cy,R,a0), [ox1,oy1]=polar(cx,cy,R,a1), [ix1,iy1]=polar(cx,cy,r,a1), [ix0,iy0]=polar(cx,cy,r,a0);
+    const mid=(a0+a1)/2; const [dx,dy]=polar(0,0,3.6,mid);
+    arcs.push({ key:v.key, path:`M ${ox0.toFixed(2)} ${oy0.toFixed(2)} A ${R} ${R} 0 ${large} 1 ${ox1.toFixed(2)} ${oy1.toFixed(2)} L ${ix1.toFixed(2)} ${iy1.toFixed(2)} A ${r} ${r} 0 ${large} 0 ${ix0.toFixed(2)} ${iy0.toFixed(2)} Z`, dx:dx.toFixed(2), dy:dy.toFixed(2) });
+  });
+  return { entries, total, arcs, pcts:base };
+}
+function renderDashDonut(){
+  const wrap=$("#dashDonut");
+  const d=donutData();
+  if(!d.entries.length){ wrap.innerHTML = `<div class="empty-note">Add a daily cost to a tracker and your money-saved breakdown appears here.</div>`; return; }
+  const selKey=sel.donutTracker;
+  const selEntry=d.entries.find(v=>v.key===selKey);
+  const center = selEntry ? `<b>${fmtMoney(selEntry.value)}</b><span>${esc(selEntry.label)}</span>` : `<b>${fmtMoney(d.total)}</b><span>saved in total</span>`;
+  const segs=d.arcs.map((a,i)=>`<path class="donut-seg ${a.key===selKey?"sel":""}" data-act="donutSeg" data-id="${a.key}" d="${a.path}" fill="${d.entries[i].color}" ${a.key===selKey?`transform="translate(${a.dx} ${a.dy})"`:""}><title>${esc(d.entries[i].label)}: ${fmtMoney(d.entries[i].value)} (${d.pcts[i]}%)</title></path>`).join("");
+  const cards=d.entries.map((v,i)=>`<button type="button" class="outcome-card ${v.key===selKey?"sel":""}" data-act="donutSeg" data-id="${v.key}"><span class="hbar-name"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:${v.color};margin-right:6px"></span>${esc(v.label)}</span><span class="hbar-val">${fmtMoney(v.value)} · ${d.pcts[i]}%</span><span class="hbar-track"><span class="hbar-fill" style="width:${d.pcts[i]}%"></span></span></button>`).join("");
+  wrap.innerHTML = `<div class="donut-stack"><div class="donut-box"><svg viewBox="-6 -6 124 124" role="img" aria-label="Money saved by tracker">${segs}</svg><div class="donut-center">${center}</div></div><div class="donut-grid"><div class="outcome-total"><b>${fmtMoney(d.total)}</b> saved across ${d.entries.length} tracker${d.entries.length===1?"":"s"} · tap a slice or bar to pin it</div>${cards}</div><p class="hint">${selEntry ? `${esc(selEntry.label)}: ${fmtMoney(selEntry.value)} saved (${d.pcts[d.entries.indexOf(selEntry)]}% of your total). Tap again to release.` : "Slices show each tracker's share of the money you have not spent."}</p></div>`;
+}
+function renderDashRecent(){
+  const wrap=$("#dashRecent");
+  const items=[];
+  S.pledges.forEach(p=>{ const t=trackerById(p.trackerId); items.push({ ts:Date.parse(p.date+"T12:00:00"), html:`<span class="record-head"><b>Pledge</b><span class="badge good">${esc(t?t.name:"Tracker removed")}</span><span class="badge">${fmtDate(p.date)}</span></span>` }); });
+  S.urges.forEach(u=>{ const t=u.trackerId?trackerById(u.trackerId):null; items.push({ ts:u.ts, html:`<span class="record-head"><b>Urge ${u.intensity}/10</b><span class="badge ${u.intensity>=8?"severe":u.intensity>=5?"high":"warn"}">${esc(u.trigger||"Trigger not recorded")}</span><span class="badge">${fmtDate(tsToDateInput(u.ts))} · ${fmtTime(u.ts)}</span>${t?`<span class="badge">${esc(t.name)}</span>`:""}</span>${u.helped?`<br><span class="hint">What helped: ${esc(u.helped)}</span>`:""}${u.note?`<br>${esc(u.note)}`:""}` }); });
+  S.resets.forEach(r=>{ const t=trackerById(r.trackerId); items.push({ ts:r.ts, html:`<span class="record-head"><b>Reset recorded</b><span class="badge">${esc(t?t.name:"Tracker removed")}</span><span class="badge">${fmtDate(tsToDateInput(r.ts))} · ${fmtTime(r.ts)}</span></span>${r.note?`<br>${esc(r.note)}`:""}` }); });
+  items.sort((a,b)=>b.ts-a.ts);
+  wrap.innerHTML = items.length ? items.slice(0,8).map(i=>`<div class="record">${i.html}</div>`).join("") : `<p class="hint">Nothing logged yet. A pledge, urge or reset will show up here.</p>`;
+}
+function renderDashboard(){ renderDashTiles(); renderDashTrackers(); renderDashPledge(); renderDashGauge(); renderDashDonut(); renderDashRecent(); }
+</script>
+<script>
+"use strict";
+/* ---------- trackers view ---------- */
+function fillTrackerSelect(selEl, includeAny, anyLabel){
+  const cur=selEl.value;
+  const opts = includeAny ? `<option value="">${anyLabel||"All trackers"}</option>` : "";
+  selEl.innerHTML = opts + S.trackers.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join("");
+  if([...selEl.options].some(o=>o.value===cur)) selEl.value=cur;
+}
+function renderTrackerList(){
+  const wrap=$("#trackerList");
+  wrap.innerHTML = S.trackers.length ? [...S.trackers].sort((a,b)=>a.createdAt-b.createdAt).map(t=>{
+    const p=streakParts(t);
+    return `<button type="button" class="record clickable ${sel.detailTracker===t.id?"sel":""}" data-act="detail" data-id="${t.id}"><span class="record-head"><b>${esc(t.name)}</b><span class="badge good">${p.days} days sober</span><span class="badge">${resetsFor(t.id).length} reset${resetsFor(t.id).length===1?"":"s"}</span></span><br><span class="hint">Quit ${fmtDate(tsToDateInput(t.quitAt))} · ${fmtMoney(moneySaved(t))} saved · ${pledgesFor(t.id).length} pledges</span></button>`;
+  }).join("") : `<div class="empty-note">No trackers yet — use the form to add your first one.</div>`;
+}
+function renderTrackerDetail(){
+  const wrap=$("#trackerDetail");
+  const t=sel.detailTracker?trackerById(sel.detailTracker):null;
+  if(!t){ wrap.innerHTML = `<p class="hint">Pick a tracker above to see milestones, pledges and its reset history.</p>`; return; }
+  const p=streakParts(t);
+  const st=milestoneStatus(p.days, tsToDateInput(p.start));
+  const rs=resetsFor(t.id);
+  const earnedHtml = st.earned.length ? [...st.earned].reverse().slice(0,10).map(m=>{
+    const reached=m.date;
+    return `<div class="mile earned"><span class="m-ic">✓</span><span class="m-name">${esc(m.label)}</span><span class="m-when">${fmtDate(reached)}</span></div>`;
+  }).join("") : `<p class="hint">Your first milestone — 24 hours — is on its way.</p>`;
+  const upcomingHtml = st.upcoming.map((m,i)=>{
+    const when=m.date;
+    return `<div class="mile ${i===0?"next":""}"><span class="m-ic">${i===0?"→":"·"}</span><span class="m-name">${esc(m.label)}</span><span class="m-when">${i===0?`in ${m.days-p.days} day${m.days-p.days===1?"":"s"} · `:""}${fmtDate(when)}</span></div>`;
+  }).join("");
+  const resetsHtml = rs.length ? [...rs].reverse().map(r=>`<div class="record"><span class="record-head"><b>${fmtDate(tsToDateInput(r.ts))} · ${fmtTime(r.ts)}</b></span>${r.note?`<br>${esc(r.note)}`:""}<div class="btnrow"><button class="btn small danger" data-act="delReset" data-id="${r.id}">Delete reset</button></div></div>`).join("") : `<p class="hint">No resets recorded for this tracker.</p>`;
+  wrap.innerHTML = `<h3 style="margin-top:0">${esc(t.name)}</h3>
+    <dl class="kv"><dt>Quit</dt><dd>${fmtDate(tsToDateInput(t.quitAt))} at ${fmtTime(t.quitAt)}</dd>
+    <dt>Counter started</dt><dd>${fmtDate(tsToDateInput(p.start))}${rs.length?" (after latest reset)":""}</dd>
+    <dt>Current streak</dt><dd>${p.days} days, ${p.hours}h ${p.mins}m</dd>
+    <dt>Longest streak</dt><dd>${longestStreakDays(t)} days</dd>
+    <dt>Saved</dt><dd>${fmtMoney(moneySaved(t))} · ${fmtDur(timeSavedMins(t))} of time</dd>
+    <dt>Pledges</dt><dd>${pledgesFor(t.id).length} total · ${pledgeStreak(t.id)} day streak</dd></dl>
+    ${t.reason?`<p style="margin-top:10px">“${esc(t.reason)}”</p>`:""}
+    <div class="btnrow"><button class="btn small" data-act="editTracker" data-id="${t.id}">Edit tracker</button><button class="btn small" data-act="logUrgeFor" data-id="${t.id}">Log urge</button><button class="btn small danger" data-act="delTracker" data-id="${t.id}">Delete tracker</button></div>
+    <h3>Milestones</h3><div class="mile-ladder">${upcomingHtml}${earnedHtml}</div>
+    <h3>Reset history</h3>${resetsHtml}`;
+}
+function renderTrackersView(){
+  renderTrackerList();
+  renderTrackerDetail();
+  fillTrackerSelect($("#rTracker"), false);
+}
+/* ---------- log view ---------- */
+function renderRecentUrges(){
+  const wrap=$("#recentUrges");
+  const list=[...S.urges].sort((a,b)=>b.ts-a.ts).slice(0,10);
+  wrap.innerHTML = list.length ? list.map(u=>{
+    const t=u.trackerId?trackerById(u.trackerId):null;
+    return `<button type="button" class="record clickable ${sel.historyItem==="urge:"+u.id?"sel":""}" data-act="editUrge" data-id="${u.id}"><span class="record-head"><b>${fmtDate(tsToDateInput(u.ts))} · ${fmtTime(u.ts)}</b><span class="badge ${u.intensity>=8?"severe":u.intensity>=5?"high":"warn"}">${u.intensity}/10</span>${t?`<span class="badge">${esc(t.name)}</span>`:""}</span><br><span class="hint">${esc(u.trigger||"Trigger not recorded")}${u.helped?` · Helped: ${esc(u.helped)}`:""}</span>${u.note?`<br>${esc(u.note)}`:""}</button>`;
+  }).join("") : `<p class="hint">No urges logged yet. When one hits, noting it here takes ten seconds.</p>`;
+}
+function renderLogView(){
+  fillTrackerSelect($("#uTracker"), true, "No specific tracker");
+  renderRecentUrges();
+}
+/* ---------- history ---------- */
+function renderHistory(){
+  fillTrackerSelect($("#hTracker"), true, "All trackers");
+  const q=($("#hSearch").value||"").toLowerCase();
+  const tf=$("#hTracker").value, type=$("#hType").value;
+  const items=[];
+  S.pledges.forEach(p=>{ const t=trackerById(p.trackerId); const name=t?t.name:"Tracker removed"; items.push({ kind:"pledge", id:p.id, ts:Date.parse(p.date+"T12:00:00"), trackerId:p.trackerId, text:`pledge ${name}`, html:`<span class="record-head"><b>Pledge</b><span class="badge good">${esc(name)}</span><span class="badge">${fmtDate(p.date)}</span></span><div class="btnrow"><button class="btn small danger" data-act="delPledge" data-id="${p.id}">Delete</button></div>` }); });
+  S.urges.forEach(u=>{ const t=u.trackerId?trackerById(u.trackerId):null; const name=t?t.name:""; items.push({ kind:"urge", id:u.id, ts:u.ts, trackerId:u.trackerId||"", text:`urge ${u.trigger} ${u.helped} ${u.note} ${name}`.toLowerCase(), html:`<span class="record-head"><b>Urge ${u.intensity}/10</b><span class="badge ${u.intensity>=8?"severe":u.intensity>=5?"high":"warn"}">${esc(u.trigger||"Trigger not recorded")}</span><span class="badge">${fmtDate(tsToDateInput(u.ts))} · ${fmtTime(u.ts)}</span>${t?`<span class="badge">${esc(t.name)}</span>`:""}</span>${u.helped?`<br><span class="hint">What helped: ${esc(u.helped)}</span>`:""}${u.note?`<br>${esc(u.note)}`:""}<div class="btnrow"><button class="btn small" data-act="editUrge" data-id="${u.id}">Edit</button><button class="btn small danger" data-act="delUrge" data-id="${u.id}">Delete</button></div>` }); });
+  S.resets.forEach(r=>{ const t=trackerById(r.trackerId); const name=t?t.name:"Tracker removed"; items.push({ kind:"reset", id:r.id, ts:r.ts, trackerId:r.trackerId, text:`reset ${name} ${r.note}`.toLowerCase(), html:`<span class="record-head"><b>Reset recorded</b><span class="badge">${esc(name)}</span><span class="badge">${fmtDate(tsToDateInput(r.ts))} · ${fmtTime(r.ts)}</span></span>${r.note?`<br>${esc(r.note)}`:""}<div class="btnrow"><button class="btn small danger" data-act="delResetHist" data-id="${r.id}">Delete</button></div>` }); });
+  const filtered=items.filter(i=>(type==="all"||i.kind===type) && (!tf||i.trackerId===tf) && (!q||i.text.includes(q))).sort((a,b)=>b.ts-a.ts);
+  $("#historyList").innerHTML = filtered.length ? filtered.map(i=>`<div class="record">${i.html}</div>`).join("") : `<div class="empty-note">Nothing matches. Logged pledges, urges and resets will appear here.</div>`;
+}
+/* ---------- charts ---------- */
+function renderUrgeTrend(){
+  const days=sel.trendDays;
+  $$("#trendToggle .chip").forEach(c=>c.classList.toggle("on", Number(c.dataset.days)===days));
+  const byDay={};
+  S.urges.forEach(u=>{ const d=tsToDateInput(u.ts); (byDay[d]=byDay[d]||[]).push(u); });
+  const rows=[];
+  for(let i=days-1;i>=0;i--){
+    const d=addDays(localToday(),-i); const list=byDay[d]||[];
+    rows.push({ date:d, count:list.length, max:list.reduce((m,u)=>Math.max(m,u.intensity),0) });
+  }
+  $("#urgeTrend").innerHTML = rows.map((d,i)=>{
+    const label=(days===30 ? i%5===0 : i%15===0) ? fmtShort(d.date) : "";
+    const bar = d.count===0 ? `<span class="trend-bar zero"></span>` : `<span class="trend-bar" style="height:${Math.max(8, d.max/10*158)}px"></span>`;
+    return `<button type="button" class="trend-col ${sel.trendDay===d.date?"sel":""}" data-act="trendDay" data-id="${d.date}" aria-label="${fmtDate(d.date)}: ${d.count} urges, strongest ${d.max} of 10"><span class="trend-val">${d.count?d.max:"&nbsp;"}</span>${bar}<span class="trend-lab">${label}</span></button>`;
+  }).join("");
+  const selDay=rows.find(r=>r.date===sel.trendDay);
+  $("#trendDetail").innerHTML = selDay ? (selDay.count ? `<b>${fmtDate(selDay.date)}</b> — ${selDay.count} urge${selDay.count===1?"":"s"} logged, strongest ${selDay.max}/10. Tap again to release.` : `<b>${fmtDate(selDay.date)}</b> — no urges logged. A quiet day. Tap again to release.`) : "Days with no urges logged stay empty — an empty day is a quiet day, not a failure. Tap any day to pin it.";
+}
+function renderTriggerBars(){
+  const counts={};
+  S.urges.forEach(u=>{ const k=u.trigger||"Not recorded"; counts[k]=(counts[k]||0)+1; });
+  const rows=Object.entries(counts).map(([name,count])=>({name,count})).sort((a,b)=>b.count-a.count).slice(0,10);
+  const max=rows.reduce((m,r)=>Math.max(m,r.count),0)||1;
+  $("#triggerBars").innerHTML = rows.length ? rows.map(r=>`<button type="button" class="hbar ${sel.trigger===r.name?"sel":""}" data-act="triggerBar" data-id="${esc(r.name)}"><span class="hbar-name">${esc(r.name)}</span><span class="hbar-track"><span class="hbar-fill" style="width:${Math.round(r.count/max*100)}%"></span></span><span class="hbar-val">${r.count} urge${r.count===1?"":"s"}</span></button>`).join("") : `<p class="hint">Log a few urges and your most common triggers will rank here.</p>`;
+  const sRow=rows.find(r=>r.name===sel.trigger);
+  $("#triggerDetail").innerHTML = sRow ? `<b>${esc(sRow.name)}</b> shows up in ${sRow.count} of ${S.urges.length} logged urges. Tap again to release.` : "Tap any bar to pin its numbers here.";
+}
+function renderPledgeHeat(){
+  const pledgedDays={};
+  S.pledges.forEach(p=>{ (pledgedDays[p.date]=pledgedDays[p.date]||[]).push(p); });
+  const cells=[];
+  for(let i=89;i>=0;i--){
+    const d=addDays(localToday(),-i);
+    const n=(pledgedDays[d]||[]).length;
+    cells.push(`<button type="button" class="heat-cell ${n?"yes":""} ${i===0?"today":""}" data-act="heatDay" data-id="${d}" aria-label="${fmtDate(d)}: ${n} pledges">${new Date(d+"T00:00:00").getDate()}</button>`);
+  }
+  $("#pledgeHeat").innerHTML = cells.join("");
+  pledgedMap = pledgedDays;
+}
+function renderMoneyTrend(){
+  const now=new Date(); const rows=[];
+  for(let i=5;i>=0;i--){
+    const d=new Date(now.getFullYear(), now.getMonth()-i, 1);
+    const key=`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+    const mStart=d.getTime(), mEnd=new Date(d.getFullYear(), d.getMonth()+1, 1).getTime();
+    let total=0;
+    S.trackers.forEach(t=>{ const from=Math.max(effectiveStart(t), mStart), to=Math.min(Date.now(), mEnd); if(to>from) total += t.dailyCost*((to-from)/864e5); });
+    rows.push({ key, label:d.toLocaleDateString(undefined,{month:"short"}), total });
+  }
+  const max=rows.reduce((m,r)=>Math.max(m,r.total),0)||1;
+  $("#moneyTrend").innerHTML = rows.map(r=>`<button type="button" class="trend-col ${sel.moneyMonth===r.key?"sel":""}" data-act="moneyMonth" data-id="${r.key}" aria-label="${r.label}: ${fmtMoney(r.total)} saved"><span class="trend-val">${r.total>0?fmtMoney(r.total):"&nbsp;"}</span><span class="trend-bar" style="height:${Math.max(4, r.total/max*158)}px"></span><span class="trend-lab">${r.label}</span></button>`).join("");
+  const sRow=rows.find(r=>r.key===sel.moneyMonth);
+  $("#moneyDetail").innerHTML = sRow ? `<b>${sRow.label}</b> — ${fmtMoney(sRow.total)} not spent during your current streaks. Tap again to release.` : "Money saved is estimated from the daily cost you set on each tracker.";
+}
+function renderCharts(){ renderUrgeTrend(); renderTriggerBars(); renderPledgeHeat(); renderMoneyTrend(); }
+/* ---------- stats ---------- */
+function renderStats(){
+  const now=Date.now();
+  const totalDays=S.trackers.reduce((a,t)=>a+streakParts(t,now).days,0);
+  const longest=S.trackers.reduce((m,t)=>Math.max(m, longestStreakDays(t)),0);
+  const totalMoney=S.trackers.reduce((a,t)=>a+moneySaved(t,now),0);
+  const totalMins=S.trackers.reduce((a,t)=>a+timeSavedMins(t,now),0);
+  const trigCounts={}; S.urges.forEach(u=>{ const k=u.trigger||"Not recorded"; trigCounts[k]=(trigCounts[k]||0)+1; });
+  const topTrigger=Object.entries(trigCounts).sort((a,b)=>b[1]-a[1])[0];
+  $("#statsTiles").innerHTML = [
+    statTile(totalDays.toLocaleString(), "Clean days (current streaks)", "good"),
+    statTile(longest.toLocaleString(), "Longest streak (days)"),
+    statTile(fmtMoney(totalMoney), "Money saved"),
+    statTile(fmtDur(totalMins), "Time saved"),
+    statTile(S.pledges.length.toLocaleString(), "Total pledges"),
+    statTile(S.urges.length.toLocaleString(), "Urges logged"),
+    statTile(S.resets.length.toLocaleString(), "Resets recorded"),
+    statTile(topTrigger?esc(topTrigger[0]):"—", "Most common trigger")
+  ].join("");
+  $("#statsTable").innerHTML = S.trackers.length ? `<table class="list"><thead><tr><th>Tracker</th><th>Current</th><th>Longest</th><th>Pledges</th><th>Urges</th><th>Saved</th></tr></thead><tbody>${S.trackers.map(t=>`<tr><td>${esc(t.name)}</td><td>${streakParts(t,now).days}d</td><td>${longestStreakDays(t)}d</td><td>${pledgesFor(t.id).length} (${pledgeStreak(t.id)} streak)</td><td>${S.urges.filter(u=>u.trackerId===t.id).length}</td><td>${fmtMoney(moneySaved(t,now))}</td></tr>`).join("")}</tbody></table>` : `<p class="hint">No trackers yet.</p>`;
+  const wd=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; const wc=[0,0,0,0,0,0,0];
+  S.pledges.forEach(p=>{ const d=new Date(p.date+"T00:00:00"); if(!Number.isNaN(d.getTime())) wc[(d.getDay()+6)%7]++; });
+  const wmax=Math.max(...wc,1);
+  $("#weekdayBars").innerHTML = wd.map((name,i)=>`<button type="button" class="hbar ${sel.weekday===name?"sel":""}" data-act="weekdayBar" data-id="${name}"><span class="hbar-name">${name}</span><span class="hbar-track"><span class="hbar-fill" style="width:${Math.round(wc[i]/wmax*100)}%"></span></span><span class="hbar-val">${wc[i]}</span></button>`).join("");
+  const selW = sel.weekday ? wd.indexOf(sel.weekday) : -1;
+  $("#weekdayDetail").innerHTML = selW>=0 ? `<b>${wd[selW]}days</b> carry ${wc[selW]} of your ${S.pledges.length} pledges. Tap again to release.` : "Every weekday bar counts pledges across all trackers.";
+  /* what-helped donut */
+  const wrap=$("#helpedDonut");
+  const counts={};
+  S.urges.forEach(u=>{ if(u.helped) counts[u.helped]=(counts[u.helped]||0)+1; });
+  const entries=Object.entries(counts).map(([label,value])=>({label,value})).sort((a,b)=>b.value-a.value);
+  const total=entries.reduce((a,v)=>a+v.value,0);
+  if(!total){ wrap.innerHTML = `<div class="empty-note">When you log what helped you through an urge, it charts here.</div>`; return; }
+  const raw=entries.map(v=>v.value/total*100); const base=raw.map(Math.floor);
+  let rem=100-base.reduce((a,b)=>a+b,0); const order=raw.map((r,i)=>[r-base[i],i]).sort((a,b)=>b[0]-a[0]);
+  for(let k=0;k<rem;k++) base[order[k%order.length][1]]++;
+  const colored=entries.map((v,i)=>({...v, color:DONUT_COLORS[i%DONUT_COLORS.length], pct:base[i]}));
+  const R=49, r=32, cx=56, cy=56; let ang=-90;
+  const arcs=colored.map((v)=>{
+    const frac=v.value/total; const a0=ang; const a1=ang+(colored.length===1?359.99:frac*360); ang+=frac*360;
+    const large=(a1-a0)>180?1:0;
+    const [ox0,oy0]=polar(cx,cy,R,a0), [ox1,oy1]=polar(cx,cy,R,a1), [ix1,iy1]=polar(cx,cy,r,a1), [ix0,iy0]=polar(cx,cy,r,a0);
+    const mid=(a0+a1)/2; const [dx,dy]=polar(0,0,3.6,mid);
+    return { key:v.label, path:`M ${ox0.toFixed(2)} ${oy0.toFixed(2)} A ${R} ${R} 0 ${large} 1 ${ox1.toFixed(2)} ${oy1.toFixed(2)} L ${ix1.toFixed(2)} ${iy1.toFixed(2)} A ${r} ${r} 0 ${large} 0 ${ix0.toFixed(2)} ${iy0.toFixed(2)} Z`, dx:dx.toFixed(2), dy:dy.toFixed(2) };
+  });
+  const selH=colored.find(v=>v.label===sel.helped);
+  const center=selH?`<b>${selH.value}</b><span>${esc(selH.label)}</span>`:`<b>${total}</b><span>urges with a strategy</span>`;
+  const segs=arcs.map((a,i)=>`<path class="donut-seg ${a.key===sel.helped?"sel":""}" data-act="helpedSeg" data-id="${esc(a.key)}" d="${a.path}" fill="${colored[i].color}" ${a.key===sel.helped?`transform="translate(${a.dx} ${a.dy})"`:""}><title>${esc(colored[i].label)}: ${colored[i].value} (${colored[i].pct}%)</title></path>`).join("");
+  const cards=colored.map(v=>`<button type="button" class="outcome-card ${v.label===sel.helped?"sel":""}" data-act="helpedSeg" data-id="${esc(v.label)}"><span class="hbar-name"><span style="display:inline-block;width:11px;height:11px;border-radius:3px;background:${v.color};margin-right:6px"></span>${esc(v.label)}</span><span class="hbar-val">${v.value} · ${v.pct}%</span><span class="hbar-track"><span class="hbar-fill" style="width:${v.pct}%"></span></span></button>`).join("");
+  wrap.innerHTML = `<div class="donut-stack"><div class="donut-box"><svg viewBox="-6 -6 124 124" role="img" aria-label="Urges by what helped">${segs}</svg><div class="donut-center">${center}</div></div><div class="donut-grid"><div class="outcome-total"><b>${total}</b> of ${S.urges.length} logged urges have a strategy recorded</div>${cards}</div></div>`;
+}
+/* ---------- report ---------- */
+function reportHTML(forPrint){
+  const now=Date.now();
+  const totalDays=S.trackers.reduce((a,t)=>a+streakParts(t,now).days,0);
+  const totalMoney=S.trackers.reduce((a,t)=>a+moneySaved(t,now),0);
+  const totalMins=S.trackers.reduce((a,t)=>a+timeSavedMins(t,now),0);
+  const rows=S.trackers.map(t=>{
+    const p=streakParts(t,now); const st=milestoneStatus(p.days, tsToDateInput(p.start));
+    return `<tr><td>${esc(t.name)}</td><td>${p.days} days (${p.hours}h ${p.mins}m)</td><td>${fmtDate(tsToDateInput(p.start))}</td><td>${st.earned.length?esc(st.earned[st.earned.length-1].label):"—"}</td><td>${st.next?`${esc(st.next.label)} in ${st.next.days-p.days}d`:"All passed"}</td><td>${fmtMoney(moneySaved(t,now))}</td></tr>`;
+  }).join("");
+  const mileRows=S.trackers.map(t=>{
+    const p=streakParts(t,now); const st=milestoneStatus(p.days, tsToDateInput(p.start));
+    return `<tr><td>${esc(t.name)}</td><td>${st.earned.length? st.earned.map(m=>`${esc(m.label)} (${fmtDate(m.date)})`).join(", ") : "None yet"}</td></tr>`;
+  }).join("");
+  return `<h1>${esc(APP_NAME)} — Milestone &amp; Progress Report</h1><p><b>Generated:</b> ${fmtDate(localToday())}</p>
+  <h2>Summary</h2><table><tbody>
+  <tr><td>Trackers</td><td>${S.trackers.length}</td></tr>
+  <tr><td>Clean days across trackers (current streaks)</td><td>${totalDays.toLocaleString()}</td></tr>
+  <tr><td>Money saved</td><td>${fmtMoney(totalMoney)}</td></tr>
+  <tr><td>Time saved</td><td>${fmtDur(totalMins)}</td></tr>
+  <tr><td>Total pledges</td><td>${S.pledges.length}</td></tr>
+  <tr><td>Urges logged</td><td>${S.urges.length}</td></tr>
+  <tr><td>Resets recorded</td><td>${S.resets.length}</td></tr></tbody></table>
+  <h2>Counters</h2>${S.trackers.length?`<table><thead><tr><th>Tracker</th><th>Current streak</th><th>Counting from</th><th>Latest milestone</th><th>Next milestone</th><th>Saved</th></tr></thead><tbody>${rows}</tbody></table>`:`<p>No trackers yet.</p>`}
+  <h2>Milestones earned</h2>${S.trackers.length?`<table><thead><tr><th>Tracker</th><th>Milestones (date reached)</th></tr></thead><tbody>${mileRows}</tbody></table>`:`<p>No milestones yet.</p>`}
+  <p class="foot">This report summarizes records entered by the user in ${esc(APP_NAME)}, a sobriety counter and diary tool. It is not medical advice and does not diagnose, treat, or provide detox or withdrawal guidance. If you are in crisis, call or text 988 (US Suicide and Crisis Lifeline).</p>`;
+}
+function renderReport(){ $("#reportPreview").innerHTML=reportHTML(false); $("#printArea").innerHTML=reportHTML(true); }
+function renderAll(){ renderDashboard(); renderTrackersView(); renderLogView(); renderHistory(); renderCharts(); renderStats(); renderReport(); setSampleUI(); }
+</script>
+<script>
+"use strict";
+/* ---------- forms ---------- */
+function buildRadioChips(wrapId, name, options, checkedVal){
+  const wrap=document.getElementById(wrapId);
+  wrap.innerHTML = options.map(o=>`<label class="radio-chip"><input type="radio" name="${name}" value="${esc(o)}"${o===checkedVal?" checked":""}>${esc(o)}</label>`).join("") +
+    `<label class="radio-chip"><input type="radio" name="${name}" value=""${!checkedVal?" checked":""}>None</label>`;
+}
+function chipValue(name){ const el=document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ""; }
+function setChip(name, value){
+  $$(`input[name="${name}"]`).forEach(el=>{ el.checked = el.value===value; });
+  if(!document.querySelector(`input[name="${name}"]:checked`)){ const none=document.querySelector(`input[name="${name}"][value=""]`); if(none) none.checked=true; }
+}
+function buildForms(){
+  $("#presetChips").innerHTML = PRESETS.map(p=>`<label class="radio-chip"><input type="radio" name="preset" value="${esc(p)}">${esc(p)}</label>`).join("") +
+    `<label class="radio-chip"><input type="radio" name="preset" value="Custom" checked>Custom</label>`;
+  $$('input[name="preset"]').forEach(el=>el.addEventListener("change",()=>{ if(el.checked && el.value!=="Custom"){ $("#fName").value=el.value; beep(700,.05); } }));
+  buildRadioChips("uTriggers","uTrigger",TRIGGERS,"");
+  buildRadioChips("uHelpeds","uHelped",HELPEDS,"");
+  $("#fQuitDate").value=localToday(); $("#fQuitTime").value=tsToTimeInput(Date.now());
+  $("#rDate").value=localToday(); $("#rTime").value=tsToTimeInput(Date.now());
+  $("#uDate").value=localToday(); $("#uTime").value=tsToTimeInput(Date.now());
+  $("#uIntensity").addEventListener("input",e=>{ $("#uIntensityVal").textContent=e.target.value; });
+  $("#uMinus").addEventListener("click",()=>{ const el=$("#uIntensity"); el.value=Math.max(1, Number(el.value)-1); $("#uIntensityVal").textContent=el.value; beep(420,.05); });
+  $("#uPlus").addEventListener("click",()=>{ const el=$("#uIntensity"); el.value=Math.min(10, Number(el.value)+1); $("#uIntensityVal").textContent=el.value; beep(760,.05); });
+}
+function clearTrackerForm(){
+  $("#fId").value=""; $("#fName").value=""; $("#fCost").value=""; $("#fMins").value=""; $("#fReason").value="";
+  $("#fQuitDate").value=localToday(); $("#fQuitTime").value="00:00";
+  setChip("preset","Custom");
+  $("#trackerFormTitle").textContent="Add a tracker";
+}
+function saveTracker(){
+  const name=$("#fName").value.trim();
+  if(!name){ toast("Give the tracker a name first."); thud(); return; }
+  const date=$("#fQuitDate").value; if(!date){ toast("Pick the quit date."); thud(); return; }
+  const quitAt=toTs(date, $("#fQuitTime").value||"00:00");
+  if(quitAt > Date.now()+60000){ toast("That quit date is in the future — pick the day you quit, or today."); thud(); return; }
+  const id=$("#fId").value;
+  const rec={ name, quitAt, dailyCost:num($("#fCost").value), dailyMins:Math.round(num($("#fMins").value)), reason:$("#fReason").value.trim() };
+  if(id && trackerById(id)){
+    Object.assign(trackerById(id), rec);
+    toast(`Tracker “${name}” updated.`);
+  } else {
+    const t={ id:uid("trk"), createdAt:Date.now(), ...rec };
+    S.trackers.push(t);
+    sel.detailTracker=t.id;
+    toast(`Tracker “${name}” started. Day one counts.`);
+  }
+  sampleSaveWarning();
+  save(); clearTrackerForm(); renderAll(); chime();
+}
+function editTracker(id){
+  const t=trackerById(id); if(!t) return;
+  $("#fId").value=t.id; $("#fName").value=t.name;
+  $("#fQuitDate").value=tsToDateInput(t.quitAt); $("#fQuitTime").value=tsToTimeInput(t.quitAt);
+  $("#fCost").value=t.dailyCost||""; $("#fMins").value=t.dailyMins||""; $("#fReason").value=t.reason||"";
+  setChip("preset", PRESETS.includes(t.name) ? t.name : "Custom");
+  $("#trackerFormTitle").textContent="Edit tracker";
+  switchView("Trackers");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function clearUrgeForm(){
+  $("#uId").value=""; $("#uNote").value=""; $("#uTriggerCustom").value=""; $("#uHelpedCustom").value="";
+  $("#uDate").value=localToday(); $("#uTime").value=tsToTimeInput(Date.now());
+  $("#uIntensity").value=5; $("#uIntensityVal").textContent="5";
+  setChip("uTrigger",""); setChip("uHelped","");
+}
+function saveUrge(){
+  const date=$("#uDate").value; if(!date){ toast("Pick the date of the urge."); thud(); return; }
+  const ts=toTs(date, $("#uTime").value||"00:00");
+  if(ts > Date.now()+60000){ toast("That urge time is in the future — log it once it has happened."); thud(); return; }
+  const trigger=($("#uTriggerCustom").value.trim() || chipValue("uTrigger") || "").slice(0,60);
+  const helped=($("#uHelpedCustom").value.trim() || chipValue("uHelped") || "").slice(0,60);
+  const rec={ trackerId:$("#uTracker").value||null, ts, intensity:Math.round(num($("#uIntensity").value,5)), trigger, helped, note:$("#uNote").value.trim() };
+  const id=$("#uId").value;
+  if(id){ const u=S.urges.find(x=>x.id===id); if(u) Object.assign(u, rec); toast("Urge updated."); }
+  else { S.urges.push({ id:uid("urg"), ...rec }); toast("Urge logged."); }
+  sampleSaveWarning();
+  save(); clearUrgeForm(); renderAll(); chime();
+}
+function editUrge(id){
+  const u=S.urges.find(x=>x.id===id); if(!u) return;
+  renderLogView();
+  if(u.trackerId) $("#uTracker").value=u.trackerId;
+  $("#uId").value=u.id;
+  $("#uDate").value=tsToDateInput(u.ts); $("#uTime").value=tsToTimeInput(u.ts);
+  $("#uIntensity").value=u.intensity; $("#uIntensityVal").textContent=u.intensity;
+  if(u.trigger && !TRIGGERS.includes(u.trigger)){ $("#uTriggerCustom").value=u.trigger; setChip("uTrigger",""); } else { $("#uTriggerCustom").value=""; setChip("uTrigger", u.trigger||""); }
+  if(u.helped && !HELPEDS.includes(u.helped)){ $("#uHelpedCustom").value=u.helped; setChip("uHelped",""); } else { $("#uHelpedCustom").value=""; setChip("uHelped", u.helped||""); }
+  $("#uNote").value=u.note||"";
+  const selTracker = u.trackerId && trackerById(u.trackerId) ? u.trackerId : "";
+  fillTrackerSelect($("#uTracker"), true, "No specific tracker");
+  if(selTracker) $("#uTracker").value=selTracker;
+  switchView("Log");
+}
+function saveReset(){
+  const tid=$("#rTracker").value;
+  if(!tid){ toast("Add a tracker first, then record a reset against it."); thud(); return; }
+  const date=$("#rDate").value; if(!date){ toast("Pick the reset date."); thud(); return; }
+  const t=trackerById(tid);
+  if(!t){ toast("That tracker is no longer there — pick another one."); thud(); return; }
+  const ts=toTs(date, $("#rTime").value||"00:00");
+  if(ts > Date.now()+60000){ toast("That reset date is in the future — record it once it has happened."); thud(); return; }
+  S.resets.push({ id:uid("rst"), trackerId:tid, ts, note:$("#rNote").value.trim() });
+  $("#rNote").value="";
+  sampleSaveWarning();
+  save(); renderAll();
+  toast(`Reset recorded for ${t?t.name:"tracker"}. The counter restarts — the history stays, and so does everything you learned.`);
+  chime();
+}
+/* ---------- sample data ---------- */
+function sampleData(){
+  const rand=mulberry32(20261009);
+  const pick=arr=>arr[Math.floor(rand()*arr.length)];
+  const out=blankData();
+  out.settings={...S.settings};
+  const now=Date.now();
+  const mkTracker=(name, daysAgo, time, cost, mins, reason)=>({ id:uid("sample_trk"), name, quitAt:toTs(addDays(localToday(),-daysAgo), time), dailyCost:cost, dailyMins:mins, reason, createdAt:now-daysAgo*864e5 });
+  const alcohol=mkTracker("Alcohol", 128, "21:30", 14, 90, "For my health, my family, and mornings I can be proud of.");
+  const vaping=mkTracker("Vaping", 62, "08:15", 7.5, 30, "Tired of planning my day around it.");
+  const social=mkTracker("Social media", 19, "22:05", 0, 150, "I want my evenings back for reading and people.");
+  out.trackers=[alcohol, vaping, social];
+  out.resets.push({ id:uid("sample_rst"), trackerId:vaping.id, ts:toTs(addDays(localToday(),-45), "13:20"), note:"Bought one at a gas station on a hard day. Threw it away the same evening." });
+  const pledgePlan=[[alcohol, 90, .88],[vaping, 45, .8],[social, 19, .68]];
+  pledgePlan.forEach(([t, span, rate])=>{
+    for(let i=span;i>=0;i--){ if(rand()<rate || i===0) out.pledges.push({ id:uid("sample_plg"), trackerId:t.id, date:addDays(localToday(),-i) }); }
+  });
+  const trigPool=["Stress","Social event","Boredom","Habit / routine cue","Tired","Celebration","Work pressure","Loneliness","Driving home from work"];
+  const helpPool=["Went for a walk","Called or texted someone","Drank water / ate something","Deep breathing","Left the situation","Waited it out","Exercise"];
+  for(let i=89;i>=0;i--){
+    const n = rand()<.42 ? (rand()<.2?2:1) : 0;
+    for(let k=0;k<n;k++){
+      const t = i>45 ? pick([alcohol, vaping]) : pick([alcohol, vaping, social]);
+      const base = t===alcohol ? 7.5 : t===vaping ? 6.5 : 5;
+      const fade = t===alcohol ? Math.min(3, i/40) : Math.min(2, i/50);
+      const intensity=Math.max(2, Math.min(10, Math.round(base - fade + (rand()*3-1.5))));
+      out.urges.push({ id:uid("sample_urg"), trackerId:t.id, ts:toTs(addDays(localToday(),-i), pick(["07:40","12:25","17:50","20:15","21:45"])), intensity, trigger:pick(trigPool), helped:pick(helpPool), note: intensity>=8 ? "Strong one. Used my plan and it passed." : "" });
+    }
+  }
+  out.sampling=true; out.snapshot=null;
+  return out;
+}
+function toggleSample(){
+  if(S.sampling){
+    if(!S.snapshot || typeof S.snapshot !== "object"){
+      toast("Your saved records could not be found, so nothing was changed.");
+      thud(); setSampleUI(); return;
+    }
+    const keepSettings={...S.settings};
+    S=JSON.parse(JSON.stringify(S.snapshot));
+    S.settings=keepSettings;
+    S.sampling=false; S.snapshot=null;
+    save(); renderAll(); applyTheme(); setSoundUI();
+    toast("Sample data off — your real data is back exactly as you left it.");
+  } else {
+    const snap=JSON.parse(JSON.stringify(S));
+    snap.sampling=false; snap.snapshot=null;
+    const sample=sampleData();
+    sample.snapshot=snap;
+    S=sample;
+    save(); renderAll();
+    toast("Sample data on — tap the flask again to return to your real data.");
+  }
+  setSampleUI();
+}
+/* ---------- backup / restore / csv ---------- */
+function downloadBlob(name, text, type){
+  const blob=new Blob([text], {type});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+function doBackup(){
+  if(sampleExportGuard()) return;
+  const payload={ app:BACKUP_APP, version:BACKUP_VERSION, exportedAt:new Date().toISOString(), data:{ trackers:S.trackers, pledges:S.pledges, urges:S.urges, resets:S.resets } };
+  downloadBlob(`sobercount-backup-${localToday()}.json`, JSON.stringify(payload, null, 2), "application/json");
+  toast("Backup downloaded. Keep it somewhere safe.");
+  chime();
+}
+function handleRestoreFile(file){
+  if(S.sampling){ toast("Sample data is on — turn it off before restoring a backup."); thud(); return; }
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const parsed=JSON.parse(String(reader.result||""));
+      if(!parsed || parsed.app!==BACKUP_APP || parsed.version!==BACKUP_VERSION || !parsed.data || typeof parsed.data!=="object"){
+        toast("That file is not a SoberCount backup — nothing was changed."); thud(); return;
+      }
+      const cleaned=normalizeState({ settings:S.settings, trackers:parsed.data.trackers, pledges:parsed.data.pledges, urges:parsed.data.urges, resets:parsed.data.resets }, true);
+      const before=(Array.isArray(parsed.data.trackers)?parsed.data.trackers.length:0)+(Array.isArray(parsed.data.pledges)?parsed.data.pledges.length:0)+(Array.isArray(parsed.data.urges)?parsed.data.urges.length:0)+(Array.isArray(parsed.data.resets)?parsed.data.resets.length:0);
+      const after=cleaned.trackers.length+cleaned.pledges.length+cleaned.urges.length+cleaned.resets.length;
+      const dropped=before-after;
+      if(!window.confirm(`Replace ALL current data with this backup?\n\n${cleaned.trackers.length} trackers, ${cleaned.pledges.length} pledges, ${cleaned.urges.length} urges, ${cleaned.resets.length} resets${dropped?`\n${dropped} invalid or duplicate record(s) will be skipped.`:""}\n\nThis cannot be undone.`)) return;
+      S.trackers=cleaned.trackers; S.pledges=cleaned.pledges; S.urges=cleaned.urges; S.resets=cleaned.resets;
+      sel.detailTracker=S.trackers[0]?S.trackers[0].id:null;
+      save(); renderAll();
+      toast(`Backup restored: ${cleaned.trackers.length} trackers, ${cleaned.pledges.length} pledges, ${cleaned.urges.length} urges${dropped?` · ${dropped} skipped`:""}.`);
+      chime();
+    }catch(e){ toast("That file could not be read as a backup — nothing was changed."); thud(); }
+  };
+  reader.onerror=()=>{ toast("That file could not be read — nothing was changed."); thud(); };
+  reader.readAsText(file);
+}
+function csvCell(v){
+  let s=String(v ?? "");
+  if(/^[=+\-@\t\r]/.test(s)) s="'"+s;
+  return `"${s.replace(/"/g,'""')}"`;
+}
+function doCsvUrges(){
+  if(sampleExportGuard()) return;
+  const rows=[["date","time","tracker","intensity","trigger","what_helped","note"]];
+  [...S.urges].sort((a,b)=>a.ts-b.ts).forEach(u=>{ const t=u.trackerId?trackerById(u.trackerId):null; rows.push([tsToDateInput(u.ts), tsToTimeInput(u.ts), t?t.name:"", u.intensity, u.trigger, u.helped, u.note]); });
+  downloadBlob(`sobercount-urges-${localToday()}.csv`, rows.map(r=>r.map(csvCell).join(",")).join("\n"), "text/csv");
+  toast("Urges exported as CSV.");
+}
+function doCsvPledges(){
+  if(sampleExportGuard()) return;
+  const rows=[["date","tracker"]];
+  [...S.pledges].sort((a,b)=>a.date.localeCompare(b.date)).forEach(p=>{ const t=trackerById(p.trackerId); rows.push([p.date, t?t.name:""]); });
+  downloadBlob(`sobercount-pledges-${localToday()}.csv`, rows.map(r=>r.map(csvCell).join(",")).join("\n"), "text/csv");
+  toast("Pledges exported as CSV.");
+}
+/* ---------- actions ---------- */
+function toggleSel(key, val){ sel[key] = sel[key]===val ? null : val; }
+document.addEventListener("click", e=>{
+  const el=e.target.closest("[data-act]");
+  if(!el || el.disabled) return;
+  const act=el.dataset.act, id=el.dataset.id;
+  if(act==="pledge"){
+    const t=trackerById(id); if(!t) return;
+    if(pledgedToday(id)){ toast(`Already pledged for ${t.name} today.`); return; }
+    S.pledges.push({ id:uid("plg"), trackerId:id, date:localToday() });
+    sampleSaveWarning(); save(); renderAll(); chime();
+    toast(`Pledged for ${t.name}. See you tomorrow.`);
+  }
+  else if(act==="detail"){ sel.detailTracker = sel.detailTracker===id ? null : id; renderTrackersView(); renderDashTrackers(); switchView("Trackers"); beep(700,.06); }
+  else if(act==="gotoTrackers"){ switchView("Trackers"); }
+  else if(act==="logUrgeFor"){ renderLogView(); if(trackerById(id)) $("#uTracker").value=id; switchView("Log"); beep(700,.06); }
+  else if(act==="editTracker"){ editTracker(id); }
+  else if(act==="delTracker"){
+    const t=trackerById(id); if(!t) return;
+    if(!window.confirm(`Delete tracker “${t.name}”?\n\nIts pledges and resets go with it. Urges stay in your log without a tracker attached. This cannot be undone.`)) return;
+    S.trackers=S.trackers.filter(x=>x.id!==id);
+    S.pledges=S.pledges.filter(p=>p.trackerId!==id);
+    S.resets=S.resets.filter(r=>r.trackerId!==id);
+    S.urges.forEach(u=>{ if(u.trackerId===id) u.trackerId=null; });
+    if(sel.detailTracker===id) sel.detailTracker=null;
+    if($("#fId").value===id) clearTrackerForm();
+    save(); renderAll(); toast(`Tracker “${t.name}” deleted.`); thud();
+  }
+  else if(act==="editUrge"){ editUrge(id); beep(700,.06); }
+  else if(act==="delUrge"){ const u=S.urges.find(x=>x.id===id); if(!u) return; if(!window.confirm("Delete this urge entry?")) return; S.urges=S.urges.filter(x=>x.id!==id); if($("#uId").value===id) clearUrgeForm(); save(); renderAll(); toast("Urge entry deleted."); thud(); }
+  else if(act==="delPledge"){ if(!window.confirm("Delete this pledge?")) return; S.pledges=S.pledges.filter(p=>p.id!==id); save(); renderAll(); toast("Pledge deleted."); thud(); }
+  else if(act==="delReset" || act==="delResetHist"){ if(!window.confirm("Delete this reset record? The counter will measure from the previous starting point again.")) return; S.resets=S.resets.filter(r=>r.id!==id); save(); renderAll(); toast("Reset record deleted."); thud(); }
+  else if(act==="trendDay"){ toggleSel("trendDay", id); renderUrgeTrend(); beep(sel.trendDay?760:520,.06); }
+  else if(act==="triggerBar"){ toggleSel("trigger", id); renderTriggerBars(); beep(sel.trigger?760:520,.06); }
+  else if(act==="weekdayBar"){ toggleSel("weekday", id); renderStats(); beep(sel.weekday?760:520,.06); }
+  else if(act==="moneyMonth"){ toggleSel("moneyMonth", id); renderMoneyTrend(); beep(sel.moneyMonth?760:520,.06); }
+  else if(act==="heatDay"){
+    const map=pledgedMap||{}; const list=map[id]||[];
+    $("#pledgeHeatDetail").innerHTML = list.length ? `<b>${fmtDate(id)}</b> — pledged: ${list.map(p=>{ const t=trackerById(p.trackerId); return esc(t?t.name:"Tracker removed"); }).join(", ")}.` : `<b>${fmtDate(id)}</b> — no pledges recorded.`;
+    beep(640,.06);
+  }
+  else if(act==="donutSeg"){ toggleSel("donutTracker", id); renderDashDonut(); beep(sel.donutTracker?760:520,.06); }
+  else if(act==="helpedSeg"){ toggleSel("helped", id); renderStats(); beep(sel.helped?760:520,.06); }
+});
+/* ---------- wire up ---------- */
+function init(){
+  $("#brandName").textContent=APP_NAME;
+  buildForms();
+  applyTheme(); setSoundUI(); setSampleUI();
+  $$(".tab").forEach(t=>t.addEventListener("click",()=>{ switchView(t.dataset.view); beep(600,.05); }));
+  switchView("Dashboard");
+  renderAll();
+  $("#sampleBtn").addEventListener("click",()=>{ toggleSample(); beep(540,.07); });
+  $("#themeBtn").addEventListener("click",()=>{ S.settings.dark=!S.settings.dark; save(); applyTheme(); beep(S.settings.dark?520:700,.06); renderAll(); });
+  $("#soundBtn").addEventListener("click",()=>{ S.settings.sound=!S.settings.sound; save(); setSoundUI(); toast(S.settings.sound?"Sounds on.":"Sounds off."); if(S.settings.sound) chime(); });
+  $("#saveTrackerBtn").addEventListener("click", saveTracker);
+  $("#clearTrackerBtn").addEventListener("click",()=>{ clearTrackerForm(); beep(500,.05); });
+  $("#saveResetBtn").addEventListener("click", saveReset);
+  $("#saveUrgeBtn").addEventListener("click", saveUrge);
+  $("#clearUrgeBtn").addEventListener("click",()=>{ clearUrgeForm(); beep(500,.05); });
+  $$("#trendToggle .chip").forEach(c=>c.addEventListener("click",()=>{ sel.trendDays=Number(c.dataset.days); sel.trendDay=null; renderUrgeTrend(); beep(680,.05); }));
+  ["hSearch","hType"].forEach(idv=>{ document.getElementById(idv).addEventListener("input", renderHistory); });
+  $("#hTracker").addEventListener("change", renderHistory);
+  $("#printBtn").addEventListener("click",()=>{ renderReport(); window.print(); });
+  $("#backupBtn").addEventListener("click", doBackup);
+  $("#restoreBtn").addEventListener("click",()=>{ if(S.sampling){ toast("Sample data is on — turn it off before restoring a backup."); thud(); return; } $("#restoreFile").click(); });
+  $("#restoreFile").addEventListener("change",e=>{ const f=e.target.files && e.target.files[0]; if(f) handleRestoreFile(f); e.target.value=""; });
+  $("#csvUrgesBtn").addEventListener("click", doCsvUrges);
+  $("#csvPledgesBtn").addEventListener("click", doCsvPledges);
+  setInterval(()=>{ renderDashTiles(); renderDashTrackers(); renderDashGauge(); }, 30000);
+  if(bootDataUnreadable) toast("Saved data could not be read — starting fresh. A JSON backup can restore your records.");
+}
+init();
+</script>
+</body>
+</html>
