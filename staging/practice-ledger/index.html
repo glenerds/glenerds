@@ -246,7 +246,7 @@ function renderDashboard(){
   var recent=state.sessions.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0;}).slice(0,6);
   if(recent.length){
     h+='<table><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th></tr>';
-    recent.forEach(function(s){h+='<tr><td>'+s.date+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';});
+    recent.forEach(function(s){h+='<tr><td>'+esc(s.date)+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';});
     h+='</table>';
   } else h+='<p class="muted">No sessions logged yet. Your history will appear here.</p>';
   h+='</div>';
@@ -259,7 +259,7 @@ function renderPractice(){
   var s=editSessionId?state.sessions.find(function(x){return x.id===editSessionId;}):null;
   var h='<div class="card"><h2>'+(s?'Edit session':'Log a practice session')+'</h2>';
   if(!state.instruments.length)h+='<div class="notice">Add an instrument first (Pieces tab) so sessions have something to attach to.</div>';
-  h+='<div class="grid2"><div><label>Date</label><input type="date" id="f-date" value="'+(s?s.date:todayStr())+'"></div>'
+  h+='<div class="grid2"><div><label>Date</label><input type="date" id="f-date" value="'+esc(s?s.date:todayStr())+'"></div>'
     +'<div><label>Minutes practiced</label><input type="number" id="f-min" min="1" max="1440" step="1" value="'+(s?s.minutes:30)+'"></div></div>'
     +'<div class="grid2"><div><label>Instrument</label><select id="f-inst">'
     +((s&&!state.instruments.some(function(i){return i.id===s.instrumentId;}))?'<option value="'+esc(s.instrumentId)+'" selected>(instrument deleted — keep, or pick another)</option>':'')
@@ -279,7 +279,7 @@ function renderPractice(){
   if(list.length){
     h+='<table><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th><th></th></tr>';
     list.slice(0,60).forEach(function(x){
-      h+='<tr><td>'+x.date+'</td><td>'+esc(instName(x.instrumentId))+'</td><td>'+esc(pieceTitle(x.pieceId))+'</td><td>'+fmtMin(x.minutes)+'</td><td>'+esc(x.focus||'')+(x.notes?' <span class="muted">· '+esc(x.notes)+'</span>':'')+'</td>'
+      h+='<tr><td>'+esc(x.date)+'</td><td>'+esc(instName(x.instrumentId))+'</td><td>'+esc(pieceTitle(x.pieceId))+'</td><td>'+fmtMin(x.minutes)+'</td><td>'+esc(x.focus||'')+(x.notes?' <span class="muted">· '+esc(x.notes)+'</span>':'')+'</td>'
         +'<td class="noprint"><button class="btn-small" data-edit="'+x.id+'">Edit</button> <button class="btn-danger" data-del="'+x.id+'">Delete</button></td></tr>';});
     h+='</table>'+(list.length>60?'<p class="small muted">Showing the 60 most recent of '+list.length+' sessions. Full history is in the CSV export.</p>':'');
   } else h+='<p class="muted">Nothing logged yet.</p>';
@@ -289,7 +289,8 @@ function renderPractice(){
   var c=document.getElementById('f-cancel');if(c)c.addEventListener('click',function(){editSessionId=null;renderPractice();});
   el.querySelectorAll('[data-edit]').forEach(function(b){b.addEventListener('click',function(){editSessionId=b.getAttribute('data-edit');renderPractice();window.scrollTo(0,0);sndClick();});});
   el.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){
-    state.sessions=state.sessions.filter(function(x){return x.id!==b.getAttribute('data-del');});save();renderPractice();renderDashboard();toast('Session deleted.');sndClick();
+    var delId=b.getAttribute('data-del');if(editSessionId===delId)editSessionId=null;
+    state.sessions=state.sessions.filter(function(x){return x.id!==delId;});save();renderPractice();renderDashboard();toast('Session deleted.');sndClick();
   });});
 }
 function saveSession(){
@@ -304,6 +305,7 @@ function saveSession(){
   if(!inst){toast('Add an instrument first (Pieces tab).');return;}
   if(editSessionId){
     var s=state.sessions.find(function(x){return x.id===editSessionId;});
+    if(!s){editSessionId=null;toast('That session was deleted — nothing was saved.');renderPractice();return;}
     Object.assign(s,{date:date,minutes:minutes,instrumentId:inst,pieceId:piece,focus:focus,mood:mood,notes:notes});
     editSessionId=null;toast('Session updated.');
   } else {
@@ -423,7 +425,9 @@ function renderPieces(){
     if(!title){toast('Give the piece a title.');return;}
     if(!inst){toast('Add an instrument first.');return;}
     var data={title:title,composer:document.getElementById('pc-comp').value.trim().slice(0,80),instrumentId:inst,status:document.getElementById('pc-status').value};
-    if(editPieceId){Object.assign(state.pieces.find(function(x){return x.id===editPieceId;}),data);editPieceId=null;toast('Piece saved.');}
+    if(editPieceId){var fp=state.pieces.find(function(x){return x.id===editPieceId;});
+      if(!fp){editPieceId=null;toast('That piece was deleted — nothing was saved.');renderPieces();return;}
+      Object.assign(fp,data);editPieceId=null;toast('Piece saved.');}
     else{state.pieces.push(Object.assign({id:uid()},data));toast('Piece added.');}
     save();sndOk();renderPieces();renderDashboard();
   });
@@ -541,7 +545,7 @@ function renderReports(){
     +Object.keys(byPiece).sort(function(a,b){return byPiece[b]-byPiece[a];}).map(function(k){return '<tr><td>'+esc(pieceTitle(k==='general'?null:k))+'</td><td>'+fmtMin(byPiece[k])+'</td><td>'+(total?Math.round(byPiece[k]/total*100):0)+'%</td></tr>';}).join('')
     +'</table>'
     +'<table style="margin-top:14px"><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th></tr>'
-    +list.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(s){return '<tr><td>'+s.date+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';}).join('')
+    +list.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(s){return '<tr><td>'+esc(s.date)+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';}).join('')
     +'</table>'
     +'<div class="row noprint" style="margin-top:14px"><button class="btn" id="rep-print">Print this report</button></div></div>';
   h+='<div class="card noprint"><h2>Your data</h2>'
