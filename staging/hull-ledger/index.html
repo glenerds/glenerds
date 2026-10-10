@@ -492,15 +492,16 @@ function renderService(){
   h+="<div class='card'><h2>Service tasks — what is due</h2>";
   if(!tasks.length)h+="<p class='muted'>No tasks yet. Add one below: oil every 100 engine hours, impeller every 12 months, whichever style your manual uses — or both.</p>";
   else h+=tasks.map(x=>"<div class='listitem'><div class='head'><b>"+esc(x.t.title)+"</b>"+dueTag(x.st)+"</div><div class='muted'>"+esc(boatLabel(boatById(x.t.boatId)))+" · "+esc(eqLabel(eqById(x.t.equipmentId)))+"</div><div>"+esc(x.st.label)+"</div>"+
+    (x.t.intervalHours>0&&!x.t.equipmentId?"<div class='hint'>Hours-based due dates need an engine — edit this task and pick the equipment so its hour readings can drive the math.</div>":"")+
     (x.t.lastDone?"<div class='muted'>Last done "+fmtD(x.t.lastDone)+(x.t.lastDoneHours?" at "+fmtH(x.t.lastDoneHours)+" hrs":"")+"</div>":"<div class='muted'>Never logged yet</div>")+
     "<div class='btnrow'><button class='small primary' data-done-task='"+x.t.id+"'>Log it done</button><button class='small' data-edit-task='"+x.t.id+"'>Edit</button><button class='small danger' data-del-task='"+x.t.id+"'>Delete</button></div></div>").join("");
-  h+="</div>";
+  h+="<p class='hint'>Tip: due by date, by engine hours, or both. For hours, pick the engine under Equipment — the math reads its hour log.</p></div>";
   const et=editTaskId?D().tasks.find(t=>t.id===editTaskId):null;
   h+="<div class='card' style='margin-top:.9rem'><h2>"+(et?"Edit service task":"Add a service task")+"</h2><form id='taskForm'>"+
     "<div class='row'><div><label>Boat</label><select id='tf-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(et&&et.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
     "<div><label>Equipment (optional)</label><select id='tf-eq'><option value=''>Whole boat / general</option>"+D().equipment.map(e=>"<option value='"+e.id+"'"+(et&&et.equipmentId===e.id?" selected":"")+">"+esc(e.name)+" ("+esc(boatLabel(boatById(e.boatId)))+")</option>").join("")+"</select></div>"+
     "<div><label>Task</label><input id='tf-title' required maxlength='160' value='"+esc(et?et.title:"")+"' placeholder='e.g. Engine oil & filter change'></div></div>"+
-    "<div class='row'><div><label>Every N months (0 = none)</label><input id='tf-months' inputmode='numeric' value='"+(et?et.intervalMonths:"")+"' placeholder='12'></div>"+
+    "<div class='row'><div><label>Interval — every N months (0 = none)</label><input id='tf-months' inputmode='numeric' value='"+(et?et.intervalMonths:"")+"' placeholder='12'></div>"+
     "<div><label>Every N engine hours (0 = none)</label><input id='tf-hours' inputmode='decimal' value='"+(et?et.intervalHours:"")+"' placeholder='100'></div>"+
     "<div><label>One-time due date (if no interval)</label><input id='tf-once' type='date' value='"+esc(et?et.oneTimeDue:"")+"'></div></div>"+
     "<div class='row'><div><label>Last done date</label><input id='tf-lastdate' type='date' value='"+esc(et?et.lastDone:"")+"'></div>"+
