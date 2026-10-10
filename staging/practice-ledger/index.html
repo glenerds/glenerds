@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Music Practice Log & Planner — Practice Sessions, Goals, Repertoire Progress and Teacher Reports</title>
+<meta name="description" content="A private music practice log and planner that runs in one file on your device: log practice sessions by instrument and piece, plan your week, set goals, track streaks and progress, print a practice report for your teacher. No account, no subscription.">
+<style>
+:root{
+  --bg:#f6f3ee; --card:#ffffff; --ink:#23201c; --muted:#6f675c; --line:#e3ddd2;
+  --accent:#7c4d1e; --accent2:#b07a35; --good:#2e7d4f; --warn:#b3541e; --bad:#b03a2e;
+  --chip:#efe8dc; --sel:#7c4d1e; --shadow:0 1px 3px rgba(35,32,28,.08);
+  --heat0:#ece5d8; --heat1:#e3cfa8; --heat2:#d4a95e; --heat3:#b07a35; --heat4:#7c4d1e;
+}
+body.dark{
+  --bg:#171512; --card:#221f1b; --ink:#f0eadf; --muted:#b3a894; --line:#3a352e;
+  --accent:#e0aa5e; --accent2:#c98f3d; --good:#5cb87f; --warn:#e08a4e; --bad:#e06a5e;
+  --chip:#2e2a24; --sel:#e0aa5e; --shadow:0 1px 3px rgba(0,0,0,.4);
+  --heat0:#2b2721; --heat1:#4a3a22; --heat2:#7a5a28; --heat3:#b07a35; --heat4:#e0aa5e;
+}
+*{box-sizing:border-box}
+html{font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+header{max-width:1080px;margin:0 auto;padding:14px 16px 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo-badge{width:44px;height:44px;flex:0 0 44px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.brand{font-size:26px;font-weight:700;letter-spacing:.2px;margin-right:auto;line-height:1.1}
+.brand small{display:block;font-size:15px;font-weight:400;color:var(--muted)}
+.iconbtn{width:44px;height:44px;border:1px solid var(--line);background:var(--card);border-radius:11px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--shadow);padding:0}
+.iconbtn svg{width:22px;height:22px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn.on{outline:2px solid var(--accent)}
+.pillbtn{height:44px;padding:0 16px;border:1px solid var(--line);background:var(--card);border-radius:22px;cursor:pointer;box-shadow:var(--shadow);font-size:15px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink)}
+main{max-width:1080px;margin:0 auto;padding:8px 16px 40px}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 16px}
+nav.tabs button{padding:10px 14px;border:1px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer;font-size:15px;box-shadow:var(--shadow)}
+nav.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+body.dark nav.tabs button.active{color:#171512;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:20px}
+.card h3{margin:14px 0 8px;font-size:17px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+.big{font-size:34px;font-weight:700;line-height:1.1}
+.mid{font-size:22px;font-weight:700}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label{display:block;font-size:15px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--card);font-size:16px}
+textarea{min-height:64px;resize:vertical}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:11px 18px;cursor:pointer;font-size:16px}
+body.dark .btn{color:#171512;font-weight:700}
+.btn2{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer;font-size:15px}
+.btn-danger{background:var(--bad);color:#fff;border:none;border-radius:9px;padding:7px 12px;cursor:pointer;font-size:15px}
+.btn-small{background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 11px;cursor:pointer;font-size:15px}
+.chip{display:inline-block;background:var(--chip);border-radius:12px;padding:2px 10px;font-size:15px;margin:2px 2px 2px 0}
+.bar{height:16px;background:var(--heat0);border-radius:8px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent2);border-radius:8px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:7px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.heat{display:grid;grid-template-columns:repeat(17,1fr);gap:3px;max-width:560px}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--heat0);display:block}
+.heat i.h1{background:var(--heat1)}.heat i.h2{background:var(--heat2)}.heat i.h3{background:var(--heat3)}.heat i.h4{background:var(--heat4)}
+.wkbar{display:flex;align-items:flex-end;gap:5px;height:170px;padding-top:8px}
+.wkbar .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;cursor:pointer}
+.wkbar .b{width:100%;max-width:44px;background:var(--accent2);border-radius:5px 5px 0 0;min-height:3px}
+.wkbar .col.sel .b{background:var(--accent);outline:3px solid var(--ink);outline-offset:1px;transform:translateY(-4px)}
+.wkbar .lb{font-size:15px;color:var(--muted);text-align:center}
+.donutwrap{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.legend{font-size:15px}
+.legend .sw{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.notice{background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:10px;font-size:15px;box-shadow:var(--shadow);z-index:60;max-width:92vw;text-align:center}
+.sampletag{background:#8a6d1f;color:#fff;border-radius:8px;padding:2px 9px;font-size:15px}
+footer{max-width:1080px;margin:0 auto;padding:0 16px 34px}
+.cta{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+@media print{
+  header,nav.tabs,footer,.noprint{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border:1px solid #bbb;break-inside:avoid}
+  main{padding:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo-badge" aria-hidden="true">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/></svg>
+  </div>
+  <div class="brand">PracticeLedger<small>Music practice log &amp; weekly planner</small></div>
+  <a class="pillbtn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  <button class="iconbtn" id="btnSample" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M10 3v5.2L4.8 17a2.4 2.4 0 0 0 2.1 3.6h10.2a2.4 2.4 0 0 0 2.1-3.6L14 8.2V3"/><path d="M7.5 14h9"/></svg></button>
+  <button class="iconbtn" id="btnDark" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2z"/></svg></button>
+  <button class="iconbtn" id="btnSound" title="Sound on/off" aria-label="Toggle sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="sw1" d="M16.5 8.5a5 5 0 0 1 0 7"/><path class="sw2" d="M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+</header>
+<main>
+  <div id="sampleBanner"></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="dashboard" class="active">Dashboard</button>
+    <button data-tab="practice">Practice Log</button>
+    <button data-tab="planner">Planner</button>
+    <button data-tab="pieces">Pieces</button>
+    <button data-tab="charts">Charts</button>
+    <button data-tab="reports">Reports &amp; Data</button>
+    <button data-tab="about">About</button>
+  </nav>
+  <section id="tab-dashboard"></section>
+  <section id="tab-practice" hidden></section>
+  <section id="tab-planner" hidden></section>
+  <section id="tab-pieces" hidden></section>
+  <section id="tab-charts" hidden></section>
+  <section id="tab-reports" hidden></section>
+  <section id="tab-about" hidden></section>
+</main>
+<footer>
+  <div class="cta">
+    <div class="mid" style="margin-bottom:6px">Enjoying PracticeLedger?</div>
+    <p class="small muted" style="margin:0 0 12px">More one-file tools for musicians, hobbyists, and record-keepers — no accounts, no subscriptions.</p>
+    <a class="pillbtn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">Browse More Apps</a>
+  </div>
+  <p class="small muted" style="text-align:center;margin-top:14px">PracticeLedger keeps your records in this browser on this device only. Export a backup from Reports &amp; Data to keep them safe.</p>
+</footer>
+<div id="toast" class="toast" hidden></div>
+<script>
+'use strict';
+var LS_KEY='practiceledger_v1';
+var state=null, sampleOn=false, snapshot=null;
+var chartSel={week:null,piece:null,inst:null};
+
+function uid(){return 'id'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function todayStr(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function parseD(s){var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2]);}
+function fmtD(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDays(d,n){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);return x;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function clampInt(v,min,max){v=parseInt(v,10);if(isNaN(v))return min;return Math.max(min,Math.min(max,v));}
+function weekStartOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());var dow=(x.getDay()+6)%7;return addDays(x,-dow);} // Monday
+function fmtMin(m){m=Math.round(m);if(m<60)return m+' min';var h=Math.floor(m/60);var r=m%60;return r?h+'h '+r+'m':h+'h';}
+function instName(id){var i=state.instruments.find(function(x){return x.id===id;});return i?i.name:'—';}
+function pieceTitle(id){if(!id)return 'General practice';var p=state.pieces.find(function(x){return x.id===id;});return p?p.title:'(deleted piece)';}
+
+function defaultState(){
+  return {version:1,instruments:[],pieces:[],sessions:[],
+    goals:{weeklyMinutes:150,weeklySessions:5},
+    plan:[],settings:{dark:'auto',sound:true}};
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){toast('Could not save — browser storage is full or blocked. Export a backup.');}}
+function load(){
+  var raw=null;try{raw=localStorage.getItem(LS_KEY);}catch(e){}
+  if(raw){try{var s=JSON.parse(raw);if(s&&s.version===1&&Array.isArray(s.sessions)){state=s;return;}}catch(e){}}
+  state=defaultState();save();
+}
+/* ---------- sample data ---------- */
+function sampleData(){
+  var t=new Date();var D=function(n){return fmtD(addDays(t,-n));};
+  var piano={id:'i-piano',name:'Piano'},guitar={id:'i-guitar',name:'Guitar'};
+  var pieces=[
+    {id:'p1',title:'Nocturne in E-flat major, Op. 9 No. 2',composer:'Chopin',instrumentId:'i-piano',status:'polishing'},
+    {id:'p2',title:'Clair de lune',composer:'Debussy',instrumentId:'i-piano',status:'learning'},
+    {id:'p3',title:'Blackbird',composer:'The Beatles',instrumentId:'i-guitar',status:'learning'},
+    {id:'p4',title:'Scales & arpeggios routine',composer:'',instrumentId:'i-piano',status:'routine'}];
+  var sess=[];var planDays=[32,30,28,25,24,21,18,17,14,11,10,7,4,3,1];
+  var focus=['Hands separately, slow','Dynamics and phrasing','Memorise bars 1–16','Right-hand voicing','Full run-through','Tricky fingering passage','Rhythm work','Review last lesson notes'];
+  planDays.forEach(function(n,i){
+    sess.push({id:'ss'+i,date:D(n),instrumentId:i%3===2?'i-guitar':'i-piano',pieceId:i%3===2?'p3':(i%2?'p2':'p1'),minutes:25+(i%4)*10,focus:focus[i%focus.length],mood:(i%5)+1,notes:i%3===0?'Felt steadier than last week.':''});
+  });
+  sess.push({id:'ssx',date:D(2),instrumentId:'i-piano',pieceId:'p4',minutes:20,focus:'All major scales, 2 octaves',mood:4,notes:''});
+  return {version:1,instruments:[piano,guitar],pieces:pieces,sessions:sess,
+    goals:{weeklyMinutes:180,weeklySessions:5},
+    plan:[{id:'pl1',weekday:0,pieceId:'p1',instrumentId:'i-piano',minutes:40,focus:'Polishing — full run'},
+          {id:'pl2',weekday:2,pieceId:'p2',instrumentId:'i-piano',minutes:30,focus:'New section'},
+          {id:'pl3',weekday:4,pieceId:'p3',instrumentId:'i-guitar',minutes:25,focus:'Fingerpicking pattern'},
+          {id:'pl4',weekday:5,pieceId:'p4',instrumentId:'i-piano',minutes:20,focus:'Technique routine'}],
+    settings:state.settings};
+}
+/* ---------- sound ---------- */
+var actx=null;
+function beep(f,dur,type){if(!state.settings.sound)return;try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();var o=actx.createOscillator(),g=actx.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(0.08,actx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+(dur||0.07));o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+(dur||0.07));}catch(e){}}
+function sndClick(){beep(660,0.05);}
+function sndOk(){beep(660,0.06);setTimeout(function(){beep(880,0.08);},70);}
+/* ---------- toast ---------- */
+var toastT=null;
+function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(function(){t.hidden=true;},3400);}
+/* ---------- stats ---------- */
+function sessionsInRange(a,b){return state.sessions.filter(function(s){return s.date>=a&&s.date<=b;});}
+function sumMin(list){return list.reduce(function(t,s){return t+s.minutes;},0);}
+function weekBounds(offset){var ws=weekStartOf(new Date());ws=addDays(ws,-7*(offset||0));var we=addDays(ws,6);return{a:fmtD(ws),b:fmtD(we)};}
+function streakDays(){
+  var days={};state.sessions.forEach(function(s){days[s.date]=1;});
+  var d=new Date();if(!days[fmtD(d)])d=addDays(d,-1);
+  var n=0;while(days[fmtD(d)]){n++;d=addDays(d,-1);}return n;
+}
+function lastPracticed(pieceId){
+  var best=null;state.sessions.forEach(function(s){if(s.pieceId===pieceId&&(!best||s.date>best))best=s.date;});
+  return best;
+}
+function daysSince(dateStr){if(!dateStr)return null;return Math.round((parseD(todayStr())-parseD(dateStr))/86400000);}
+/* ---------- render: dashboard ---------- */
+function planFor(weekday){return state.plan.filter(function(p){return p.weekday===weekday;});}
+function planDone(p,dateStr){
+  return state.sessions.some(function(s){return s.date===dateStr&&s.instrumentId===p.instrumentId&&(!p.pieceId||s.pieceId===p.pieceId);});
+}
+function renderDashboard(){
+  var el=document.getElementById('tab-dashboard');
+  var wb=weekBounds(0),wk=sessionsInRange(wb.a,wb.b),wkMin=sumMin(wk);
+  var allMin=sumMin(state.sessions),streak=streakDays();
+  var g=state.goals;
+  var today=new Date(),wd=(today.getDay()+6)%7,todayPlan=planFor(wd);
+  var h='';
+  if(!state.instruments.length&&!state.sessions.length){
+    h+='<div class="card"><h2>Welcome to PracticeLedger</h2>'
+      +'<p>Log each practice session, plan your week, and watch the minutes add up. Everything lives in this one file, on this device — no account, no subscription, nothing to renew.</p>'
+      +'<p>Start by adding your instrument under <b>Pieces</b> (instruments live there too), or tap the flask up top to look around with sample data first.</p></div>';
+  }
+  h+='<div class="grid3">'
+    +'<div class="card"><div class="muted small">This week (Mon–Sun)</div><div class="big">'+fmtMin(wkMin)+'</div>'
+    +'<div class="small muted">Goal '+fmtMin(g.weeklyMinutes)+' · '+wk.length+' of '+g.weeklySessions+' sessions</div>'
+    +'<div class="bar" style="margin-top:9px"><i style="width:'+Math.min(100,g.weeklyMinutes?wkMin/g.weeklyMinutes*100:0)+'%"></i></div></div>'
+    +'<div class="card"><div class="muted small">Practice streak</div><div class="big">'+streak+(streak===1?' day':' days')+'</div>'
+    +'<div class="small muted">'+(streak>0?'Practiced today or yesterday — keep it going.':'Log a session today to start a streak.')+'</div></div>'
+    +'<div class="card"><div class="muted small">All time</div><div class="big">'+fmtMin(allMin)+'</div>'
+    +'<div class="small muted">'+state.sessions.length+' sessions · '+state.pieces.length+' pieces · '+state.instruments.length+' instruments</div></div>'
+    +'</div>';
+  // today's plan + heatmap side by side
+  h+='<div class="grid2"><div class="card"><h2>Today&rsquo;s plan</h2>';
+  if(todayPlan.length){
+    todayPlan.forEach(function(p){
+      var done=planDone(p,todayStr());
+      h+='<p style="margin:7px 0"><span class="chip">'+esc(pieceTitle(p.pieceId))+'</span> '+p.minutes+' min · '+esc(p.focus||'')
+        +' — <b style="color:'+(done?'var(--good)':'var(--warn)')+'">'+(done?'done':'not yet')+'</b></p>';
+    });
+  } else h+='<p class="muted">Nothing planned for today. Set up your week in the Planner tab.</p>';
+  h+='<h3>Needs attention</h3>';
+  var stale=state.pieces.filter(function(p){return p.status!=='ready';}).map(function(p){return{p:p,last:lastPracticed(p.id)};})
+    .sort(function(a,b){var x=a.last||'',y=b.last||'';return x<y?-1:x>y?1:0;}).slice(0,4);
+  if(stale.length){stale.forEach(function(x){var d=daysSince(x.last);h+='<p style="margin:6px 0"><b>'+esc(x.p.title)+'</b> <span class="muted">— '+(x.last?('last practiced '+d+' day'+(d===1?'':'s')+' ago'):'not practiced yet')+'</span></p>';});}
+  else h+='<p class="muted">Add pieces in the Pieces tab and this list shows what has waited longest.</p>';
+  h+='</div><div class="card"><h2>Last 17 weeks</h2><div class="heat">';
+  var mins={};state.sessions.forEach(function(s){mins[s.date]=(mins[s.date]||0)+s.minutes;});
+  for(var i=118;i>=0;i--){var ds=fmtD(addDays(new Date(),-i));var m=mins[ds]||0;var lvl=m===0?0:m<20?1:m<40?2:m<70?3:4;h+='<i class="'+(lvl?'h'+lvl:'')+'" title="'+ds+': '+m+' min"></i>';}
+  h+='</div><p class="small muted" style="margin-top:9px">Each square is a day; darker means more practice. Hover or tap a square to see the day.</p></div></div>';
+  // recent sessions
+  h+='<div class="card"><h2>Recent sessions</h2>';
+  var recent=state.sessions.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0;}).slice(0,6);
+  if(recent.length){
+    h+='<table><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th></tr>';
+    recent.forEach(function(s){h+='<tr><td>'+s.date+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';});
+    h+='</table>';
+  } else h+='<p class="muted">No sessions logged yet. Your history will appear here.</p>';
+  h+='</div>';
+  el.innerHTML=h;
+}
+/* ---------- render: practice log ---------- */
+var editSessionId=null;
+function renderPractice(){
+  var el=document.getElementById('tab-practice');
+  var s=editSessionId?state.sessions.find(function(x){return x.id===editSessionId;}):null;
+  var h='<div class="card"><h2>'+(s?'Edit session':'Log a practice session')+'</h2>';
+  if(!state.instruments.length)h+='<div class="notice">Add an instrument first (Pieces tab) so sessions have something to attach to.</div>';
+  h+='<div class="grid2"><div><label>Date</label><input type="date" id="f-date" value="'+(s?s.date:todayStr())+'"></div>'
+    +'<div><label>Minutes practiced</label><input type="number" id="f-min" min="1" max="1440" step="1" value="'+(s?s.minutes:30)+'"></div></div>'
+    +'<div class="grid2"><div><label>Instrument</label><select id="f-inst">'
+    +state.instruments.map(function(i){return '<option value="'+i.id+'"'+(s&&s.instrumentId===i.id?' selected':'')+'>'+esc(i.name)+'</option>';}).join('')
+    +'</select></div><div><label>Piece</label><select id="f-piece"><option value="">General practice (no specific piece)</option>'
+    +state.pieces.map(function(p){return '<option value="'+p.id+'"'+(s&&s.pieceId===p.id?' selected':'')+'>'+esc(p.title)+'</option>';}).join('')
+    +'</select></div></div>'
+    +'<label>Focus of this session</label><input type="text" id="f-focus" maxlength="120" placeholder="e.g. Bars 20–36, hands separately" value="'+(s?esc(s.focus||''):'')+'">'
+    +'<label>How did it feel? (optional, 1–5)</label><select id="f-mood"><option value="">—</option>'
+    +[1,2,3,4,5].map(function(n){return '<option value="'+n+'"'+(s&&s.mood===n?' selected':'')+'>'+n+(n===1?' (rough)':n===5?' (great)':'')+'</option>';}).join('')+'</select>'
+    +'<label>Notes</label><textarea id="f-notes" maxlength="600" placeholder="What improved? What needs work next time?">'+(s?esc(s.notes||''):'')+'</textarea>'
+    +'<div class="row" style="margin-top:14px"><button class="btn" id="f-save">'+(s?'Save changes':'Log session')+'</button>'
+    +(s?'<button class="btn2" id="f-cancel">Cancel edit</button>':'')+'</div></div>';
+  h+='<div class="card"><h2>Session history</h2>';
+  var list=state.sessions.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0;});
+  if(list.length){
+    h+='<table><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th><th></th></tr>';
+    list.slice(0,60).forEach(function(x){
+      h+='<tr><td>'+x.date+'</td><td>'+esc(instName(x.instrumentId))+'</td><td>'+esc(pieceTitle(x.pieceId))+'</td><td>'+fmtMin(x.minutes)+'</td><td>'+esc(x.focus||'')+(x.notes?' <span class="muted">· '+esc(x.notes)+'</span>':'')+'</td>'
+        +'<td class="noprint"><button class="btn-small" data-edit="'+x.id+'">Edit</button> <button class="btn-danger" data-del="'+x.id+'">Delete</button></td></tr>';});
+    h+='</table>'+(list.length>60?'<p class="small muted">Showing the 60 most recent of '+list.length+' sessions. Full history is in the CSV export.</p>':'');
+  } else h+='<p class="muted">Nothing logged yet.</p>';
+  h+='</div>';
+  el.innerHTML=h;
+  document.getElementById('f-save').addEventListener('click',saveSession);
+  var c=document.getElementById('f-cancel');if(c)c.addEventListener('click',function(){editSessionId=null;renderPractice();});
+  el.querySelectorAll('[data-edit]').forEach(function(b){b.addEventListener('click',function(){editSessionId=b.getAttribute('data-edit');renderPractice();window.scrollTo(0,0);sndClick();});});
+  el.querySelectorAll('[data-del]').forEach(function(b){b.addEventListener('click',function(){
+    state.sessions=state.sessions.filter(function(x){return x.id!==b.getAttribute('data-del');});save();renderPractice();renderDashboard();toast('Session deleted.');sndClick();
+  });});
+}
+function saveSession(){
+  var date=document.getElementById('f-date').value;
+  var minutes=clampInt(document.getElementById('f-min').value,1,1440);
+  var inst=document.getElementById('f-inst').value;
+  var piece=document.getElementById('f-piece').value||null;
+  var focus=document.getElementById('f-focus').value.trim().slice(0,120);
+  var mood=document.getElementById('f-mood').value?clampInt(document.getElementById('f-mood').value,1,5):null;
+  var notes=document.getElementById('f-notes').value.trim().slice(0,600);
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('Pick a valid date.');return;}
+  if(!inst){toast('Add an instrument first (Pieces tab).');return;}
+  if(editSessionId){
+    var s=state.sessions.find(function(x){return x.id===editSessionId;});
+    Object.assign(s,{date:date,minutes:minutes,instrumentId:inst,pieceId:piece,focus:focus,mood:mood,notes:notes});
+    editSessionId=null;toast('Session updated.');
+  } else {
+    state.sessions.push({id:uid(),date:date,minutes:minutes,instrumentId:inst,pieceId:piece,focus:focus,mood:mood,notes:notes});
+    toast('Session logged. Nice work.');
+  }
+  save();sndOk();renderPractice();renderDashboard();
+}
+/* ---------- render: planner ---------- */
+var DOW=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+function renderPlanner(){
+  var el=document.getElementById('tab-planner');
+  var wb=weekBounds(0),wk=sessionsInRange(wb.a,wb.b),wkMin=sumMin(wk),g=state.goals;
+  var h='<div class="card"><h2>Weekly goals</h2>'
+    +'<div class="grid2"><div><label>Minutes per week</label><input type="number" id="g-min" min="0" max="10080" value="'+g.weeklyMinutes+'"></div>'
+    +'<div><label>Sessions per week</label><input type="number" id="g-sess" min="0" max="50" value="'+g.weeklySessions+'"></div></div>'
+    +'<div class="row" style="margin-top:12px"><button class="btn" id="g-save">Save goals</button></div>'
+    +'<p class="small" style="margin-top:12px">This week so far: <b>'+fmtMin(wkMin)+'</b> across <b>'+wk.length+' sessions</b>'
+    +(g.weeklyMinutes?' — '+(wkMin>=g.weeklyMinutes?'<b style="color:var(--good)">weekly minutes goal met</b>':fmtMin(g.weeklyMinutes-wkMin)+' to go'):'')
+    +'.</p></div>';
+  // this week, day by day
+  h+='<div class="card"><h2>This week, day by day</h2>';
+  var ws=parseD(wb.a);
+  for(var d=0;d<7;d++){
+    var ds=fmtD(addDays(ws,d)),daySess=sessionsInRange(ds,ds),items=planFor(d),isToday=ds===todayStr();
+    h+='<h3>'+DOW[d]+' <span class="muted small">'+ds+(isToday?' · today':'')+'</span></h3>';
+    if(items.length){items.forEach(function(p){var done=planDone(p,ds);
+      h+='<p style="margin:5px 0"><span class="chip">'+esc(pieceTitle(p.pieceId))+'</span> '+p.minutes+' min'+(p.focus?' · '+esc(p.focus):'')+' — <b style="color:'+(done?'var(--good)':'var(--warn)')+'">'+(done?'done':'planned')+'</b></p>';});}
+    else h+='<p class="small muted" style="margin:5px 0">Nothing planned.</p>';
+    if(daySess.length)h+='<p class="small muted" style="margin:5px 0">Logged: '+fmtMin(sumMin(daySess))+' in '+daySess.length+' session'+(daySess.length===1?'':'s')+'.</p>';
+  }
+  h+='</div>';
+  // plan template editor
+  h+='<div class="card"><h2>Weekly plan (repeats every week)</h2>'
+    +'<div class="grid2"><div><label>Day</label><select id="pl-day">'+DOW.map(function(n,i){return '<option value="'+i+'">'+n+'</option>';}).join('')+'</select></div>'
+    +'<div><label>Planned minutes</label><input type="number" id="pl-min" min="1" max="1440" value="30"></div></div>'
+    +'<div class="grid2"><div><label>Instrument</label><select id="pl-inst">'+state.instruments.map(function(i){return '<option value="'+i.id+'">'+esc(i.name)+'</option>';}).join('')+'</select></div>'
+    +'<div><label>Piece</label><select id="pl-piece"><option value="">General practice</option>'+state.pieces.map(function(p){return '<option value="'+p.id+'">'+esc(p.title)+'</option>';}).join('')+'</select></div></div>'
+    +'<label>Focus</label><input type="text" id="pl-focus" maxlength="120" placeholder="e.g. New material, slow">'
+    +'<div class="row" style="margin-top:12px"><button class="btn" id="pl-add">Add to plan</button></div>';
+  if(state.plan.length){
+    h+='<table style="margin-top:14px"><tr><th>Day</th><th>Piece</th><th>Instrument</th><th>Minutes</th><th>Focus</th><th></th></tr>';
+    state.plan.slice().sort(function(a,b){return a.weekday-b.weekday;}).forEach(function(p){
+      h+='<tr><td>'+DOW[p.weekday]+'</td><td>'+esc(pieceTitle(p.pieceId))+'</td><td>'+esc(instName(p.instrumentId))+'</td><td>'+p.minutes+'</td><td>'+esc(p.focus||'')+'</td><td><button class="btn-danger" data-pldel="'+p.id+'">Remove</button></td></tr>';});
+    h+='</table>';
+  } else h+='<p class="muted" style="margin-top:10px">No plan yet. A light plan you mostly keep beats an ambitious one you abandon.</p>';
+  h+='</div>';
+  el.innerHTML=h;
+  document.getElementById('g-save').addEventListener('click',function(){
+    state.goals.weeklyMinutes=clampInt(document.getElementById('g-min').value,0,10080);
+    state.goals.weeklySessions=clampInt(document.getElementById('g-sess').value,0,50);
+    save();sndOk();toast('Goals saved.');renderPlanner();renderDashboard();
+  });
+  document.getElementById('pl-add').addEventListener('click',function(){
+    var inst=document.getElementById('pl-inst').value;
+    if(!inst){toast('Add an instrument first (Pieces tab).');return;}
+    state.plan.push({id:uid(),weekday:clampInt(document.getElementById('pl-day').value,0,6),
+      pieceId:document.getElementById('pl-piece').value||null,instrumentId:inst,
+      minutes:clampInt(document.getElementById('pl-min').value,1,1440),
+      focus:document.getElementById('pl-focus').value.trim().slice(0,120)});
+    save();sndOk();toast('Added to your weekly plan.');renderPlanner();renderDashboard();
+  });
+  el.querySelectorAll('[data-pldel]').forEach(function(b){b.addEventListener('click',function(){
+    state.plan=state.plan.filter(function(p){return p.id!==b.getAttribute('data-pldel');});save();renderPlanner();renderDashboard();toast('Plan item removed.');sndClick();
+  });});
+}
+/* ---------- render: pieces & instruments ---------- */
+var editPieceId=null, editInstId=null;
+var STATUS=[['learning','Learning'],['polishing','Polishing'],['routine','Technique / routine'],['ready','Performance-ready']];
+function statusLabel(s){var f=STATUS.find(function(x){return x[0]===s;});return f?f[1]:s;}
+function renderPieces(){
+  var el=document.getElementById('tab-pieces');
+  var h='<div class="grid2"><div class="card"><h2>Instruments</h2>';
+  var ei=editInstId?state.instruments.find(function(x){return x.id===editInstId;}):null;
+  h+='<label>Instrument name</label><input type="text" id="in-name" maxlength="60" placeholder="e.g. Piano" value="'+(ei?esc(ei.name):'')+'">'
+    +'<div class="row" style="margin-top:12px"><button class="btn" id="in-save">'+(ei?'Save instrument':'Add instrument')+'</button>'
+    +(ei?'<button class="btn2" id="in-cancel">Cancel</button>':'')+'</div>';
+  if(state.instruments.length){
+    h+='<table style="margin-top:14px"><tr><th>Instrument</th><th>Sessions</th><th>Total</th><th></th></tr>';
+    state.instruments.forEach(function(i){
+      var list=state.sessions.filter(function(s){return s.instrumentId===i.id;});
+      h+='<tr><td>'+esc(i.name)+'</td><td>'+list.length+'</td><td>'+fmtMin(sumMin(list))+'</td><td><button class="btn-small" data-inedit="'+i.id+'">Edit</button> <button class="btn-danger" data-indel="'+i.id+'">Delete</button></td></tr>';});
+    h+='</table><p class="small muted">Deleting an instrument keeps its past sessions (they show the name as missing) — better to rename it.</p>';
+  } else h+='<p class="muted" style="margin-top:10px">None yet. Add the instrument you practise most.</p>';
+  h+='</div><div class="card"><h2>'+(editPieceId?'Edit piece':'Add a piece')+'</h2>';
+  var ep=editPieceId?state.pieces.find(function(x){return x.id===editPieceId;}):null;
+  h+='<label>Title</label><input type="text" id="pc-title" maxlength="120" placeholder="e.g. Moonlight Sonata, 1st movement" value="'+(ep?esc(ep.title):'')+'">'
+    +'<label>Composer / source (optional)</label><input type="text" id="pc-comp" maxlength="80" placeholder="e.g. Beethoven" value="'+(ep?esc(ep.composer||''):'')+'">'
+    +'<label>Instrument</label><select id="pc-inst">'+state.instruments.map(function(i){return '<option value="'+i.id+'"'+(ep&&ep.instrumentId===i.id?' selected':'')+'>'+esc(i.name)+'</option>';}).join('')+'</select>'
+    +'<label>Status</label><select id="pc-status">'+STATUS.map(function(s){return '<option value="'+s[0]+'"'+(ep&&ep.status===s[0]?' selected':'')+'>'+s[1]+'</option>';}).join('')+'</select>'
+    +'<div class="row" style="margin-top:12px"><button class="btn" id="pc-save">'+(ep?'Save piece':'Add piece')+'</button>'
+    +(ep?'<button class="btn2" id="pc-cancel">Cancel</button>':'')+'</div></div></div>';
+  h+='<div class="card"><h2>Your repertoire</h2>';
+  if(state.pieces.length){
+    h+='<table><tr><th>Piece</th><th>Instrument</th><th>Status</th><th>Total time</th><th>Sessions</th><th>Last practiced</th><th></th></tr>';
+    state.pieces.forEach(function(p){
+      var list=state.sessions.filter(function(s){return s.pieceId===p.id;});var last=lastPracticed(p.id);
+      h+='<tr><td><b>'+esc(p.title)+'</b>'+(p.composer?' <span class="muted">· '+esc(p.composer)+'</span>':'')+'</td><td>'+esc(instName(p.instrumentId))+'</td><td><span class="chip">'+statusLabel(p.status)+'</span></td><td>'+fmtMin(sumMin(list))+'</td><td>'+list.length+'</td><td>'+(last||'—')+'</td>'
+        +'<td><button class="btn-small" data-pcedit="'+p.id+'">Edit</button> <button class="btn-danger" data-pcdel="'+p.id+'">Delete</button></td></tr>';});
+    h+='</table>';
+  } else h+='<p class="muted">No pieces yet. Add what you are working on — pieces are where progress becomes visible.</p>';
+  h+='</div>';
+  el.innerHTML=h;
+  document.getElementById('in-save').addEventListener('click',function(){
+    var name=document.getElementById('in-name').value.trim().slice(0,60);
+    if(!name){toast('Give the instrument a name.');return;}
+    if(editInstId){state.instruments.find(function(x){return x.id===editInstId;}).name=name;editInstId=null;toast('Instrument saved.');}
+    else{state.instruments.push({id:uid(),name:name});toast('Instrument added.');}
+    save();sndOk();renderPieces();renderDashboard();
+  });
+  var ic=document.getElementById('in-cancel');if(ic)ic.addEventListener('click',function(){editInstId=null;renderPieces();});
+  document.getElementById('pc-save').addEventListener('click',function(){
+    var title=document.getElementById('pc-title').value.trim().slice(0,120);
+    var inst=document.getElementById('pc-inst').value;
+    if(!title){toast('Give the piece a title.');return;}
+    if(!inst){toast('Add an instrument first.');return;}
+    var data={title:title,composer:document.getElementById('pc-comp').value.trim().slice(0,80),instrumentId:inst,status:document.getElementById('pc-status').value};
+    if(editPieceId){Object.assign(state.pieces.find(function(x){return x.id===editPieceId;}),data);editPieceId=null;toast('Piece saved.');}
+    else{state.pieces.push(Object.assign({id:uid()},data));toast('Piece added.');}
+    save();sndOk();renderPieces();renderDashboard();
+  });
+  var pc=document.getElementById('pc-cancel');if(pc)pc.addEventListener('click',function(){editPieceId=null;renderPieces();});
+  el.querySelectorAll('[data-inedit]').forEach(function(b){b.addEventListener('click',function(){editInstId=b.getAttribute('data-inedit');renderPieces();sndClick();});});
+  el.querySelectorAll('[data-indel]').forEach(function(b){b.addEventListener('click',function(){
+    state.instruments=state.instruments.filter(function(x){return x.id!==b.getAttribute('data-indel');});save();renderPieces();renderDashboard();toast('Instrument deleted. Past sessions remain.');sndClick();});});
+  el.querySelectorAll('[data-pcedit]').forEach(function(b){b.addEventListener('click',function(){editPieceId=b.getAttribute('data-pcedit');renderPieces();window.scrollTo(0,0);sndClick();});});
+  el.querySelectorAll('[data-pcdel]').forEach(function(b){b.addEventListener('click',function(){
+    state.pieces=state.pieces.filter(function(x){return x.id!==b.getAttribute('data-pcdel');});save();renderPieces();renderDashboard();toast('Piece deleted. Its sessions remain as history.');sndClick();});});
+}
+/* ---------- render: charts ---------- */
+var PALETTE=['#b07a35','#7c4d1e','#2e7d4f','#46689b','#8a4d7d','#b3541e','#4d7d7a','#6b5b95'];
+function renderCharts(){
+  var el=document.getElementById('tab-charts');
+  var h='<div class="card"><h2>Minutes by week (last 12 weeks)</h2>';
+  var weeks=[];for(var i=11;i>=0;i--){var wb=weekBounds(i);var list=sessionsInRange(wb.a,wb.b);weeks.push({a:wb.a,b:wb.b,min:sumMin(list),n:list.length});}
+  var max=Math.max.apply(null,weeks.map(function(w){return w.min;}).concat([1]));
+  h+='<div class="wkbar">';
+  weeks.forEach(function(w,i){var pct=Math.round(w.min/max*100);
+    h+='<div class="col'+(chartSel.week===i?' sel':'')+'" data-wk="'+i+'"><div class="b" style="height:'+Math.max(3,pct)+'%"></div><div class="lb">'+w.a.slice(5)+'</div></div>';});
+  h+='</div><div id="wk-detail" style="margin-top:12px">';
+  if(chartSel.week!==null&&weeks[chartSel.week]){
+    var w=weeks[chartSel.week],byp={};sessionsInRange(w.a,w.b).forEach(function(s){var k=pieceTitle(s.pieceId);byp[k]=(byp[k]||0)+s.minutes;});
+    var top=Object.keys(byp).sort(function(a,b){return byp[b]-byp[a];}).slice(0,3);
+    h+='Week of '+w.a+': <b>'+fmtMin(w.min)+'</b> in '+w.n+' sessions.'+(top.length?' Most time: '+top.map(function(k){return esc(k)+' ('+fmtMin(byp[k])+')';}).join(', ')+'.':'');
+  } else h+='<span class="muted">Select a bar to see that week&rsquo;s detail. Select it again to clear.</span>';
+  h+='</div></div>';
+  // donut by piece
+  var byPiece={};state.sessions.forEach(function(s){var k=s.pieceId||'general';byPiece[k]=(byPiece[k]||0)+s.minutes;});
+  var keys=Object.keys(byPiece).sort(function(a,b){return byPiece[b]-byPiece[a];});
+  var total=sumMin(state.sessions);
+  h+='<div class="grid2"><div class="card"><h2>Where the time goes (by piece)</h2>';
+  if(total>0&&keys.length){
+    var top6=keys.slice(0,6),otherMin=keys.slice(6).reduce(function(t,k){return t+byPiece[k];},0);
+    var segs=top6.map(function(k,i){return{key:k,label:pieceTitle(k==='general'?null:k),min:byPiece[k],color:PALETTE[i%PALETTE.length]};});
+    if(otherMin>0)segs.push({key:'other',label:'Other pieces',min:otherMin,color:'#9a8f7d'});
+    var C=2*Math.PI*44,off=0,paths='';
+    segs.forEach(function(sg,i){
+      var frac=sg.min/total,startFrac=off/C,sel=chartSel.piece===i;
+      var midA=(startFrac+frac/2)*2*Math.PI; // measured from 3 o'clock, clockwise (SVG y-down)
+      var pull=sel?' transform="translate('+(7*Math.cos(midA)).toFixed(1)+' '+(7*Math.sin(midA)).toFixed(1)+')"':'';
+      if(segs.length===1||frac>=0.999){paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="'+sg.color+'" stroke-width="26" data-seg="'+i+'" style="cursor:pointer"'+pull+'/>';}
+      else{var len=Math.max(0,frac*C-1.5);
+        paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="'+sg.color+'" stroke-width="26" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" data-seg="'+i+'" style="cursor:pointer"'+pull+'/>';
+        if(sel){paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="var(--ink)" stroke-width="29.5" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" opacity="0.28"'+pull+'/>';}}
+      off+=frac*C;});
+    h+='<div class="donutwrap"><svg width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="44" fill="none" stroke="var(--heat0)" stroke-width="26"/>'+paths
+      +'<text x="100" y="96" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">'+fmtMin(total)+'</text>'
+      +'<text x="100" y="116" text-anchor="middle" font-size="13" fill="var(--muted)">total</text></svg>'
+      +'<div class="legend">'+segs.map(function(sg,i){return '<div><span class="sw" style="background:'+sg.color+'"></span>'+esc(sg.label)+' — '+fmtMin(sg.min)+' ('+Math.round(sg.min/total*100)+'%)</div>';}).join('')+'</div></div>'
+      +'<div id="seg-detail" style="margin-top:10px">'+(chartSel.piece!==null&&segs[chartSel.piece]?('Selected: <b>'+esc(segs[chartSel.piece].label)+'</b> — '+fmtMin(segs[chartSel.piece].min)+' of '+fmtMin(total)+'.'):'<span class="muted">Select a slice to highlight a piece.</span>')+'</div>';
+  } else h+='<p class="muted">Log some sessions and the split by piece appears here.</p>';
+  h+='</div>';
+  // by instrument
+  h+='<div class="card"><h2>By instrument</h2>';
+  var byInst={};state.sessions.forEach(function(s){byInst[s.instrumentId]=(byInst[s.instrumentId]||0)+s.minutes;});
+  var ikeys=Object.keys(byInst);
+  if(ikeys.length){
+    var imax=Math.max.apply(null,ikeys.map(function(k){return byInst[k];}));
+    ikeys.sort(function(a,b){return byInst[b]-byInst[a];}).forEach(function(k){
+      h+='<p style="margin:8px 0 3px"><b>'+esc(instName(k))+'</b> — '+fmtMin(byInst[k])+'</p><div class="bar"><i style="width:'+Math.round(byInst[k]/imax*100)+'%"></i></div>';});
+    // mood trend
+    var moods=state.sessions.filter(function(s){return s.mood;});
+    if(moods.length>=3){
+      var avg=moods.reduce(function(t,s){return t+s.mood;},0)/moods.length;
+      h+='<h3>Session feel</h3><p class="small">Average of your 1–5 session ratings: <b>'+avg.toFixed(1)+'</b> across '+moods.length+' rated sessions. Longer sessions rated '
+        +(function(){var lg=moods.filter(function(s){return s.minutes>=30;}),sm=moods.filter(function(s){return s.minutes<30;});
+          if(!lg.length||!sm.length)return '—';
+          var a=lg.reduce(function(t,s){return t+s.mood;},0)/lg.length,b=sm.reduce(function(t,s){return t+s.mood;},0)/sm.length;
+          return '<b>'+a.toFixed(1)+'</b> vs <b>'+b.toFixed(1)+'</b> for sessions under 30 minutes.';})()
+        +'</p>';
+    }
+  } else h+='<p class="muted">Nothing logged yet.</p>';
+  h+='</div></div>';
+  el.innerHTML=h;
+  el.querySelectorAll('[data-wk]').forEach(function(c){c.addEventListener('click',function(){
+    var i=+c.getAttribute('data-wk');chartSel.week=chartSel.week===i?null:i;sndClick();renderCharts();});});
+  el.querySelectorAll('[data-seg]').forEach(function(c){c.addEventListener('click',function(){
+    var i=+c.getAttribute('data-seg');chartSel.piece=chartSel.piece===i?null:i;sndClick();renderCharts();});});
+}
+/* ---------- render: reports & data ---------- */
+function csvEsc(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function download(name,content,type){
+  var blob=new Blob([content],{type:type||'text/plain'});var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},400);
+}
+function reportRange(kind){
+  var now=new Date();
+  if(kind==='week'){var wb=weekBounds(0);return{a:wb.a,b:wb.b,label:'This week ('+wb.a+' to '+wb.b+')'};}
+  if(kind==='4w'){var wb4=weekBounds(3),wb0=weekBounds(0);return{a:wb4.a,b:wb0.b,label:'Last 4 weeks ('+wb4.a+' to '+wb0.b+')'};}
+  if(kind==='12w'){var wb12=weekBounds(11),wbz=weekBounds(0);return{a:wb12.a,b:wbz.b,label:'Last 12 weeks ('+wb12.a+' to '+wbz.b+')'};}
+  var dates=state.sessions.map(function(s){return s.date;}).sort();
+  return{a:dates.length?dates[0]:todayStr(),b:todayStr(),label:'All time'};
+}
+var reportKind='4w';
+function renderReports(){
+  var el=document.getElementById('tab-reports');
+  var r=reportRange(reportKind),list=sessionsInRange(r.a,r.b),total=sumMin(list);
+  var byPiece={},byInst={};
+  list.forEach(function(s){var k=s.pieceId||'general';byPiece[k]=(byPiece[k]||0)+s.minutes;byInst[s.instrumentId]=(byInst[s.instrumentId]||0)+s.minutes;});
+  var h='<div class="card"><h2>Practice report</h2>'
+    +'<p class="small muted">A clean summary to print or hand to a teacher. Choose a range, then print — only the report prints.</p>'
+    +'<label>Range</label><select id="rep-range">'
+    +[['week','This week'],['4w','Last 4 weeks'],['12w','Last 12 weeks'],['all','All time']].map(function(o){return '<option value="'+o[0]+'"'+(reportKind===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')
+    +'</select>'
+    +'<h3>'+esc(r.label)+'</h3>'
+    +'<p>Total practice: <b>'+fmtMin(total)+'</b> · Sessions: <b>'+list.length+'</b> · Instruments: <b>'+Object.keys(byInst).length+'</b> · Pieces: <b>'+Object.keys(byPiece).length+'</b></p>'
+    +'<table><tr><th>Piece</th><th>Time</th><th>Share</th></tr>'
+    +Object.keys(byPiece).sort(function(a,b){return byPiece[b]-byPiece[a];}).map(function(k){return '<tr><td>'+esc(pieceTitle(k==='general'?null:k))+'</td><td>'+fmtMin(byPiece[k])+'</td><td>'+(total?Math.round(byPiece[k]/total*100):0)+'%</td></tr>';}).join('')
+    +'</table>'
+    +'<table style="margin-top:14px"><tr><th>Date</th><th>Instrument</th><th>Piece</th><th>Time</th><th>Focus</th></tr>'
+    +list.slice().sort(function(a,b){return a.date<b.date?-1:1;}).map(function(s){return '<tr><td>'+s.date+'</td><td>'+esc(instName(s.instrumentId))+'</td><td>'+esc(pieceTitle(s.pieceId))+'</td><td>'+fmtMin(s.minutes)+'</td><td>'+esc(s.focus||'')+'</td></tr>';}).join('')
+    +'</table>'
+    +'<div class="row noprint" style="margin-top:14px"><button class="btn" id="rep-print">Print this report</button></div></div>';
+  h+='<div class="card noprint"><h2>Your data</h2>'
+    +'<p class="small">Your records live only in this browser on this device. Back them up regularly — the backup file is also how you move to a new device.</p>'
+    +'<div class="row"><button class="btn2" id="d-csv">Export sessions (CSV)</button>'
+    +'<button class="btn2" id="d-json">Download backup (JSON)</button></div>'
+    +'<label>Restore from a backup file</label><input type="file" id="d-file" accept=".json,application/json">'
+    +'<div id="d-report" style="margin-top:10px"></div>'
+    +(sampleOn?'<div class="notice" style="margin-top:12px">You are viewing sample data. Turn sample data off (flask, top right) before exporting or restoring — exports are blocked in sample mode so demo data never overwrites your real records.</div>':'')
+    +'</div>';
+  el.innerHTML=h;
+  document.getElementById('rep-range').addEventListener('change',function(){reportKind=this.value;renderReports();});
+  document.getElementById('rep-print').addEventListener('click',function(){sndClick();window.print();});
+  document.getElementById('d-csv').addEventListener('click',function(){
+    if(sampleOn){toast('Turn sample data off before exporting.');return;}
+    var rows=[['date','instrument','piece','minutes','focus','feel_1_to_5','notes'].join(',')];
+    state.sessions.slice().sort(function(a,b){return a.date<b.date?-1:1;}).forEach(function(s){
+      rows.push([s.date,instName(s.instrumentId),pieceTitle(s.pieceId),s.minutes,s.focus||'',s.mood||'',s.notes||''].map(csvEsc).join(','));});
+    download('practiceledger-sessions.csv',rows.join('\n'),'text/csv');sndOk();toast('CSV exported.');});
+  document.getElementById('d-json').addEventListener('click',function(){
+    if(sampleOn){toast('Turn sample data off before backing up.');return;}
+    download('practiceledger-backup.json',JSON.stringify({app:'practiceledger',version:1,exported:todayStr(),data:state},null,2),'application/json');sndOk();toast('Backup downloaded.');});
+  document.getElementById('d-file').addEventListener('change',function(){
+    if(sampleOn){toast('Turn sample data off before restoring.');this.value='';return;}
+    var f=this.files[0];if(!f)return;var rd=new FileReader();
+    rd.onload=function(){
+      try{
+        var obj=JSON.parse(rd.result);
+        if(!obj||obj.app!=='practiceledger'||!obj.data)throw new Error('not a PracticeLedger backup');
+        var clean=sanitizeData(obj.data);
+        state=clean.data;save();renderAll();
+        document.getElementById('d-report').innerHTML='<div class="notice">Backup restored. Kept '+clean.kept+' records; dropped '+clean.dropped+' invalid entries. Review your Dashboard to confirm everything looks right.</div>';
+        toast('Backup restored.');
+      }catch(e){document.getElementById('d-report').innerHTML='<div class="notice">That file could not be restored ('+esc(e.message)+'). Your current records were not changed.</div>';}
+    };
+    rd.readAsText(f);this.value='';
+  });
+}
+function sanitizeData(d){
+  var out=defaultState(),kept=0,dropped=0;
+  function str(v,max){return typeof v==='string'?v.trim().slice(0,max):'';}
+  function okDate(v){return typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&!isNaN(parseD(v).getTime());}
+  if(d&&Array.isArray(d.instruments))d.instruments.forEach(function(i){var n=str(i&&i.name,60);if(n){out.instruments.push({id:str(i.id,40)||uid(),name:n});kept++;}else dropped++;});
+  var instIds={};out.instruments.forEach(function(i){instIds[i.id]=1;});
+  if(d&&Array.isArray(d.pieces))d.pieces.forEach(function(p){var t=str(p&&p.title,120);
+    if(t&&p&&instIds[p.instrumentId]){out.pieces.push({id:str(p.id,40)||uid(),title:t,composer:str(p.composer,80),instrumentId:p.instrumentId,status:STATUS.some(function(s){return s[0]===p.status;})?p.status:'learning'});kept++;}else dropped++;});
+  var pieceIds={};out.pieces.forEach(function(p){pieceIds[p.id]=1;});
+  if(d&&Array.isArray(d.sessions))d.sessions.forEach(function(s){
+    if(s&&okDate(s.date)&&instIds[s.instrumentId]){out.sessions.push({id:str(s.id,40)||uid(),date:s.date,minutes:clampInt(s.minutes,1,1440),instrumentId:s.instrumentId,pieceId:pieceIds[s.pieceId]?s.pieceId:null,focus:str(s.focus,120),mood:[1,2,3,4,5].indexOf(s.mood)>=0?s.mood:null,notes:str(s.notes,600)});kept++;}else dropped++;});
+  if(d&&Array.isArray(d.plan))d.plan.forEach(function(p){
+    if(p&&instIds[p.instrumentId]){out.plan.push({id:str(p.id,40)||uid(),weekday:clampInt(p.weekday,0,6),pieceId:pieceIds[p.pieceId]?p.pieceId:null,instrumentId:p.instrumentId,minutes:clampInt(p.minutes,1,1440),focus:str(p.focus,120)});kept++;}else dropped++;});
+  if(d&&d.goals){out.goals.weeklyMinutes=clampInt(d.goals.weeklyMinutes,0,10080);out.goals.weeklySessions=clampInt(d.goals.weeklySessions,0,50);}
+  if(d&&d.settings){out.settings.dark=['auto','light','dark'].indexOf(d.settings.dark)>=0?d.settings.dark:'auto';out.settings.sound=d.settings.sound!==false;}
+  return{data:out,kept:kept,dropped:dropped};
+}
+/* ---------- render: about ---------- */
+function renderAbout(){
+  document.getElementById('tab-about').innerHTML=
+  '<div class="card"><h2>About PracticeLedger</h2>'
+  +'<p>PracticeLedger is a practice log and weekly planner for musicians who would rather practise than maintain a subscription. Log sessions by instrument and piece, plan your week once and reuse it, set goals, and print a clean report for your teacher or for yourself.</p>'
+  +'<h3>What it does</h3><p>Session logging with focus notes and a 1–5 feel rating · repertoire tracking with learning/polishing/ready stages · a repeating weekly plan with done/not-done checks · weekly minute and session goals · streaks and a 17-week practice heatmap · clickable charts (minutes by week, time by piece, time by instrument) · printable practice reports · CSV export and full JSON backup/restore.</p>'
+  +'<h3>Honest notes</h3><p>This is a record book, not a teacher. It does not record audio, tune your instrument, or judge your playing — plenty of apps do those jobs, and they are not what a log is for. There are no reminders or notifications: open the app and today&rsquo;s plan is waiting. Your records are stored only in this browser on this device; they are not uploaded anywhere, and there is no account. Because of that, export a backup (Reports &amp; Data) now and then — if you clear browser data without a backup, the records go with it.</p>'
+  +'<h3>Questions or problems?</h3><p>Use the contact option on the store page where you downloaded PracticeLedger and you will reach the maker directly.</p></div>';
+}
+/* ---------- shell ---------- */
+function applyDark(){
+  var dark=state.settings.dark==='dark'||(state.settings.dark==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.classList.toggle('dark',dark);
+  document.getElementById('btnDark').classList.toggle('on',dark);
+}
+function applySoundBtn(){
+  var b=document.getElementById('btnSound');
+  b.classList.toggle('on',!!state.settings.sound);
+  b.querySelectorAll('.sw1,.sw2').forEach(function(p){p.style.display=state.settings.sound?'':'none';});
+  b.title=state.settings.sound?'Sound: on':'Sound: off';
+}
+function renderSampleBanner(){
+  var el=document.getElementById('sampleBanner');
+  document.getElementById('btnSample').classList.toggle('on',sampleOn);
+  el.innerHTML=sampleOn?'<div class="notice"><span class="sampletag">Sample data</span> You are looking at demo records. Turn sample mode off (flask, top right) to return to your own data, exactly as you left it.</div>':'';
+}
+function renderAll(){renderSampleBanner();renderDashboard();renderPractice();renderPlanner();renderPieces();renderCharts();renderReports();renderAbout();}
+function switchTab(name){
+  document.querySelectorAll('#tabs button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-tab')===name);});
+  ['dashboard','practice','planner','pieces','charts','reports','about'].forEach(function(t){
+    document.getElementById('tab-'+t).hidden=t!==name;});
+  if(name==='dashboard')renderDashboard();if(name==='charts')renderCharts();if(name==='reports')renderReports();
+  sndClick();window.scrollTo(0,0);
+}
+document.querySelectorAll('#tabs button').forEach(function(b){b.addEventListener('click',function(){switchTab(b.getAttribute('data-tab'));});});
+document.getElementById('btnDark').addEventListener('click',function(){
+  var cur=document.body.classList.contains('dark');
+  state.settings.dark=cur?'light':'dark';save();applyDark();sndClick();});
+document.getElementById('btnSound').addEventListener('click',function(){
+  state.settings.sound=!state.settings.sound;save();applySoundBtn();sndClick();});
+var LS_SNAP='practiceledger_v1_snapshot';
+document.getElementById('btnSample').addEventListener('click',function(){
+  if(!sampleOn){
+    try{localStorage.setItem(LS_SNAP,JSON.stringify(state));}catch(e){}
+    snapshot=JSON.stringify(state);state=sampleData();sampleOn=true;
+  } else {
+    var snap=null;try{snap=localStorage.getItem(LS_SNAP)||snapshot;}catch(e){snap=snapshot;}
+    if(snap){try{state=JSON.parse(snap);}catch(e){}}
+    try{localStorage.removeItem(LS_SNAP);}catch(e){}
+    sampleOn=false;snapshot=null;
+  }
+  save();applyDark();applySoundBtn();renderAll();switchTab('dashboard');
+  toast(sampleOn?'Sample data on — your real records are saved and will come back exactly, even after a reload.':'Sample data off — your records are back.');
+});
+load();
+try{if(localStorage.getItem(LS_SNAP)){sampleOn=true;snapshot=localStorage.getItem(LS_SNAP);}}catch(e){}
+applyDark();applySoundBtn();renderAll();
+</script>
+</body>
+</html>
