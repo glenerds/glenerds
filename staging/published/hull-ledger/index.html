@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HullLedger — Boat Maintenance Log &amp; Service History Tracker | Engine Hours, Service Due Dates, Fuel &amp; Expense Records</title>
+<style>
+:root{
+  --bg:#f3f6f8; --panel:#ffffff; --panel2:#e8eef2; --ink:#182430; --muted:#5a6a78;
+  --line:#d2dde4; --acc:#0f6a8a; --acc2:#1280a6; --good:#1e7a46; --warn:#a86e05; --bad:#b03a2e;
+  --chip:#e2ebf1; --shadow:0 1px 4px rgba(15,50,70,.10);
+  color-scheme: light;
+}
+html[data-theme="dark"]{
+  --bg:#0e151c; --panel:#182230; --panel2:#212f42; --ink:#e8f0f7; --muted:#a7bacd;
+  --line:#31435a; --acc:#4db3d9; --acc2:#6cc3e6; --good:#63cc8f; --warn:#e3b95c; --bad:#ef8a7a;
+  --chip:#243449; --shadow:0 1px 4px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+header{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:.55rem .9rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.55rem;font-weight:800;font-size:22px;letter-spacing:.2px}
+.logo-badge{width:40px;height:40px;border-radius:10px;background:var(--acc);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.logo-badge svg{width:26px;height:26px;fill:#fff}
+.hspace{flex:1}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.5rem .8rem;cursor:pointer;min-height:44px}
+button:hover{border-color:var(--acc2)}
+button.primary{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:700}
+button.primary:hover{background:var(--acc2)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.small{min-height:38px;padding:.3rem .6rem;font-size:15px}
+button.seg[aria-pressed="true"]{background:var(--acc);color:#fff;border-color:var(--acc)}
+.iconbtn{width:44px;height:44px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:12px}
+.iconbtn svg{width:23px;height:23px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.iconbtn[aria-pressed="true"]{background:var(--chip)}
+a.moreapps{display:inline-flex;align-items:center;gap:.4rem;height:44px;padding:0 .9rem;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--ink);text-decoration:none;font-weight:600}
+a.moreapps:hover{border-color:var(--acc2)}
+#sampleBanner{display:none;background:var(--warn);color:#1d1607;font-weight:700;text-align:center;padding:.45rem .8rem;font-size:15px}
+#sampleBanner.on{display:block}
+nav.tabs{display:flex;gap:.4rem;flex-wrap:wrap;justify-content:center;padding:.6rem .9rem 0}
+nav.tabs button{border-radius:999px;padding:.45rem .95rem}
+nav.tabs button[aria-selected="true"]{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+main{max-width:1180px;margin:0 auto;padding:.9rem}
+.view{display:none}
+.view.on{display:block}
+.grid{display:grid;gap:.9rem;align-items:start}
+.grid.c2{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}
+.grid.charts2{grid-template-columns:repeat(auto-fit,minmax(min(520px,100%),1fr));align-items:stretch}
+.grid.c3{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.grid.c4{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:1rem;box-shadow:var(--shadow)}
+.card h2{margin:.1rem 0 .6rem;font-size:19px}
+.card h3{margin:.8rem 0 .4rem;font-size:16px}
+.stat .num{font-size:30px;font-weight:800;line-height:1.1}
+.stat .lab{color:var(--muted);font-size:15px}
+.muted{color:var(--muted)}
+.tag{display:inline-block;background:var(--chip);border-radius:999px;padding:.08rem .6rem;font-size:15px;margin:.1rem .15rem .1rem 0}
+.tag.good{background:rgba(30,122,70,.16);color:var(--good)}
+.tag.warn{background:rgba(168,110,5,.18);color:var(--warn)}
+.tag.bad{background:rgba(176,58,46,.15);color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:.42rem .5rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600}
+form .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem;margin-bottom:.6rem}
+label{display:block;font-size:15px;color:var(--muted);margin-bottom:.15rem}
+input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:.5rem .6rem;min-height:44px}
+textarea{min-height:64px;resize:vertical}
+input[type="checkbox"]{width:22px;height:22px;min-height:0;vertical-align:middle}
+.btnrow{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
+.listitem{border:1px solid var(--line);border-radius:12px;padding:.75rem .85rem;margin-bottom:.6rem;background:var(--panel)}
+.listitem .head{display:flex;gap:.5rem;align-items:baseline;flex-wrap:wrap}
+.listitem .head b{font-size:17px}
+.notice{border:1px solid var(--warn);background:rgba(168,110,5,.10);border-radius:12px;padding:.7rem .9rem;margin-bottom:.9rem}
+.hint{font-size:15px;color:var(--warn);margin:.3rem 0}
+.chartwrap{width:100%}
+#view-charts .card{display:flex;flex-direction:column}
+#view-charts .chartwrap{flex:1;display:flex;align-items:center}
+#view-charts .detail{margin-top:auto}
+.chartwrap svg{width:100%;height:auto;display:block}
+.detail{background:var(--panel2);border-radius:10px;padding:.6rem .8rem;margin-top:.6rem;font-size:15px}
+footer{max-width:1180px;margin:0 auto;padding:1rem .9rem 2rem;color:var(--muted);font-size:15px}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:.6rem 1rem;border-radius:999px;font-size:15px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:92vw;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#printArea{display:none}
+@media print{
+  body>*{display:none !important}
+  #printArea{display:block !important;color:#000;background:#fff;font-size:13px}
+  #printArea h1{font-size:20px;margin:0 0 4px}
+  #printArea h2{font-size:15px;margin:14px 0 4px;border-bottom:1px solid #999;padding-bottom:2px}
+  #printArea table{font-size:12px}
+  #printArea th,#printArea td{border-bottom:1px solid #bbb;padding:3px 5px;color:#000}
+  .pbrk{page-break-before:always}
+}
+@media (max-width:560px){ .brand{font-size:19px} main{padding:.7rem} }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5 3.5 20.2c2.9 1.2 5.7 1.2 8.5-.4 2.8 1.6 5.6 1.6 8.5.4L12 2.5Zm0 3.4 5.1 10.6c-1.7.5-3.4.3-5.1-.7-1.7 1-3.4 1.2-5.1.7L12 5.9Z"/></svg></span>HullLedger</div>
+  <div class="hspace"></div>
+  <a class="moreapps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+  <button class="iconbtn" id="flaskBtn" title="Try sample data" aria-pressed="false" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M10 3v5.2L4.8 18a2.4 2.4 0 0 0 2.1 3.5h10.2A2.4 2.4 0 0 0 19.2 18L14 8.2V3"/><path d="M7.5 14h9"/></svg></button>
+  <button class="iconbtn" id="themeBtn" title="Dark mode" aria-pressed="false" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.2 8.2 0 0 1 10.8 4 8.5 8.5 0 1 0 20 13.2Z"/></svg></button>
+  <button class="iconbtn" id="soundBtn" title="Sound" aria-pressed="true" aria-label="Toggle sound"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4Z"/><path class="sndw" d="M15.5 9.5a3.6 3.6 0 0 1 0 5M18 7a6.8 6.8 0 0 1 0 10"/></svg></button>
+</header>
+<div id="sampleBanner">Sample data is on — you are looking at demo records. Toggle the flask to get your own records back.</div>
+<nav class="tabs" role="tablist">
+  <button data-tab="dashboard" aria-selected="true">Dashboard</button>
+  <button data-tab="boats" aria-selected="false">Boats</button>
+  <button data-tab="equipment" aria-selected="false">Equipment</button>
+  <button data-tab="service" aria-selected="false">Service</button>
+  <button data-tab="fuel" aria-selected="false">Fuel</button>
+  <button data-tab="parts" aria-selected="false">Parts</button>
+  <button data-tab="expenses" aria-selected="false">Expenses</button>
+  <button data-tab="documents" aria-selected="false">Documents</button>
+  <button data-tab="charts" aria-selected="false">Charts</button>
+  <button data-tab="reports" aria-selected="false">Reports &amp; Data</button>
+  <button data-tab="about" aria-selected="false">About</button>
+</nav>
+<main>
+  <section class="view on" id="view-dashboard"></section>
+  <section class="view" id="view-boats"></section>
+  <section class="view" id="view-equipment"></section>
+  <section class="view" id="view-service"></section>
+  <section class="view" id="view-fuel"></section>
+  <section class="view" id="view-parts"></section>
+  <section class="view" id="view-expenses"></section>
+  <section class="view" id="view-documents"></section>
+  <section class="view" id="view-charts"></section>
+  <section class="view" id="view-reports"></section>
+  <section class="view" id="view-about"></section>
+</main>
+<footer>HullLedger keeps your boat records on this device only — no account, no sync, no subscription, and your records cannot vanish if a company folds. Export a backup from Reports &amp; Data and keep it somewhere safe.</footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="printArea"></div>
+<script>
+"use strict";
+const APP_NAME="HullLedger", LS_KEY="hullledger_v1";
+const $=s=>document.querySelector(s);
+let uidC=0;
+const uid=()=>"id"+Date.now().toString(36)+(uidC++).toString(36)+Math.random().toString(36).slice(2,7);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>{if(typeof v==="number")return isFinite(v)?v:0;const s=String(v==null?"":v).trim();if(!/^-?(\d+\.?\d*|\.\d+)$/.test(s))return 0;const n=parseFloat(s);return isFinite(n)?n:0;};
+const pad=n=>String(n).padStart(2,"0");
+const dstr=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const todayStr=()=>dstr(new Date());
+const parseD=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||""))return null;const p=s.split("-").map(Number);const d=new Date(p[0],p[1]-1,p[2]);return(d.getFullYear()===p[0]&&d.getMonth()===p[1]-1&&d.getDate()===p[2])?d:null;};
+const fmtD=s=>{const d=parseD(s);return d?d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}):"—";};
+const addDays=(s,n)=>{const d=parseD(s);if(!d)return "";d.setDate(d.getDate()+n);return dstr(d);};
+const diffDays=(a,b)=>{const da=parseD(a),db=parseD(b);if(!da||!db)return null;return Math.round((db-da)/864e5);};
+const daysInMonth=(y,m)=>new Date(y,m+1,0).getDate();
+function addCalMonths(s,n){const d=parseD(s);if(!d)return "";const t=new Date(d.getFullYear(),d.getMonth()+n,1);const day=Math.min(d.getDate(),daysInMonth(t.getFullYear(),t.getMonth()));return dstr(new Date(t.getFullYear(),t.getMonth(),day));}
+const monthKey=s=>(s||"").slice(0,7);
+const monthLabel=k=>{const d=parseD(k+"-01");return d?d.toLocaleDateString(undefined,{month:"short",year:"2-digit"}):k;};
+/* money: INTEGER CENTS everywhere. Never sum float dollars. */
+const money2c=v=>Math.max(0,Math.round(num(v)*100));
+const fmt$=c=>{const v=Math.round(c||0);const neg=v<0;const a=Math.abs(v);return (neg?"-$":"$")+(Math.floor(a/100)).toLocaleString()+"."+pad(a%100);};
+const fmt$0=c=>{const v=Math.round((c||0)/100);return (v<0?"-$":"$")+Math.abs(v).toLocaleString();};
+const hrs1=v=>Math.max(0,Math.round(num(v)*10)/10);
+const fmtH=v=>{const n=hrs1(v);return (n%1===0?n.toFixed(0):n.toFixed(1));};
+/* CSV safety: neutralize spreadsheet formula injection (leading =, +, -, @, tab, CR after optional spaces). */
+const csvCell=v=>{let s=String(v==null?"":v);if(/^\s*[=+\-@\t\r]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';};
+
+const BOAT_TYPES=["Powerboat","Sailboat","Pontoon","Trawler","Catamaran","Fishing boat","Other"];
+const SYSTEMS=["Engine","Generator","Electrical","Plumbing","Hull & Deck","Safety","Rigging","Trailer","Electronics","Other"];
+const EXP_CATS=["Mooring & slip","Insurance","Storage","Repairs","Upgrades","Registration & fees","Cleaning & detailing","Other"];
+const DOC_KINDS=["Registration","Insurance","Documentation (USCG)","Safety inspection","Warranty","Other"];
+
+/* ---------- state ---------- */
+function blankData(){return {boats:[],equipment:[],readings:[],tasks:[],service:[],fuel:[],parts:[],expenses:[],documents:[]};}
+let S=null;
+function defaultState(){return {v:1,settings:{sound:true,theme:null,boatId:""},data:blankData(),sample:{on:false,snapshot:null,prevBoatId:""}};}
+let saveWarned=false;
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(S));}catch(e){if(!saveWarned){saveWarned=true;try{toast("Warning: this browser could not save your records (storage full or blocked). Export a backup from Reports & Data.");}catch(e2){}}}}
+function load(){
+  let raw=null;try{raw=localStorage.getItem(LS_KEY);}catch(e){}
+  if(raw){
+    let p=null;try{p=JSON.parse(raw);}catch(e){}
+    if(p&&p.v===1&&p.data){
+      const clean=sanitizeData(p.data);
+      const snap=p.sample&&p.sample.snapshot?sanitizeData(p.sample.snapshot):null;
+      S={v:1,
+        settings:{sound:!(p.settings&&p.settings.sound===false),
+          theme:p.settings&&(p.settings.theme==="dark"||p.settings.theme==="light")?p.settings.theme:null,
+          boatId:p.settings&&typeof p.settings.boatId==="string"?p.settings.boatId:""},
+        data:clean?clean.data:blankData(),
+        sample:{on:!!(p.sample&&p.sample.on),snapshot:snap?snap.data:null,prevBoatId:p.sample&&typeof p.sample.prevBoatId==="string"?p.sample.prevBoatId:""}};
+    }else{
+      try{localStorage.setItem(LS_KEY+"_corrupt",raw);}catch(e){}
+    }
+  }
+  if(!S){S=defaultState();save();}
+}
+const D=()=>S.data;
+const boatById=id=>D().boats.find(b=>b.id===id);
+const eqById=id=>D().equipment.find(e=>e.id===id);
+const boatLabel=b=>b?b.name:"(removed boat)";
+const eqLabel=e=>e?e.name:"(general / whole boat)";
+function curBoatId(){
+  const id=S.settings.boatId;
+  if(id&&boatById(id))return id;
+  const first=D().boats[0];
+  return first?first.id:"";
+}
+/* current hour reading of a piece of equipment = latest reading by date (ties: latest logged hours wins only if it is the max that day) */
+function eqHours(eqId){
+  let best=null;
+  D().readings.forEach(r=>{if(r.equipmentId!==eqId)return;if(!best||r.date>=best.date)best=r;});
+  return best?best.hours:null;
+}
+
+/* ---------- task due math (deterministic, from your records) ---------- */
+function taskStatus(t){
+  const out={dueDate:"",dueHours:null,status:"ok",label:"",daysLeft:null,hoursLeft:null};
+  if(t.intervalMonths>0&&t.lastDone)out.dueDate=addCalMonths(t.lastDone,t.intervalMonths);
+  else if(t.oneTimeDue)out.dueDate=t.oneTimeDue;
+  if(t.intervalHours>0)out.dueHours=hrs1(t.lastDoneHours+t.intervalHours);
+  const eqH=t.equipmentId?eqHours(t.equipmentId):null;
+  let dateState=null,hourState=null;
+  if(out.dueDate){out.daysLeft=diffDays(todayStr(),out.dueDate);dateState=out.daysLeft<0?"overdue":(out.daysLeft<=30?"soon":"ok");}
+  if(out.dueHours!=null&&eqH!=null){out.hoursLeft=hrs1(out.dueHours-eqH);hourState=out.hoursLeft<=0?"overdue":(out.hoursLeft<=25?"soon":"ok");}
+  const rank={overdue:3,soon:2,ok:1};
+  const states=[dateState,hourState].filter(Boolean);
+  out.status=states.length?states.sort((a,b)=>rank[b]-rank[a])[0]:"none";
+  const bits=[];
+  if(out.dueDate)bits.push((dateState==="overdue"?"overdue since ":"due ")+fmtD(out.dueDate)+(out.daysLeft!=null&&dateState!=="overdue"?" ("+out.daysLeft+" days)":""));
+  if(out.dueHours!=null)bits.push("at "+fmtH(out.dueHours)+" hrs"+(eqH!=null?" (now "+fmtH(eqH)+"; "+(out.hoursLeft<=0?Math.abs(out.hoursLeft)+" over":out.hoursLeft+" left")+")":" (no reading logged yet)"));
+  out.label=bits.join(" · ")||"No schedule set";
+  return out;
+}
+
+/* ---------- sanitize / restore ---------- */
+function isDateStr(s){return typeof s==="string"&&!!parseD(s);}
+function sanitizeData(raw){
+  const dropped={boats:0,equipment:0,readings:0,tasks:0,service:0,fuel:0,parts:0,expenses:0,documents:0};
+  let corrected=0;
+  if(!raw||typeof raw!=="object")return null;
+  const arr=v=>Array.isArray(v)?v:[];
+  const okId=o=>o&&typeof o==="object"&&typeof o.id==="string"&&/^[A-Za-z0-9_-]{1,80}$/.test(o.id);
+  const str=v=>typeof v==="string"?v.slice(0,500):"";
+  const cents=v=>Math.max(0,Math.min(100000000,Math.round(num(v))));
+  const hours=v=>Math.max(0,Math.min(100000,hrs1(v)));
+  const gallons=v=>Math.max(0,Math.min(100000,Math.round(num(v)*100)/100));
+  const fixDate=(v,fb)=>{if(isDateStr(v))return v;if(typeof v==="string"&&v)corrected++;return fb;};
+  const boats=arr(raw.boats).filter(o=>{if(!okId(o)){dropped.boats++;return false;}return true;}).map(o=>({id:o.id,name:str(o.name)||"Boat",type:BOAT_TYPES.indexOf(o.type)>=0?o.type:"Other",year:str(o.year),make:str(o.make),model:str(o.model),hin:str(o.hin),homePort:str(o.homePort),bought:isDateStr(o.bought)?o.bought:"",paidCents:cents(o.paidCents),notes:str(o.notes)}));
+  const boatIds={};boats.forEach(b=>boatIds[b.id]=1);
+  const equipment=arr(raw.equipment).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.equipment++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,name:str(o.name)||"Equipment",system:SYSTEMS.indexOf(o.system)>=0?o.system:"Other",brand:str(o.brand),model:str(o.model),serial:str(o.serial),installed:isDateStr(o.installed)?o.installed:"",notes:str(o.notes)}));
+  const eqIds={};equipment.forEach(e=>eqIds[e.id]=1);
+  const readings=arr(raw.readings).filter(o=>{if(!okId(o)||!eqIds[o.equipmentId]){dropped.readings++;return false;}return true;}).map(o=>({id:o.id,equipmentId:o.equipmentId,date:fixDate(o.date,todayStr()),hours:hours(o.hours),notes:str(o.notes)}));
+  const tasks=arr(raw.tasks).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.tasks++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,equipmentId:eqIds[o.equipmentId]?o.equipmentId:"",title:str(o.title)||"Service task",intervalMonths:Math.max(0,Math.min(600,Math.round(num(o.intervalMonths)))),intervalHours:hours(o.intervalHours),lastDone:isDateStr(o.lastDone)?o.lastDone:"",lastDoneHours:hours(o.lastDoneHours),oneTimeDue:isDateStr(o.oneTimeDue)?o.oneTimeDue:"",notes:str(o.notes)}));
+  const taskIds={};tasks.forEach(t=>taskIds[t.id]=1);
+  const service=arr(raw.service).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.service++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,equipmentId:eqIds[o.equipmentId]?o.equipmentId:"",taskId:taskIds[o.taskId]?o.taskId:"",date:fixDate(o.date,todayStr()),hours:hours(o.hours),title:str(o.title)||"Service",costCents:cents(o.costCents),vendor:str(o.vendor),parts:str(o.parts),notes:str(o.notes)}));
+  const fuel=arr(raw.fuel).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.fuel++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,date:fixDate(o.date,todayStr()),gallons:gallons(o.gallons),costCents:cents(o.costCents),hours:hours(o.hours),place:str(o.place),notes:str(o.notes)}));
+  const parts=arr(raw.parts).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.parts++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,equipmentId:eqIds[o.equipmentId]?o.equipmentId:"",name:str(o.name)||"Part",partNo:str(o.partNo),qty:Math.max(0,Math.min(100000,Math.round(num(o.qty)))),location:str(o.location),costEachCents:cents(o.costEachCents),notes:str(o.notes)}));
+  const expenses=arr(raw.expenses).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.expenses++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,date:fixDate(o.date,todayStr()),category:EXP_CATS.indexOf(o.category)>=0?o.category:"Other",amountCents:cents(o.amountCents),vendor:str(o.vendor),notes:str(o.notes)}));
+  const documents=arr(raw.documents).filter(o=>{if(!okId(o)||!boatIds[o.boatId]){dropped.documents++;return false;}return true;}).map(o=>({id:o.id,boatId:o.boatId,kind:DOC_KINDS.indexOf(o.kind)>=0?o.kind:"Other",name:str(o.name)||"Document",ref:str(o.ref),expires:isDateStr(o.expires)?o.expires:"",notes:str(o.notes)}));
+  const droppedTotal=Object.keys(dropped).reduce((a,k)=>a+dropped[k],0);
+  return {data:{boats:boats,equipment:equipment,readings:readings,tasks:tasks,service:service,fuel:fuel,parts:parts,expenses:expenses,documents:documents},dropped:droppedTotal,droppedDetail:dropped,corrected:corrected};
+}
+
+/* ---------- sound / toast ---------- */
+let AC=null;
+let toastTimer=null;
+function toast(msg){const el=$("#toast");if(!el)return;el.textContent=msg;el.classList.add("on");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("on"),2800);}
+function beep(f){if(!S.settings.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();const o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f||760;o.type="sine";g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.09);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+.1);}catch(e){}}
+
+/* ---------- sample data (dates relative to today so due math demos cleanly) ---------- */
+function sampleData(){
+  const B=(name,type,year,make,model,port,off)=>({id:uid(),name:name,type:type,year:year,make:make,model:model,hin:"",homePort:port,bought:addDays(todayStr(),off),paidCents:0,notes:""});
+  const boats=[B("Wanderer","Sailboat","2008","Beneteau","Oceanis 31","Bloomington Lake Marina",-900),B("Lake Runner","Powerboat","2016","Bayliner","VR5 Bowrider","Monroe Harbor",-420)];
+  const E=(boatId,name,system,brand,model,serial)=>({id:uid(),boatId:boatId,name:name,system:system,brand:brand,model:model,serial:serial,installed:"",notes:""});
+  const eq=[
+    E(boats[0].id,"Yanmar 3YM20","Engine","Yanmar","3YM20","E-48210"),
+    E(boats[0].id,"House battery bank","Electrical","Trojan","T-105 x2",""),
+    E(boats[0].id,"Standing rigging","Rigging","","",""),
+    E(boats[0].id,"Raw water pump","Engine","Johnson","10-35157",""),
+    E(boats[1].id,"Mercury 150 FourStroke","Engine","Mercury","150 FourStroke","2B-611930"),
+    E(boats[1].id,"Fishfinder / GPS","Electronics","Garmin","ECHOMAP 73sv",""),
+    E(boats[1].id,"Galvanized trailer","Trailer","Shoreland'r","","")
+  ];
+  const R=(equipmentId,off,hours)=>({id:uid(),equipmentId:equipmentId,date:addDays(todayStr(),off),hours:hours,notes:""});
+  const readings=[R(eq[0].id,-160,1130),R(eq[0].id,-30,1184),R(eq[0].id,-4,1207.5),R(eq[4].id,-90,486),R(eq[4].id,-6,512.4)];
+  const T=(boatId,equipmentId,title,im,ih,lastOff,lastHrs,oneOff)=>({id:uid(),boatId:boatId,equipmentId:equipmentId,title:title,intervalMonths:im,intervalHours:ih,lastDone:lastOff==null?"":addDays(todayStr(),lastOff),lastDoneHours:lastHrs,oneTimeDue:oneOff==null?"":addDays(todayStr(),oneOff),notes:""});
+  const tasks=[
+    T(boats[0].id,eq[0].id,"Engine oil & filter change",0,100,-60,1158,null),
+    T(boats[0].id,eq[3].id,"Raw water impeller",12,0,-400,0,null),
+    T(boats[0].id,eq[2].id,"Standing rigging inspection",12,0,-200,0,null),
+    T(boats[0].id,"","Bottom paint & zincs",12,0,-330,0,null),
+    T(boats[1].id,eq[4].id,"Engine oil & gear lube",0,100,-120,452,null),
+    T(boats[1].id,eq[6].id,"Trailer bearing repack",24,0,-500,0,null),
+    T(boats[1].id,"","Winterize engine & systems",0,0,null,0,45)
+  ];
+  const SV=(boatId,equipmentId,taskId,off,hours,title,cost,vendor,parts)=>({id:uid(),boatId:boatId,equipmentId:equipmentId,taskId:taskId||"",date:addDays(todayStr(),off),hours:hours,title:title,costCents:cost,vendor:vendor,parts:parts,notes:""});
+  const service=[
+    SV(boats[0].id,eq[0].id,tasks[0].id,-60,1158,"Engine oil & filter change",8620,"Did it myself","Delo 400 15W-40, Yanmar filter"),
+    SV(boats[0].id,"",null,-330,0,"Bottom paint & zincs",41200,"Lakeside Marine","Interlux Micron, 2 zincs"),
+    SV(boats[0].id,eq[3].id,null,-400,0,"Raw water impeller",5400,"Did it myself","Johnson impeller kit"),
+    SV(boats[1].id,eq[4].id,tasks[4].id,-120,452,"Engine oil & gear lube",11840,"Did it myself","Mercury 25W-40, gear lube"),
+    SV(boats[1].id,eq[4].id,null,-45,0,"Water pump kit",23610,"Monroe Marine","Impeller + housing"),
+    SV(boats[0].id,eq[1].id,null,-150,0,"Replaced house battery bank",38924,"Batteries Plus","2x Trojan T-105")
+  ];
+  const FU=(boatId,off,gallons,cost,hours,place)=>({id:uid(),boatId:boatId,date:addDays(todayStr(),off),gallons:gallons,costCents:cost,hours:hours,place:place,notes:""});
+  const fuel=[
+    FU(boats[1].id,-88,18.4,7160,489.2,"Monroe Harbor fuel dock"),
+    FU(boats[1].id,-52,21.1,8450,498.6,"Monroe Harbor fuel dock"),
+    FU(boats[1].id,-21,16.2,6310,506.1,"Fourwinds Marina"),
+    FU(boats[1].id,-6,14.8,5920,512.4,"Monroe Harbor fuel dock"),
+    FU(boats[0].id,-95,9.6,4410,1171,"Bloomington Lake Marina"),
+    FU(boats[0].id,-30,8.2,3890,1184,"Bloomington Lake Marina")
+  ];
+  const PT=(boatId,equipmentId,name,partNo,qty,loc,cost)=>({id:uid(),boatId:boatId,equipmentId:equipmentId,name:name,partNo:partNo,qty:qty,location:loc,costEachCents:cost,notes:""});
+  const parts=[
+    PT(boats[0].id,eq[0].id,"Oil filter","Yanmar 119305-35170",2,"Port lazarette",1299),
+    PT(boats[0].id,eq[3].id,"Impeller kit","Johnson 09-1027B",1,"Engine spares box",4250),
+    PT(boats[1].id,eq[4].id,"Spark plugs (set of 4)","NGK ZFR5F",1,"Dock box",3196),
+    PT(boats[1].id,"","Fuel/water separator filter","Mercury 35-879194A03",1,"Dock box",1849)
+  ];
+  const EX=(boatId,off,cat,amt,vendor)=>({id:uid(),boatId:boatId,date:addDays(todayStr(),off),category:cat,amountCents:amt,vendor:vendor,notes:""});
+  const expenses=[
+    EX(boats[0].id,-200,"Mooring & slip",185000,"Bloomington Lake Marina"),
+    EX(boats[0].id,-90,"Insurance",48600,"Progressive"),
+    EX(boats[0].id,-40,"Cleaning & detailing",18000,"Did it myself"),
+    EX(boats[1].id,-150,"Storage",72000,"Indoor boat storage"),
+    EX(boats[1].id,-60,"Insurance",39200,"Progressive"),
+    EX(boats[1].id,-15,"Registration & fees",8650,"State BMV")
+  ];
+  const DC=(boatId,kind,name,ref,expOff)=>({id:uid(),boatId:boatId,kind:kind,name:name,ref:ref,expires:addDays(todayStr(),expOff),notes:""});
+  const documents=[
+    DC(boats[0].id,"Registration","State registration","IN 2214 SW",77),
+    DC(boats[0].id,"Insurance","Insurance policy","Policy ends in 4",310),
+    DC(boats[1].id,"Registration","State registration","IN 8841 TK",-12),
+    DC(boats[1].id,"Safety inspection","Courtesy safety check","",150)
+  ];
+  return {boats:boats,equipment:eq,readings:readings,tasks:tasks,service:service,fuel:fuel,parts:parts,expenses:expenses,documents:documents};
+}
+
+/* ---------- shared UI helpers ---------- */
+let editBoatId=null, editEqId=null, editTaskId=null, editSvcId=null, editFuelId=null, editPartId=null, editExpId=null, editDocId=null, editReadingId=null;
+const stat=(n,l)=>"<div class='card stat'><div class='num'>"+esc(n)+"</div><div class='lab'>"+esc(l)+"</div></div>";
+function boatPicker(){
+  const boats=D().boats;
+  if(!boats.length)return "";
+  const cur=curBoatId();
+  return "<div class='card' style='margin-bottom:.9rem'><label for='boatSel'>Showing records for</label><select id='boatSel'>"+
+    boats.map(b=>"<option value='"+b.id+"'"+(b.id===cur?" selected":"")+">"+esc(b.name)+"</option>").join("")+
+    "<option value='__all'"+(S.settings.boatId==="__all"?" selected":"")+">All boats</option></select></div>";
+}
+function shownBoatIds(){
+  if(S.settings.boatId==="__all")return D().boats.map(b=>b.id);
+  const id=curBoatId();
+  return id?[id]:[];
+}
+function dueTag(st){
+  if(st.status==="overdue")return "<span class='tag bad'>Overdue</span>";
+  if(st.status==="soon")return "<span class='tag warn'>Due soon</span>";
+  if(st.status==="ok")return "<span class='tag good'>On schedule</span>";
+  return "<span class='tag'>No schedule</span>";
+}
+function daysTag(days){
+  if(days==null)return "";
+  if(days<0)return "<span class='tag bad'>"+Math.abs(days)+" days overdue</span>";
+  if(days<=30)return "<span class='tag warn'>"+days+" days left</span>";
+  return "<span class='tag good'>"+days+" days left</span>";
+}
+function emptyNote(what,hintText){
+  return "<div class='card'><h2>No "+esc(what)+" yet</h2><p class='muted'>"+esc(hintText)+"</p></div>";
+}
+
+/* ---------- dashboard ---------- */
+function renderDashboard(){
+  const el=$("#view-dashboard");
+  if(!D().boats.length){
+    el.innerHTML="<div class='card'><h2>Your boat records, in one file you own</h2><p class='muted'>HullLedger tracks service due dates by calendar and engine hours, keeps your full service history, fuel, parts and expenses, and prints a service &amp; resale history for the next owner. Everything stays on this device — no account, no subscription, nothing that disappears if a company folds.</p><p class='muted'>Add your first boat on the Boats tab, or tap the flask (top right) to explore with sample data first.</p><div class='btnrow'><button class='primary' data-goto='boats'>Add your first boat</button></div></div>";
+    return;
+  }
+  const ids=shownBoatIds();
+  const inScope=x=>ids.indexOf(x.boatId)>=0;
+  const tasks=D().tasks.filter(inScope).map(t=>({t:t,st:taskStatus(t)})).sort((a,b)=>({overdue:0,soon:1,ok:2,none:3}[a.st.status]-{overdue:0,soon:1,ok:2,none:3}[b.st.status])||String(a.st.daysLeft).localeCompare(String(b.st.daysLeft)));
+  const overdue=tasks.filter(x=>x.st.status==="overdue"), soon=tasks.filter(x=>x.st.status==="soon");
+  const svc=D().service.filter(inScope), exp=D().expenses.filter(inScope), fuelL=D().fuel.filter(inScope);
+  const yr=new Date().getFullYear();
+  const svcYr=svc.filter(s=>s.date.slice(0,4)===String(yr)).reduce((a,s)=>a+s.costCents,0);
+  const expYr=exp.filter(s=>s.date.slice(0,4)===String(yr)).reduce((a,s)=>a+s.amountCents,0);
+  const gal=fuelL.reduce((a,f)=>a+f.gallons,0);
+  const docs=D().documents.filter(x=>inScope(x)&&x.expires).map(x=>({x:x,days:diffDays(todayStr(),x.expires)})).sort((a,b)=>a.days-b.days).slice(0,4);
+  const recentSvc=svc.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  let h=boatPicker();
+  h+="<div class='grid c4'>"+stat(String(overdue.length),"Overdue service items")+stat(String(soon.length),"Due in the next 30 days / 25 hrs")+stat(fmt$0(svcYr+expYr),"Spent in "+yr)+stat(Math.round(gal*10)/10+" gal","Fuel logged")+"</div>";
+  h+="<div class='grid c2' style='margin-top:.9rem'>";
+  h+="<div class='card'><h2>Service due</h2>";
+  if(!tasks.length)h+="<p class='muted'>No service tasks yet. Add tasks on the Service tab — each one can run on a calendar interval, an engine-hours interval, or both.</p>";
+  else h+=tasks.slice(0,6).map(x=>"<div class='listitem'><div class='head'><b>"+esc(x.t.title)+"</b>"+dueTag(x.st)+"</div><div class='muted'>"+esc(boatLabel(boatById(x.t.boatId)))+" · "+esc(x.st.label)+"</div></div>").join("");
+  h+="</div>";
+  h+="<div class='card'><h2>Recent service</h2>";
+  if(!recentSvc.length)h+="<p class='muted'>No service logged yet. Every job you record lands here and in the printable history.</p>";
+  else h+="<table><tr><th>Date</th><th>Job</th><th>Boat</th><th>Cost</th></tr>"+recentSvc.map(s=>"<tr><td>"+fmtD(s.date)+"</td><td>"+esc(s.title)+"</td><td>"+esc(boatLabel(boatById(s.boatId)))+"</td><td>"+fmt$(s.costCents)+"</td></tr>").join("")+"</table>";
+  if(docs.length)h+="<h3>Documents coming due</h3>"+docs.map(d=>"<div>"+esc(d.x.name)+" ("+esc(boatLabel(boatById(d.x.boatId)))+") — <b>"+(d.days<0?"expired "+fmtD(d.x.expires):"expires "+fmtD(d.x.expires))+"</b> "+daysTag(d.days)+"</div>").join("");
+  h+="</div></div>";
+  h+="<div class='card' style='margin-top:.9rem'><h2>Honest limits</h2><p class='muted'>HullLedger shows what is due when you open it — it cannot send phone notifications, read your hour meter, or judge what your boat needs. Intervals here are the ones you enter from your owner's manual; the app just does the calendar and hours math on your records.</p></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- boats ---------- */
+function renderBoats(){
+  const el=$("#view-boats");
+  const boats=D().boats;
+  let h="";
+  if(boats.length){
+    h+="<div class='grid c2'>"+boats.map(b=>{
+      const eqs=D().equipment.filter(e=>e.boatId===b.id).length;
+      const svcs=D().service.filter(s=>s.boatId===b.id);
+      const spent=svcs.reduce((a,s)=>a+s.costCents,0)+D().expenses.filter(s=>s.boatId===b.id).reduce((a,s)=>a+s.amountCents,0);
+      return "<div class='card'><h2>"+esc(b.name)+"</h2><div class='muted'>"+esc([b.year,b.make,b.model].filter(Boolean).join(" "))+(b.type?" · "+esc(b.type):"")+"</div>"+
+      (b.homePort?"<div>Home port: "+esc(b.homePort)+"</div>":"")+(b.hin?"<div>Hull ID: "+esc(b.hin)+"</div>":"")+(b.bought?"<div>Owned since "+fmtD(b.bought)+"</div>":"")+(b.paidCents?"<div>Paid "+fmt$(b.paidCents)+"</div>":"")+
+      "<div style='margin-top:.4rem'>"+eqs+" equipment items · "+svcs.length+" service jobs · "+fmt$0(spent)+" recorded spend</div>"+
+      (b.notes?"<div class='muted'>"+esc(b.notes)+"</div>":"")+
+      "<div class='btnrow'><button class='small' data-edit-boat='"+b.id+"'>Edit</button><button class='small' data-print-boat='"+b.id+"'>Print history</button><button class='small danger' data-del-boat='"+b.id+"'>Delete</button></div></div>";
+    }).join("")+"</div>";
+  }else{
+    h+=emptyNote("boats","Your boats live here — powerboat, sailboat, pontoon, whatever floats. Add the first one below.");
+  }
+  const b=editBoatId?boatById(editBoatId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(b?"Edit boat":"Add a boat")+"</h2><form id='boatForm'>"+
+    "<div class='row'><div><label>Boat name</label><input id='bf-name' required maxlength='120' value='"+esc(b?b.name:"")+"' placeholder='e.g. Wanderer'></div>"+
+    "<div><label>Type</label><select id='bf-type'>"+BOAT_TYPES.map(t=>"<option"+(b&&b.type===t?" selected":"")+">"+t+"</option>").join("")+"</select></div>"+
+    "<div><label>Year</label><input id='bf-year' maxlength='10' value='"+esc(b?b.year:"")+"' placeholder='2008'></div></div>"+
+    "<div class='row'><div><label>Make</label><input id='bf-make' maxlength='120' value='"+esc(b?b.make:"")+"'></div>"+
+    "<div><label>Model</label><input id='bf-model' maxlength='120' value='"+esc(b?b.model:"")+"'></div>"+
+    "<div><label>Hull ID (HIN) — optional</label><input id='bf-hin' maxlength='60' value='"+esc(b?b.hin:"")+"'></div></div>"+
+    "<div class='row'><div><label>Home port / marina</label><input id='bf-port' maxlength='120' value='"+esc(b?b.homePort:"")+"'></div>"+
+    "<div><label>Date you got it</label><input id='bf-bought' type='date' value='"+esc(b?b.bought:"")+"'></div>"+
+    "<div><label>What you paid ($)</label><input id='bf-paid' inputmode='decimal' value='"+(b&&b.paidCents?(b.paidCents/100):"")+"'></div></div>"+
+    "<div><label>Notes</label><textarea id='bf-notes'>"+esc(b?b.notes:"")+"</textarea></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(b?"Save changes":"Add boat")+"</button>"+(b?"<button type='button' id='bf-cancel'>Cancel edit</button>":"")+"</div></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- equipment + hour readings ---------- */
+function renderEquipment(){
+  const el=$("#view-equipment");
+  if(!D().boats.length){el.innerHTML=emptyNote("equipment","Add a boat first (Boats tab), then register its engine, generator and systems here.");return;}
+  const ids=shownBoatIds();
+  const eqs=D().equipment.filter(e=>ids.indexOf(e.boatId)>=0);
+  let h=boatPicker();
+  if(eqs.length){
+    h+="<div class='grid c2'>"+eqs.map(e=>{
+      const hrs=eqHours(e.id);
+      const svcCount=D().service.filter(s=>s.equipmentId===e.id).length;
+      const taskCount=D().tasks.filter(t=>t.equipmentId===e.id).length;
+      const reads=D().readings.filter(r=>r.equipmentId===e.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,3);
+      return "<div class='card'><h2>"+esc(e.name)+"</h2><div class='muted'>"+esc(e.system)+" · "+esc(boatLabel(boatById(e.boatId)))+"</div>"+
+      ([e.brand,e.model].filter(Boolean).length?"<div>"+esc([e.brand,e.model].filter(Boolean).join(" "))+"</div>":"")+
+      (e.serial?"<div>Serial: "+esc(e.serial)+"</div>":"")+(e.installed?"<div>Installed "+fmtD(e.installed)+"</div>":"")+
+      "<div style='margin-top:.35rem'><b>"+(hrs!=null?fmtH(hrs)+" hrs logged":"No hours logged yet")+"</b> · "+svcCount+" service jobs · "+taskCount+" scheduled tasks</div>"+
+      (reads.length?"<div class='muted'>Latest readings: "+reads.map(r=>fmtD(r.date)+" — "+fmtH(r.hours)+" hrs").join("; ")+"</div>":"")+
+      (e.notes?"<div class='muted'>"+esc(e.notes)+"</div>":"")+
+      "<div class='btnrow'><button class='small' data-hours-for='"+e.id+"'>Log hours</button><button class='small' data-edit-eq='"+e.id+"'>Edit</button><button class='small danger' data-del-eq='"+e.id+"'>Delete</button></div></div>";
+    }).join("")+"</div>";
+  }else h+=emptyNote("equipment","Register the engine, generator, batteries, rigging — anything you service or track by hours.");
+  const ed=editEqId?eqById(editEqId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(ed?"Edit equipment":"Add equipment")+"</h2><form id='eqForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='ef-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(ed&&ed.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Name</label><input id='ef-name' required maxlength='120' value='"+esc(ed?ed.name:"")+"' placeholder='e.g. Main engine'></div>"+
+    "<div><label>System</label><select id='ef-system'>"+SYSTEMS.map(t=>"<option"+(ed&&ed.system===t?" selected":"")+">"+t+"</option>").join("")+"</select></div></div>"+
+    "<div class='row'><div><label>Brand</label><input id='ef-brand' maxlength='120' value='"+esc(ed?ed.brand:"")+"'></div>"+
+    "<div><label>Model</label><input id='ef-model' maxlength='120' value='"+esc(ed?ed.model:"")+"'></div>"+
+    "<div><label>Serial number</label><input id='ef-serial' maxlength='120' value='"+esc(ed?ed.serial:"")+"'></div></div>"+
+    "<div class='row'><div><label>Installed date</label><input id='ef-installed' type='date' value='"+esc(ed?ed.installed:"")+"'></div>"+
+    "<div><label>Notes</label><input id='ef-notes' maxlength='300' value='"+esc(ed?ed.notes:"")+"'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(ed?"Save changes":"Add equipment")+"</button>"+(ed?"<button type='button' id='ef-cancel'>Cancel edit</button>":"")+"</div></form></div>";
+  const re=editReadingId?D().readings.find(r=>r.id===editReadingId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(re?"Edit hour reading":"Log engine / equipment hours")+"</h2><form id='readForm'>"+
+    "<div class='row'><div><label>Equipment</label><select id='rf-eq'>"+D().equipment.map(e=>"<option value='"+e.id+"'"+(re&&re.equipmentId===e.id?" selected":"")+">"+esc(e.name)+" ("+esc(boatLabel(boatById(e.boatId)))+")</option>").join("")+"</select></div>"+
+    "<div><label>Date</label><input id='rf-date' type='date' required value='"+esc(re?re.date:todayStr())+"'></div>"+
+    "<div><label>Hour meter reading</label><input id='rf-hours' inputmode='decimal' required value='"+(re?re.hours:"")+"' placeholder='e.g. 1207.5'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(re?"Save changes":"Log reading")+"</button>"+(re?"<button type='button' id='rf-cancel'>Cancel edit</button>":"")+"</div></form>"+
+    "<p class='muted'>Due-by-hours math uses the newest reading on or before today. Log a reading after each outing and the Service tab always knows where you stand.</p></div>";
+  const recentReads=D().readings.filter(r=>ids.indexOf((eqById(r.equipmentId)||{}).boatId)>=0).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  if(recentReads.length)h+="<div class='card' style='margin-top:.9rem'><h2>Recent readings</h2><table><tr><th>Date</th><th>Equipment</th><th>Hours</th><th></th></tr>"+recentReads.map(r=>"<tr><td>"+fmtD(r.date)+"</td><td>"+esc(eqLabel(eqById(r.equipmentId)))+"</td><td>"+fmtH(r.hours)+"</td><td><button class='small' data-edit-reading='"+r.id+"'>Edit</button> <button class='small danger' data-del-reading='"+r.id+"'>Delete</button></td></tr>").join("")+"</table></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- service: tasks + history ---------- */
+function renderService(){
+  const el=$("#view-service");
+  if(!D().boats.length){el.innerHTML=emptyNote("service","Add a boat first (Boats tab), then set up its recurring service tasks here.");return;}
+  const ids=shownBoatIds();
+  const inScope=x=>ids.indexOf(x.boatId)>=0;
+  const tasks=D().tasks.filter(inScope).map(t=>({t:t,st:taskStatus(t)})).sort((a,b)=>({overdue:0,soon:1,ok:2,none:3}[a.st.status]-{overdue:0,soon:1,ok:2,none:3}[b.st.status])||String(a.st.dueDate).localeCompare(String(b.st.dueDate)));
+  let h=boatPicker();
+  h+="<div class='card'><h2>Service tasks — what is due</h2>";
+  if(!tasks.length)h+="<p class='muted'>No tasks yet. Add one below: oil every 100 engine hours, impeller every 12 months, whichever style your manual uses — or both.</p>";
+  else h+=tasks.map(x=>"<div class='listitem'><div class='head'><b>"+esc(x.t.title)+"</b>"+dueTag(x.st)+"</div><div class='muted'>"+esc(boatLabel(boatById(x.t.boatId)))+" · "+esc(eqLabel(eqById(x.t.equipmentId)))+"</div><div>"+esc(x.st.label)+"</div>"+
+    (x.t.intervalHours>0&&!x.t.equipmentId?"<div class='hint'>Hours-based due dates need an engine — edit this task and pick the equipment so its hour readings can drive the math.</div>":"")+
+    (x.t.lastDone?"<div class='muted'>Last done "+fmtD(x.t.lastDone)+(x.t.lastDoneHours?" at "+fmtH(x.t.lastDoneHours)+" hrs":"")+"</div>":"<div class='muted'>Never logged yet</div>")+
+    "<div class='btnrow'><button class='small primary' data-done-task='"+x.t.id+"'>Log it done</button><button class='small' data-edit-task='"+x.t.id+"'>Edit</button><button class='small danger' data-del-task='"+x.t.id+"'>Delete</button></div></div>").join("");
+  h+="<p class='hint'>Tip: due by date, by engine hours, or both. For hours, pick the engine under Equipment — the math reads its hour log.</p></div>";
+  const et=editTaskId?D().tasks.find(t=>t.id===editTaskId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(et?"Edit service task":"Add a service task")+"</h2><form id='taskForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='tf-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(et&&et.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Equipment (optional)</label><select id='tf-eq'><option value=''>Whole boat / general</option>"+D().equipment.map(e=>"<option value='"+e.id+"'"+(et&&et.equipmentId===e.id?" selected":"")+">"+esc(e.name)+" ("+esc(boatLabel(boatById(e.boatId)))+")</option>").join("")+"</select></div>"+
+    "<div><label>Task</label><input id='tf-title' required maxlength='160' value='"+esc(et?et.title:"")+"' placeholder='e.g. Engine oil & filter change'></div></div>"+
+    "<div class='row'><div><label>Interval — every N months (0 = none)</label><input id='tf-months' inputmode='numeric' value='"+(et?et.intervalMonths:"")+"' placeholder='12'></div>"+
+    "<div><label>Every N engine hours (0 = none)</label><input id='tf-hours' inputmode='decimal' value='"+(et?et.intervalHours:"")+"' placeholder='100'></div>"+
+    "<div><label>One-time due date (if no interval)</label><input id='tf-once' type='date' value='"+esc(et?et.oneTimeDue:"")+"'></div></div>"+
+    "<div class='row'><div><label>Last done date</label><input id='tf-lastdate' type='date' value='"+esc(et?et.lastDone:"")+"'></div>"+
+    "<div><label>Last done at hours</label><input id='tf-lasthours' inputmode='decimal' value='"+(et?et.lastDoneHours:"")+"'></div>"+
+    "<div><label>Notes</label><input id='tf-notes' maxlength='300' value='"+esc(et?et.notes:"")+"'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(et?"Save changes":"Add task")+"</button>"+(et?"<button type='button' id='tf-cancel'>Cancel edit</button>":"")+"</div>"+
+    "<p class='muted'>Use the intervals from your owner's manual — HullLedger does the math, it does not decide what your boat needs.</p></form></div>";
+  const svc=D().service.filter(inScope).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const es=editSvcId?D().service.find(s=>s.id===editSvcId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>Service history</h2>";
+  if(svc.length)h+="<table><tr><th>Date</th><th>Job</th><th>Boat / equipment</th><th>Hours</th><th>Cost</th><th>Vendor</th><th></th></tr>"+svc.slice(0,40).map(s=>"<tr><td>"+fmtD(s.date)+"</td><td>"+esc(s.title)+"</td><td>"+esc(boatLabel(boatById(s.boatId)))+" · "+esc(eqLabel(eqById(s.equipmentId)))+"</td><td>"+(s.hours?fmtH(s.hours):"—")+"</td><td>"+fmt$(s.costCents)+"</td><td>"+esc(s.vendor||"—")+"</td><td><button class='small' data-edit-svc='"+s.id+"'>Edit</button> <button class='small danger' data-del-svc='"+s.id+"'>Delete</button></td></tr>").join("")+"</table>"+(svc.length>40?"<p class='muted'>Showing the newest 40 of "+svc.length+" jobs — the full history is in the printable report and CSV export.</p>":"");
+  else h+="<p class='muted'>No service logged yet. When you finish a job, log it below — this becomes the history a future buyer will thank you for.</p>";
+  h+="</div>";
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(es?"Edit service job":"Log a service job")+"</h2><form id='svcForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='sf-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(es&&es.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Equipment (optional)</label><select id='sf-eq'><option value=''>Whole boat / general</option>"+D().equipment.map(e=>"<option value='"+e.id+"'"+(es&&es.equipmentId===e.id?" selected":"")+">"+esc(e.name)+" ("+esc(boatLabel(boatById(e.boatId)))+")</option>").join("")+"</select></div>"+
+    "<div><label>Linked task (optional)</label><select id='sf-task'><option value=''>None</option>"+D().tasks.map(t=>"<option value='"+t.id+"'"+(es&&es.taskId===t.id?" selected":"")+">"+esc(t.title)+"</option>").join("")+"</select></div></div>"+
+    "<div class='row'><div><label>Date</label><input id='sf-date' type='date' required value='"+esc(es?es.date:todayStr())+"'></div>"+
+    "<div><label>Hours at service</label><input id='sf-hours' inputmode='decimal' value='"+(es?es.hours:"")+"'></div>"+
+    "<div><label>Job</label><input id='sf-title' required maxlength='160' value='"+esc(es?es.title:"")+"'></div></div>"+
+    "<div class='row'><div><label>Cost ($)</label><input id='sf-cost' inputmode='decimal' value='"+(es&&es.costCents?(es.costCents/100):"")+"'></div>"+
+    "<div><label>Vendor / who did it</label><input id='sf-vendor' maxlength='120' value='"+esc(es?es.vendor:"")+"'></div>"+
+    "<div><label>Parts used</label><input id='sf-parts' maxlength='300' value='"+esc(es?es.parts:"")+"'></div></div>"+
+    "<div><label>Notes</label><textarea id='sf-notes'>"+esc(es?es.notes:"")+"</textarea></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(es?"Save changes":"Log service")+"</button>"+(es?"<button type='button' id='sf-cancel'>Cancel edit</button>":"")+"</div>"+
+    "<p class='muted'>Saving a job with a linked task also updates that task's last-done date and hours.</p></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- fuel ---------- */
+function renderFuel(){
+  const el=$("#view-fuel");
+  if(!D().boats.length){el.innerHTML=emptyNote("fuel entries","Add a boat first (Boats tab), then log every fill-up here.");return;}
+  const ids=shownBoatIds();
+  const list=D().fuel.filter(f=>ids.indexOf(f.boatId)>=0).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const totGal=list.reduce((a,f)=>a+f.gallons,0), totCost=list.reduce((a,f)=>a+f.costCents,0);
+  /* burn rate: gallons per hour between consecutive fills that carry hour readings, per boat */
+  let burnTxt="Log hour readings with your fill-ups and HullLedger computes gallons-per-hour between fills.";
+  const byBoat={};list.forEach(f=>{if(f.hours>0){(byBoat[f.boatId]=byBoat[f.boatId]||[]).push(f);}});
+  const burns=[];
+  Object.keys(byBoat).forEach(bid=>{const arr=byBoat[bid].slice().sort((a,b)=>a.date.localeCompare(b.date));for(let i=1;i<arr.length;i++){const dh=arr[i].hours-arr[i-1].hours;if(dh>0)burns.push(arr[i].gallons/dh);}});
+  if(burns.length)burnTxt="Average burn across "+burns.length+" measured fill(s): <b>"+(Math.round(burns.reduce((a,b)=>a+b,0)/burns.length*100)/100)+" gal/hr</b>.";
+  let h=boatPicker();
+  h+="<div class='grid c3'>"+stat(Math.round(totGal*10)/10,"Gallons logged")+stat(fmt$0(totCost),"Fuel spend recorded")+stat(list.length,"Fill-ups")+"</div>";
+  h+="<div class='card' style='margin-top:.9rem'><h2>Fuel burn</h2><p>"+burnTxt+"</p></div>";
+  if(list.length)h+="<div class='card' style='margin-top:.9rem'><h2>Fill-ups</h2><table><tr><th>Date</th><th>Boat</th><th>Gallons</th><th>Cost</th><th>$/gal</th><th>Hours</th><th>Place</th><th></th></tr>"+list.slice(0,40).map(f=>"<tr><td>"+fmtD(f.date)+"</td><td>"+esc(boatLabel(boatById(f.boatId)))+"</td><td>"+f.gallons+"</td><td>"+fmt$(f.costCents)+"</td><td>"+(f.gallons>0?fmt$(Math.round(f.costCents/f.gallons)):"—")+"</td><td>"+(f.hours?fmtH(f.hours):"—")+"</td><td>"+esc(f.place||"—")+"</td><td><button class='small' data-edit-fuel='"+f.id+"'>Edit</button> <button class='small danger' data-del-fuel='"+f.id+"'>Delete</button></td></tr>").join("")+"</table></div>";
+  const ef=editFuelId?D().fuel.find(f=>f.id===editFuelId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(ef?"Edit fill-up":"Log a fill-up")+"</h2><form id='fuelForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='ff-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(ef&&ef.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Date</label><input id='ff-date' type='date' required value='"+esc(ef?ef.date:todayStr())+"'></div>"+
+    "<div><label>Gallons</label><input id='ff-gal' inputmode='decimal' required value='"+(ef?ef.gallons:"")+"'></div></div>"+
+    "<div class='row'><div><label>Total cost ($)</label><input id='ff-cost' inputmode='decimal' value='"+(ef&&ef.costCents?(ef.costCents/100):"")+"'></div>"+
+    "<div><label>Hour meter at fill</label><input id='ff-hours' inputmode='decimal' value='"+(ef?ef.hours:"")+"'></div>"+
+    "<div><label>Place</label><input id='ff-place' maxlength='120' value='"+esc(ef?ef.place:"")+"'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(ef?"Save changes":"Log fill-up")+"</button>"+(ef?"<button type='button' id='ff-cancel'>Cancel edit</button>":"")+"</div></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- parts ---------- */
+function renderParts(){
+  const el=$("#view-parts");
+  if(!D().boats.length){el.innerHTML=emptyNote("parts","Add a boat first (Boats tab), then keep your spares inventory here — what you have, how many, and where it lives.");return;}
+  const ids=shownBoatIds();
+  const list=D().parts.filter(p=>ids.indexOf(p.boatId)>=0);
+  const value=list.reduce((a,p)=>a+p.qty*p.costEachCents,0);
+  let h=boatPicker();
+  h+="<div class='grid c3'>"+stat(String(list.length),"Part lines")+stat(String(list.reduce((a,p)=>a+p.qty,0)),"Pieces on hand")+stat(fmt$0(value),"Shelf value at your cost")+"</div>";
+  if(list.length)h+="<div class='card' style='margin-top:.9rem'><h2>Spares inventory</h2><table><tr><th>Part</th><th>Part #</th><th>Qty</th><th>Location</th><th>Fits</th><th>Each</th><th></th></tr>"+list.map(p=>"<tr><td>"+esc(p.name)+"</td><td>"+esc(p.partNo||"—")+"</td><td>"+(p.qty===0?"<span class='tag bad'>Out</span>":p.qty)+"</td><td>"+esc(p.location||"—")+"</td><td>"+esc(eqLabel(eqById(p.equipmentId)))+"</td><td>"+(p.costEachCents?fmt$(p.costEachCents):"—")+"</td><td><button class='small' data-edit-part='"+p.id+"'>Edit</button> <button class='small danger' data-del-part='"+p.id+"'>Delete</button></td></tr>").join("")+"</table></div>";
+  else h+="<div style='margin-top:.9rem'>"+emptyNote("parts","Filters, impellers, plugs, zincs — log them with their storage spot and you will never buy a spare you already own.")+"</div>";
+  const ep=editPartId?D().parts.find(p=>p.id===editPartId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(ep?"Edit part":"Add a part")+"</h2><form id='partForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='pf-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(ep&&ep.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Equipment it fits (optional)</label><select id='pf-eq'><option value=''>General</option>"+D().equipment.map(e=>"<option value='"+e.id+"'"+(ep&&ep.equipmentId===e.id?" selected":"")+">"+esc(e.name)+" ("+esc(boatLabel(boatById(e.boatId)))+")</option>").join("")+"</select></div>"+
+    "<div><label>Part name</label><input id='pf-name' required maxlength='160' value='"+esc(ep?ep.name:"")+"'></div></div>"+
+    "<div class='row'><div><label>Part number</label><input id='pf-no' maxlength='120' value='"+esc(ep?ep.partNo:"")+"'></div>"+
+    "<div><label>Quantity on hand</label><input id='pf-qty' inputmode='numeric' value='"+(ep?ep.qty:"1")+"'></div>"+
+    "<div><label>Where it lives</label><input id='pf-loc' maxlength='120' value='"+esc(ep?ep.location:"")+"' placeholder='Dock box, port lazarette…'></div></div>"+
+    "<div class='row'><div><label>Cost each ($)</label><input id='pf-cost' inputmode='decimal' value='"+(ep&&ep.costEachCents?(ep.costEachCents/100):"")+"'></div>"+
+    "<div><label>Notes</label><input id='pf-notes' maxlength='300' value='"+esc(ep?ep.notes:"")+"'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(ep?"Save changes":"Add part")+"</button>"+(ep?"<button type='button' id='pf-cancel'>Cancel edit</button>":"")+"</div></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- expenses ---------- */
+function renderExpenses(){
+  const el=$("#view-expenses");
+  if(!D().boats.length){el.innerHTML=emptyNote("expenses","Add a boat first (Boats tab), then track slip fees, insurance, storage and the rest here.");return;}
+  const ids=shownBoatIds();
+  const list=D().expenses.filter(x=>ids.indexOf(x.boatId)>=0).slice().sort((a,b)=>b.date.localeCompare(a.date));
+  const yr=new Date().getFullYear();
+  const yrTotal=list.filter(s=>s.date.slice(0,4)===String(yr)).reduce((a,s)=>a+s.amountCents,0);
+  const allTotal=list.reduce((a,s)=>a+s.amountCents,0);
+  let h=boatPicker();
+  h+="<div class='grid c3'>"+stat(fmt$0(yrTotal),"Spent in "+yr)+stat(fmt$0(allTotal),"All-time expenses")+stat(String(list.length),"Expense entries")+"</div>";
+  if(list.length)h+="<div class='card' style='margin-top:.9rem'><h2>Expenses</h2><table><tr><th>Date</th><th>Category</th><th>Boat</th><th>Amount</th><th>Paid to</th><th></th></tr>"+list.slice(0,40).map(x=>"<tr><td>"+fmtD(x.date)+"</td><td>"+esc(x.category)+"</td><td>"+esc(boatLabel(boatById(x.boatId)))+"</td><td>"+fmt$(x.amountCents)+"</td><td>"+esc(x.vendor||"—")+"</td><td><button class='small' data-edit-exp='"+x.id+"'>Edit</button> <button class='small danger' data-del-exp='"+x.id+"'>Delete</button></td></tr>").join("")+"</table>"+(list.length>40?"<p class='muted'>Showing the newest 40 of "+list.length+" — all of them are in the CSV export.</p>":"")+"</div>";
+  const ex=editExpId?D().expenses.find(s=>s.id===editExpId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(ex?"Edit expense":"Add an expense")+"</h2><form id='expForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='xf-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(ex&&ex.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Date</label><input id='xf-date' type='date' required value='"+esc(ex?ex.date:todayStr())+"'></div>"+
+    "<div><label>Category</label><select id='xf-cat'>"+EXP_CATS.map(t=>"<option"+(ex&&ex.category===t?" selected":"")+">"+t+"</option>").join("")+"</select></div></div>"+
+    "<div class='row'><div><label>Amount ($)</label><input id='xf-amt' inputmode='decimal' required value='"+(ex&&ex.amountCents?(ex.amountCents/100):"")+"'></div>"+
+    "<div><label>Paid to</label><input id='xf-vendor' maxlength='120' value='"+esc(ex?ex.vendor:"")+"'></div>"+
+    "<div><label>Notes</label><input id='xf-notes' maxlength='300' value='"+esc(ex?ex.notes:"")+"'></div></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(ex?"Save changes":"Add expense")+"</button>"+(ex?"<button type='button' id='xf-cancel'>Cancel edit</button>":"")+"</div></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- documents ---------- */
+function renderDocuments(){
+  const el=$("#view-documents");
+  if(!D().boats.length){el.innerHTML=emptyNote("documents","Add a boat first (Boats tab), then record registration, insurance and safety-check expiry dates here.");return;}
+  const ids=shownBoatIds();
+  const list=D().documents.filter(x=>ids.indexOf(x.boatId)>=0).slice().sort((a,b)=>(a.expires||"9999").localeCompare(b.expires||"9999"));
+  let h=boatPicker();
+  if(list.length)h+="<div class='card'><h2>Document expiry dates</h2>"+list.map(x=>{const days=x.expires?diffDays(todayStr(),x.expires):null;return "<div class='listitem'><div class='head'><b>"+esc(x.name)+"</b><span class='tag'>"+esc(x.kind)+"</span>"+(days!=null?daysTag(days):"")+"</div><div class='muted'>"+esc(boatLabel(boatById(x.boatId)))+(x.ref?" · Ref: "+esc(x.ref):"")+"</div><div>"+(x.expires?("Expires "+fmtD(x.expires)):"No expiry date recorded")+"</div>"+(x.notes?"<div class='muted'>"+esc(x.notes)+"</div>":"")+"<div class='btnrow'><button class='small' data-edit-doc='"+x.id+"'>Edit</button><button class='small danger' data-del-doc='"+x.id+"'>Delete</button></div></div>";}).join("")+"</div>";
+  else h+=emptyNote("documents","Registration renewals and insurance expiries have a way of sneaking up — record the dates here and the Dashboard flags them 30 days out.");
+  const ed=editDocId?D().documents.find(s=>s.id===editDocId):null;
+  h+="<div class='card' style='margin-top:.9rem'><h2>"+(ed?"Edit document record":"Add a document record")+"</h2><form id='docForm'>"+
+    "<div class='row'><div><label>Boat</label><select id='df-boat'>"+D().boats.map(b=>"<option value='"+b.id+"'"+(ed&&ed.boatId===b.id?" selected":"")+">"+esc(b.name)+"</option>").join("")+"</select></div>"+
+    "<div><label>Kind</label><select id='df-kind'>"+DOC_KINDS.map(t=>"<option"+(ed&&ed.kind===t?" selected":"")+">"+t+"</option>").join("")+"</select></div>"+
+    "<div><label>Name</label><input id='df-name' required maxlength='160' value='"+esc(ed?ed.name:"")+"' placeholder='e.g. State registration'></div></div>"+
+    "<div class='row'><div><label>Reference (last 4 digits only)</label><input id='df-ref' maxlength='60' value='"+esc(ed?ed.ref:"")+"' placeholder='e.g. ends in 4821'></div>"+
+    "<div><label>Expiry date</label><input id='df-exp' type='date' value='"+esc(ed?ed.expires:"")+"'></div></div>"+
+    "<div><label>Notes</label><textarea id='df-notes'>"+esc(ed?ed.notes:"")+"</textarea></div>"+
+    "<div class='btnrow'><button class='primary' type='submit'>"+(ed?"Save changes":"Add record")+"</button>"+(ed?"<button type='button' id='df-cancel'>Cancel edit</button>":"")+"</div>"+
+    "<p class='muted'>Record expiry dates and short references only — never a full policy, account, or card number. Dates come from your paperwork; HullLedger never invents one.</p></form></div>";
+  el.innerHTML=h;
+}
+
+/* ---------- charts (clickable; selection persists until clicked again) ---------- */
+let chartSel={year:null,donut:null,fuel:null};
+const PALETTE=["#0f6a8a","#e08a2e","#3d9970","#8a5fb0","#c4514e","#5b8def","#b03a78","#7a8a1f","#4fb0a5","#9c6b30"];
+function barChartSVG(items,selKey,fmtVal){
+  /* items: [{key,label,value}] — fixed uniform slots, value labels on top, clickable */
+  const W=560,H=300,padB=34,padT=26,plotH=H-padB-padT;
+  const max=Math.max.apply(null,items.map(i=>i.value).concat([1]));
+  const slot=W/items.length, bw=Math.min(120,slot*0.66);
+  let s="<svg viewBox='0 0 "+W+" "+H+"' role='img' aria-label='Bar chart'>";
+  items.forEach((it,i)=>{
+    const bh=Math.max(2,Math.round(it.value/max*plotH));
+    const x=Math.round(i*slot+(slot-bw)/2), y=padT+(plotH-bh);
+    const sel=chartSel[selKey]===it.key;
+    s+="<g data-chart='"+selKey+"' data-key='"+esc(it.key)+"' style='cursor:pointer'>"+
+      "<rect x='"+x+"' y='"+y+"' width='"+bw+"' height='"+bh+"' rx='5' fill='"+PALETTE[i%PALETTE.length]+"'"+(sel?" stroke='var(--ink)' stroke-width='3' transform='translate(0,-4)'":" opacity='0.88'")+"></rect>"+
+      "<text x='"+(x+bw/2)+"' y='"+(y-6)+"' text-anchor='middle' font-size='14' fill='var(--ink)' font-weight='700'>"+esc(fmtVal(it.value))+"</text>"+
+      "<text x='"+(x+bw/2)+"' y='"+(H-12)+"' text-anchor='middle' font-size='13' fill='var(--muted)'>"+esc(it.label)+"</text></g>";
+  });
+  return s+"</svg>";
+}
+function donutSVG(items,selKey,centerTop){
+  const size=300,cx=150,cy=150,rO=118,rI=74;
+  const total=items.reduce((a,i)=>a+i.value,0);
+  let s="<svg viewBox='0 0 "+size+" "+size+"' role='img' aria-label='Donut chart'>";
+  if(total<=0){s+="<circle cx='"+cx+"' cy='"+cy+"' r='"+rO+"' fill='none' stroke='var(--panel2)' stroke-width='"+(rO-rI)+"'></circle>";}
+  let ang=-90;
+  items.forEach((it,i)=>{
+    if(it.value<=0)return;
+    const frac=it.value/total, sweep=frac*360;
+    if(sweep>=359.99){
+      const selF=chartSel[selKey]===it.key;
+      s+="<circle data-chart='"+selKey+"' data-key='"+esc(it.key)+"' style='cursor:pointer' cx='"+cx+"' cy='"+cy+"' r='"+((rO+rI)/2)+"' fill='none' stroke='"+PALETTE[i%PALETTE.length]+"' stroke-width='"+(rO-rI)+"'"+(selF?" stroke-opacity='1'":" opacity='0.92'")+"></circle>";
+      if(selF)s+="<circle cx='"+cx+"' cy='"+cy+"' r='"+(rO+4)+"' fill='none' stroke='var(--ink)' stroke-width='3' pointer-events='none'></circle><circle cx='"+cx+"' cy='"+cy+"' r='"+(rI-4)+"' fill='none' stroke='var(--ink)' stroke-width='3' pointer-events='none'></circle>";
+      ang+=sweep; return;
+    }
+    const a0=(ang)*Math.PI/180, a1=(ang+sweep)*Math.PI/180;
+    const mid=(ang+sweep/2)*Math.PI/180;
+    const sel=chartSel[selKey]===it.key;
+    const off=sel?10:0;
+    const ox=Math.cos(mid)*off, oy=Math.sin(mid)*off;
+    const large=sweep>180?1:0;
+    const x0=cx+rO*Math.cos(a0),y0=cy+rO*Math.sin(a0),x1=cx+rO*Math.cos(a1),y1=cy+rO*Math.sin(a1);
+    const x2=cx+rI*Math.cos(a1),y2=cy+rI*Math.sin(a1),x3=cx+rI*Math.cos(a0),y3=cy+rI*Math.sin(a0);
+    s+="<path data-chart='"+selKey+"' data-key='"+esc(it.key)+"' style='cursor:pointer' transform='translate("+ox.toFixed(1)+","+oy.toFixed(1)+")' d='M"+x0.toFixed(1)+" "+y0.toFixed(1)+" A"+rO+" "+rO+" 0 "+large+" 1 "+x1.toFixed(1)+" "+y1.toFixed(1)+" L"+x2.toFixed(1)+" "+y2.toFixed(1)+" A"+rI+" "+rI+" 0 "+large+" 0 "+x3.toFixed(1)+" "+y3.toFixed(1)+" Z' fill='"+PALETTE[i%PALETTE.length]+"'"+(sel?" stroke='var(--ink)' stroke-width='3'":" opacity='0.92'")+"></path>";
+    ang+=sweep;
+  });
+  const selItem=items.find(i=>i.key===chartSel[selKey]);
+  s+="<text x='"+cx+"' y='"+(cy-8)+"' text-anchor='middle' font-size='15' fill='var(--muted)'>"+esc(selItem?selItem.label:centerTop)+"</text>"+
+     "<text x='"+cx+"' y='"+(cy+22)+"' text-anchor='middle' font-size='24' font-weight='800' fill='var(--ink)'>"+esc(selItem?fmt$0(selItem.value):fmt$0(total))+"</text></svg>";
+  return s;
+}
+function renderCharts(){
+  const el=$("#view-charts");
+  if(!D().boats.length){el.innerHTML=emptyNote("charts","Add a boat and log some service, fuel or expenses — the charts build themselves from your records.");return;}
+  const ids=shownBoatIds();
+  const inScope=x=>ids.indexOf(x.boatId)>=0;
+  const svc=D().service.filter(inScope), exp=D().expenses.filter(inScope), fuelL=D().fuel.filter(inScope);
+  /* costs by year: service + expenses */
+  const byYear={};
+  svc.forEach(s=>{const y=s.date.slice(0,4);byYear[y]=(byYear[y]||0)+s.costCents;});
+  exp.forEach(s=>{const y=s.date.slice(0,4);byYear[y]=(byYear[y]||0)+s.amountCents;});
+  const years=Object.keys(byYear).sort().map(y=>({key:y,label:y,value:byYear[y]}));
+  /* costs by system: service via equipment system; expenses via category */
+  const bySys={};
+  svc.forEach(s=>{const e=eqById(s.equipmentId);const k=e?e.system:"General service";bySys[k]=(bySys[k]||0)+s.costCents;});
+  exp.forEach(s=>{bySys[s.category]=(bySys[s.category]||0)+s.amountCents;});
+  const sysItems=Object.keys(bySys).map(k=>({key:k,label:k,value:bySys[k]})).sort((a,b)=>b.value-a.value).slice(0,10);
+  /* fuel gallons by month, last 12 with data */
+  const byMonth={};
+  fuelL.forEach(f=>{const m=monthKey(f.date);byMonth[m]=(byMonth[m]||0)+f.gallons;});
+  const months=Object.keys(byMonth).sort().slice(-12).map(m=>({key:m,label:monthLabel(m),value:Math.round(byMonth[m]*10)/10}));
+  let h=boatPicker()+"<div class='grid charts2'>";
+  h+="<div class='card'><h2>Spend by year (service + expenses)</h2>"+(years.length?"<div class='chartwrap'>"+barChartSVG(years,"year",v=>fmt$0(v))+"</div><div class='detail'>"+(chartSel.year?esc(chartSel.year)+": "+fmt$(byYear[chartSel.year]||0)+" recorded. Click again to clear.":"Click a bar for the year's total.")+"</div>":"<p class='muted'>No cost records yet.</p>")+"</div>";
+  h+="<div class='card'><h2>Where the money goes</h2>"+(sysItems.length?"<div class='chartwrap'>"+donutSVG(sysItems,"donut","All spend")+"</div><div class='detail'>"+(chartSel.donut?esc(chartSel.donut)+": "+fmt$(bySys[chartSel.donut]||0)+". Click the slice again to clear.":"Click a slice to spotlight it.")+"</div>":"<p class='muted'>No cost records yet.</p>")+"</div>";
+  h+="<div class='card'><h2>Fuel by month (gallons)</h2>"+(months.length?"<div class='chartwrap'>"+barChartSVG(months,"fuel",v=>v+" gal")+"</div><div class='detail'>"+(chartSel.fuel?esc(monthLabel(chartSel.fuel))+": "+esc(byMonth[chartSel.fuel])+" gallons. Click again to clear.":"Click a bar for the month's gallons.")+"</div>":"<p class='muted'>No fuel logged yet.</p>")+"</div>";
+  const dueCount=D().tasks.filter(inScope).map(t=>taskStatus(t)).filter(s=>s.status==="overdue"||s.status==="soon").length;
+  h+="<div class='card'><h2>At a glance</h2>"+stat(String(D().boats.length===1?D().equipment.length:D().equipment.filter(e=>inScope(e)).length),"Equipment items tracked")+stat(String(D().service.filter(inScope).length),"Service jobs on record")+stat(String(dueCount),"Service items due or overdue")+"<p class='muted'>Charts read straight from your records and update the moment you log something new.</p></div>";
+  h+="</div>";
+  el.innerHTML=h;
+}
+
+/* ---------- reports & data ---------- */
+function download(name,content,type){
+  const blob=new Blob([content],{type:type||"text/plain"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+}
+function csvOf(rows){return rows.map(r=>r.map(csvCell).join(",")).join("\r\n")+"\r\n";}
+function renderReports(){
+  const el=$("#view-reports");
+  let h="<div class='grid c2'>";
+  h+="<div class='card'><h2>Printable service &amp; resale history</h2><p class='muted'>A clean per-boat packet: boat details, equipment register, full service history and totals. Hand it to a buyer, a broker, or your own binder.</p>";
+  if(D().boats.length)h+="<div class='btnrow'>"+D().boats.map(b=>"<button data-print-boat='"+b.id+"'>Print "+esc(b.name)+"</button>").join("")+"</div>";
+  else h+="<p class='muted'>Add a boat first.</p>";
+  h+="</div>";
+  h+="<div class='card'><h2>Spreadsheet exports (CSV)</h2><p class='muted'>Open in Excel, Google Sheets, or any spreadsheet. Formula-looking text is neutralized so a note can never become a spreadsheet formula.</p><div class='btnrow'><button id='csvService'>Service history CSV</button><button id='csvFuel'>Fuel CSV</button><button id='csvExpenses'>Expenses CSV</button></div></div>";
+  if(S.sample.on)h+="<div class='notice'>Sample data is on. Backup, restore and CSV exports are paused so demo records can never overwrite your real ones — toggle the flask (top right) to get your records back first.</div>";
+  h+="<div class='card'><h2>Full backup (JSON)</h2><p class='muted'>One file with everything — boats, equipment, readings, tasks, service, fuel, parts, expenses, documents. Keep it somewhere safe; it is the only copy besides this device.</p><div class='btnrow'><button class='primary' id='jsonOut'>Download backup</button></div></div>";
+  h+="<div class='card'><h2>Restore a backup</h2><p class='muted'>Restoring replaces everything currently shown. Invalid or damaged files are rejected before anything changes, and the report tells you exactly what was dropped.</p><div class='btnrow'><label style='margin:0'><input type='file' id='jsonIn' accept='.json,application/json' style='display:none'><span class='tag' style='cursor:pointer;font-size:16px;padding:.5rem 1rem'>Choose backup file…</span></label></div><div id='restoreMsg'></div></div>";
+  h+="</div>";
+  el.innerHTML=h;
+  const b1=$("#csvService"),b2=$("#csvFuel"),b3=$("#csvExpenses"),b4=$("#jsonOut"),fi=$("#jsonIn");
+  if(b1)b1.addEventListener("click",()=>{if(S.sample.on){toast("Sample data is on — turn the flask off before exporting");beep(220);return;}const rows=[["Date","Boat","Job","Equipment","Hours","Cost","Vendor","Parts","Notes"]];D().service.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(s=>rows.push([s.date,boatLabel(boatById(s.boatId)),s.title,eqLabel(eqById(s.equipmentId)),s.hours||"",(s.costCents/100).toFixed(2),s.vendor,s.parts,s.notes]));download("hullledger-service-history.csv",csvOf(rows),"text/csv");beep(880);});
+  if(b2)b2.addEventListener("click",()=>{if(S.sample.on){toast("Sample data is on — turn the flask off before exporting");beep(220);return;}const rows=[["Date","Boat","Gallons","Total cost","Hours","Place","Notes"]];D().fuel.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(f=>rows.push([f.date,boatLabel(boatById(f.boatId)),f.gallons,(f.costCents/100).toFixed(2),f.hours||"",f.place,f.notes]));download("hullledger-fuel-log.csv",csvOf(rows),"text/csv");beep(880);});
+  if(b3)b3.addEventListener("click",()=>{if(S.sample.on){toast("Sample data is on — turn the flask off before exporting");beep(220);return;}const rows=[["Date","Boat","Category","Amount","Paid to","Notes"]];D().expenses.slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(x=>rows.push([x.date,boatLabel(boatById(x.boatId)),x.category,(x.amountCents/100).toFixed(2),x.vendor,x.notes]));download("hullledger-expenses.csv",csvOf(rows),"text/csv");beep(880);});
+  if(b4)b4.addEventListener("click",()=>{if(S.sample.on){toast("Sample data is on — turn the flask off before backing up");beep(220);return;}download("hullledger-backup.json",JSON.stringify({app:"hullledger",version:1,exported:new Date().toISOString(),data:D()},null,2),"application/json");beep(880);});
+  if(fi)fi.addEventListener("change",()=>{
+    const file=fi.files&&fi.files[0];if(!file)return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      const msg=$("#restoreMsg");
+      let parsed=null;try{parsed=JSON.parse(rd.result);}catch(e){}
+      if(S.sample.on){msg.innerHTML="<p class='hint'>Sample data is on — turn the flask off before restoring, so your real records are not replaced by accident.</p>";beep(220);return;}
+      if(!parsed||parsed.app!=="hullledger"||parsed.version!==1||!parsed.data){msg.innerHTML="<p class='hint'>That file is not a HullLedger backup — nothing was changed.</p>";beep(220);return;}
+      const clean=sanitizeData(parsed.data);
+      if(!clean){msg.innerHTML="<p class='hint'>That backup could not be read — nothing was changed.</p>";beep(220);return;}
+      S.data=clean.data;S.sample.on=false;S.sample.snapshot=null;editBoatId=editEqId=editTaskId=editSvcId=editFuelId=editPartId=editExpId=editDocId=editReadingId=null;
+      save();renderAll();
+      msg.innerHTML="<p>Backup restored."+(clean.dropped?" Dropped "+clean.dropped+" damaged record(s) that could not be verified.":"")+(clean.corrected?" Corrected "+clean.corrected+" bad date(s) to today.":"")+"</p>";
+      toast("Backup restored");beep(990);
+    };
+    rd.readAsText(file);
+  });
+}
+
+/* ---------- printable per-boat history ---------- */
+function printBoat(boatId){
+  const b=boatById(boatId);if(!b)return;
+  const eqs=D().equipment.filter(e=>e.boatId===boatId);
+  const svc=D().service.filter(s=>s.boatId===boatId).slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const fuelL=D().fuel.filter(f=>f.boatId===boatId);
+  const totalSvc=svc.reduce((a,s)=>a+s.costCents,0);
+  const totalExp=D().expenses.filter(x=>x.boatId===boatId).reduce((a,x)=>a+x.amountCents,0);
+  const hrsLine=eqs.map(e=>{const hv=eqHours(e.id);return hv!=null?esc(e.name)+": "+fmtH(hv)+" hrs":"";}).filter(Boolean).join(" · ");
+  let h="<h1>"+esc(b.name)+" — Service &amp; Ownership History</h1>"+
+    "<p>"+esc([b.year,b.make,b.model,b.type].filter(Boolean).join(" · "))+(b.hin?"<br>Hull ID: "+esc(b.hin):"")+(b.homePort?"<br>Home port: "+esc(b.homePort):"")+(b.bought?"<br>Owned since: "+fmtD(b.bought):"")+(hrsLine?"<br>Latest hour readings: "+hrsLine:"")+"</p>"+
+    "<p>Printed from HullLedger on "+fmtD(todayStr())+". Records as entered by the owner.</p>";
+  h+="<h2>Equipment register</h2><table><tr><th>Item</th><th>System</th><th>Brand / model</th><th>Serial</th><th>Installed</th><th>Hours</th></tr>"+
+    (eqs.length?eqs.map(e=>"<tr><td>"+esc(e.name)+"</td><td>"+esc(e.system)+"</td><td>"+esc([e.brand,e.model].filter(Boolean).join(" "))+"</td><td>"+esc(e.serial||"—")+"</td><td>"+(e.installed?fmtD(e.installed):"—")+"</td><td>"+(eqHours(e.id)!=null?fmtH(eqHours(e.id)):"—")+"</td></tr>").join(""):"<tr><td colspan='6'>No equipment recorded.</td></tr>")+"</table>";
+  h+="<h2>Service history</h2><table><tr><th>Date</th><th>Job</th><th>Equipment</th><th>Hours</th><th>Cost</th><th>Vendor</th><th>Parts</th></tr>"+
+    (svc.length?svc.map(s=>"<tr><td>"+fmtD(s.date)+"</td><td>"+esc(s.title)+"</td><td>"+esc(eqLabel(eqById(s.equipmentId)))+"</td><td>"+(s.hours?fmtH(s.hours):"—")+"</td><td>"+fmt$(s.costCents)+"</td><td>"+esc(s.vendor||"—")+"</td><td>"+esc(s.parts||"—")+"</td></tr>").join(""):"<tr><td colspan='7'>No service recorded.</td></tr>")+"</table>"+
+    "<p><b>Total recorded service spend: "+fmt$(totalSvc)+"</b> · Other recorded expenses: "+fmt$(totalExp)+" · Fuel logged: "+Math.round(fuelL.reduce((a,f)=>a+f.gallons,0)*10)/10+" gallons across "+fuelL.length+" fill-ups.</p>"+
+    "<p>Seller's note: this packet lists the service history recorded in HullLedger. It is an owner's record, not a marine survey or a warranty of condition.</p>";
+  $("#printArea").innerHTML=h;
+  window.print();
+}
+
+/* ---------- about ---------- */
+function renderAbout(){
+  $("#view-about").innerHTML="<div class='grid c2'>"+
+  "<div class='card'><h2>What HullLedger does</h2><p>Keeps the records a boat owner actually needs: which engine or system is which (with serial numbers), when service is due by calendar or engine hours, every job ever done and what it cost, fuel burn, the spares on the shelf and where they live, the running expenses, and the paperwork expiry dates. It prints a per-boat service &amp; resale history and exports everything in open formats (CSV and JSON) that no company can take away from you.</p></div>"+
+  "<div class='card'><h2>What it does not do</h2><p>It does not send phone notifications — it shows what is due when you open it. It does not read your hour meter, connect to your engine, track GPS, or advise you on what your boat needs: service intervals are the ones you enter from your owner's manual, and expiry dates are the ones on your own paperwork. Nothing here is a survey, certification, or safety judgment.</p></div>"+
+  "<div class='card'><h2>Your records, your device</h2><p>Everything is stored in this browser on this device only. No account, no cloud, no subscription, and no company that can fold and take your history with it. The trade-off is on you: download a JSON backup from Reports &amp; Data after big updates and keep it somewhere safe.</p></div>"+
+  "<div class='card'><h2>Getting the most from it</h2><p>Log an hour reading after each outing (Equipment tab) and due-by-hours stays honest. Link service jobs to their scheduled tasks so last-done updates itself. Use the flask (top right) any time to explore with sample data — your own records are snapshotted and restored exactly when you toggle it off.</p></div>"+
+  "</div>";
+}
+
+/* ---------- render / navigation ---------- */
+let curTab="dashboard";
+function renderAll(){
+  renderDashboard();renderBoats();renderEquipment();renderService();renderFuel();renderParts();renderExpenses();renderDocuments();renderCharts();renderReports();renderAbout();
+  const sel=$("#boatSel");
+  if(sel)sel.addEventListener("change",()=>{S.settings.boatId=sel.value;save();beep(700);renderAll();});
+  const rb=$("#view-reports"); /* reports view re-renders each time; its listeners were attached in renderReports */
+}
+function showTab(tab){
+  curTab=tab;
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab?"true":"false"));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("on",v.id==="view-"+tab));
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{showTab(b.dataset.tab);beep(660);window.scrollTo({top:0,behavior:"smooth"});}));
+
+/* ---------- global click delegation ---------- */
+document.addEventListener("click",e=>{
+  const goto=e.target.closest("[data-goto]");
+  if(goto){showTab(goto.dataset.goto);return;}
+  const ch=e.target.closest("[data-chart]");
+  if(ch){const k=ch.dataset.chart,key=ch.dataset.key;chartSel[k]=chartSel[k]===key?null:key;beep(chartSel[k]?880:520);renderCharts();return;}
+  const bp=e.target.closest("[data-print-boat]");
+  if(bp){beep(760);printBoat(bp.dataset.printBoat);return;}
+  const acts=[
+    ["data-edit-boat",id=>{editBoatId=id;showTab("boats");renderBoats();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-boat",id=>{if(!confirm("Delete this boat and ALL its equipment, tasks, service, fuel, parts, expenses and documents? Export a backup first if unsure."))return;D().boats=D().boats.filter(b=>b.id!==id);D().equipment=D().equipment.filter(x=>x.boatId!==id);const goneEq={};/* readings for removed equipment */D().readings=D().readings.filter(r=>eqById(r.equipmentId));D().tasks=D().tasks.filter(x=>x.boatId!==id);D().service=D().service.filter(x=>x.boatId!==id);D().fuel=D().fuel.filter(x=>x.boatId!==id);D().parts=D().parts.filter(x=>x.boatId!==id);D().expenses=D().expenses.filter(x=>x.boatId!==id);D().documents=D().documents.filter(x=>x.boatId!==id);if(editBoatId===id)editBoatId=null;save();renderAll();toast("Boat deleted");beep(440);}],
+    ["data-edit-eq",id=>{editEqId=id;showTab("equipment");renderEquipment();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-eq",id=>{if(!confirm("Delete this equipment item? Its hour readings go with it; service history stays but shows as general."))return;D().equipment=D().equipment.filter(x=>x.id!==id);D().readings=D().readings.filter(r=>r.equipmentId!==id);if(editEqId===id)editEqId=null;save();renderAll();toast("Equipment deleted");beep(440);}],
+    ["data-hours-for",id=>{showTab("equipment");renderEquipment();const sel=$("#rf-eq");if(sel)sel.value=id;const inp=$("#rf-hours");if(inp)inp.focus();const f=$("#readForm");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});}],
+    ["data-edit-reading",id=>{editReadingId=id;showTab("equipment");renderEquipment();const f=$("#readForm");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});}],
+    ["data-del-reading",id=>{D().readings=D().readings.filter(r=>r.id!==id);if(editReadingId===id)editReadingId=null;save();renderAll();toast("Reading deleted");beep(440);}],
+    ["data-edit-task",id=>{editTaskId=id;showTab("service");renderService();const f=$("#taskForm");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});}],
+    ["data-del-task",id=>{if(!confirm("Delete this service task? Past service history stays."))return;D().tasks=D().tasks.filter(t=>t.id!==id);D().service.forEach(sv=>{if(sv.taskId===id)sv.taskId="";});if(editTaskId===id)editTaskId=null;save();renderAll();toast("Task deleted");beep(440);}],
+    ["data-done-task",id=>{
+      const t=D().tasks.find(x=>x.id===id);if(!t)return;
+      const hrsNow=t.equipmentId?eqHours(t.equipmentId):null;
+      const entry={id:uid(),boatId:t.boatId,equipmentId:t.equipmentId,taskId:t.id,date:todayStr(),hours:hrsNow||0,title:t.title,costCents:0,vendor:"",parts:"",notes:"Logged from the task list — edit to add cost, vendor and parts."};
+      D().service.push(entry);
+      t.lastDone=entry.date;if(hrsNow!=null)t.lastDoneHours=hrsNow;
+      save();renderAll();showTab("service");toast("Logged as done today — edit the new history entry to add cost details");beep(990);
+    }],
+    ["data-edit-svc",id=>{editSvcId=id;showTab("service");renderService();const f=$("#svcForm");if(f)f.scrollIntoView({behavior:"smooth",block:"center"});}],
+    ["data-del-svc",id=>{if(!confirm("Delete this service record?"))return;D().service=D().service.filter(s=>s.id!==id);if(editSvcId===id)editSvcId=null;save();renderAll();toast("Service record deleted");beep(440);}],
+    ["data-edit-fuel",id=>{editFuelId=id;showTab("fuel");renderFuel();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-fuel",id=>{D().fuel=D().fuel.filter(f=>f.id!==id);if(editFuelId===id)editFuelId=null;save();renderAll();toast("Fill-up deleted");beep(440);}],
+    ["data-edit-part",id=>{editPartId=id;showTab("parts");renderParts();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-part",id=>{D().parts=D().parts.filter(p=>p.id!==id);if(editPartId===id)editPartId=null;save();renderAll();toast("Part deleted");beep(440);}],
+    ["data-edit-exp",id=>{editExpId=id;showTab("expenses");renderExpenses();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-exp",id=>{D().expenses=D().expenses.filter(x=>x.id!==id);if(editExpId===id)editExpId=null;save();renderAll();toast("Expense deleted");beep(440);}],
+    ["data-edit-doc",id=>{editDocId=id;showTab("documents");renderDocuments();window.scrollTo(0,document.body.scrollHeight);}],
+    ["data-del-doc",id=>{D().documents=D().documents.filter(x=>x.id!==id);if(editDocId===id)editDocId=null;save();renderAll();toast("Document record deleted");beep(440);}]
+  ];
+  for(const [attr,fn] of acts){const n=e.target.closest("["+attr+"]");if(n){e.preventDefault();fn(n.getAttribute(attr));return;}}
+});
+
+/* ---------- form helpers (forms are re-created on every renderAll, so submit is handled by delegation) ---------- */
+const val=id=>{const n=document.getElementById(id);return n?n.value.trim():"";};
+const valDate=id=>{const v=val(id);return isDateStr(v)?v:"";};
+document.addEventListener("submit",e=>{
+  const f=e.target;if(!f||!f.id)return;
+  e.preventDefault();
+  if(f.id==="boatForm"){
+    const rec={id:editBoatId||uid(),name:val("bf-name")||"Boat",type:BOAT_TYPES.indexOf(val("bf-type"))>=0?val("bf-type"):"Other",year:val("bf-year"),make:val("bf-make"),model:val("bf-model"),hin:val("bf-hin"),homePort:val("bf-port"),bought:valDate("bf-bought"),paidCents:money2c(val("bf-paid")),notes:val("bf-notes")};
+    if(editBoatId){const i=D().boats.findIndex(b=>b.id===editBoatId);if(i>=0)D().boats[i]=rec;toast("Boat updated");}
+    else{D().boats.push(rec);S.settings.boatId=rec.id;toast("Boat added — now register its equipment");}
+    editBoatId=null;save();renderAll();showTab("boats");beep(880);return;
+  }
+  if(f.id==="eqForm"){
+    const rec={id:editEqId||uid(),boatId:val("ef-boat"),name:val("ef-name")||"Equipment",system:SYSTEMS.indexOf(val("ef-system"))>=0?val("ef-system"):"Other",brand:val("ef-brand"),model:val("ef-model"),serial:val("ef-serial"),installed:valDate("ef-installed"),notes:val("ef-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(editEqId){const i=D().equipment.findIndex(x=>x.id===editEqId);if(i>=0)D().equipment[i]=rec;toast("Equipment updated");}else{D().equipment.push(rec);toast("Equipment added");}
+    editEqId=null;save();renderAll();showTab("equipment");beep(880);return;
+  }
+  if(f.id==="readForm"){
+    const eqId=val("rf-eq");
+    if(!eqById(eqId)){toast("Add equipment first");return;}
+    const rec={id:editReadingId||uid(),equipmentId:eqId,date:valDate("rf-date")||todayStr(),hours:hrs1(val("rf-hours")),notes:""};
+    if(editReadingId){const i=D().readings.findIndex(r=>r.id===editReadingId);if(i>=0)D().readings[i]=rec;toast("Reading updated");}else{D().readings.push(rec);toast("Hours logged");}
+    editReadingId=null;save();renderAll();showTab("equipment");beep(880);return;
+  }
+  if(f.id==="taskForm"){
+    const rec={id:editTaskId||uid(),boatId:val("tf-boat"),equipmentId:val("tf-eq"),title:val("tf-title")||"Service task",intervalMonths:Math.max(0,Math.min(600,Math.round(num(val("tf-months"))))),intervalHours:hrs1(val("tf-hours")),lastDone:valDate("tf-lastdate"),lastDoneHours:hrs1(val("tf-lasthours")),oneTimeDue:valDate("tf-once"),notes:val("tf-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(rec.equipmentId&&!eqById(rec.equipmentId))rec.equipmentId="";
+    if(!rec.equipmentId)rec.lastDoneHours=0;
+    if(editTaskId){const i=D().tasks.findIndex(t=>t.id===editTaskId);if(i>=0)D().tasks[i]=rec;toast("Task updated");}else{D().tasks.push(rec);toast("Task added");}
+    editTaskId=null;save();renderAll();showTab("service");beep(880);return;
+  }
+  if(f.id==="svcForm"){
+    const rec={id:editSvcId||uid(),boatId:val("sf-boat"),equipmentId:val("sf-eq"),taskId:val("sf-task"),date:valDate("sf-date")||todayStr(),hours:hrs1(val("sf-hours")),title:val("sf-title")||"Service",costCents:money2c(val("sf-cost")),vendor:val("sf-vendor"),parts:val("sf-parts"),notes:val("sf-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(rec.equipmentId&&!eqById(rec.equipmentId))rec.equipmentId="";
+    if(rec.taskId&&!D().tasks.find(t=>t.id===rec.taskId))rec.taskId="";
+    if(editSvcId){const i=D().service.findIndex(s=>s.id===editSvcId);if(i>=0)D().service[i]=rec;toast("Service record updated");}else{D().service.push(rec);toast("Service logged");}
+    if(rec.taskId){const t=D().tasks.find(x=>x.id===rec.taskId);if(t&&(rec.date>(t.lastDone||""))){t.lastDone=rec.date;if(val("sf-hours")!=="")t.lastDoneHours=rec.hours;}}
+    editSvcId=null;save();renderAll();showTab("service");beep(880);return;
+  }
+  if(f.id==="fuelForm"){
+    const rec={id:editFuelId||uid(),boatId:val("ff-boat"),date:valDate("ff-date")||todayStr(),gallons:Math.max(0,Math.round(num(val("ff-gal"))*100)/100),costCents:money2c(val("ff-cost")),hours:hrs1(val("ff-hours")),place:val("ff-place"),notes:""};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(editFuelId){const i=D().fuel.findIndex(x=>x.id===editFuelId);if(i>=0)D().fuel[i]=rec;toast("Fill-up updated");}else{D().fuel.push(rec);toast("Fill-up logged");}
+    editFuelId=null;save();renderAll();showTab("fuel");beep(880);return;
+  }
+  if(f.id==="partForm"){
+    const rec={id:editPartId||uid(),boatId:val("pf-boat"),equipmentId:val("pf-eq"),name:val("pf-name")||"Part",partNo:val("pf-no"),qty:Math.max(0,Math.min(100000,Math.round(num(val("pf-qty"))))),location:val("pf-loc"),costEachCents:money2c(val("pf-cost")),notes:val("pf-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(rec.equipmentId&&!eqById(rec.equipmentId))rec.equipmentId="";
+    if(editPartId){const i=D().parts.findIndex(p=>p.id===editPartId);if(i>=0)D().parts[i]=rec;toast("Part updated");}else{D().parts.push(rec);toast("Part added");}
+    editPartId=null;save();renderAll();showTab("parts");beep(880);return;
+  }
+  if(f.id==="expForm"){
+    const rec={id:editExpId||uid(),boatId:val("xf-boat"),date:valDate("xf-date")||todayStr(),category:EXP_CATS.indexOf(val("xf-cat"))>=0?val("xf-cat"):"Other",amountCents:money2c(val("xf-amt")),vendor:val("xf-vendor"),notes:val("xf-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(editExpId){const i=D().expenses.findIndex(x=>x.id===editExpId);if(i>=0)D().expenses[i]=rec;toast("Expense updated");}else{D().expenses.push(rec);toast("Expense added");}
+    editExpId=null;save();renderAll();showTab("expenses");beep(880);return;
+  }
+  if(f.id==="docForm"){
+    const rec={id:editDocId||uid(),boatId:val("df-boat"),kind:DOC_KINDS.indexOf(val("df-kind"))>=0?val("df-kind"):"Other",name:val("df-name")||"Document",ref:val("df-ref"),expires:valDate("df-exp"),notes:val("df-notes")};
+    if(!boatById(rec.boatId)){toast("Pick a boat first");return;}
+    if(editDocId){const i=D().documents.findIndex(x=>x.id===editDocId);if(i>=0)D().documents[i]=rec;toast("Record updated");}else{D().documents.push(rec);toast("Record added");}
+    editDocId=null;save();renderAll();showTab("documents");beep(880);return;
+  }
+});
+/* cancel-edit buttons (delegated; they are type=button) */
+document.addEventListener("click",e=>{
+  const map={"bf-cancel":()=>{editBoatId=null;},"ef-cancel":()=>{editEqId=null;},"rf-cancel":()=>{editReadingId=null;},"tf-cancel":()=>{editTaskId=null;},"sf-cancel":()=>{editSvcId=null;},"ff-cancel":()=>{editFuelId=null;},"pf-cancel":()=>{editPartId=null;},"xf-cancel":()=>{editExpId=null;},"df-cancel":()=>{editDocId=null;}};
+  const cb=e.target&&e.target.closest?e.target.closest("button"):null;
+  if(cb&&map[cb.id]){map[cb.id]();renderAll();}
+});
+
+/* ---------- header: sample flask / theme / sound ---------- */
+function applyTheme(){
+  const pref=S.settings.theme;
+  const dark=pref==="dark"||(pref==null&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  $("#themeBtn").setAttribute("aria-pressed",dark?"true":"false");
+}
+$("#themeBtn").addEventListener("click",()=>{
+  const nowDark=document.documentElement.getAttribute("data-theme")==="dark";
+  S.settings.theme=nowDark?"light":"dark";save();applyTheme();beep(nowDark?520:760);
+});
+$("#soundBtn").addEventListener("click",()=>{
+  S.settings.sound=!S.settings.sound;save();
+  $("#soundBtn").setAttribute("aria-pressed",S.settings.sound?"true":"false");
+  if(S.settings.sound)beep(880);else toast("Sound off");
+});
+$("#flaskBtn").addEventListener("click",()=>{
+  if(S.sample.on){
+    if(S.sample.snapshot){S.data=S.sample.snapshot;}
+    S.settings.boatId=S.sample.prevBoatId||"";
+    S.sample={on:false,snapshot:null,prevBoatId:""};
+    toast("Sample data off — your records are back");
+  }else{
+    S.sample={on:true,snapshot:JSON.parse(JSON.stringify(S.data)),prevBoatId:S.settings.boatId||""};
+    S.data=sampleData();
+    S.settings.boatId="";
+    toast("Sample data on — explore freely, your records are saved aside");
+  }
+  editBoatId=editEqId=editTaskId=editSvcId=editFuelId=editPartId=editExpId=editDocId=editReadingId=null;
+  save();syncSampleUI();renderAll();beep(S.sample.on?880:520);
+});
+function syncSampleUI(){
+  $("#flaskBtn").setAttribute("aria-pressed",S.sample.on?"true":"false");
+  $("#sampleBanner").classList.toggle("on",!!S.sample.on);
+  $("#soundBtn").setAttribute("aria-pressed",S.settings.sound?"true":"false");
+}
+
+/* ---------- init ---------- */
+load();
+applyTheme();
+syncSampleUI();
+renderAll();
+showTab("dashboard");
+</script>
+</body>
+</html>
