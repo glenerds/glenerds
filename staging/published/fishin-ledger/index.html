@@ -65,20 +65,31 @@ body.dark .btn.ghost{color:var(--ink)}
 .listitem{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg)}
 .listitem .ttl{font-size:18px;font-weight:700}
 .tag{display:inline-block;background:var(--chip);border-radius:8px;padding:2px 10px;font-size:15px;margin:2px 4px 2px 0}
-.bars{display:flex;align-items:flex-end;gap:8px;height:260px;padding:8px 4px 0;border-bottom:2px solid var(--line)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:280px;padding:8px 4px 0;border-bottom:2px solid var(--line)}
 .barcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;min-width:0}
 .barfill{width:100%;max-width:54px;background:var(--bar);border-radius:6px 6px 0 0;border:1px solid var(--barline);border-bottom:none;transition:transform .12s}
 .barcol.sel .barfill{background:var(--sel);outline:3px solid var(--sel);outline-offset:2px}
 .barlab{font-size:14px;color:var(--muted);margin-top:4px;white-space:nowrap}
 .donutwrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.donutwrap .legend{flex:1;min-width:180px}
+.chartsgrid{display:grid;gap:14px;grid-template-columns:repeat(2,1fr);align-items:start}
+.chartsgrid .wide{grid-column:1/-1}
+.hbars{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.hbarrow{display:flex;align-items:center;gap:10px;cursor:pointer}
+.hbarlab{flex:0 0 170px;text-align:right;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbartrack{flex:1;background:var(--h0);border-radius:6px;height:22px}
+.hbarfill{background:var(--bar);border:1px solid var(--barline);border-radius:6px;height:100%;min-width:4px}
+.hbarrow.sel .hbarfill{background:var(--sel);border-color:var(--sel)}
+.hbarval{flex:0 0 44px;font-size:15px;color:var(--muted)}
+@media(max-width:700px){.chartsgrid{grid-template-columns:1fr}}
 .donutwrap svg{flex:0 0 auto}
 .legend{font-size:16px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
 .legend .li{cursor:pointer;padding:4px 10px;border-radius:8px;display:inline-flex;gap:8px;align-items:center}
 .legend .li.sel{background:var(--chip);outline:2px solid var(--sel)}
 .sw{width:16px;height:16px;border-radius:4px;flex:0 0 auto}
 path.slice{cursor:pointer;transition:transform .15s}
-.heat{display:grid;grid-template-columns:repeat(13,1fr);gap:5px;margin-top:6px}
-.heat i{aspect-ratio:1.4;border-radius:4px;background:var(--h0);display:block;cursor:pointer}
+.heat{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:6px}
+.heat i{aspect-ratio:1.14;border-radius:6px;background:var(--h0);display:block;cursor:pointer}
 .heat i.h1{background:var(--h1)}.heat i.h2{background:var(--h2)}.heat i.h3{background:var(--h3)}.heat i.h4{background:var(--h4)}
 .heat i.sel{outline:3px solid var(--ink);outline-offset:1px}
 table{border-collapse:collapse;width:100%;font-size:16px}
@@ -98,7 +109,7 @@ footer.cta{max-width:1080px;margin:0 auto 40px;padding:0 16px;text-align:center}
   #printArea table{font-size:13px}
   #printArea th,#printArea td{border-bottom:1px solid #999;padding:6px}
 }
-@media(max-width:560px){.heat{grid-template-columns:repeat(9,1fr)}}
+@media(max-width:560px){.heat{grid-template-columns:repeat(8,1fr)}}
 @media(max-width:560px){.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}.tabs button{flex:0 0 auto}}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:16px;font-weight:600;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
 .toast.show{opacity:1}
@@ -266,7 +277,7 @@ function refreshSampleBtn(){var b=document.getElementById('btnSample');b.classLi
 /* ---------- tabs ---------- */
 var TABS=[['dash','Dashboard'],['log','Catch Log'],['spots','Spots'],['tackle','Tackle'],['bests','Personal Bests'],['charts','Charts'],['reports','Reports & Data']];
 var activeTab='dash';
-var sel={month:null,species:null,bait:null,week:null};
+var sel={month:null,species:null,bait:null,week:null,spot:null};
 var editTrip=null,editCatch=null,editSpot=null,editBait=null;
 function renderTabs(){
   document.getElementById('tabs').innerHTML=TABS.map(function(t){
@@ -328,11 +339,12 @@ function viewDash(){
   return h;
 }
 function viewCharts(){
-  return '<div class="grid cards2" style="align-items:start">'
+  return '<div class="chartsgrid">'
     +'<div class="card"><h2>Catches by month</h2>'+chartMonths()+'<div class="detail" id="dMonth">'+monthDetail()+'</div></div>'
     +'<div class="card"><h2>Catches by species</h2>'+chartDonut()+'<div class="detail" id="dSpecies">'+speciesDetail()+'</div></div>'
     +'<div class="card"><h2>Bait performance</h2>'+chartBaits()+'<div class="detail" id="dBait">'+baitDetail()+'</div></div>'
-    +'<div class="card"><h2>Activity — last 26 weeks</h2>'+chartHeat()+'<div class="detail" id="dWeek">'+weekDetail()+'</div></div>'
+    +'<div class="card"><h2>Activity — last 26 weeks</h2>'+chartHeat()+'<div class="detail" id="dWeek">'+weekDetail()+'</div>'+weekSummary()+'</div>'
+    +'<div class="card wide"><h2>Catches by spot</h2>'+chartSpots()+'<div class="detail" id="dSpot">'+spotDetail()+'</div></div>'
     +'</div>';
 }
 function monthDetail(){
@@ -352,7 +364,7 @@ function chartMonths(){
   var max=Math.max.apply(null,keys.map(function(k){return counts[k];}).concat([1]));
   var lab=['J','F','M','A','M','J','J','A','S','O','N','D'];
   return '<div class="bars" role="img" aria-label="Catches by month">'+keys.map(function(k){
-    var h=Math.round(counts[k]/max*240);
+    var h=Math.round(counts[k]/max*260);
     var ml=monthLabel(k).split(' ');
     return '<div class="barcol'+(sel.month===k?' sel':'')+'" data-month="'+k+'" title="'+monthLabel(k)+': '+counts[k]+' catches">'
       +'<div class="barfill" style="height:'+Math.max(h,counts[k]>0?6:2)+'px"></div>'
@@ -389,11 +401,28 @@ function chartDonut(){
     return '<div class="li'+(sel.species===n?' sel':'')+'" data-species="'+esc(n)+'"><span class="sw" style="background:'+pal[i%pal.length]+'"></span>'+esc(n)+' ('+counts[n]+')</div>';
   }).join('');
   return '<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto">'
-    +'<svg width="320" height="320" viewBox="0 0 200 200" role="img" aria-label="Catches by species">'
+    +'<svg width="280" height="280" viewBox="0 0 200 200" role="img" aria-label="Catches by species">'
     +'<circle cx="100" cy="100" r="'+R+'" fill="none" stroke="var(--h0)" stroke-width="30"/>'+paths
     +'<text x="100" y="96" text-anchor="middle" font-size="'+fs1+'" font-weight="700" fill="var(--ink)" pointer-events="none">'+esc(center1)+'</text>'
     +'<text x="100" y="122" text-anchor="middle" font-size="15" fill="var(--muted)" pointer-events="none">'+esc(center2)+'</text>'
     +'</svg></div><div class="legend">'+legend+'</div></div>';
+}
+function chartSpots(){
+  var bySpot={};DB.catches.forEach(function(c){var t=tripById(c.tripId);var k=t?t.spotName:'Unknown';bySpot[k]=(bySpot[k]||0)+1;});
+  var names=Object.keys(bySpot).sort(function(a,b){return bySpot[b]-bySpot[a];}).slice(0,8);
+  if(!names.length)return '<p class="muted">No catches yet.</p>';
+  var max=bySpot[names[0]];
+  return '<div class="hbars" role="img" aria-label="Catches by spot">'+names.map(function(n){
+    var w=Math.max(Math.round(bySpot[n]/max*100),4);
+    return '<div class="hbarrow'+(sel.spot===n?' sel':'')+'" data-spot="'+esc(n)+'" title="'+esc(n)+': '+bySpot[n]+' catches">'
+      +'<div class="hbarlab">'+esc(n)+'</div><div class="hbartrack"><div class="hbarfill" style="width:'+w+'%"></div></div>'
+      +'<div class="hbarval">'+bySpot[n]+'</div></div>';
+  }).join('')+'</div>';
+}
+function spotDetail(){
+  if(!sel.spot)return 'Tap a bar to see the spot.';
+  var n=0;DB.catches.forEach(function(c){var t=tripById(c.tripId);if(t&&t.spotName===sel.spot)n++;});
+  return esc(sel.spot)+': '+n+' catches. Tap again to release.';
 }
 function baitStats(){
   var st={};
@@ -414,7 +443,7 @@ function chartBaits(){
   if(!s.length)return '<p class="muted">No bait data yet.</p>';
   var max=Math.max.apply(null,s.map(function(x){return x.n;}).concat([1]));
   return '<div class="bars" role="img" aria-label="Catches by bait">'+s.map(function(x){
-    var h=Math.round(x.n/max*240);
+    var h=Math.round(x.n/max*260);
     return '<div class="barcol'+(sel.bait===x.key?' sel':'')+'" data-bait="'+esc(x.key)+'" title="'+esc(x.name)+': '+x.n+' catches">'
       +'<div class="barfill" style="height:'+Math.max(h,6)+'px"></div>'
       +'<div class="barlab">'+x.n+'</div></div>';
@@ -433,6 +462,19 @@ function chartHeat(){
     cells.push('<i class="'+(lvl?'h'+lvl:'')+(sel.week===w?' sel':'')+'" data-week="'+w+'" title="Week of '+wd.toISOString().slice(0,10)+': '+n+' catches"></i>');
   }
   return '<div class="heat">'+cells.join('')+'</div>';
+}
+function weekSummary(){
+  var now=new Date();now.setHours(0,0,0,0);
+  var start=new Date(now.getTime()-(26*7-1)*86400000);
+  var buckets={};DB.catches.forEach(function(c){var t=tripById(c.tripId);if(!t)return;
+    var d=new Date(t.date+'T12:00:00');var w=Math.floor((d-start)/(7*86400000));
+    if(w>=0&&w<26)buckets[w]=(buckets[w]||0)+1;});
+  var active=Object.keys(buckets).length,total=0,best=0,bestW=-1;
+  for(var w=0;w<26;w++){var n=buckets[w]||0;total+=n;if(n>best){best=n;bestW=w;}}
+  var bw=bestW>=0?new Date(start.getTime()+bestW*7*86400000).toISOString().slice(0,10):'—';
+  return '<div class="snap" style="margin-top:10px"><div class="snaprow"><span>Fish in 26 weeks</span><b>'+total+'</b></div>'
+    +'<div class="snaprow"><span>Active weeks</span><b>'+active+' / 26</b></div>'
+    +'<div class="snaprow"><span>Best week</span><b>'+best+' fish · '+bw+'</b></div></div>';
 }
 function weekDetail(){
   if(sel.week==null)return 'Tap a square to see the week.';
@@ -650,6 +692,8 @@ function wireView(){
     var k=el.getAttribute('data-bait');sel.bait=sel.bait===k?null:k;click();render();});});
   qa('[data-week]').forEach(function(el){el.addEventListener('click',function(){
     var k=Number(el.getAttribute('data-week'));sel.week=sel.week===k?null:k;click();render();});});
+  qa('[data-spot]').forEach(function(el){el.addEventListener('click',function(){
+    var k=el.getAttribute('data-spot');sel.spot=sel.spot===k?null:k;click();render();});});
   qa('[data-fixcond]').forEach(function(el){el.addEventListener('click',function(){
     var t=tripById(el.getAttribute('data-fixcond'));if(t){editTrip=t;activeTab='log';click();render();
       setTimeout(function(){var f=q('#tWeather');if(f)f.focus();},50);}});});
