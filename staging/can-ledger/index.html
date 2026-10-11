@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Canning Log & Pantry Tracker — Batch Records, Inventory & Season Planner</title>
+<style>
+:root{--bg:#faf8f3;--card:#fff;--ink:#2b2620;--mut:#6f6a5e;--line:#e8e2d5;--acc:#b3541e;--acc2:#5a7d2a;--warn:#c0392b;--ok:#2e7d32}
+[data-theme="dark"]{--bg:#1c1a16;--card:#26231d;--ink:#ece7da;--mut:#a39c8a;--line:#3a352b;--acc:#e08a3c;--acc2:#9ab85a;--warn:#e06c5a;--ok:#7bc47f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;max-width:1100px;margin:0 auto;padding:12px 16px 60px}
+header{display:flex;align-items:center;gap:10px;padding:10px 0;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.3rem}
+.logo svg{width:34px;height:34px}
+.hdr-btns{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hdr-btns button,.hdr-btns a{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
+.hdr-btns button:hover{background:var(--line)}
+.more-apps{width:auto!important;padding:0 14px;font-weight:600;font-size:15px}
+.tabs{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:8px}
+.tabs button{background:none;border:none;color:var(--mut);font-size:16px;font-weight:600;padding:8px 14px;cursor:pointer;border-radius:8px}
+.tabs button.active{color:var(--acc);background:var(--card);box-shadow:inset 0 -3px 0 var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.card h3{margin-bottom:10px;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat .n{font-size:1.7rem;font-weight:800;color:var(--acc)}
+.stat .l{font-size:15px;color:var(--mut)}
+.stat.warn .n{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:14px}
+input,select,textarea{font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+input[type="checkbox"]{width:auto}
+label{font-size:15px;font-weight:600;display:block;margin:8px 0 4px}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.btn.sec{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--warn)}
+.btn.sm{padding:6px 12px;font-size:15px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.toolbar input,.toolbar select{width:auto;min-width:140px}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:14px;font-weight:700}
+.badge.ok{background:#dff0df;color:#1d5c22}[data-theme="dark"] .badge.ok{background:#2a4a2d;color:#bfe6c2}
+.badge.warn{background:#fbe3df;color:#8f2b1d}[data-theme="dark"] .badge.warn{background:#4a2a24;color:#f0b3a6}
+.badge.low{background:#fff3d6;color:#7a5b00}[data-theme="dark"] .badge.low{background:#4a3d1a;color:#f0d98a}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:300px;display:flex;flex-direction:column}
+.chart-card h3{margin-bottom:8px}
+.chart-card svg{flex:1}
+.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer}
+.bar-lbl{width:130px;font-size:15px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;background:var(--line);border-radius:6px;height:26px;position:relative}
+.bar-fill{background:var(--acc);border-radius:6px;height:100%;transition:width .3s}
+.bar-fill.sel{background:var(--acc2);outline:3px solid var(--ink);outline-offset:-3px}
+.bar-val{width:56px;text-align:right;font-size:15px;font-weight:700}
+.donut-wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.legend{font-size:15px}
+.legend div{margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px}
+.legend div.sel{outline:2px solid var(--ink)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:10px;font-size:15px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal .box{background:var(--card);border-radius:14px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.hidden{display:none}
+.foot-cta{text-align:center;margin:30px 0}
+.foot-cta a{display:inline-block;background:var(--acc);color:#fff;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:17px}
+details{margin:8px 0}
+summary{cursor:pointer;font-weight:700;font-size:16px}
+@media print{.tabs,.hdr-btns,.toolbar,.foot-cta,.btn{display:none!important}body{max-width:100%}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 34 34" aria-hidden="true"><rect x="9" y="6" width="16" height="22" rx="3" fill="#b3541e"/><rect x="9" y="6" width="16" height="6" rx="3" fill="#8a3f14"/><rect x="13" y="14" width="8" height="9" rx="1.5" fill="#faf8f3" opacity=".85"/></svg><span>CanLedger</span></div>
+  <div class="hdr-btns">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="btnSample" title="Try sample data" aria-label="Try sample data"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5.5L4.8 17a3 3 0 0 0 2.6 4.5h9.2a3 3 0 0 0 2.6-4.5L14 8.5V3"/></svg></button>
+    <button id="btnTheme" title="Dark mode" aria-label="Dark mode"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button id="btnSound" title="Sound" aria-label="Sound"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path class="wv" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+  </div>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="view"></main>
+<div class="foot-cta"><a href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps by Glenerds</a></div>
+<div class="toast" id="toast"></div>
+<div id="modal" class="hidden"></div>
+<script>
+"use strict";
+var LS="canledger_v1",LSS="canledger_sample_snap",LST="canledger_sample_on";
+var DB={batches:[],used:[],supplies:[],plans:[]};
+try{var raw=localStorage.getItem(LS);if(raw){var d=JSON.parse(raw);if(d&&Array.isArray(d.batches)){DB.batches=d.batches;DB.used=Array.isArray(d.used)?d.used:[];DB.supplies=Array.isArray(d.supplies)?d.supplies:[];DB.plans=Array.isArray(d.plans)?d.plans:[];}}}catch(e){toast("Saved data was unreadable — starting fresh. Restore a backup if you have one.");}
+var ui={tab:"dash",q:"",fType:"",sel:{},editBatch:null,editSupply:null,editPlan:null};
+function todayLocal(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+function uid(){return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function save(){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){toast("Could not save — storage full or blocked. Export a backup now.");}}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},2600);}
+/* sound */
+var sndOn=true;try{sndOn=localStorage.getItem("canledger_snd")!=="0";}catch(e){}
+function click(){if(!sndOn)return;try{var c=new (window.AudioContext||window.webkitAudioContext)();var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=660;g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch(e){}}
+function paintSnd(){var b=document.getElementById("btnSound");if(!b)return;b.querySelectorAll(".wv").forEach(function(p){p.style.display=sndOn?"":"none";});b.style.opacity=sndOn?1:.45;}
+/* theme */
+function paintTheme(){var dark=false;try{dark=localStorage.getItem("canledger_theme")==="dark"||(!localStorage.getItem("canledger_theme")&&matchMedia("(prefers-color-scheme: dark)").matches);}catch(e){}document.documentElement.setAttribute("data-theme",dark?"dark":"");}
+/* sample data */
+function sampleOn(){try{return !!localStorage.getItem(LST);}catch(e){return false;}}
+function toggleSample(){click();
+  if(!sampleOn()){
+    try{localStorage.setItem(LSS,JSON.stringify(DB));localStorage.setItem(LST,"1");}catch(e){}
+    DB=makeSample();save();toast("Sample data loaded — toggle off to restore yours.");
+  }else{
+    var snap=null;try{snap=JSON.parse(localStorage.getItem(LSS)||"null");}catch(e){}
+    if(!snap||!Array.isArray(snap.batches)||!Array.isArray(snap.used)||!Array.isArray(snap.supplies)||!Array.isArray(snap.plans)){toast("Sample snapshot missing — not touching data.");return;}
+    DB=snap;save();
+    try{localStorage.removeItem(LSS);localStorage.removeItem(LST);}catch(e){}
+    toast("Your data restored.");
+  }
+  ui.editBatch=ui.editSupply=ui.editPlan=null;render();
+}
+function makeSample(){
+  var B=[
+    {id:uid(),date:"2026-07-12",recipe:"Crushed Tomatoes",source:"Ball Blue Book",method:"Water bath",jars:14,size:"Quart",notes:"Roma tomatoes, lemon juice added"},
+    {id:uid(),date:"2026-07-28",recipe:"Salsa Verde",source:"USDA Guide",method:"Water bath",jars:9,size:"Pint",notes:"Tomatillos from garden"},
+    {id:uid(),date:"2026-08-09",recipe:"Green Beans",source:"Ball Blue Book",method:"Pressure",jars:12,size:"Pint",notes:"Blue Lake bush beans"},
+    {id:uid(),date:"2026-08-22",recipe:"Peach Jam",source:"Grandma's card",method:"Water bath",jars:11,size:"Half-pint",notes:"Low-sugar pectin"},
+    {id:uid(),date:"2026-09-05",recipe:"Apple Butter",source:"Ball Blue Book",method:"Water bath",jars:8,size:"Half-pint",notes:"Crockpot method"},
+    {id:uid(),date:"2026-09-19",recipe:"Dill Pickles",source:"USDA Guide",method:"Water bath",jars:10,size:"Quart",notes:"Kirby cucumbers"}
+  ];
+  // use-by = date + 18 months
+  B.forEach(function(b){var d=new Date(b.date+"T12:00");d.setMonth(d.getMonth()+18);b.useby=d.toISOString().slice(0,10);});
+  return {batches:B,
+    used:[{id:uid(),batchId:B[0].id,date:"2026-09-02",qty:2},{id:uid(),batchId:B[3].id,date:"2026-10-01",qty:1}],
+    supplies:[{id:uid(),name:"Quart jars",qty:24,low:12},{id:uid(),name:"Pint jars",qty:36,low:12},{id:uid(),name:"Half-pint jars",qty:18,low:12},{id:uid(),name:"Lids (regular)",qty:60,low:24},{id:uid(),name:"Lids (wide)",qty:30,low:24}],
+    plans:[{id:uid(),month:"June",item:"Strawberry jam",done:true},{id:uid(),month:"July",item:"Tomatoes & salsa",done:true},{id:uid(),month:"August",item:"Green beans, peaches",done:true},{id:uid(),month:"September",item:"Applesauce, pickles",done:false},{id:uid(),month:"October",item:"Pumpkin butter",done:false}]
+  };
+}
+/* derived */
+function batchById(id){return DB.batches.find(function(b){return b.id===id;});}
+function usedQty(batchId){return DB.used.filter(function(u){return u.batchId===batchId;}).reduce(function(s,u){return s+(Number(u.qty)||0);},0);}
+function remaining(b){return Math.max(0,(b.jars||0)-usedQty(b.id));}
+function pantry(){return DB.batches.filter(function(b){return remaining(b)>0;});}
+function isExpired(b){return b.useby&&b.useby<todayLocal();}
+function isSoon(b){if(!b.useby||isExpired(b))return false;var t=new Date(b.useby+"T12:00");var n=new Date();n.setHours(0,0,0,0);return (t-n)/864e5<60;}
+/* tabs */
+var tabs=[["dash","Dashboard"],["batch","Batches"],["pantry","Pantry"],["sup","Supplies"],["plan","Season Plan"],["charts","Charts"],["rep","Reports & Data"]];
+function renderTabs(){document.getElementById("tabs").innerHTML=tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" class="'+(ui.tab===t[0]?"active":"")+'">'+t[1]+"</button>";}).join("");}
+function $(s){return document.querySelector(s);}
+function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+/* views */
+function viewDash(){
+  var p=pantry(),jars=p.reduce(function(s,b){return s+remaining(b);},0);
+  var exp=DB.batches.filter(isExpired).length,soon=DB.batches.filter(isSoon).length;
+  var lowSup=DB.supplies.filter(function(s){return s.qty<=(s.low||0);}).length;
+  var YR=new Date().getFullYear();var thisYear=DB.batches.filter(function(b){return b.date&&b.date.indexOf(String(YR))===0;}).reduce(function(s,b){return s+b.jars;},0);
+  var h='<div class="grid">';
+  h+='<div class="stat"><div class="n">'+jars+'</div><div class="l">Jars in pantry</div></div>';
+  h+='<div class="stat"><div class="n">'+p.length+'</div><div class="l">Active batches</div></div>';
+  h+='<div class="stat"><div class="n">'+thisYear+'</div><div class="l">Jars canned in '+YR+'</div></div>';
+  h+='<div class="stat'+(soon||exp?" warn":"")+'"><div class="n">'+(exp+soon)+'</div><div class="l">Expiring soon / expired</div></div>';
+  h+='<div class="stat'+(lowSup?" warn":"")+'"><div class="n">'+lowSup+'</div><div class="l">Supplies low</div></div>';
+  h+="</div>";
+  h+='<div class="card"><h3>Needs attention</h3>';
+  var flags=[];
+  DB.batches.filter(isExpired).forEach(function(b){flags.push('<span class="badge warn">EXPIRED</span> '+esc(b.recipe)+" ("+b.date+") — "+remaining(b)+" jars left");});
+  DB.batches.filter(isSoon).forEach(function(b){flags.push('<span class="badge low">USE SOON</span> '+esc(b.recipe)+" — use by "+b.useby);});
+  DB.supplies.filter(function(s){return s.qty<=(s.low||0);}).forEach(function(s){flags.push('<span class="badge low">LOW SUPPLY</span> '+esc(s.name)+": "+s.qty+" left");});
+  h+=flags.length?flags.map(function(f){return "<div style='margin:6px 0'>"+f+"</div>";}).join(""):"<p style='color:var(--mut)'>All clear — nothing expiring, supplies stocked.</p>";
+  h+="</div>";
+  h+='<div class="card"><h3>Recent batches</h3>'+batchTable(DB.batches.slice().sort(byDate).slice(0,5))+"</div>";
+  return h;
+}
+function byDate(a,b){var x=b.date||"",y=a.date||"";return x===y?0:(x<y?-1:1);}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function batchTable(list){
+  if(!list.length)return "<p style='color:var(--mut)'>No batches yet.</p>";
+  var h='<table><tr><th>Date</th><th>Recipe</th><th>Jars</th><th>Size</th><th>Left</th><th>Use by</th><th></th></tr>';
+  list.forEach(function(b){
+    var r=remaining(b),cls=r===0?"":(isExpired(b)?'<span class="badge warn">EXPIRED</span>':(isSoon(b)?'<span class="badge low">USE SOON</span>':""));
+    h+="<tr><td>"+esc(b.date)+"</td><td><b>"+esc(b.recipe)+"</b><br><span style='color:var(--mut);font-size:14px'>"+esc(b.source||"")+" · "+esc(b.method||"")+"</span></td><td>"+b.jars+"</td><td>"+esc(b.size)+"</td><td>"+r+"</td><td>"+esc(b.useby||"—")+" "+cls+"</td>";
+    h+='<td style="white-space:nowrap"><button class="btn sm sec" data-act="editB" data-id="'+b.id+'">Edit</button> '+(r>0?'<button class="btn sm sec" data-act="useB" data-id="'+b.id+'">Use</button>':"")+' <button class="btn sm danger" data-act="delB" data-id="'+b.id+'">✕</button></td></tr>';
+  });
+  return h+"</table>";
+}
+function viewBatch(){
+  var h='<div class="toolbar"><input id="qBox" placeholder="Search recipes..." value="'+esc(ui.q)+'"><select id="fType"><option value="">All sizes</option>'+["Quart","Pint","Half-pint"].map(function(s){return '<option '+(ui.fType===s?"selected":"")+">"+s+"</option>";}).join("")+'</select><button class="btn" data-act="newB">+ New batch</button></div>';
+  h+='<div id="bForm"></div><div class="card">'+batchTable(filteredBatches())+"</div>";
+  return h;
+}
+function filteredBatches(){
+  return DB.batches.slice().sort(byDate).filter(function(b){
+    if(ui.q&&(b.recipe+" "+(b.source||"")).toLowerCase().indexOf(ui.q.toLowerCase())<0)return false;
+    if(ui.fType&&b.size!==ui.fType)return false;
+    return true;
+  });
+}
+function batchForm(b){
+  b=b||{date:todayLocal(),recipe:"",source:"",method:"Water bath",jars:1,size:"Quart",useby:"",notes:""};
+  return '<div class="card"><h3>'+(b.id?"Edit batch":"New batch")+'</h3>'
+  +'<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">'
+  +'<div><label>Date canned</label><input type="date" id="fDate" value="'+esc(b.date)+'"></div>'
+  +'<div><label>Recipe name</label><input id="fRecipe" value="'+esc(b.recipe)+'" placeholder="Crushed Tomatoes"></div>'
+  +'<div><label>Recipe source</label><input id="fSource" value="'+esc(b.source||"")+'" placeholder="Ball Blue Book"></div>'
+  +'<div><label>Method (record only)</label><select id="fMethod"><option '+(b.method==="Water bath"?"selected":"")+'>Water bath</option><option '+(b.method==="Pressure"?"selected":"")+'>Pressure</option><option '+(b.method==="Other"?"selected":"")+'>Other</option></select></div>'
+  +'<div><label>Jars</label><input type="number" id="fJars" min="1" value="'+b.jars+'"></div>'
+  +'<div><label>Jar size</label><select id="fSize"><option '+(b.size==="Quart"?"selected":"")+'>Quart</option><option '+(b.size==="Pint"?"selected":"")+'>Pint</option><option '+(b.size==="Half-pint"?"selected":"")+'>Half-pint</option></select></div>'
+  +'<div><label>Use by (optional)</label><input type="date" id="fUseby" value="'+esc(b.useby||"")+'"></div>'
+  +'</div><label>Notes</label><textarea id="fNotes" rows="2">'+esc(b.notes||"")+'</textarea>'
+  +'<p style="color:var(--mut);font-size:14px;margin:6px 0">Record only — always follow your tested recipe source for processing times and pressures.</p>'
+  +'<div class="row"><button class="btn" data-act="saveB" data-id="'+(b.id||"")+'">Save batch</button><button class="btn sec" data-act="cancelB">Cancel</button></div></div>';
+}
+function viewPantry(){
+  var p=pantry().slice().sort(function(a,b){return (a.useby||"9999")<(b.useby||"9999")?-1:1;});
+  if(!p.length)return '<div class="card"><p style="color:var(--mut)">Pantry is empty. Add batches to stock it.</p></div>';
+  var h='<div class="card"><h3>Pantry — oldest use-by first (FIFO)</h3><table><tr><th>Recipe</th><th>Size</th><th>Jars left</th><th>Canned</th><th>Use by</th><th>Status</th><th></th></tr>';
+  p.forEach(function(b){
+    var st=isExpired(b)?'<span class="badge warn">EXPIRED</span>':(isSoon(b)?'<span class="badge low">USE SOON</span>':'<span class="badge ok">GOOD</span>');
+    h+="<tr><td><b>"+esc(b.recipe)+"</b></td><td>"+esc(b.size)+"</td><td>"+remaining(b)+"</td><td>"+esc(b.date)+"</td><td>"+esc(b.useby||"—")+"</td><td>"+st+'</td><td><button class="btn sm sec" data-act="useB" data-id="'+b.id+'">Use jars</button></td></tr>';
+  });
+  return h+"</table></div>";
+}
+function viewSup(){
+  var h='<div class="toolbar"><button class="btn" data-act="newS">+ Add supply</button></div><div id="sForm"></div><div class="card"><table><tr><th>Supply</th><th>On hand</th><th>Low at</th><th>Status</th><th></th></tr>';
+  DB.supplies.forEach(function(s){
+    var st=s.qty<=(s.low||0)?'<span class="badge low">LOW</span>':'<span class="badge ok">OK</span>';
+    h+='<tr><td><b>'+esc(s.name)+'</b></td><td>'+s.qty+'</td><td>'+s.low+'</td><td>'+st+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="adjS" data-id="'+s.id+'" data-d="1">+1</button> <button class="btn sm sec" data-act="adjS" data-id="'+s.id+'" data-d="-1">−1</button> <button class="btn sm sec" data-act="editS" data-id="'+s.id+'">Edit</button> <button class="btn sm danger" data-act="delS" data-id="'+s.id+'">✕</button></td></tr>';
+  });
+  return h+"</table></div>";
+}
+function supplyForm(s){
+  s=s||{name:"",qty:0,low:12};
+  return '<div class="card"><h3>'+(s.id?"Edit supply":"New supply")+'</h3><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))"><div><label>Name</label><input id="sName" value="'+esc(s.name)+'" placeholder="Lids (regular)"></div><div><label>On hand</label><input type="number" id="sQty" value="'+s.qty+'"></div><div><label>Flag low at</label><input type="number" id="sLow" value="'+s.low+'"></div></div><div class="row" style="margin-top:8px"><button class="btn" data-act="saveS" data-id="'+(s.id||"")+'">Save</button><button class="btn sec" data-act="cancelS">Cancel</button></div></div>';
+}
+var MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function viewPlan(){
+  var h='<div class="toolbar"><button class="btn" data-act="newP">+ Add plan item</button></div><div id="pForm"></div>';
+  MONTHS.forEach(function(m){
+    var items=DB.plans.filter(function(p){return p.month===m;});
+    h+='<div class="card"><h3>'+m+'</h3>';
+    if(!items.length)h+='<p style="color:var(--mut)">Nothing planned.</p>';
+    items.forEach(function(p){
+      h+='<div class="row" style="margin:6px 0"><input type="checkbox" data-act="togP" data-id="'+p.id+'" '+(p.done?"checked":"")+' style="width:22px;height:22px"><span style="'+(p.done?"text-decoration:line-through;color:var(--mut)":"")+'">'+esc(p.item)+'</span><span style="margin-left:auto"><button class="btn sm danger" data-act="delP" data-id="'+p.id+'">✕</button></span></div>';
+    });
+    h+="</div>";
+  });
+  return h;
+}
+function planForm(p){
+  p=p||{month:"July",item:"",done:false};
+  return '<div class="card"><h3>Plan item</h3><div class="grid" style="grid-template-columns:200px 1fr"><div><label>Month</label><select id="pMonth">'+MONTHS.map(function(m){return "<option "+(p.month===m?"selected":"")+">"+m+"</option>";}).join("")+'</select></div><div><label>What to can</label><input id="pItem" value="'+esc(p.item)+'" placeholder="Tomatoes, salsa"></div></div><div class="row" style="margin-top:8px"><button class="btn" data-act="saveP">Save</button><button class="btn sec" data-act="cancelP">Cancel</button></div></div>';
+}
+/* charts */
+function chartJarsByType(){
+  var byT={};
+  pantry().forEach(function(b){byT[b.recipe]=(byT[b.recipe]||0)+remaining(b);});
+  var ks=Object.keys(byT).sort(function(a,b){return byT[b]-byT[a];}).slice(0,10);
+  var max=Math.max.apply(null,ks.map(function(k){return byT[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){
+    var sel=ui.sel.type===k, w=Math.max(Math.round(byT[k]/max*100),4);
+    h+='<div class="bar-row" data-vtype="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byT[k]+(sel?" jars":"")+"</div></div>";
+  });
+  return h||'<p style="color:var(--mut)">No pantry data.</p>';
+}
+function chartBatchesByMonth(){
+  var byM={};DB.batches.forEach(function(b){if(b.date){var k=b.date.slice(0,7);byM[k]=(byM[k]||0)+b.jars;}});
+  var ks=Object.keys(byM).sort().slice(-12);
+  var max=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){
+    var sel=ui.sel.month===k,w=Math.max(Math.round(byM[k]/max*100),4);
+    h+='<div class="bar-row" data-vmonth="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byM[k]+(sel?" jars":"")+"</div></div>";
+  });
+  return h||'<p style="color:var(--mut)">No batch data.</p>';
+}
+function chartSizeDonut(){
+  var byS={};pantry().forEach(function(b){byS[b.size]=(byS[b.size]||0)+remaining(b);});
+  var ks=Object.keys(byS),tot=ks.reduce(function(s,k){return s+byS[k];},0);
+  if(!tot)return '<p style="color:var(--mut)">No pantry data.</p>';
+  var C=2*Math.PI*70,cx=90,cy=90,off=0,cols=["#b3541e","#5a7d2a","#7a5cc9","#c9a227"];
+  var h='<div class="donut-wrap"><svg width="180" height="180" viewBox="0 0 180 180">';
+  ks.forEach(function(k,i){
+    var frac=byS[k]/tot,len=frac*C,sel=ui.sel.size===k;
+    h+='<circle cx="'+cx+'" cy="'+cy+'" r="70" fill="none" stroke="'+cols[i%4]+'" stroke-width="'+(sel?30:22)+'" stroke-dasharray="'+Math.max(len-1.5,0.5)+" "+C+'" stroke-dashoffset="'+(-off)+'" data-vsize="'+esc(k)+'" style="cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>';
+    off+=len;
+  });
+  var fs=tot>99999?13:16;
+  h+='<text x="90" y="86" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle" font-size="12" fill="var(--mut)">jars</text></svg><div class="legend">';
+  ks.forEach(function(k){h+='<div data-vsize="'+esc(k)+'" class="'+(ui.sel.size===k?"sel":"")+'"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+cols[ks.indexOf(k)%4]+'"></span> '+esc(k)+" — "+byS[k]+"</div>";});
+  return h+"</div></div>";
+}
+function chartMethod(){
+  var byM={};DB.batches.forEach(function(b){byM[b.method||"Other"]=(byM[b.method||"Other"]||0)+b.jars;});
+  var ks=Object.keys(byM),max=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){
+    var sel=ui.sel.method===k,w=Math.max(Math.round(byM[k]/max*100),4);
+    h+='<div class="bar-row" data-vmethod="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byM[k]+(sel?" jars":"")+"</div></div>";
+  });
+  return h||'<p style="color:var(--mut)">No data.</p>';
+}
+function viewCharts(){
+  return '<div class="charts-grid">'
+  +'<div class="chart-card"><h3>Jars in pantry by recipe</h3>'+chartJarsByType()+'</div>'
+  +'<div class="chart-card"><h3>Jars canned by month</h3>'+chartBatchesByMonth()+'</div>'
+  +'<div class="chart-card"><h3>Pantry by jar size</h3>'+chartSizeDonut()+'</div>'
+  +'<div class="chart-card"><h3>Jars by method</h3>'+chartMethod()+'</div>'
+  +"</div><p style='color:var(--mut);font-size:14px'>Click a bar, slice, or legend row to spotlight it; click again to release.</p>";
+}
+/* reports */
+function csvEsc(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return csvEsc(v);}
+function viewRep(){
+  return '<div class="card"><h3>Printable sheets</h3><div class="row"><button class="btn sec" data-act="printPantry">🖨 Pantry sheet</button><button class="btn sec" data-act="printBatch">🖨 Batch log</button></div></div>'
+  +'<div class="card"><h3>Export / backup</h3><div class="row"><button class="btn sec" data-act="csvB">⬇ Batches CSV</button><button class="btn sec" data-act="csvP">⬇ Pantry CSV</button><button class="btn sec" data-act="jsonB">⬇ JSON backup</button><label class="btn sec" style="cursor:pointer">⬆ Restore JSON<input type="file" id="restoreFile" accept=".json" class="hidden"></label></div></div>';
+}
+function printSheet(title,rows){
+  var h="<h1>"+esc(title)+"</h1><p>Printed "+todayLocal()+"</p><table border='1' cellpadding='6' style='border-collapse:collapse;width:100%'>";
+  h+="<tr>"+rows[0].map(function(c){return "<th>"+esc(c)+"</th>";}).join("")+"</tr>";
+  rows.slice(1).forEach(function(r){h+="<tr>"+r.map(function(c){return "<td>"+esc(c)+"</td>";}).join("")+"</tr>";});
+  var w=window.open("","_blank");if(!w){toast("Popup blocked — allow pop-ups to print.");return;}
+  w.document.write("<html><head><title>"+esc(title)+"</title></head><body style='font-family:sans-serif'>"+h+"</table></body></html>");w.document.close();w.focus();w.print();
+}
+/* render + wire */
+function render(){
+  renderTabs();paintTheme();paintSnd();
+  var v=document.getElementById("view");
+  var html=ui.tab==="dash"?viewDash():ui.tab==="batch"?viewBatch():ui.tab==="pantry"?viewPantry():ui.tab==="sup"?viewSup():ui.tab==="plan"?viewPlan():ui.tab==="charts"?viewCharts():viewRep();
+  v.innerHTML=html;
+  if(ui.tab==="batch"&&ui._showBForm)document.getElementById("bForm").innerHTML=batchForm(ui.editBatch?batchById(ui.editBatch):null);
+  if(ui.tab==="sup"&&ui._showSForm)document.getElementById("sForm").innerHTML=supplyForm(ui.editSupply?DB.supplies.find(function(s){return s.id===ui.editSupply;}):null);
+  if(ui.tab==="plan"&&ui._showPForm)document.getElementById("pForm").innerHTML=planForm();
+  wire();
+}
+function wire(){
+  qa("#tabs button").forEach(function(b){b.addEventListener("click",function(){ui.tab=b.getAttribute("data-tab");ui._showBForm=ui._showSForm=ui._showPForm=false;ui.editBatch=ui.editSupply=null;click();render();});});
+  var qb=$("#qBox");if(qb){qb.addEventListener("input",function(){ui.q=qb.value;var pos=qb.selectionStart;render();var n=$("#qBox");if(n){n.focus();n.setSelectionRange(pos,pos);}});}
+  var ft=$("#fType");if(ft)ft.addEventListener("change",function(){ui.fType=ft.value;click();render();});
+  /* chart selection */
+  qa("[data-vtype]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vtype");ui.sel.type=ui.sel.type===k?null:k;click();render();});});
+  qa("[data-vmonth]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vmonth");ui.sel.month=ui.sel.month===k?null:k;click();render();});});
+  qa("[data-vsize]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vsize");ui.sel.size=ui.sel.size===k?null:k;click();render();});});
+  qa("[data-vmethod]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vmethod");ui.sel.method=ui.sel.method===k?null:k;click();render();});});
+  qa("[data-act]").forEach(function(b){b.addEventListener("click",function(){act(b.getAttribute("data-act"),b);});});
+  var rf=$("#restoreFile");if(rf)rf.addEventListener("change",function(){doRestore(rf);});
+}
+function act(a,b){
+  var id=b.getAttribute("data-id");
+  if(a==="newB"){ui.editBatch=null;ui._showBForm=true;click();render();window.scrollTo(0,0);}
+  else if(a==="editB"){ui.editBatch=id;ui._showBForm=true;click();render();window.scrollTo(0,0);}
+  else if(a==="cancelB"){ui._showBForm=false;ui.editBatch=null;click();render();}
+  else if(a==="saveB"){
+    var rec={date:$("#fDate").value||todayLocal(),recipe:$("#fRecipe").value.trim(),source:$("#fSource").value.trim(),method:$("#fMethod").value,jars:Math.max(0,parseInt($("#fJars").value,10)||0),size:$("#fSize").value,useby:$("#fUseby").value||"",notes:$("#fNotes").value.trim()};
+    if(!rec.recipe){toast("Recipe name is required.");return;}
+    if(id){var ex=batchById(id);if(!ex){toast("That batch is gone.");return;}Object.assign(ex,rec);}else{rec.id=uid();DB.batches.push(rec);}
+    save();ui._showBForm=false;ui.editBatch=null;click();toast("Batch saved.");render();
+  }
+  else if(a==="delB"){if(confirm("Delete this batch and its use records?")){DB.batches=DB.batches.filter(function(x){return x.id!==id;});DB.used=DB.used.filter(function(u){return u.batchId!==id;});save();click();toast("Deleted.");render();}}
+  else if(a==="useB"){
+    var bt=batchById(id);if(!bt){toast("That batch is gone.");return;}var left=remaining(bt);if(left<1){toast("No jars left in this batch.");return;}
+    openModal("Use jars — "+esc(bt.recipe),'<label>How many '+esc(bt.size)+' jars used? ('+left+' left)</label><input type="number" id="uQty" min="1" max="'+left+'" value="1"><div class="row" style="margin-top:10px"><button class="btn" id="uGo">Record</button></div>');
+    $("#uGo").addEventListener("click",function(){
+      var q=parseInt($("#uQty").value,10)||0;
+      if(q<1||q>left){toast("Enter 1–"+left+".");return;}
+      DB.used.push({id:uid(),batchId:id,date:todayLocal(),qty:q});save();closeModal();click();toast("Recorded.");render();
+    });
+  }
+  else if(a==="newS"){ui.editSupply=null;ui._showSForm=true;click();render();}
+  else if(a==="editS"){ui.editSupply=id;ui._showSForm=true;click();render();}
+  else if(a==="cancelS"){ui._showSForm=false;ui.editSupply=null;click();render();}
+  else if(a==="saveS"){
+    var s={name:$("#sName").value.trim(),qty:parseInt($("#sQty").value,10)||0,low:parseInt($("#sLow").value,10)||0};
+    if(!s.name){toast("Name is required.");return;}
+    if(id){var es=DB.supplies.find(function(x){return x.id===id;});if(!es){toast("That supply is gone.");return;}Object.assign(es,s);}else{s.id=uid();DB.supplies.push(s);}
+    save();ui._showSForm=false;ui.editSupply=null;click();toast("Saved.");render();
+  }
+  else if(a==="delS"){if(confirm("Delete this supply?")){DB.supplies=DB.supplies.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="adjS"){var s=DB.supplies.find(function(x){return x.id===id;});if(!s){toast("That supply is gone.");return;}s.qty=Math.max(0,s.qty+parseInt(b.getAttribute("data-d"),10));save();click();render();}
+  else if(a==="newP"){ui._showPForm=true;click();render();}
+  else if(a==="cancelP"){ui._showPForm=false;click();render();}
+  else if(a==="saveP"){var it=$("#pItem").value.trim();if(!it){toast("Describe what to can.");return;}DB.plans.push({id:uid(),month:$("#pMonth").value,item:it,done:false});save();ui._showPForm=false;click();toast("Planned.");render();}
+  else if(a==="delP"){DB.plans=DB.plans.filter(function(x){return x.id!==id;});save();click();render();}
+  else if(a==="togP"){var p=DB.plans.find(function(x){return x.id===id;});if(!p)return;p.done=!p.done;save();click();render();}
+  else if(a==="csvB"){
+    var rows=[["Date","Recipe","Source","Method","Jars","Size","Use by","Notes"]];
+    DB.batches.slice().sort(byDate).forEach(function(b){rows.push([b.date,b.recipe,b.source,b.method,b.jars,b.size,b.useby,b.notes]);});
+    dl("canledger-batches.csv",rows.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");
+  }
+  else if(a==="csvP"){
+    var rows2=[["Recipe","Size","Jars left","Canned","Use by","Status"]];
+    pantry().forEach(function(b){rows2.push([b.recipe,b.size,remaining(b),b.date,b.useby,isExpired(b)?"EXPIRED":(isSoon(b)?"USE SOON":"GOOD")]);});
+    dl("canledger-pantry.csv",rows2.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");
+  }
+  else if(a==="jsonB"){dl("canledger-backup.json",JSON.stringify(DB,null,1),"application/json");}
+  else if(a==="printPantry"){
+    var rows3=[["Recipe","Size","Jars left","Canned","Use by"]];
+    pantry().slice().sort(function(x,y){return (x.useby||"9999")<(y.useby||"9999")?-1:1;}).forEach(function(b){rows3.push([b.recipe,b.size,remaining(b),b.date,b.useby||"—"]);});
+    printSheet("CanLedger — Pantry Sheet",rows3);
+  }
+  else if(a==="printBatch"){
+    var rows4=[["Date","Recipe","Jars","Size","Method","Use by"]];
+    DB.batches.slice().sort(byDate).forEach(function(b){rows4.push([b.date,b.recipe,b.jars,b.size,b.method,b.useby||"—"]);});
+    printSheet("CanLedger — Batch Log",rows4);
+  }
+}
+function dl(name,text,mime){var u=URL.createObjectURL(new Blob([text],{type:mime}));var l=document.createElement("a");l.href=u;l.download=name;document.body.appendChild(l);l.click();setTimeout(function(){URL.revokeObjectURL(u);l.remove();},500);click();}
+function doRestore(rf){
+  var f=rf.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){try{
+    var d=JSON.parse(r.result);
+    if(!d||!Array.isArray(d.batches))throw 0;
+    var bad=(d.batches||[]).some(function(x){return !x||!x.id;})||(d.used||[]).some(function(x){return !x||!x.id;})||(d.supplies||[]).some(function(x){return !x||!x.id;});
+    if(bad)throw 0;
+    DB={batches:d.batches,used:Array.isArray(d.used)?d.used:[],supplies:Array.isArray(d.supplies)?d.supplies:[],plans:Array.isArray(d.plans)?d.plans:[]};
+    save();click();toast("Backup restored.");render();
+  }catch(e){toast("Invalid backup file.");}};
+  r.readAsText(f);rf.value="";
+}
+function openModal(title,bodyHtml){var m=document.getElementById("modal");m.classList.remove("hidden");m.innerHTML='<div class="box"><h3>'+title+'</h3><div style="margin-top:10px">'+bodyHtml+'</div><div class="row" style="margin-top:12px"><button class="btn sec" id="mClose">Close</button></div></div>';document.getElementById("mClose").addEventListener("click",closeModal);m.onclick=function(e){if(e.target===m)closeModal();};}
+function closeModal(){var m=document.getElementById("modal");m.classList.add("hidden");m.innerHTML="";}
+/* init */
+document.getElementById("btnSample").addEventListener("click",toggleSample);
+document.getElementById("btnTheme").addEventListener("click",function(){click();try{var d=document.documentElement.getAttribute("data-theme")==="dark";localStorage.setItem("canledger_theme",d?"":"dark");}catch(e){}paintTheme();});
+document.getElementById("btnSound").addEventListener("click",function(){sndOn=!sndOn;try{localStorage.setItem("canledger_snd",sndOn?"1":"0");}catch(e){}paintSnd();click();});
+if(sampleOn()){try{var s=JSON.parse(localStorage.getItem(LSS)||"null");}catch(e){}}
+render();
+</script>
+</body>
+</html>
