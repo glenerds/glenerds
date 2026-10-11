@@ -280,19 +280,19 @@ function viewCharts(){
   var byM={};DB.sales.forEach(function(s){if(s.dateSold){var k=s.dateSold.slice(0,7);byM[k]=(byM[k]||0)+saleNet(s);}});
   var ks=Object.keys(byM).sort().slice(-12),mx=Math.max.apply(null,ks.map(function(k){return Math.abs(byM[k]);}).concat([1]));
   var pSpot="";
-  if(ui.sel.prof){var so=DB.sales.filter(function(s){return s.dateSold&&s.dateSold.slice(0,7)===ui.sel.prof;});var sr=so.reduce(function(a,s){return a+num(s.salePrice);},0);var sn=so.reduce(function(a,s){return a+saleNet(s);},0);pSpot='<div class="spot">'+esc(ui.sel.prof)+' — $'+Math.round(sr)+' revenue · '+so.length+' sales · '+money(sn)+' net · tap again to release</div>';}
+  if(ui.sel.prof){var so=DB.sales.filter(function(s){return s.dateSold&&s.dateSold.slice(0,7)===ui.sel.prof;});var sr=so.reduce(function(a,s){return a+num(s.salePrice);},0);var sn=so.reduce(function(a,s){return a+saleNet(s);},0);pSpot='<div class="spot">'+esc(ui.sel.prof)+' — $'+Math.round(sr)+' revenue · '+so.length+' sales · '+money(sn)+' net</div>';}
   var profH=ks.map(function(k){var sel=ui.sel.prof===k,w=Math.max(Math.round(Math.abs(byM[k])/mx*100),4);
     return '<div class="bar-row" data-vprof="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%;background:'+(byM[k]<0?"var(--warn)":"var(--acc2)")+'"></div></div><div class="bar-val">'+money(byM[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No sales yet.</p>';
   var byP={};DB.sales.forEach(function(s){var p=s.platform||"Other";byP[p]=(byP[p]||0)+num(s.salePrice);});
   var pk=Object.keys(byP).sort(function(a,b){return byP[b]-byP[a];}),mx2=Math.max.apply(null,pk.map(function(k){return byP[k];}).concat([1]));
   var plSpot="";
-  if(ui.sel.plat){var sp=DB.sales.filter(function(s){return (s.platform||"Other")===ui.sel.plat;});var spn=sp.reduce(function(a,s){return a+saleNet(s);},0);plSpot='<div class="spot">'+esc(ui.sel.plat)+' — '+sp.length+' sales · '+money(spn)+' net · tap again to release</div>';}
+  if(ui.sel.plat){var sp=DB.sales.filter(function(s){return (s.platform||"Other")===ui.sel.plat;});var spn=sp.reduce(function(a,s){return a+saleNet(s);},0);plSpot='<div class="spot">'+esc(ui.sel.plat)+' — '+sp.length+' sales · '+money(spn)+' net</div>';}
   var platH=pk.map(function(k){var sel=ui.sel.plat===k,w=Math.max(Math.round(byP[k]/mx2*100),4);
     return '<div class="bar-row" data-vplat="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+money(byP[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No sales yet.</p>';
   var byC={};DB.items.forEach(function(i){if(i.status!=="sold"){var c=i.category||"Other";byC[c]=(byC[c]||0)+num(i.cost);}});
   var ck=Object.keys(byC).sort(function(a,b){return byC[b]-byC[a];}),mx3=Math.max.apply(null,ck.map(function(k){return byC[k];}).concat([1]));
   var catSpot="";
-  if(ui.sel.cat){var ci=DB.items.filter(function(i){return i.status!=="sold"&&(i.category||"Other")===ui.sel.cat;});catSpot='<div class="spot">'+esc(ui.sel.cat)+' — '+ci.length+' items · '+money(byC[ui.sel.cat]||0)+' tied up · tap again to release</div>';}
+  if(ui.sel.cat){var ci=DB.items.filter(function(i){return i.status!=="sold"&&(i.category||"Other")===ui.sel.cat;});catSpot='<div class="spot">'+esc(ui.sel.cat)+' — '+ci.length+' items · '+money(byC[ui.sel.cat]||0)+' tied up</div>';}
   var catH=ck.map(function(k){var sel=ui.sel.cat===k,w=Math.max(Math.round(byC[k]/mx3*100),4);
     return '<div class="bar-row" data-vcat="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+money(byC[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No active inventory.</p>';
   var st={sourced:0,listed:0,sold:0};DB.items.forEach(function(i){st[i.status]=(st[i.status]||0)+1;});
@@ -306,13 +306,13 @@ function viewCharts(){
   sk.forEach(function(k){donut+='<div data-vstat="'+k+'" class="'+(ui.sel.stat===k?"sel":"")+'" style="margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px">'+lbl[k]+" — "+st[k]+"</div>";});
   donut+="</div></div>";
   var stSpot="";
-  if(ui.sel.stat){stSpot='<div class="spot">'+lbl[ui.sel.stat]+' — '+st[ui.sel.stat]+' items · tap again to release</div>';}
+  if(ui.sel.stat){stSpot='<div class="spot">'+lbl[ui.sel.stat]+' — '+st[ui.sel.stat]+' items</div>';}
   return '<div class="charts-grid">'
   +'<div class="chart-card"><h3>Net profit by month</h3>'+pSpot+profH+'</div>'
   +'<div class="chart-card"><h3>Revenue by platform</h3>'+plSpot+platH+'</div>'
   +'<div class="chart-card"><h3>Cash tied up by category</h3>'+catSpot+catH+'</div>'
   +'<div class="chart-card"><h3>Items by status</h3>'+stSpot+donut+'</div>'
-  +"</div><p style='color:var(--mut);font-size:14px'>Tap a bar, slice, or legend row to spotlight it; tap again to release.</p>";
+  +"</div>";
 }
 function viewBackup(){
   return '<div class="card"><h3>CSV export (tax-ready)</h3><div class="row"><button class="btn sec" data-act="csvI">⬇ Items CSV</button><button class="btn sec" data-act="csvS">⬇ Sales CSV</button><button class="btn sec" data-act="csvE">⬇ Expenses CSV</button></div></div>'
