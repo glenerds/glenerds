@@ -72,8 +72,8 @@ body.dark .btn.ghost{color:var(--ink)}
 .barlab{font-size:14px;color:var(--muted);margin-top:4px;white-space:nowrap}
 .donutwrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
 .donutwrap svg{flex:0 0 auto}
-.legend{font-size:16px}
-.legend .li{cursor:pointer;padding:4px 8px;border-radius:8px;display:flex;gap:8px;align-items:center}
+.legend{font-size:16px;display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.legend .li{cursor:pointer;padding:4px 10px;border-radius:8px;display:inline-flex;gap:8px;align-items:center}
 .legend .li.sel{background:var(--chip);outline:2px solid var(--sel)}
 .sw{width:16px;height:16px;border-radius:4px;flex:0 0 auto}
 path.slice{cursor:pointer;transition:transform .15s}
@@ -264,7 +264,7 @@ document.getElementById('btnSample').addEventListener('click',function(){setSamp
 function refreshSampleBtn(){var b=document.getElementById('btnSample');b.classList.toggle('on',sampleMode);b.title=sampleMode?'Sample data ON — tap to restore your data':'Try sample data';}
 
 /* ---------- tabs ---------- */
-var TABS=[['dash','Dashboard'],['log','Catch Log'],['spots','Spots'],['tackle','Tackle'],['bests','Personal Bests'],['reports','Reports & Data']];
+var TABS=[['dash','Dashboard'],['log','Catch Log'],['spots','Spots'],['tackle','Tackle'],['bests','Personal Bests'],['charts','Charts'],['reports','Reports & Data']];
 var activeTab='dash';
 var sel={month:null,species:null,bait:null,week:null};
 var editTrip=null,editCatch=null,editSpot=null,editBait=null;
@@ -282,6 +282,7 @@ function render(){renderTabs();refreshSampleBtn();applyTheme();
   else if(activeTab==='spots')v.innerHTML=viewSpots();
   else if(activeTab==='tackle')v.innerHTML=viewTackle();
   else if(activeTab==='bests')v.innerHTML=viewBests();
+  else if(activeTab==='charts')v.innerHTML=viewCharts();
   else v.innerHTML=viewReports();
   wireView();
 }
@@ -324,13 +325,15 @@ function viewDash(){
       return '<div class="alert">Trip on <b>'+esc(t.date)+'</b> at '+esc(t.spotName)+' is missing conditions (weather, water temp…). <button class="btn small ghost" data-fixcond="'+t.id+'">Add conditions</button></div>';
     }).join(''):'<p class="muted">All trips have conditions recorded. Nice logbook.</p>'+snap)
     +(needy.length>5?'<p class="muted">+ '+(needy.length-5)+' more…</p>':'')+'</div></div>';
-  h+='<div class="grid cards2" style="margin-top:14px;align-items:start">'
-    +'<div class="card"><h2>Catches by month</h2>'+chartMonths()+ '<div class="detail" id="dMonth">'+monthDetail()+'</div></div>'
+  return h;
+}
+function viewCharts(){
+  return '<div class="grid cards2" style="align-items:start">'
+    +'<div class="card"><h2>Catches by month</h2>'+chartMonths()+'<div class="detail" id="dMonth">'+monthDetail()+'</div></div>'
     +'<div class="card"><h2>Catches by species</h2>'+chartDonut()+'<div class="detail" id="dSpecies">'+speciesDetail()+'</div></div>'
     +'<div class="card"><h2>Bait performance</h2>'+chartBaits()+'<div class="detail" id="dBait">'+baitDetail()+'</div></div>'
-    +'<div class="card"><h2>Activity — last 26 weeks</h2>'+chartHeat()+'<div class="detail" id="dWeek">'+weekDetail()+'</div><p class="muted">Each square is a week; darker means more catches. Tap a square to see the week.</p></div>'
+    +'<div class="card"><h2>Activity — last 26 weeks</h2>'+chartHeat()+'<div class="detail" id="dWeek">'+weekDetail()+'</div></div>'
     +'</div>';
-  return h;
 }
 function monthDetail(){
   if(!sel.month)return 'Tap a bar to see the month.';
