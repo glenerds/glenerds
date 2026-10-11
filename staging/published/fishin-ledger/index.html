@@ -31,6 +31,7 @@ header{max-width:1080px;margin:0 auto;padding:14px 16px 6px;display:flex;align-i
 .hbtn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:21px;box-shadow:var(--shadow)}
 .hbtn:hover{border-color:var(--accent)}
 .hbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.hbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 body.dark .hbtn.on{color:#10201a}
 .pillbtn{height:44px;padding:0 18px;border-radius:22px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:16px;font-weight:700;box-shadow:var(--shadow);text-decoration:none;display:inline-flex;align-items:center;color:var(--ink)}
 .pillbtn:hover{border-color:var(--accent)}
@@ -48,7 +49,7 @@ body.dark .tab.active{color:#10201a}
 .statnum{font-size:32px;font-weight:700;color:var(--accent)}
 .statlab{font-size:15px;color:var(--muted)}
 .statsub{font-size:15px;color:var(--muted);margin-top:6px}
-.detail{font-size:20px;font-weight:600;min-height:28px;margin-top:8px}
+.detail{font-size:20px;font-weight:600;min-height:28px;margin-top:8px;text-align:center}
 .muted{color:var(--muted);font-size:15px}
 form .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 form label{font-size:15px;font-weight:700;display:block;margin-bottom:4px}
@@ -64,7 +65,7 @@ body.dark .btn.ghost{color:var(--ink)}
 .listitem{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--bg)}
 .listitem .ttl{font-size:18px;font-weight:700}
 .tag{display:inline-block;background:var(--chip);border-radius:8px;padding:2px 10px;font-size:15px;margin:2px 4px 2px 0}
-.bars{display:flex;align-items:flex-end;gap:8px;height:170px;padding:8px 4px 0;border-bottom:2px solid var(--line)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:260px;padding:8px 4px 0;border-bottom:2px solid var(--line)}
 .barcol{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer;min-width:0}
 .barfill{width:100%;max-width:54px;background:var(--bar);border-radius:6px 6px 0 0;border:1px solid var(--barline);border-bottom:none;transition:transform .12s}
 .barcol.sel .barfill{background:var(--sel);outline:3px solid var(--sel);outline-offset:2px}
@@ -110,9 +111,9 @@ footer.cta{max-width:1080px;margin:0 auto 40px;padding:0 16px;text-align:center}
     <span class="name">FishinLedger</span>
   </div>
   <a class="pillbtn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-  <button class="hbtn" id="btnSample" title="Try sample data" aria-label="Try sample data">⚗</button>
-  <button class="hbtn" id="btnTheme" title="Toggle dark mode" aria-label="Toggle dark mode">◐</button>
-  <button class="hbtn" id="btnSound" title="Toggle sound" aria-label="Toggle sound">🔔</button>
+  <button class="hbtn" id="btnSample" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24"><path d="M10 3h4M10 3v5.2L4.8 17a2.4 2.4 0 0 0 2.1 3.6h10.2a2.4 2.4 0 0 0 2.1-3.6L14 8.2V3"/><path d="M7.5 14h9"/></svg></button>
+  <button class="hbtn" id="btnTheme" title="Toggle dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24"><path d="M20 13.2A8.5 8.5 0 1 1 10.8 4 6.8 6.8 0 0 0 20 13.2z"/></svg></button>
+  <button class="hbtn" id="btnSound" title="Toggle sound" aria-label="Toggle sound"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="sw1" d="M16.5 8.5a5 5 0 0 1 0 7"/><path class="sw2" d="M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
 </header>
 <main>
   <nav class="tabs" id="tabs" aria-label="Sections"></nav>
@@ -171,7 +172,6 @@ function applyTheme(){
   var dark=t==='dark'||(t==='auto'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
   document.body.classList.toggle('dark',dark);
   var b=document.getElementById('btnTheme');
-  b.textContent=t==='dark'?'☾':t==='light'?'☀':'◐';
   b.classList.toggle('on',t!=='auto');
 }
 document.getElementById('btnTheme').addEventListener('click',function(){
@@ -180,9 +180,16 @@ document.getElementById('btnTheme').addEventListener('click',function(){
 });
 document.getElementById('btnSound').addEventListener('click',function(){
   DB.settings.sound=!DB.settings.sound;save();
-  this.textContent=DB.settings.sound?'🔔':'🔕';this.classList.toggle('on',!DB.settings.sound);
+  applySoundBtn();
   click();
 });
+function applySoundBtn(){
+  var b=document.getElementById('btnSound');
+  b.classList.toggle('on',!DB.settings.sound);
+  var w=b.querySelectorAll('.sw1,.sw2');
+  for(var i=0;i<w.length;i++)w[i].style.display=DB.settings.sound?'':'none';
+  b.title=DB.settings.sound?'Sound: on':'Sound: off';
+}
 
 /* ---------- sample data ---------- */
 function seededRand(seed){var s=seed;return function(){s=(s*1103515245+12345)%2147483648;return s/2147483648;};}
@@ -317,7 +324,7 @@ function viewDash(){
       return '<div class="alert">Trip on <b>'+esc(t.date)+'</b> at '+esc(t.spotName)+' is missing conditions (weather, water temp…). <button class="btn small ghost" data-fixcond="'+t.id+'">Add conditions</button></div>';
     }).join(''):'<p class="muted">All trips have conditions recorded. Nice logbook.</p>'+snap)
     +(needy.length>5?'<p class="muted">+ '+(needy.length-5)+' more…</p>':'')+'</div></div>';
-  h+='<div class="grid cards2" style="margin-top:14px">'
+  h+='<div class="grid cards2" style="margin-top:14px;align-items:start">'
     +'<div class="card"><h2>Catches by month</h2>'+chartMonths()+ '<div class="detail" id="dMonth">'+monthDetail()+'</div></div>'
     +'<div class="card"><h2>Catches by species</h2>'+chartDonut()+'<div class="detail" id="dSpecies">'+speciesDetail()+'</div></div>'
     +'<div class="card"><h2>Bait performance</h2>'+chartBaits()+'<div class="detail" id="dBait">'+baitDetail()+'</div></div>'
@@ -342,7 +349,7 @@ function chartMonths(){
   var max=Math.max.apply(null,keys.map(function(k){return counts[k];}).concat([1]));
   var lab=['J','F','M','A','M','J','J','A','S','O','N','D'];
   return '<div class="bars" role="img" aria-label="Catches by month">'+keys.map(function(k){
-    var h=Math.round(counts[k]/max*150);
+    var h=Math.round(counts[k]/max*240);
     var ml=monthLabel(k).split(' ');
     return '<div class="barcol'+(sel.month===k?' sel':'')+'" data-month="'+k+'" title="'+monthLabel(k)+': '+counts[k]+' catches">'
       +'<div class="barfill" style="height:'+Math.max(h,counts[k]>0?6:2)+'px"></div>'
@@ -361,14 +368,14 @@ function chartDonut(){
   var total=DB.catches.length;
   var pal=palette();
   if(!total)return '<p class="muted">No catches yet.</p>';
-  var R=60,C=2*Math.PI*R,off=25,paths='';
+  var R=72,C=2*Math.PI*R,off=25,paths='';
   names.forEach(function(n,i){
     var frac=counts[n]/total, len=frac*C;
     var pull=sel.species===n?9:0;
     var mid=(off+len/2)/C*360-90, rad=mid*Math.PI/180;
     var dx=Math.cos(rad)*pull, dy=Math.sin(rad)*pull;
-    paths+='<g transform="translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')"><circle class="slice" data-species="'+esc(n)+'" cx="100" cy="100" r="'+R+'" fill="none" stroke="'+pal[i%pal.length]+'" stroke-width="28"'
-      +' stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)" style="'+(sel.species===n?'outline:3px solid var(--ink);outline-offset:3px;border-radius:50%;':'')+'"><title>'+esc(n)+': '+counts[n]+'</title></circle></g>';
+    paths+='<g transform="translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')"><circle class="slice" data-species="'+esc(n)+'" cx="100" cy="100" r="'+R+'" fill="none" stroke="'+pal[i%pal.length]+'" stroke-width="30"'
+      +' stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)"><title>'+esc(n)+': '+counts[n]+'</title></circle></g>';
     off+=len;
   });
   var center1,center2;
@@ -379,10 +386,10 @@ function chartDonut(){
     return '<div class="li'+(sel.species===n?' sel':'')+'" data-species="'+esc(n)+'"><span class="sw" style="background:'+pal[i%pal.length]+'"></span>'+esc(n)+' ('+counts[n]+')</div>';
   }).join('');
   return '<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto">'
-    +'<svg width="280" height="280" viewBox="0 0 200 200" role="img" aria-label="Catches by species">'
-    +'<circle cx="100" cy="100" r="'+R+'" fill="none" stroke="var(--h0)" stroke-width="28"/>'+paths
+    +'<svg width="320" height="320" viewBox="0 0 200 200" role="img" aria-label="Catches by species">'
+    +'<circle cx="100" cy="100" r="'+R+'" fill="none" stroke="var(--h0)" stroke-width="30"/>'+paths
     +'<text x="100" y="96" text-anchor="middle" font-size="'+fs1+'" font-weight="700" fill="var(--ink)" pointer-events="none">'+esc(center1)+'</text>'
-    +'<text x="100" y="122" text-anchor="middle" font-size="17" fill="var(--muted)" pointer-events="none">'+esc(center2)+'</text>'
+    +'<text x="100" y="122" text-anchor="middle" font-size="15" fill="var(--muted)" pointer-events="none">'+esc(center2)+'</text>'
     +'</svg></div><div class="legend">'+legend+'</div></div>';
 }
 function baitStats(){
@@ -404,7 +411,7 @@ function chartBaits(){
   if(!s.length)return '<p class="muted">No bait data yet.</p>';
   var max=Math.max.apply(null,s.map(function(x){return x.n;}).concat([1]));
   return '<div class="bars" role="img" aria-label="Catches by bait">'+s.map(function(x){
-    var h=Math.round(x.n/max*150);
+    var h=Math.round(x.n/max*240);
     return '<div class="barcol'+(sel.bait===x.key?' sel':'')+'" data-bait="'+esc(x.key)+'" title="'+esc(x.name)+': '+x.n+' catches">'
       +'<div class="barfill" style="height:'+Math.max(h,6)+'px"></div>'
       +'<div class="barlab">'+x.n+'</div></div>';
@@ -735,8 +742,7 @@ function wireView(){
 
 /* ---------- init ---------- */
 (function(){
-  var sb=document.getElementById('btnSound');
-  sb.textContent=DB.settings.sound?'🔔':'🔕';sb.classList.toggle('on',!DB.settings.sound);
+  applySoundBtn();
   render();
 })();
 </script>
