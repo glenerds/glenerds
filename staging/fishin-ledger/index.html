@@ -56,6 +56,7 @@ input,select,textarea{background:var(--bg);border:1px solid var(--line);border-r
 textarea{min-height:64px;resize:vertical}
 .btn{padding:11px 20px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
 body.dark .btn{color:#10201a}
+body.dark .btn.ghost{color:var(--ink)}
 .btn.ghost{background:var(--card);color:var(--ink);border-color:var(--line)}
 .btn.danger{background:var(--bad);border-color:var(--bad)}
 .btn.small{padding:7px 12px;font-size:15px}
@@ -167,8 +168,7 @@ function applyTheme(){
   b.classList.toggle('on',t!=='auto');
 }
 document.getElementById('btnTheme').addEventListener('click',function(){
-  var t=DB.settings.theme||'auto';
-  DB.settings.theme=t==='auto'?'light':t==='light'?'dark':'auto';
+  DB.settings.theme=document.body.classList.contains('dark')?'light':'dark';
   save();applyTheme();click();
 });
 document.getElementById('btnSound').addEventListener('click',function(){
