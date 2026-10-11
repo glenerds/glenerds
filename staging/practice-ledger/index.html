@@ -473,18 +473,19 @@ function renderCharts(){
     var top6=keys.slice(0,6),otherMin=keys.slice(6).reduce(function(t,k){return t+byPiece[k];},0);
     var segs=top6.map(function(k,i){return{key:k,label:pieceTitle(k==='general'?null:k),min:byPiece[k],color:PALETTE[i%PALETTE.length]};});
     if(otherMin>0)segs.push({key:'other',label:'Other pieces',min:otherMin,color:'#9a8f7d'});
-    var C=2*Math.PI*44,off=0,paths='';
+    var C=2*Math.PI*60,off=0,paths='';
     segs.forEach(function(sg,i){
       var frac=sg.min/total,startFrac=off/C,sel=chartSel.piece===sg.key;
       var midA=(startFrac+frac/2)*2*Math.PI; // measured from 3 o'clock, clockwise (SVG y-down)
       var pull=sel?' transform="translate('+(7*Math.cos(midA)).toFixed(1)+' '+(7*Math.sin(midA)).toFixed(1)+')"':'';
-      if(segs.length===1||frac>=0.999){paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="'+sg.color+'" stroke-width="26" data-seg="'+sg.key+'" style="cursor:pointer"'+pull+'/>';}
+      if(segs.length===1||frac>=0.999){paths+='<circle cx="100" cy="100" r="60" fill="none" stroke="'+sg.color+'" stroke-width="28" data-seg="'+sg.key+'" style="cursor:pointer"'+pull+'/>';}
       else{var len=Math.max(0,frac*C-1.5);
-        paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="'+sg.color+'" stroke-width="26" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" data-seg="'+sg.key+'" style="cursor:pointer"'+pull+'/>';
-        if(sel){paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="var(--ink)" stroke-width="29.5" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" opacity="0.28"'+pull+'/>';}}
+        paths+='<circle cx="100" cy="100" r="60" fill="none" stroke="'+sg.color+'" stroke-width="28" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" data-seg="'+sg.key+'" style="cursor:pointer"'+pull+'/>';
+        if(sel){paths+='<circle cx="100" cy="100" r="60" fill="none" stroke="var(--ink)" stroke-width="31.5" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" opacity="0.28"'+pull+'/>';}}
       off+=frac*C;});
-    h+='<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto"><svg width="260" height="260" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="44" fill="none" stroke="var(--heat0)" stroke-width="26"/>'+paths+'</svg>'
-      +'<div style="font-size:24px;font-weight:700;margin-top:4px">'+fmtMin(total)+'</div><div class="small muted">total practice</div></div>'
+    h+='<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto"><svg width="280" height="280" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="60" fill="none" stroke="var(--heat0)" stroke-width="28"/>'+paths
+      +'<text x="100" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="var(--ink)">'+fmtMin(total)+'</text>'
+      +'<text x="100" y="115" text-anchor="middle" font-size="12" fill="var(--muted)">total</text></svg></div>'
       +'<div class="legend" style="flex:1 1 180px">'+segs.map(function(sg,i){return '<div><span class="sw" style="background:'+sg.color+'"></span>'+esc(sg.label)+' — '+fmtMin(sg.min)+' ('+Math.round(sg.min/total*100)+'%)</div>';}).join('')+'</div></div>'
       +'<div id="seg-detail" style="margin-top:10px">'+(function(){var sg=segs.find(function(x){return x.key===chartSel.piece;});return sg?('Selected: <b>'+esc(sg.label)+'</b> — '+fmtMin(sg.min)+' of '+fmtMin(total)+'.'):'<span class="muted">Select a slice to highlight a piece.</span>';})()+'</div>';
   } else h+='<p class="muted">Log some sessions and the split by piece appears here.</p>';
