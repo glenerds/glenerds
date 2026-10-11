@@ -54,7 +54,9 @@ label{font-size:15px;font-weight:600;display:block;margin:8px 0 4px}
 .bar-lbl{width:120px;font-size:15px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bar-track{flex:1;background:var(--line);border-radius:6px;height:26px}
 .bar-fill{background:var(--acc);border-radius:6px;height:100%}
-.bar-fill.sel{background:var(--acc2);outline:3px solid var(--ink);outline-offset:-3px}
+.bar-fill.sel{background:var(--acc2);outline:3px solid var(--ink);outline-offset:-3px};filter:brightness(1.25);transform:scaleY(1.35)}
+.spot{background:var(--acc);color:#fff;border-radius:8px;padding:8px 12px;margin:0 0 10px;font-size:15px;font-weight:700}
+.legend .sel{background:var(--acc);color:#fff}
 .bar-val{width:70px;text-align:right;font-size:15px;font-weight:700}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:10px;font-size:15px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1}
@@ -270,14 +272,20 @@ function ordForm(o){
 function viewCharts(){
   var byM={};DB.orders.forEach(function(o){if(o.date){var k=o.date.slice(0,7);byM[k]=(byM[k]||0)+num(o.total);}});
   var ks=Object.keys(byM).sort().slice(-12),mx=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var revSpot="";
+  if(ui.sel.rev){var so=DB.orders.filter(function(o){return o.date&&o.date.slice(0,7)===ui.sel.rev;});var sr=so.reduce(function(a,o){return a+num(o.total);},0);revSpot='<div class="spot">'+ui.sel.rev+' — $'+Math.round(sr)+' revenue · '+so.length+' orders · tap again to release</div>';}
   var revH=ks.map(function(k){var sel=ui.sel.rev===k,w=Math.max(Math.round(byM[k]/mx*100),4);
     return '<div class="bar-row" data-vrev="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">$'+Math.round(byM[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No orders yet.</p>';
   var byF={};DB.jobs.forEach(function(j){var f=DB.filament.find(function(x){return x.id===j.filamentId;});var n=f?f.name:"?";byF[n]=(byF[n]||0)+num(j.grams);});
   var fk=Object.keys(byF).sort(function(a,b){return byF[b]-byF[a];}),mx2=Math.max.apply(null,fk.map(function(k){return byF[k];}).concat([1]));
+  var filSpot="";
+  if(ui.sel.fil){var fs=DB.filament.find(function(x){return x.name===ui.sel.fil;});var fj=DB.jobs.filter(function(j){var f=DB.filament.find(function(x){return x.id===j.filamentId;});return f&&f.name===ui.sel.fil;}).length;filSpot='<div class="spot">'+esc(ui.sel.fil)+' — '+Math.round(byF[ui.sel.fil]||0)+'g used · '+(fs?Math.round(num(fs.grams))+'g left':'')+' · '+fj+' jobs · tap again to release</div>';}
   var filH=fk.map(function(k){var sel=ui.sel.fil===k,w=Math.max(Math.round(byF[k]/mx2*100),4);
     return '<div class="bar-row" data-vfil="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+Math.round(byF[k])+"g</div></div>";}).join("")||'<p style="color:var(--mut)">No jobs yet.</p>';
   var pj=DB.jobs.map(function(j){return {n:j.name,id:j.id,p:jobProfit(j)};}).sort(function(a,b){return b.p-a.p;}).slice(0,8);
   var mx3=Math.max.apply(null,pj.map(function(x){return Math.abs(x.p);}).concat([1]));
+  var profSpot="";
+  if(ui.sel.prof){var pj0=DB.jobs.find(function(j){return j.id===ui.sel.prof;});if(pj0){var pc=jobCost(pj0),pr=num(pj0.price)*Math.max(1,pj0.qty||1);profSpot='<div class="spot">'+esc(pj0.name)+' — $'+pr.toFixed(2)+' revenue · $'+pc.total.toFixed(2)+' cost · $'+(pr-pc.total).toFixed(2)+' profit · tap again to release</div>';}}
   var profH=pj.map(function(x){var sel=ui.sel.prof===x.id,w=Math.max(Math.round(Math.abs(x.p)/mx3*100),4);
     return '<div class="bar-row" data-vprof="'+x.id+'"><div class="bar-lbl">'+esc(x.n)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%;background:'+(x.p<0?"var(--warn)":"var(--acc2)")+'"></div></div><div class="bar-val">$'+Math.round(x.p)+"</div></div>";}).join("")||'<p style="color:var(--mut)">No jobs yet.</p>';
   var st={};DB.orders.forEach(function(o){st[o.status||"—"]=(st[o.status||"—"]||0)+1;});
@@ -287,15 +295,16 @@ function viewCharts(){
   sk.forEach(function(k,i){var frac=st[k]/tot,len=frac*C,sel=ui.sel.ostat===k;
     donut+='<circle cx="90" cy="90" r="70" fill="none" stroke="'+cols[i%cols.length]+'" stroke-width="'+(sel?30:22)+'" stroke-dasharray="'+Math.max(len-1.5,.5)+" "+C+'" stroke-dashoffset="'+(-off)+'" data-vostat="'+esc(k)+'" style="cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>';
     off+=len;});
-  donut+='<text x="90" y="86" text-anchor="middle" font-size="16" font-weight="800" fill="var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle" font-size="12" fill="var(--mut)">orders</text></svg><div class="legend" style="font-size:15px">';
+  donut+='<text x="90" y="86" text-anchor="middle" pointer-events="none" font-size="16" font-weight="800" fill="var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle" pointer-events="none" font-size="12" fill="var(--mut)">orders</text></svg><div class="legend" style="font-size:15px">';
   sk.forEach(function(k){donut+='<div data-vostat="'+esc(k)+'" class="'+(ui.sel.ostat===k?"sel":"")+'" style="margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px">'+esc(k)+" — "+st[k]+"</div>";});
   donut+="</div></div>";
   if(!tot)donut='<p style="color:var(--mut)">No orders yet.</p>';
+  var ostatSpot="";if(ui.sel.ostat){var oo=DB.orders.filter(function(o){return (o.status||"—")===ui.sel.ostat;});var orr=oo.reduce(function(a,o){return a+num(o.total);},0);ostatSpot='<div class="spot">'+esc(ui.sel.ostat)+' — '+oo.length+' orders · $'+Math.round(orr)+' · tap again to release</div>';}
   return '<div class="charts-grid">'
-  +'<div class="chart-card"><h3>Revenue by month</h3>'+revH+'</div>'
-  +'<div class="chart-card"><h3>Filament used by spool</h3>'+filH+'</div>'
-  +'<div class="chart-card"><h3>Profit by job</h3>'+profH+'</div>'
-  +'<div class="chart-card"><h3>Orders by status</h3>'+donut+'</div>'
+  +'<div class="chart-card"><h3>Revenue by month</h3>'+revSpot+revH+'</div>'
+  +'<div class="chart-card"><h3>Filament used by spool</h3>'+filSpot+filH+'</div>'
+  +'<div class="chart-card"><h3>Profit by job</h3>'+profSpot+profH+'</div>'
+  +'<div class="chart-card"><h3>Orders by status</h3>'+ostatSpot+donut+'</div>'
   +"</div><p style='color:var(--mut);font-size:14px'>Click a bar, slice, or legend row to spotlight it; click again to release.</p>";
 }
 function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
