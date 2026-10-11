@@ -47,6 +47,7 @@ body.dark .tab.active{color:#10201a}
 .card h3{margin:14px 0 8px;font-size:18px}
 .statnum{font-size:32px;font-weight:700;color:var(--accent)}
 .statlab{font-size:15px;color:var(--muted)}
+.statsub{font-size:15px;color:var(--muted);margin-top:6px}
 .detail{font-size:20px;font-weight:600;min-height:28px;margin-top:8px}
 .muted{color:var(--muted);font-size:15px}
 form .row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -97,6 +98,9 @@ footer.cta{max-width:1080px;margin:0 auto 40px;padding:0 16px;text-align:center}
   #printArea th,#printArea td{border-bottom:1px solid #999;padding:6px}
 }
 @media(max-width:560px){.heat{grid-template-columns:repeat(9,1fr)}}
+@media(max-width:560px){.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px}.tabs button{flex:0 0 auto}}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:16px;font-weight:600;z-index:99;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
 </style>
 </head>
 <body>
@@ -116,6 +120,7 @@ footer.cta{max-width:1080px;margin:0 auto 40px;padding:0 16px;text-align:center}
 </main>
 <footer class="cta"><a class="pillbtn" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a></footer>
 <div id="printArea"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 "use strict";
 /* FishinLedger — private offline fishing catch log. All data stays in this browser. */
@@ -130,6 +135,7 @@ function load(){
 }
 var DB=load()||blankDB();
 var sampleMode=false;
+var memBackup=null;
 try{sampleMode=localStorage.getItem(SMFLAG)==='1';}catch(e){}
 function save(){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){}}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
@@ -157,6 +163,7 @@ function beep(f){
   }catch(e){}
 }
 function click(){beep(520);}
+function toast(m){var t=document.getElementById('toast');if(!t)return;t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('show');},2600);}
 
 /* ---------- theme ---------- */
 function applyTheme(){
@@ -227,12 +234,19 @@ function genSample(){
 function setSample(on){
   click();
   if(on){
-    try{localStorage.setItem(SNAP,JSON.stringify(DB));}catch(e){}
+    var snap=null;
+    try{snap=JSON.stringify(DB);localStorage.setItem(SNAP,snap);}catch(e){snap=null;}
+    if(snap===null){toast('Could not snapshot your data — sample mode not enabled.');return;}
+    memBackup=DB;
     DB=genSample();save();
     try{localStorage.setItem(SMFLAG,'1');}catch(e){}
     sampleMode=true;
   }else{
-    try{var raw=localStorage.getItem(SNAP);DB=raw?JSON.parse(raw):blankDB();}catch(e){DB=blankDB();}
+    var restored=null;
+    try{var raw=localStorage.getItem(SNAP);restored=raw?JSON.parse(raw):null;}catch(e){restored=null;}
+    if(!restored&&memBackup)restored=memBackup;
+    DB=restored||blankDB();
+    memBackup=null;
     try{localStorage.removeItem(SNAP);localStorage.removeItem(SMFLAG);}catch(e){}
     save();sampleMode=false;
   }
@@ -273,6 +287,10 @@ function viewDash(){
   var recent=DB.catches.slice().sort(function(a,b){var ta=tripById(a.tripId),tb=tripById(b.tripId);
     var da=ta?ta.date:'',db=tb?tb.date:'';return db<da?-1:1;}).slice(0,6);
   var needy=DB.trips.filter(function(t){var c=t.cond||{};return !(c.weather||c.air||c.water||c.wind||c.notes);});
+  var mkNow=monthKey(new Date().toISOString().slice(0,10));
+  var thisMonth=DB.catches.filter(function(c){var t=tripById(c.tripId);return t&&monthKey(t.date)===mkNow;}).length;
+  var skunks=DB.trips.filter(function(t){return !DB.catches.some(function(c){return c.tripId===t.id;});}).length;
+  var bigTrip=big?tripById(big.tripId):null;
   var snap='';
   if(!needy.length&&nc){
     var bs=baitStats()[0];
@@ -285,10 +303,10 @@ function viewDash(){
       +'<div class="snaprow"><span>Last 30 days</span><b>'+last30+' fish</b></div></div>';
   }
   var h='<div class="grid cards4">'
-    +'<div class="card"><div class="statnum">'+nc+'</div><div class="statlab">Total catches logged</div></div>'
-    +'<div class="card"><div class="statnum">'+nt+'</div><div class="statlab">Trips on the water</div></div>'
-    +'<div class="card"><div class="statnum">'+(big?esc(big.species):'—')+'</div><div class="statlab">Biggest fish'+(big?' — '+fmtW(big)+' ('+esc(big.species)+')':'')+'</div></div>'
-    +'<div class="card"><div class="statnum">'+DB.spots.length+'</div><div class="statlab">Private spots tracked</div></div></div>';
+    +'<div class="card"><div class="statnum">'+nc+'</div><div class="statlab">Total catches logged</div>'+(nc?'<div class="statsub">'+thisMonth+' this month</div>':'')+'</div>'
+    +'<div class="card"><div class="statnum">'+nt+'</div><div class="statlab">Trips on the water</div>'+(nt?'<div class="statsub">'+skunks+' skunk trip'+(skunks===1?'':'s')+'</div>':'')+'</div>'
+    +'<div class="card"><div class="statnum">'+(big?esc(big.species):'—')+'</div><div class="statlab">Biggest fish'+(big?' — '+fmtW(big)+' ('+esc(big.species)+')':'')+'</div>'+(big&&bigTrip?'<div class="statsub">'+esc(bigTrip.date)+' · '+esc(bigTrip.spotName)+'</div>':'')+'</div>'
+    +'<div class="card"><div class="statnum">'+DB.spots.length+'</div><div class="statlab">Private spots tracked</div>'+(DB.spots.length?'<div class="statsub">Never leaves this device</div>':'')+'</div></div>';
   h+='<div class="grid cards2" style="margin-top:14px">'
     +'<div class="card"><h2>Recent catches</h2>'+(recent.length?recent.map(function(c){
       var t=tripById(c.tripId);
@@ -349,20 +367,21 @@ function chartDonut(){
     var pull=sel.species===n?9:0;
     var mid=(off+len/2)/C*360-90, rad=mid*Math.PI/180;
     var dx=Math.cos(rad)*pull, dy=Math.sin(rad)*pull;
-    paths+='<circle class="slice" data-species="'+esc(n)+'" cx="100" cy="100" r="'+R+'" fill="none" stroke="'+pal[i%pal.length]+'" stroke-width="28"'
-      +' stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100) translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')" style="'+(sel.species===n?'outline:3px solid var(--ink);outline-offset:3px;border-radius:50%;':'')+'"><title>'+esc(n)+': '+counts[n]+'</title></circle>';
+    paths+='<g transform="translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')"><circle class="slice" data-species="'+esc(n)+'" cx="100" cy="100" r="'+R+'" fill="none" stroke="'+pal[i%pal.length]+'" stroke-width="28"'
+      +' stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)" style="'+(sel.species===n?'outline:3px solid var(--ink);outline-offset:3px;border-radius:50%;':'')+'"><title>'+esc(n)+': '+counts[n]+'</title></circle></g>';
     off+=len;
   });
   var center1,center2;
   if(sel.species){var sc=counts[sel.species],sp2=Math.round(sc/total*100);center1=sc+' fish';center2=sp2+'% of total';}
   else{center1=total+' fish';center2='total';}
+  var fs1=center1.length>10?15:center1.length>7?19:24;
   var legend=names.map(function(n,i){
     return '<div class="li'+(sel.species===n?' sel':'')+'" data-species="'+esc(n)+'"><span class="sw" style="background:'+pal[i%pal.length]+'"></span>'+esc(n)+' ('+counts[n]+')</div>';
   }).join('');
   return '<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto">'
     +'<svg width="280" height="280" viewBox="0 0 200 200" role="img" aria-label="Catches by species">'
     +'<circle cx="100" cy="100" r="'+R+'" fill="none" stroke="var(--h0)" stroke-width="28"/>'+paths
-    +'<text x="100" y="96" text-anchor="middle" font-size="24" font-weight="700" fill="var(--ink)" pointer-events="none">'+esc(center1)+'</text>'
+    +'<text x="100" y="96" text-anchor="middle" font-size="'+fs1+'" font-weight="700" fill="var(--ink)" pointer-events="none">'+esc(center1)+'</text>'
     +'<text x="100" y="122" text-anchor="middle" font-size="17" fill="var(--muted)" pointer-events="none">'+esc(center2)+'</text>'
     +'</svg></div><div class="legend">'+legend+'</div></div>';
 }
@@ -580,7 +599,7 @@ function download(name,content,type){
   var a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(u);a.remove();},500);
 }
-function csvEsc(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function csvEsc(v){v=String(v==null?'':v);if(/^[=+\-@]/.test(v))v="'"+v;return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
 function exportCSV(){
   var rows=[['date','water','species','length_in','weight','bait','technique','released','notes']];
   DB.catches.slice().sort(function(a,b){var ta=tripById(a.tripId),tb=tripById(b.tripId);
