@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Inspection Report Builder — Offline Checklist, Comment Library & Client PDF Reports</title>
+<style>
+:root{--bg:#f7f5f0;--card:#fff;--ink:#26241f;--mut:#6e695c;--line:#e5dfd2;--acc:#1d5fa8;--acc2:#2a7d3f;--warn:#b3402a;--sev1:#2a7d3f;--sev2:#c9a227;--sev3:#c96a1e;--sev4:#b3402a}
+[data-theme="dark"]{--bg:#191817;--card:#232220;--ink:#eae6db;--mut:#a29c8d;--line:#38352d;--acc:#6aa8e0;--acc2:#7bc47f;--warn:#e06c5a;--sev1:#7bc47f;--sev2:#e0c65a;--sev3:#e09a5a;--sev4:#e06c5a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;max-width:1100px;margin:0 auto;padding:12px 16px 60px}
+header{display:flex;align-items:center;gap:10px;padding:10px 0;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.3rem}
+.logo svg{width:34px;height:34px}
+.hdr-btns{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hdr-btns button,.hdr-btns a{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
+.hdr-btns button:hover{background:var(--line)}
+.more-apps{width:auto!important;padding:0 14px;font-weight:600;font-size:15px}
+.tabs{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:8px}
+.tabs button{background:none;border:none;color:var(--mut);font-size:16px;font-weight:600;padding:8px 14px;cursor:pointer;border-radius:8px}
+.tabs button.active{color:var(--acc);background:var(--card);box-shadow:inset 0 -3px 0 var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.card h3{margin-bottom:10px;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat .n{font-size:1.7rem;font-weight:800;color:var(--acc)}
+.stat .l{font-size:15px;color:var(--mut)}
+.stat.warn .n{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:14px}
+input,select,textarea{font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+input[type="checkbox"]{width:auto}
+label{font-size:15px;font-weight:600;display:block;margin:8px 0 4px}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.btn.sec{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--warn)}
+.btn.ok{background:var(--acc2)}
+.btn.sm{padding:6px 12px;font-size:15px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.toolbar input,.toolbar select{width:auto;min-width:140px}
+.badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:14px;font-weight:700;color:#fff}
+.sev1{background:var(--sev1)}.sev2{background:var(--sev2);color:#3a3000}.sev3{background:var(--sev3)}.sev4{background:var(--sev4)}
+.sys-card{border:1px solid var(--line);border-radius:12px;padding:14px;margin:10px 0;background:var(--card)}
+.sys-card.done{border-left:5px solid var(--acc2)}
+.sys-head{display:flex;align-items:center;gap:10px;cursor:pointer}
+.sys-head h4{font-size:1.05rem}
+.sys-head .cnt{margin-left:auto;color:var(--mut);font-size:14px}
+.item-row{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.item-row .grow{flex:1;min-width:200px}
+.sev-btns{display:flex;gap:4px}
+.sev-btns button{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:14px;font-weight:700;cursor:pointer}
+.sev-btns button.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:300px;display:flex;flex-direction:column}
+.chart-card h3{margin-bottom:8px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer}
+.bar-lbl{width:130px;font-size:15px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;background:var(--line);border-radius:6px;height:26px}
+.bar-fill{background:var(--acc);border-radius:6px;height:100%}
+.bar-fill.sel{background:var(--acc2);outline:3px solid var(--ink);outline-offset:-3px}
+.bar-val{width:56px;text-align:right;font-size:15px;font-weight:700}
+.donut-wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.legend{font-size:15px}
+.legend div{margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px}
+.legend div.sel{outline:2px solid var(--ink)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:10px;font-size:15px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal .box{background:var(--card);border-radius:14px;padding:20px;max-width:640px;width:100%;max-height:90vh;overflow:auto}
+.hidden{display:none}
+.foot-cta{text-align:center;margin:30px 0}
+.foot-cta a{display:inline-block;background:var(--acc);color:#fff;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:17px}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+@media print{.tabs,.hdr-btns,.toolbar,.foot-cta,.btn,.no-print{display:none!important}body{max-width:100%}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 34 34" aria-hidden="true"><path d="M4 15 17 4l13 11" stroke="#1d5fa8" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="15" width="16" height="13" rx="1.5" fill="#1d5fa8"/><rect x="14.5" y="20" width="5" height="8" fill="#f7f5f0"/></svg><span>InspectLedger</span></div>
+  <div class="hdr-btns">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="btnSample" title="Try sample data" aria-label="Try sample data"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5.5L4.8 17a3 3 0 0 0 2.6 4.5h9.2a3 3 0 0 0 2.6-4.5L14 8.5V3"/></svg></button>
+    <button id="btnTheme" title="Dark mode" aria-label="Dark mode"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button id="btnSound" title="Sound" aria-label="Sound"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path class="wv" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+  </div>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="view"></main>
+<div class="foot-cta"><a href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps by Glenerds</a></div>
+<div class="toast" id="toast"></div>
+<div id="modal" class="hidden"></div>
+<script>
+"use strict";
+var LS="inspectledger_v1",LSS="inspectledger_sample_snap",LST="inspectledger_sample_on";
+var DB={inspections:[],library:[]};
+try{var raw=localStorage.getItem(LS);if(raw){var d=JSON.parse(raw);if(d&&Array.isArray(d.inspections)){DB.inspections=d.inspections;DB.library=Array.isArray(d.library)?d.library:[];}}}catch(e){toast("Saved data was unreadable — starting fresh. Restore a backup if you have one.");}
+var ui={tab:"dash",insp:null,sys:null,sel:{},q:""};
+var SEV=[["1","Minor",1],["2","Moderate",2],["3","Major",3],["4","Safety",4]];
+var SYSTEMS=["Roof","Exterior","Foundation & Structure","Plumbing","Electrical","HVAC","Interior","Attic & Insulation","Garage","Appliances"];
+function sevName(s){var f=SEV.find(function(x){return x[0]===s;});return f?f[1]:"—";}
+function todayLocal(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2);}
+function uid(){return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function save(){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){toast("Could not save — storage full or blocked. Export a backup now.");}}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},2600);}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function $(s){return document.querySelector(s);}
+function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+/* sound + theme */
+var sndOn=true;try{sndOn=localStorage.getItem("inspectledger_snd")!=="0";}catch(e){}
+var _ac=null;function ac(){if(!_ac){try{_ac=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}return _ac;}
+function click(){if(!sndOn)return;try{var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=620;g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch(e){}}
+function paintSnd(){var b=$("#btnSound");if(!b)return;b.querySelectorAll(".wv").forEach(function(p){p.style.display=sndOn?"":"none";});b.style.opacity=sndOn?1:.45;}
+function paintTheme(){var dark=false;try{dark=localStorage.getItem("inspectledger_theme")==="dark"||(!localStorage.getItem("inspectledger_theme")&&matchMedia("(prefers-color-scheme: dark)").matches);}catch(e){}document.documentElement.setAttribute("data-theme",dark?"dark":"");}
+/* sample */
+function sampleOn(){try{return !!localStorage.getItem(LST);}catch(e){return false;}}
+function toggleSample(){click();
+  if(!sampleOn()){var snapOk=false;try{localStorage.setItem(LSS,JSON.stringify(DB));localStorage.setItem(LST,"1");snapOk=true;}catch(e){}if(!snapOk){toast("Could not snapshot your data — not loading sample.");return;}DB=makeSample();save();toast("Sample data loaded — toggle off to restore yours.");}
+  else{var snap=null;try{snap=JSON.parse(localStorage.getItem(LSS)||"null");}catch(e){}
+    if(!snap||!Array.isArray(snap.inspections)||!Array.isArray(snap.library)){toast("Sample snapshot missing — not touching data.");return;}
+    DB=snap;save();try{localStorage.removeItem(LSS);localStorage.removeItem(LST);}catch(e){}toast("Your data restored.");}
+  ui.insp=null;ui.sys=null;render();
+}
+function mkItem(sys,title,sev,comment){return {id:uid(),system:sys,title:title,sev:sev,comment:comment,photos:[],done:true};}
+function makeSample(){
+  var insp={id:uid(),client:"Sample Homeowner",address:"123 Maple St, Bloomington, IN",date:"2026-10-02",inspector:"Sam Inspector",notes:"",items:[
+    mkItem("Roof","Missing shingles — south slope","3","Three architectural shingles missing on the south slope above the garage. Underlayment exposed. Recommend licensed roofer repair."),
+    mkItem("Roof","Gutters clogged","2","Gutters full of debris on the north side. Recommend cleaning and checking downspout extensions."),
+    mkItem("Electrical","Double-tapped breaker","4","Two conductors under one breaker lug in the main panel — fire hazard. Recommend licensed electrician."),
+    mkItem("Plumbing","Slow drain — hall bath","2","Hall bathroom sink drains slowly. Recommend plumber evaluation."),
+    mkItem("HVAC","Furnace filter dirty","1","Filter heavily soiled. Replace now and every 1–3 months."),
+    mkItem("Foundation & Structure","Hairline step crack","2","Hairline step cracking in mortar at the northeast foundation corner. Monitor; no displacement noted."),
+    mkItem("Interior","No deficiencies noted","1","All accessible interior areas appeared serviceable at time of inspection.")
+  ]};
+  return {inspections:[insp],library:[
+    {id:uid(),system:"Roof",title:"Worn shingles",comment:"Shingles show granule loss and curling consistent with age. Budget for replacement."},
+    {id:uid(),system:"Electrical",title:"Ungrounded outlets",comment:"Two-prong outlets noted — no equipment ground. Recommend electrician if grounding desired."},
+    {id:uid(),system:"Plumbing",title:"Corroded supply valve",comment:"Supply valve shows corrosion. Recommend replacement before failure."}
+  ]};
+}
+/* data helpers */
+function insp(){return DB.inspections.find(function(x){return x.id===ui.insp;});}
+function sysItems(insp,sys){return insp.items.filter(function(i){return i.system===sys;});}
+function deficiencyCount(insp){return insp.items.filter(function(i){return i.sev!=="1";}).length;}
+/* tabs */
+var tabs=[["dash","Dashboard"],["insp","Inspections"],["lib","Comment Library"],["charts","Charts"],["rep","Reports & Data"]];
+function renderTabs(){$("#tabs").innerHTML=tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" class="'+(ui.tab===t[0]?"active":"")+'">'+t[1]+"</button>";}).join("");}
+/* views */
+function viewDash(){
+  var n=DB.inspections.length,defs=DB.inspections.reduce(function(s,i){return s+deficiencyCount(i);},0);
+  var YR=new Date().getFullYear(),thisYr=DB.inspections.filter(function(i){return i.date&&i.date.indexOf(String(YR))===0;}).length;
+  var h='<div class="grid">';
+  h+='<div class="stat"><div class="n">'+n+'</div><div class="l">Inspections</div></div>';
+  h+='<div class="stat"><div class="n">'+thisYr+'</div><div class="l">Done in '+YR+'</div></div>';
+  h+='<div class="stat'+(defs?" warn":"")+'"><div class="n">'+defs+'</div><div class="l">Open deficiencies</div></div>';
+  h+='<div class="stat"><div class="n">'+DB.library.length+'</div><div class="l">Saved comments</div></div></div>';
+  h+='<div class="card"><h3>Recent inspections</h3>';
+  if(!DB.inspections.length)h+='<p style="color:var(--mut)">No inspections yet. Create one to get started.</p>';
+  else{var list=DB.inspections.slice().sort(function(a,b){return (b.date||"")<(a.date||"")?-1:1;}).slice(0,5);
+    h+='<table><tr><th>Date</th><th>Client / Address</th><th>Items</th><th>Deficiencies</th><th></th></tr>';
+    list.forEach(function(i){h+="<tr><td>"+esc(i.date)+"</td><td><b>"+esc(i.client)+"</b><br><span style='color:var(--mut);font-size:14px'>"+esc(i.address)+"</span></td><td>"+i.items.length+"</td><td>"+deficiencyCount(i)+'</td><td><button class="btn sm sec" data-act="openI" data-id="'+i.id+'">Open</button></td></tr>';});
+    h+="</table>";}
+  h+="</div>";
+  h+='<div class="card"><h3>How it works</h3><p style="color:var(--mut)">Create an inspection → work the system checklist room by room → pull narratives from your comment library or write your own → rate severity → attach photos → print a client-ready report. Everything stays on this device — no account, no subscription, works with zero signal.</p></div>';
+  return h;
+}
+function viewInsp(){
+  var h='<div class="toolbar"><button class="btn" data-act="newI">+ New inspection</button></div>';
+  if(!ui.insp){
+    h+='<div class="card"><table><tr><th>Date</th><th>Client / Address</th><th>Items</th><th>Deficiencies</th><th></th></tr>';
+    DB.inspections.slice().sort(function(a,b){return (b.date||"")<(a.date||"")?-1:1;}).forEach(function(i){
+      h+="<tr><td>"+esc(i.date)+"</td><td><b>"+esc(i.client)+"</b><br><span style='color:var(--mut);font-size:14px'>"+esc(i.address)+"</span></td><td>"+i.items.length+"</td><td>"+deficiencyCount(i)+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="openI" data-id="'+i.id+'">Open</button> <button class="btn sm sec" data-act="editI" data-id="'+i.id+'">Edit</button> <button class="btn sm danger" data-act="delI" data-id="'+i.id+'">✕</button></td></tr>';
+    });
+    h+="</table></div>";
+    if(ui._showIForm)h+=inspForm(ui._editI?DB.inspections.find(function(x){return x.id===ui._editI;}):null);
+    return h;
+  }
+  var I=insp();if(!I){ui.insp=null;return viewInsp();}
+  h+='<div class="card"><div class="row"><button class="btn sm sec" data-act="backI">← All inspections</button><h3 style="margin:0">'+esc(I.client)+" — "+esc(I.address)+'</h3><span style="margin-left:auto"><button class="btn sm sec" data-act="editI" data-id="'+I.id+'">Edit details</button> <button class="btn sm" data-act="printR" data-id="'+I.id+'">🖨 Report</button></span></div>';
+  h+='<p style="color:var(--mut);font-size:14px">Date: '+esc(I.date)+" · Inspector: "+esc(I.inspector||"—")+"</p></div>";
+  if(ui._showIForm)h+=inspForm(I);
+  SYSTEMS.forEach(function(sy){
+    var items=sysItems(I,sy),open=ui.sys===sy;
+    h+='<div class="sys-card'+(items.length?" done":"")+'"><div class="sys-head" data-syshead="'+esc(sy)+'"><h4>'+esc(sy)+'</h4><span class="cnt">'+items.length+" item"+(items.length===1?"":"s")+(open?" ▾":" ▸")+"</span></div>";
+    if(open){
+      h+='<div style="margin-top:8px">';
+      items.forEach(function(it){h+=itemRow(it);});
+      h+='<div class="row" style="margin-top:8px"><button class="btn sm sec" data-act="newItem" data-sys="'+esc(sy)+'">+ Add item</button><button class="btn sm sec" data-act="fromLib" data-sys="'+esc(sy)+'">📚 From library</button></div></div>';
+    }
+    h+="</div>";
+  });
+  return h;
+}
+function inspForm(I){
+  I=I||{date:todayLocal(),client:"",address:"",inspector:"",notes:""};
+  return '<div class="card"><h3>'+(I.id?"Edit inspection":"New inspection")+'</h3><div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">'
+  +'<div><label>Date</label><input type="date" id="iDate" value="'+esc(I.date)+'"></div>'
+  +'<div><label>Client name</label><input id="iClient" value="'+esc(I.client)+'"></div>'
+  +'<div><label>Property address</label><input id="iAddr" value="'+esc(I.address)+'"></div>'
+  +'<div><label>Inspector</label><input id="iInsp" value="'+esc(I.inspector||"")+'"></div></div>'
+  +'<label>Notes</label><textarea id="iNotes" rows="2">'+esc(I.notes||"")+'</textarea>'
+  +'<div class="row" style="margin-top:8px"><button class="btn" data-act="saveI" data-id="'+(I.id||"")+'">Save</button><button class="btn sec" data-act="cancelI">Cancel</button></div></div>';
+}
+function itemRow(it){
+  var h='<div class="item-row"><div class="grow"><b>'+esc(it.title)+'</b> <span class="badge sev'+it.sev+'">'+sevName(it.sev)+"</span>";
+  if(it.comment)h+='<div style="color:var(--mut);font-size:14px;margin-top:4px">'+esc(it.comment)+"</div>";
+  if(it.photos&&it.photos.length){h+='<div class="row" style="margin-top:6px">';it.photos.forEach(function(p,i){h+='<img class="thumb" src="'+p+'" alt="photo '+(i+1)+'">';});h+="</div>";}
+  h+='</div><div class="row"><button class="btn sm sec" data-act="editItem" data-id="'+it.id+'">Edit</button><button class="btn sm sec" data-act="photoItem" data-id="'+it.id+'">📷</button><button class="btn sm danger" data-act="delItem" data-id="'+it.id+'">✕</button></div></div>';
+  return h;
+}
+function itemForm(it,sy){
+  it=it||{system:sy,title:"",sev:"2",comment:""};
+  var lib=DB.library.filter(function(l){return !sy||l.system===sy;});
+  var h='<div class="card"><h3>'+(it.id?"Edit item":"New item")+" — "+esc(it.system)+"</h3>"
+  +'<label>Title</label><input id="itTitle" value="'+esc(it.title)+'" placeholder="e.g. Missing shingles — south slope">';
+  if(lib.length){h+='<label>Insert from library</label><select id="itLib"><option value="">— choose a saved comment —</option>'+lib.map(function(l){return '<option value="'+l.id+'">'+esc(l.title)+"</option>";}).join("")+"</select>";}
+  h+='<label>Severity</label><div class="sev-btns" id="itSev">'+SEV.map(function(s){return '<button type="button" data-sev="'+s[0]+'" class="'+(it.sev===s[0]?"on":"")+'">'+s[1]+"</button>";}).join("")+"</div>"
+  +'<label>Narrative comment</label><textarea id="itComment" rows="3">'+esc(it.comment||"")+"</textarea>"
+  +'<div class="row" style="margin-top:8px"><button class="btn" data-act="saveItem" data-id="'+(it.id||"")+'" data-sys="'+esc(it.system)+'">Save item</button><button class="btn sec" data-act="cancelItem">Cancel</button></div></div>';
+  return h;
+}
+function viewLib(){
+  var h='<div class="toolbar"><button class="btn" data-act="newL">+ New comment</button><input id="qBox" placeholder="Search comments..." value="'+esc(ui.q)+'"></div><div id="lForm"></div>';
+  var list=DB.library.filter(function(l){return !ui.q||(l.title+" "+l.comment+" "+l.system).toLowerCase().indexOf(ui.q.toLowerCase())>=0;});
+  h+='<div class="card"><table><tr><th>System</th><th>Title</th><th>Comment</th><th></th></tr>';
+  list.forEach(function(l){h+="<tr><td>"+esc(l.system)+"</td><td><b>"+esc(l.title)+"</b></td><td style='color:var(--mut);font-size:14px'>"+esc(l.comment)+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="editL" data-id="'+l.id+'">Edit</button> <button class="btn sm danger" data-act="delL" data-id="'+l.id+'">✕</button></td></tr>';});
+  return h+"</table></div>";
+}
+function libForm(l){
+  l=l||{system:"Roof",title:"",comment:""};
+  return '<div class="card"><h3>'+(l.id?"Edit comment":"New comment")+'</h3><div class="grid" style="grid-template-columns:200px 1fr"><div><label>System</label><select id="lSys">'+SYSTEMS.map(function(s){return "<option "+(l.system===s?"selected":"")+">"+s+"</option>";}).join("")+'</select></div><div><label>Title</label><input id="lTitle" value="'+esc(l.title)+'"></div></div><label>Comment text</label><textarea id="lComment" rows="3">'+esc(l.comment)+'</textarea><div class="row" style="margin-top:8px"><button class="btn" data-act="saveL" data-id="'+(l.id||"")+'">Save</button><button class="btn sec" data-act="cancelL">Cancel</button></div></div>';
+}
+/* charts */
+function allItems(){var r=[];DB.inspections.forEach(function(i){(i.items||[]).forEach(function(it){r.push(it);});});return r;}
+function chartBySystem(){
+  var byS={};allItems().forEach(function(it){if(it.sev!=="1")byS[it.system]=(byS[it.system]||0)+1;});
+  var ks=Object.keys(byS).sort(function(a,b){return byS[b]-byS[a];});
+  var max=Math.max.apply(null,ks.map(function(k){return byS[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){var sel=ui.sel.sys===k,w=Math.max(Math.round(byS[k]/max*100),4);
+    h+='<div class="bar-row" data-vsys="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byS[k]+(sel?" items":"")+"</div></div>";});
+  return h||'<p style="color:var(--mut)">No deficiencies recorded.</p>';
+}
+function chartSevDonut(){
+  var byV={"1":0,"2":0,"3":0,"4":0};allItems().forEach(function(it){byV[it.sev]=(byV[it.sev]||0)+1;});
+  var ks=Object.keys(byV).filter(function(k){return byV[k]>0;}),tot=ks.reduce(function(s,k){return s+byV[k];},0);
+  if(!tot)return '<p style="color:var(--mut)">No items recorded.</p>';
+  var C=2*Math.PI*70,off=0,cols=["#2a7d3f","#c9a227","#c96a1e","#b3402a"];
+  var h='<div class="donut-wrap"><svg width="180" height="180" viewBox="0 0 180 180">';
+  ks.forEach(function(k){
+    var frac=byV[k]/tot,len=frac*C,sel=ui.sel.sev===k;
+    h+='<circle cx="90" cy="90" r="70" fill="none" stroke="'+cols[+k-1]+'" stroke-width="'+(sel?30:22)+'" stroke-dasharray="'+Math.max(len-1.5,.5)+" "+C+'" stroke-dashoffset="'+(-off)+'" data-vsev="'+k+'" style="cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>';
+    off+=len;
+  });
+  var fs=tot>99999?13:16;
+  h+='<text x="90" y="86" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle" font-size="12" fill="var(--mut)">items</text></svg><div class="legend">';
+  ks.forEach(function(k){h+='<div data-vsev="'+k+'" class="'+(ui.sel.sev===k?"sel":"")+'">'+sevName(k)+" — "+byV[k]+"</div>";});
+  return h+"</div></div>";
+}
+function chartByMonth(){
+  var byM={};DB.inspections.forEach(function(i){if(i.date){var k=i.date.slice(0,7);byM[k]=(byM[k]||0)+1;}});
+  var ks=Object.keys(byM).sort().slice(-12),max=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){var sel=ui.sel.mo===k,w=Math.max(Math.round(byM[k]/max*100),4);
+    h+='<div class="bar-row" data-vmo="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byM[k]+(sel?" insp.":"")+"</div></div>";});
+  return h||'<p style="color:var(--mut)">No inspections yet.</p>';
+}
+function chartTopIssues(){
+  var byT={};allItems().forEach(function(it){if(it.sev!=="1")byT[it.title]=(byT[it.title]||0)+1;});
+  var ks=Object.keys(byT).sort(function(a,b){return byT[b]-byT[a];}).slice(0,8);
+  var max=Math.max.apply(null,ks.map(function(k){return byT[k];}).concat([1]));
+  var h="";
+  ks.forEach(function(k){var sel=ui.sel.issue===k,w=Math.max(Math.round(byT[k]/max*100),4);
+    h+='<div class="bar-row" data-vissue="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byT[k]+"</div></div>";});
+  return h||'<p style="color:var(--mut)">No deficiencies recorded.</p>';
+}
+function viewCharts(){
+  return '<div class="charts-grid">'
+  +'<div class="chart-card"><h3>Deficiencies by system</h3>'+chartBySystem()+'</div>'
+  +'<div class="chart-card"><h3>Items by severity</h3>'+chartSevDonut()+'</div>'
+  +'<div class="chart-card"><h3>Inspections by month</h3>'+chartByMonth()+'</div>'
+  +'<div class="chart-card"><h3>Most common issues</h3>'+chartTopIssues()+'</div>'
+  +"</div><p style='color:var(--mut);font-size:14px'>Click a bar, slice, or legend row to spotlight it; click again to release.</p>";
+}
+/* reports */
+function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function viewRep(){
+  return '<div class="card"><h3>Client report</h3><p style="color:var(--mut)">Open an inspection, then print — the report includes client info, all systems with findings, severity ratings, and photos.</p><div class="row"><select id="repInsp" style="max-width:320px">'+DB.inspections.map(function(i){return '<option value="'+i.id+'">'+esc(i.date+" — "+i.client)+"</option>";}).join("")+'</select><button class="btn sec" data-act="printR2">🖨 Print report</button></div></div>'
+  +'<div class="card"><h3>Export / backup</h3><div class="row"><button class="btn sec" data-act="csvI">⬇ Inspections CSV</button><button class="btn sec" data-act="jsonB">⬇ JSON backup</button><label class="btn sec" style="cursor:pointer">⬆ Restore JSON<input type="file" id="restoreFile" accept=".json" class="hidden"></label></div></div>';
+}
+function reportHTML(I){
+  var h="<h1>Home Inspection Report</h1><p><b>Client:</b> "+esc(I.client)+"<br><b>Property:</b> "+esc(I.address)+"<br><b>Date:</b> "+esc(I.date)+"<br><b>Inspector:</b> "+esc(I.inspector||"—")+"</p>";
+  if(I.notes)h+="<p><b>Notes:</b> "+esc(I.notes)+"</p>";
+  SYSTEMS.forEach(function(sy){
+    var items=I.items.filter(function(i){return i.system===sy;});
+    if(!items.length)return;
+    h+="<h2>"+esc(sy)+"</h2>";
+    items.forEach(function(it){
+      h+="<h3>"+esc(it.title)+' <span style="background:#eee;border-radius:10px;padding:2px 10px;font-size:13px">'+sevName(it.sev)+"</span></h3>";
+      if(it.comment)h+="<p>"+esc(it.comment)+"</p>";
+      if(it.photos&&it.photos.length){h+="<p>";it.photos.forEach(function(ph){h+='<img src="'+ph+'" style="max-width:220px;margin:4px;border:1px solid #ccc">';});h+="</p>";}
+    });
+  });
+  h+="<hr><p style='font-size:12px;color:#666'>Report generated with InspectLedger. This report reflects conditions observed at the time of inspection only.</p>";
+  return h;
+}
+/* render + wire */
+function render(){
+  renderTabs();paintTheme();paintSnd();
+  var v=$("#view");
+  v.innerHTML=ui.tab==="dash"?viewDash():ui.tab==="insp"?viewInsp():ui.tab==="lib"?viewLib():ui.tab==="charts"?viewCharts():viewRep();
+  if(ui.tab==="insp"&&ui._showItemForm){var host=document.createElement("div");host.innerHTML=itemForm(ui._editItem?(function(){var I=insp();for(var i=0;i<I.items.length;i++)if(I.items[i].id===ui._editItem)return I.items[i];return null;})():null,ui._itemSys);v.appendChild(host);}
+  if(ui.tab==="lib"&&ui._showLForm){var h2=document.createElement("div");h2.innerHTML=libForm(ui._editL?DB.library.find(function(x){return x.id===ui._editL;}):null);v.appendChild(h2);}
+  wire();
+}
+function wire(){
+  qa("#tabs button").forEach(function(b){b.addEventListener("click",function(){ui.tab=b.getAttribute("data-tab");ui._showIForm=ui._showItemForm=ui._showLForm=false;ui._editI=ui._editItem=ui._editL=null;click();render();window.scrollTo(0,0);});});
+  var qb=$("#qBox");if(qb)qb.addEventListener("input",function(){ui.q=qb.value;var pos=qb.selectionStart;render();var n=$("#qBox");if(n){n.focus();n.setSelectionRange(pos,pos);}});
+  qa("[data-syshead]").forEach(function(el){el.addEventListener("click",function(){var s=el.getAttribute("data-syshead");ui.sys=ui.sys===s?null:s;click();render();});});
+  qa("[data-vsys]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vsys");ui.sel.sys=ui.sel.sys===k?null:k;click();render();});});
+  qa("[data-vsev]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vsev");ui.sel.sev=ui.sel.sev===k?null:k;click();render();});});
+  qa("[data-vmo]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vmo");ui.sel.mo=ui.sel.mo===k?null:k;click();render();});});
+  qa("[data-vissue]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vissue");ui.sel.issue=ui.sel.issue===k?null:k;click();render();});});
+  qa("[data-act]").forEach(function(b){b.addEventListener("click",function(){act(b.getAttribute("data-act"),b);});});
+  qa("#itSev button").forEach(function(b){b.addEventListener("click",function(){qa("#itSev button").forEach(function(x){x.classList.remove("on");});b.classList.add("on");click();});});
+  var il=$("#itLib");if(il)il.addEventListener("change",function(){var l=DB.library.find(function(x){return x.id===il.value;});if(l){$("#itTitle").value=l.title;$("#itComment").value=l.comment;}});
+  var rf=$("#restoreFile");if(rf)rf.addEventListener("change",function(){doRestore(rf);});
+  var ph=$("#photoInput");if(ph)ph.addEventListener("change",function(){doPhoto(ph);});
+}
+function curInsp(){var I=insp();if(!I){toast("Open an inspection first.");return null;}return I;}
+function act(a,b){
+  var id=b.getAttribute("data-id");
+  if(a==="newI"){ui._editI=null;ui._showIForm=true;click();render();window.scrollTo(0,0);}
+  else if(a==="editI"){ui._editI=id;ui._showIForm=true;click();render();window.scrollTo(0,0);}
+  else if(a==="cancelI"){ui._showIForm=false;ui._editI=null;click();render();}
+  else if(a==="saveI"){
+    var r={date:$("#iDate").value||todayLocal(),client:$("#iClient").value.trim(),address:$("#iAddr").value.trim(),inspector:$("#iInsp").value.trim(),notes:$("#iNotes").value.trim()};
+    if(!r.client){toast("Client name is required.");return;}
+    if(id){var ex=DB.inspections.find(function(x){return x.id===id;});if(!ex){toast("Gone.");return;}Object.assign(ex,r);}
+    else{r.id=uid();r.items=[];DB.inspections.push(r);ui.insp=r.id;}
+    save();ui._showIForm=false;ui._editI=null;click();toast("Saved.");render();
+  }
+  else if(a==="delI"){if(confirm("Delete this inspection and all its items?")){DB.inspections=DB.inspections.filter(function(x){return x.id!==id;});if(ui.insp===id)ui.insp=null;save();click();toast("Deleted.");render();}}
+  else if(a==="openI"){ui.insp=id;ui.sys=null;ui._showIForm=false;click();render();window.scrollTo(0,0);}
+  else if(a==="backI"){ui.insp=null;ui.sys=null;ui._showItemForm=false;ui._editItem=null;click();render();}
+  else if(a==="newItem"){ui._editItem=null;ui._itemSys=b.getAttribute("data-sys");ui._showItemForm=true;click();render();window.scrollTo(0,document.body.scrollHeight);}
+  else if(a==="editItem"){ui._editItem=id;var I=curInsp();if(!I)return;var it=I.items.find(function(x){return x.id===id;});ui._itemSys=it.system;ui._showItemForm=true;click();render();window.scrollTo(0,document.body.scrollHeight);}
+  else if(a==="cancelItem"){ui._showItemForm=false;ui._editItem=null;click();render();}
+  else if(a==="saveItem"){
+    var I=curInsp();if(!I)return;
+    var sy=b.getAttribute("data-sys");
+    var onBtn=document.querySelector("#itSev button.on");
+    var rec={system:sy,title:$("#itTitle").value.trim(),sev:onBtn?onBtn.getAttribute("data-sev"):"2",comment:$("#itComment").value.trim()};
+    if(!rec.title){toast("Title is required.");return;}
+    if(id){var ex=I.items.find(function(x){return x.id===id;});if(!ex){toast("Gone.");return;}rec.photos=ex.photos;Object.assign(ex,rec);}
+    else{rec.id=uid();rec.photos=[];rec.done=true;I.items.push(rec);}
+    save();ui._showItemForm=false;ui._editItem=null;click();toast("Item saved.");render();
+  }
+  else if(a==="delItem"){var I2=curInsp();if(!I2)return;if(confirm("Delete this item?")){I2.items=I2.items.filter(function(x){return x.id!==id;});save();click();toast("Deleted.");render();}}
+  else if(a==="fromLib"){
+    var sy2=b.getAttribute("data-sys");
+    var lib=DB.library.filter(function(l){return l.system===sy2;});
+    if(!lib.length){toast("No saved comments for "+sy2+". Add some in the Comment Library.");return;}
+    openModal("Insert from library — "+esc(sy2),lib.map(function(l){return '<div class="card" style="margin:8px 0"><b>'+esc(l.title)+'</b><div style="color:var(--mut);font-size:14px">'+esc(l.comment)+'</div><button class="btn sm" style="margin-top:6px" data-libpick="'+l.id+'">Insert</button></div>';}).join(""));
+    qa("[data-libpick]").forEach(function(pb){pb.addEventListener("click",function(){var l=DB.library.find(function(x){return x.id===pb.getAttribute("data-libpick");});var I3=curInsp();if(I3&&l){I3.items.push({id:uid(),system:sy2,title:l.title,sev:"2",comment:l.comment,photos:[],done:true});save();}closeModal();click();toast("Inserted.");render();});});
+  }
+  else if(a==="photoItem"){
+    var I4=curInsp();if(!I4)return;
+    openModal("Attach photo",'<label class="btn sec" style="cursor:pointer">Choose photo<input type="file" id="photoInput" data-item="'+id+'" accept="image/*" class="hidden"></label><p style="color:var(--mut);font-size:14px;margin-top:8px">Photos are resized to keep the file small and stored on this device.</p>');
+    var ph2=$("#photoInput");if(ph2)ph2.addEventListener("change",function(){doPhoto(ph2);});
+  }
+  else if(a==="newL"){ui._editL=null;ui._showLForm=true;click();render();}
+  else if(a==="editL"){ui._editL=id;ui._showLForm=true;click();render();}
+  else if(a==="cancelL"){ui._showLForm=false;ui._editL=null;click();render();}
+  else if(a==="saveL"){
+    var lr={system:$("#lSys").value,title:$("#lTitle").value.trim(),comment:$("#lComment").value.trim()};
+    if(!lr.title){toast("Title is required.");return;}
+    if(id){var el=DB.library.find(function(x){return x.id===id;});if(!el){toast("Gone.");return;}Object.assign(el,lr);}
+    else{lr.id=uid();DB.library.push(lr);}
+    save();ui._showLForm=false;ui._editL=null;click();toast("Saved.");render();
+  }
+  else if(a==="delL"){if(confirm("Delete this comment?")){DB.library=DB.library.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="printR"||a==="printR2"){
+    var pid=a==="printR"?id:($("#repInsp")?$("#repInsp").value:null);
+    var PI=DB.inspections.find(function(x){return x.id===pid;});
+    if(!PI){toast("Pick an inspection first.");return;}
+    var w=window.open("","_blank");if(!w){toast("Popup blocked — allow pop-ups to print.");return;}
+    w.document.write("<html><head><title>Inspection Report</title></head><body style='font-family:sans-serif;max-width:800px;margin:20px'>"+reportHTML(PI)+"</body></html>");w.document.close();w.focus();w.print();
+  }
+  else if(a==="csvI"){
+    var rows=[["Date","Client","Address","Inspector","System","Title","Severity","Comment"]];
+    DB.inspections.forEach(function(I){I.items.forEach(function(it){rows.push([I.date,I.client,I.address,I.inspector,it.system,it.title,sevName(it.sev),it.comment]);});});
+    dl("inspectledger.csv",rows.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");
+  }
+  else if(a==="jsonB"){dl("inspectledger-backup.json",JSON.stringify(DB,null,1),"application/json");}
+}
+function doPhoto(input){
+  var itemId=input.getAttribute("data-item"),f=input.files[0];if(!f)return;
+  var I=insp();var it=I?I.items.find(function(x){return x.id===itemId;}):null;
+  if(!I||!it){toast("Item not found.");return;}
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var mx=800,sc=Math.min(1,mx/Math.max(img.width,img.height));
+      var cv=document.createElement("canvas");cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      var url=cv.toDataURL("image/jpeg",.72);
+      it.photos.push(url);save();
+      closeModal();click();toast("Photo attached.");render();
+    };
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+}
+function dl(name,text,mime){var u=URL.createObjectURL(new Blob([text],{type:mime}));var l=document.createElement("a");l.href=u;l.download=name;document.body.appendChild(l);l.click();setTimeout(function(){URL.revokeObjectURL(u);l.remove();},500);click();}
+function doRestore(rf){
+  var f=rf.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){try{
+    var d=JSON.parse(r.result);
+    if(!d||!Array.isArray(d.inspections)||!Array.isArray(d.library))throw 0;
+    var bad=d.inspections.some(function(x){return !x||!x.id||!Array.isArray(x.items)||x.items.some(function(it){return !it||!it.id||(it.photos&&!Array.isArray(it.photos));});});
+    bad=bad||d.library.some(function(l){return !l||!l.id;});
+    if(bad)throw 0;
+    DB=d;save();ui.insp=null;click();toast("Backup restored.");render();
+  }catch(e){toast("Invalid backup file.");}};
+  r.readAsText(f);rf.value="";
+}
+function openModal(title,bodyHtml){var m=$("#modal");m.classList.remove("hidden");m.innerHTML='<div class="box"><h3>'+title+'</h3><div style="margin-top:10px">'+bodyHtml+'</div><div class="row" style="margin-top:12px"><button class="btn sec" id="mClose">Close</button></div></div>';$("#mClose").addEventListener("click",closeModal);m.onclick=function(e){if(e.target===m)closeModal();};}
+function closeModal(){var m=$("#modal");m.classList.add("hidden");m.innerHTML="";}
+/* init */
+$("#btnSample").addEventListener("click",toggleSample);
+$("#btnTheme").addEventListener("click",function(){click();try{var d=document.documentElement.getAttribute("data-theme")==="dark";localStorage.setItem("inspectledger_theme",d?"":"dark");}catch(e){}paintTheme();});
+$("#btnSound").addEventListener("click",function(){sndOn=!sndOn;try{localStorage.setItem("inspectledger_snd",sndOn?"1":"0");}catch(e){}paintSnd();click();});
+render();
+</script>
+</body>
+</html>
