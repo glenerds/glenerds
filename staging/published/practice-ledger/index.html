@@ -239,8 +239,8 @@ function renderDashboard(){
   else h+='<p class="muted">Add pieces in the Pieces tab and this list shows what has waited longest.</p>';
   h+='</div><div class="card"><h2>Last 17 weeks</h2><div class="heat">';
   var mins={};state.sessions.forEach(function(s){mins[s.date]=(mins[s.date]||0)+s.minutes;});
-  for(var i=118;i>=0;i--){var ds=fmtD(addDays(new Date(),-i));var m=mins[ds]||0;var lvl=m===0?0:m<20?1:m<40?2:m<70?3:4;h+='<i class="'+(lvl?'h'+lvl:'')+'" title="'+ds+': '+m+' min"></i>';}
-  h+='</div><p class="small muted" style="margin-top:9px">Each square is a day; darker means more practice. Hover or tap a square to see the day.</p></div></div>';
+  for(var i=118;i>=0;i--){var ds=fmtD(addDays(new Date(),-i));var m=mins[ds]||0;var lvl=m===0?0:m<20?1:m<40?2:m<70?3:4;h+='<i class="'+(lvl?'h'+lvl:'')+'" data-hm="'+ds+'" data-mins="'+m+'" title="'+ds+': '+m+' min"></i>';}
+  h+='</div><p id="hm-detail" class="small" style="margin-top:9px;min-height:22px">Each square is a day; darker means more practice. Hover or tap a square to see the day.</p></div></div>';
   // recent sessions
   h+='<div class="card"><h2>Recent sessions</h2>';
   var recent=state.sessions.slice().sort(function(a,b){return a.date<b.date?1:a.date>b.date?-1:0;}).slice(0,6);
@@ -251,6 +251,10 @@ function renderDashboard(){
   } else h+='<p class="muted">No sessions logged yet. Your history will appear here.</p>';
   h+='</div>';
   el.innerHTML=h;
+  el.querySelectorAll('[data-hm]').forEach(function(c){c.addEventListener('click',function(){
+    var d=document.getElementById('hm-detail');
+    if(d)d.innerHTML='<b>'+esc(c.getAttribute('data-hm'))+'</b> — '+fmtMin(parseInt(c.getAttribute('data-mins'),10)||0)+' practiced.';sndClick();
+  });});
 }
 /* ---------- render: practice log ---------- */
 var editSessionId=null;
@@ -479,10 +483,9 @@ function renderCharts(){
         paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="'+sg.color+'" stroke-width="26" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" data-seg="'+sg.key+'" style="cursor:pointer"'+pull+'/>';
         if(sel){paths+='<circle cx="100" cy="100" r="44" fill="none" stroke="var(--ink)" stroke-width="29.5" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'" opacity="0.28"'+pull+'/>';}}
       off+=frac*C;});
-    h+='<div class="donutwrap"><svg width="200" height="200" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="44" fill="none" stroke="var(--heat0)" stroke-width="26"/>'+paths
-      +'<text x="100" y="96" text-anchor="middle" font-size="19" font-weight="700" fill="var(--ink)">'+fmtMin(total)+'</text>'
-      +'<text x="100" y="116" text-anchor="middle" font-size="13" fill="var(--muted)">total</text></svg>'
-      +'<div class="legend">'+segs.map(function(sg,i){return '<div><span class="sw" style="background:'+sg.color+'"></span>'+esc(sg.label)+' — '+fmtMin(sg.min)+' ('+Math.round(sg.min/total*100)+'%)</div>';}).join('')+'</div></div>'
+    h+='<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto"><svg width="260" height="260" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="44" fill="none" stroke="var(--heat0)" stroke-width="26"/>'+paths+'</svg>'
+      +'<div style="font-size:24px;font-weight:700;margin-top:4px">'+fmtMin(total)+'</div><div class="small muted">total practice</div></div>'
+      +'<div class="legend" style="flex:1 1 180px">'+segs.map(function(sg,i){return '<div><span class="sw" style="background:'+sg.color+'"></span>'+esc(sg.label)+' — '+fmtMin(sg.min)+' ('+Math.round(sg.min/total*100)+'%)</div>';}).join('')+'</div></div>'
       +'<div id="seg-detail" style="margin-top:10px">'+(function(){var sg=segs.find(function(x){return x.key===chartSel.piece;});return sg?('Selected: <b>'+esc(sg.label)+'</b> — '+fmtMin(sg.min)+' of '+fmtMin(total)+'.'):'<span class="muted">Select a slice to highlight a piece.</span>';})()+'</div>';
   } else h+='<p class="muted">Log some sessions and the split by piece appears here.</p>';
   h+='</div>';
