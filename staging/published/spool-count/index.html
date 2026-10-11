@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Printing Business Tracker — Print Cost Calculator, Filament Inventory & Order Manager</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#26231d;--mut:#6f695b;--line:#e4ddcd;--acc:#c25e2a;--acc2:#2a7d4f;--warn:#b3402a}
+[data-theme="dark"]{--bg:#1a1815;--card:#24211c;--ink:#ece7da;--mut:#a49c8a;--line:#38342a;--acc:#e08a4e;--acc2:#7bc47f;--warn:#e06c5a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;max-width:1100px;margin:0 auto;padding:12px 16px 60px}
+header{display:flex;align-items:center;gap:10px;padding:10px 0;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1.3rem}
+.logo svg{width:34px;height:34px}
+.hdr-btns{margin-left:auto;display:flex;gap:8px;align-items:center}
+.hdr-btns button,.hdr-btns a{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:15px}
+.hdr-btns button:hover{background:var(--line)}
+.hdr-btns button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.more-apps{width:auto!important;padding:0 14px;font-weight:600;font-size:15px}
+button:active{transform:scale(.95);filter:brightness(.9)}
+.tabs{display:flex;gap:6px;margin:12px 0;flex-wrap:wrap;border-bottom:2px solid var(--line);padding-bottom:8px}
+.tabs button{background:none;border:none;color:var(--mut);font-size:16px;font-weight:600;padding:8px 14px;cursor:pointer;border-radius:8px}
+.tabs button.active{color:var(--acc);background:var(--card);box-shadow:inset 0 -3px 0 var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:12px 0}
+.card h3{margin-bottom:10px;font-size:1.05rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.stat .n{font-size:1.6rem;font-weight:800;color:var(--acc)}
+.stat .l{font-size:15px;color:var(--mut)}
+.stat.green .n{color:var(--acc2)}
+.stat.warn .n{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:14px}
+input,select,textarea{font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+input[type="checkbox"]{width:auto}
+label{font-size:15px;font-weight:600;display:block;margin:8px 0 4px}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.btn.sec{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--warn)}
+.btn.ok{background:var(--acc2)}
+.btn.sm{padding:6px 12px;font-size:15px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.calc{background:var(--card);border:2px solid var(--acc);border-radius:14px;padding:18px;margin:12px 0}
+.calc .total{font-size:2rem;font-weight:800;color:var(--acc2);margin:8px 0}
+.calc .row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.lowstock{color:var(--warn);font-weight:700}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:300px;display:flex;flex-direction:column}
+.chart-card h3{margin-bottom:8px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer}
+.bar-lbl{width:120px;font-size:15px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;background:var(--line);border-radius:6px;height:26px}
+.bar-fill{background:var(--acc);border-radius:6px;height:100%}
+.bar-fill.sel{background:var(--acc2);outline:3px solid var(--ink);outline-offset:-3px}
+.bar-val{width:70px;text-align:right;font-size:15px;font-weight:700}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 20px;border-radius:10px;font-size:15px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal .box{background:var(--card);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.hidden{display:none}
+.foot-cta{text-align:center;margin:30px 0}
+.foot-cta a{display:inline-block;background:var(--acc);color:#fff;padding:12px 28px;border-radius:12px;text-decoration:none;font-weight:700;font-size:17px}
+@media print{.tabs,.hdr-btns,.toolbar,.foot-cta,.btn,.no-print{display:none!important}body{max-width:100%}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="13" fill="none" stroke="#c25e2a" stroke-width="3"/><circle cx="17" cy="17" r="5.5" fill="#c25e2a"/><circle cx="17" cy="17" r="2" fill="#f6f4ef"/></svg><span>SpoolCount</span></div>
+  <div class="hdr-btns">
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    <button id="btnSample" title="Try sample data" aria-label="Try sample data"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5.5L4.8 17a3 3 0 0 0 2.6 4.5h9.2a3 3 0 0 0 2.6-4.5L14 8.5V3"/></svg></button>
+    <button id="btnTheme" title="Dark mode" aria-label="Dark mode"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
+    <button id="btnSound" title="Sound" aria-label="Sound"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path class="wv" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+  </div>
+</header>
+<nav class="tabs" role="tablist" id="tabs"></nav>
+<main id="view"></main>
+<div class="foot-cta"><a href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps by Glenerds</a></div>
+<div class="toast" id="toast"></div>
+<div id="modal" class="hidden"></div>
+<script>
+"use strict";
+var LS="spoolcount_v1",LSS="spoolcount_sample_snap",LST="spoolcount_sample_on";
+var DB={filament:[],jobs:[],orders:[],customers:[],settings:{}};
+try{var raw=localStorage.getItem(LS);if(raw){var d=JSON.parse(raw);if(d&&Array.isArray(d.filament)&&Array.isArray(d.jobs)&&Array.isArray(d.orders)){DB.filament=d.filament;DB.jobs=d.jobs;DB.orders=d.orders;DB.customers=Array.isArray(d.customers)?d.customers:[];DB.settings=d.settings||{};}}}catch(e){toast("Saved data was unreadable — starting fresh. Restore a backup if you have one.");}
+var ui={tab:"dash",q:"",sel:{}};
+function uid(){return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function todayLocal(){var d=new Date();var p=function(n){return ("0"+n).slice(-2);};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function save(){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){toast("Could not save — storage full or blocked. Export a backup now.");}}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},2600);}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function $(s){return document.querySelector(s);}
+function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+function num(v){v=parseFloat(v);return isNaN(v)?0:v;}
+function money(v){return "$"+num(v).toFixed(2);}
+var _ac=null;var sndOn=true;try{sndOn=localStorage.getItem("spoolcount_snd")!=="0";}catch(e){}
+function click(){if(!sndOn)return;try{if(!_ac)_ac=new (window.AudioContext||window.webkitAudioContext)();var c=_ac,o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=640;g.gain.setValueAtTime(.06,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.12);o.start();o.stop(c.currentTime+.13);}catch(e){}}
+function paintSnd(){var b=$("#btnSound");if(!b)return;b.querySelectorAll(".wv").forEach(function(p){p.style.display=sndOn?"":"none";});b.classList.toggle("on",sndOn);b.style.opacity=sndOn?1:.45;}
+function paintTheme(){var dark=false;try{var st=localStorage.getItem("spoolcount_theme");dark=st==="dark"||(st==null&&matchMedia("(prefers-color-scheme: dark)").matches);}catch(e){}document.documentElement.setAttribute("data-theme",dark?"dark":"");var b=document.getElementById("btnTheme");if(b)b.classList.toggle("on",dark);}
+function paintSample(){var b=document.getElementById("btnSample");if(b)b.classList.toggle("on",sampleOn());}
+function sampleOn(){try{return !!localStorage.getItem(LST);}catch(e){return false;}}
+function toggleSample(){click();
+  if(!sampleOn()){var ok=false;try{localStorage.setItem(LSS,JSON.stringify(DB));localStorage.setItem(LST,"1");ok=true;}catch(e){}if(!ok){toast("Could not snapshot your data — not loading sample.");return;}DB=makeSample();save();toast("Sample data loaded — toggle off to restore yours.");}
+  else{var snap=null;try{snap=JSON.parse(localStorage.getItem(LSS)||"null");}catch(e){}
+    if(!snap||!Array.isArray(snap.filament)||!Array.isArray(snap.jobs)||!Array.isArray(snap.orders)){toast("Sample snapshot missing — not touching data.");return;}
+    DB.filament=snap.filament;DB.jobs=snap.jobs;DB.orders=snap.orders;DB.customers=Array.isArray(snap.customers)?snap.customers:[];DB.settings=snap.settings||{};save();try{localStorage.removeItem(LSS);localStorage.removeItem(LST);}catch(e){}toast("Your data restored.");}
+  render();
+}
+function mkF(name,mat,color,grams,cost,low){return {id:uid(),name:name,material:mat,color:color,grams:num(grams),cost:num(cost),lowAt:num(low)||100};}
+function makeSample(){
+  var f1=mkF("PLA Black","PLA","Black",850,21.99,150),f2=mkF("PLA Silk Gold","PLA","Gold",320,24.99,150),f3=mkF("PETG White","PETG","White",1000,26.99,150);
+  return {filament:[f1,f2,f3],
+    jobs:[
+      {id:uid(),date:"2026-10-05",name:"Dragon planter",filamentId:f1.id,grams:85,hours:6.5,electricKwh:1.2,electricRate:0.14,laborMin:20,laborRate:15,failPct:5,packaging:1.50,price:34.99,qty:1},
+      {id:uid(),date:"2026-10-07",name:"Flexi octopus",filamentId:f2.id,grams:42,hours:3.2,electricKwh:0.6,electricRate:0.14,laborMin:10,laborRate:15,failPct:5,packaging:0.80,price:18.99,qty:2}
+    ],
+    orders:[
+      {id:uid(),date:"2026-10-06",customer:"Sample Customer",items:"Dragon planter x1",total:34.99,status:"Shipped"},
+      {id:uid(),date:"2026-10-08",customer:"Sample Customer",items:"Flexi octopus x2",total:37.98,status:"Paid"}
+    ],
+    customers:[{id:uid(),name:"Sample Customer",contact:"sample@example.com"}],
+    settings:{}};
+}
+/* cost math */
+function jobCost(j){
+  var f=DB.filament.find(function(x){return x.id===j.filamentId;});
+  var q=Math.max(1,Math.round(num(j.qty)||1));
+  var filCost=f&&f.grams>0?(f.cost/f.grams)*num(j.grams)*q:0;
+  var elec=num(j.electricKwh)*num(j.electricRate)*q;
+  var labor=(num(j.laborMin)/60)*num(j.laborRate)*q;
+  var pack=num(j.packaging)*q;
+  var sub=filCost+elec+labor+pack;
+  var total=sub*(1+num(j.failPct)/100);
+  return {fil:filCost,elec:elec,labor:labor,pack:pack,fail:sub*num(j.failPct)/100,total:total};
+}
+function jobProfit(j){var c=jobCost(j).total;return num(j.price)*num(j.qty||1)-c;}
+/* tabs */
+var tabs=[["dash","Dashboard"],["calc","Cost Calculator"],["jobs","Print Jobs"],["fil","Filament"],["orders","Orders"],["charts","Charts"],["rep","Reports & Data"]];
+function renderTabs(){$("#tabs").innerHTML=tabs.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" class="'+(ui.tab===t[0]?"active":"")+'">'+t[1]+"</button>";}).join("");}
+/* views */
+function viewDash(){
+  var rev=DB.orders.reduce(function(s,o){return s+num(o.total);},0);
+  var pcost=DB.jobs.reduce(function(s,j){return s+jobCost(j).total;},0);
+  var profit=DB.jobs.reduce(function(s,j){return s+jobProfit(j);},0);
+  var low=DB.filament.filter(function(f){return f.grams<=f.lowAt;});
+  var h='<div class="grid">';
+  h+='<div class="stat green"><div class="n">'+money(rev)+'</div><div class="l">Order revenue</div></div>';
+  h+='<div class="stat"><div class="n">'+money(pcost)+'</div><div class="l">Print costs</div></div>';
+  h+='<div class="stat'+(profit<0?" warn":" green")+'"><div class="n">'+money(profit)+'</div><div class="l">Est. profit</div></div>';
+  h+='<div class="stat'+(low.length?" warn":"")+'"><div class="n">'+low.length+'</div><div class="l">Filament low</div></div></div>';
+  if(low.length){h+='<div class="card"><h3>⚠ Low filament</h3>';low.forEach(function(f){h+='<div class="lowstock">'+esc(f.name)+" — "+Math.round(f.grams)+"g left</div>";});h+="</div>";}
+  h+='<div class="card"><h3>Recent jobs</h3><table><tr><th>Date</th><th>Job</th><th>Cost</th><th>Price</th><th>Profit</th></tr>';
+  DB.jobs.slice().sort(function(a,b){return (b.date||"")<(a.date||"")?-1:1;}).slice(0,5).forEach(function(j){var c=jobCost(j),p=jobProfit(j);
+    h+="<tr><td>"+esc(j.date)+"</td><td>"+esc(j.name)+"</td><td>"+money(c.total)+"</td><td>"+money(num(j.price)*num(j.qty||1))+'</td><td style="color:'+(p<0?"var(--warn)":"var(--acc2)")+'">'+money(p)+"</td></tr>";});
+  h+="</table></div>";
+  return h;
+}
+function viewCalc(){
+  var h='<div class="calc"><h3>True-cost print calculator</h3><div class="row2">'
+  +'<div><label>Job name</label><input id="cName" placeholder="e.g. Dragon planter"></div>'
+  +'<div><label>Filament</label><select id="cFil">'+DB.filament.map(function(f){return '<option value="'+f.id+'">'+esc(f.name)+" ("+Math.round(f.grams)+"g)</option>";}).join("")+'</select></div>'
+  +'<div><label>Grams per unit</label><input id="cGrams" type="number" value="50"></div>'
+  +'<div><label>Print hours</label><input id="cHours" type="number" value="4"></div>'
+  +'<div><label>Printer watts</label><input id="cWatts" type="number" value="150"></div>'
+  +'<div><label>Electricity kWh</label><input id="cKwh" type="number" step="0.1" value="0.8"></div>'
+  +'<div><label>Electric rate $/kWh</label><input id="cRate" type="number" step="0.01" value="0.14"></div>'
+  +'<div><label>Labor minutes</label><input id="cLaborMin" type="number" value="15"></div>'
+  +'<div><label>Labor $/hour</label><input id="cLaborRate" type="number" value="15"></div>'
+  +'<div><label>Failed-print allowance %</label><input id="cFail" type="number" value="5"></div>'
+  +'<div><label>Packaging $</label><input id="cPack" type="number" step="0.01" value="1"></div>'
+  +'<div><label>Your price $</label><input id="cPrice" type="number" step="0.01" value="25"></div>'
+  +'<div><label>Quantity</label><input id="cQty" type="number" value="1"></div></div>'
+  +'<div class="total" id="cTotal">—</div><div id="cBreak" style="color:var(--mut);font-size:14px"></div>'
+  +'<div class="row" style="margin-top:10px"><button class="btn" data-act="calcGo">Calculate</button><button class="btn sec" data-act="calcSave">💾 Save as job</button></div></div>';
+  h+='<div class="card"><h3>How it works</h3><p style="color:var(--mut)">Type grams and hours once — the calculator adds filament, electricity, labor, packaging, plus a failed-print allowance, and shows your margin instantly. Saving as a job auto-deducts the filament and links the job to orders.</p></div>';
+  return h;
+}
+function calcRead(){
+  var f=DB.filament.find(function(x){return x.id===$("#cFil").value;});
+  return {name:$("#cName").value.trim(),filamentId:$("#cFil").value,grams:num($("#cGrams").value),hours:num($("#cHours").value),
+    electricKwh:num($("#cKwh").value)||((num($("#cHours").value)*num($("#cWatts").value))/1000),electricRate:num($("#cRate").value),laborMin:num($("#cLaborMin").value),
+    laborRate:num($("#cLaborRate").value),failPct:num($("#cFail").value),packaging:num($("#cPack").value),
+    price:num($("#cPrice").value),qty:Math.max(1,Math.round(num($("#cQty").value)||1)),date:todayLocal(),_fil:f};
+}
+function calcShow(){
+  var j=calcRead();
+  var q=Math.max(1,Math.round(j.qty)||1);
+  var filCost=j._fil&&j._fil.grams>0?(j._fil.cost/j._fil.grams)*j.grams*q:0;
+  var elec=j.electricKwh*j.electricRate*q, labor=(j.laborMin/60)*j.laborRate*q, pack=j.packaging*q;
+  var sub=filCost+elec+labor+pack, total=sub*(1+j.failPct/100);
+  var rev=j.price*j.qty, margin=rev-total;
+  $("#cTotal").textContent="True cost "+money(total)+" · Margin "+money(margin)+(rev>0?" ("+Math.round(margin/rev*100)+"%)":"");
+  $("#cBreak").textContent="Filament "+money(filCost)+" · Electricity "+money(elec)+" · Labor "+money(labor)+" · Packaging "+money(pack)+" · Fail allowance "+money(sub*j.failPct/100)+((j._fil&&j._fil.grams<=0)?" ⚠ selected spool is empty — filament cost $0":"");
+}
+function viewJobs(){
+  var h='<div class="toolbar"><button class="btn" data-act="newJob">+ Log job</button></div><div id="jForm"></div>';
+  h+='<div class="card"><table><tr><th>Date</th><th>Job</th><th>Filament</th><th>Cost</th><th>Price</th><th>Profit</th><th></th></tr>';
+  DB.jobs.slice().sort(function(a,b){return (b.date||"")<(a.date||"")?-1:1;}).forEach(function(j){
+    var f=DB.filament.find(function(x){return x.id===j.filamentId;});
+    var c=jobCost(j),p=jobProfit(j);
+    h+="<tr><td>"+esc(j.date)+"</td><td><b>"+esc(j.name)+"</b><br><span style='color:var(--mut);font-size:14px'>"+num(j.grams)+"g · "+num(j.hours)+"h</span></td><td>"+esc(f?f.name:"—")+"</td><td>"+money(c.total)+"</td><td>"+money(num(j.price)*num(j.qty||1))+'</td><td style="color:'+(p<0?"var(--warn)":"var(--acc2)")+'">'+money(p)+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="editJob" data-id="'+j.id+'">Edit</button> <button class="btn sm danger" data-act="delJob" data-id="'+j.id+'">✕</button></td></tr>';
+  });
+  return h+"</table></div>";
+}
+function jobForm(j){
+  j=j||{date:todayLocal(),name:"",filamentId:DB.filament.length?DB.filament[0].id:"",grams:"",hours:"",electricKwh:"",electricRate:0.14,laborMin:"",laborRate:15,failPct:5,packaging:"",price:"",qty:1};
+  return '<div class="card"><h3>'+(j.id?"Edit job":"Log print job")+'</h3><div class="row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'
+  +'<div><label>Date</label><input type="date" id="jDate" value="'+esc(j.date)+'"></div>'
+  +'<div><label>Job name</label><input id="jName" value="'+esc(j.name)+'"></div>'
+  +'<div><label>Filament</label><select id="jFil">'+DB.filament.map(function(f){return '<option value="'+f.id+'" '+(j.filamentId===f.id?"selected":"")+">"+esc(f.name)+"</option>";}).join("")+'</select></div>'
+  +'<div><label>Grams per unit</label><input id="jGrams" type="number" value="'+esc(j.grams)+'"></div>'
+  +'<div><label>Print hours</label><input id="jHours" type="number" value="'+esc(j.hours)+'"></div>'
+  +'<div><label>Printer watts</label><input id="jWatts" type="number" value="'+esc(j.watts||150)+'"></div>'
+  +'<div><label>Electricity kWh</label><input id="jKwh" type="number" step="0.1" value="'+esc(j.electricKwh)+'"></div>'
+  +'<div><label>Electric rate</label><input id="jRate" type="number" step="0.01" value="'+esc(j.electricRate)+'"></div>'
+  +'<div><label>Labor min</label><input id="jLaborMin" type="number" value="'+esc(j.laborMin)+'"></div>'
+  +'<div><label>Labor $/hr</label><input id="jLaborRate" type="number" value="'+esc(j.laborRate)+'"></div>'
+  +'<div><label>Fail %</label><input id="jFail" type="number" value="'+esc(j.failPct)+'"></div>'
+  +'<div><label>Packaging $</label><input id="jPack" type="number" step="0.01" value="'+esc(j.packaging)+'"></div>'
+  +'<div><label>Price $</label><input id="jPrice" type="number" step="0.01" value="'+esc(j.price)+'"></div>'
+  +'<div><label>Qty</label><input id="jQty" type="number" value="'+esc(j.qty||1)+'"></div></div>'
+  +'<div class="row" style="margin-top:8px"><button class="btn" data-act="saveJob" data-id="'+(j.id||"")+'">Save job</button><button class="btn sec" data-act="cancelJob">Cancel</button></div></div>';
+}
+function viewFil(){
+  var h='<div class="toolbar"><button class="btn" data-act="newFil">+ Add filament</button></div><div id="fForm"></div>';
+  h+='<div class="card"><table><tr><th>Spool</th><th>Material</th><th>Remaining</th><th>Cost</th><th>$/g</th><th></th></tr>';
+  DB.filament.forEach(function(f){
+    var low=f.grams<=f.lowAt;
+    h+="<tr><td><b>"+esc(f.name)+"</b><br><span style='color:var(--mut);font-size:14px'>"+esc(f.color||"")+"</span></td><td>"+esc(f.material||"")+"</td><td class='"+(low?"lowstock":"")+"'>"+Math.round(f.grams)+"g"+(low?" ⚠":"")+"</td><td>"+money(f.cost)+"</td><td>"+(f.grams>0?money(f.cost/f.grams):"—")+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="editFil" data-id="'+f.id+'">Edit</button> <button class="btn sm danger" data-act="delFil" data-id="'+f.id+'">✕</button></td></tr>';
+  });
+  return h+"</table></div>";
+}
+function filForm(f){
+  f=f||{name:"",material:"PLA",color:"",grams:"",cost:"",lowAt:100};
+  return '<div class="card"><h3>'+(f.id?"Edit spool":"Add filament spool")+'</h3><div class="row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'
+  +'<div><label>Name</label><input id="fName" value="'+esc(f.name)+'" placeholder="e.g. PLA Black"></div>'
+  +'<div><label>Material</label><select id="fMat">'+["PLA","PETG","ABS","ASA","TPU","Resin","Other"].map(function(m){return "<option "+(f.material===m?"selected":"")+">"+m+"</option>";}).join("")+'</select></div>'
+  +'<div><label>Color</label><input id="fColor" value="'+esc(f.color||"")+'"></div>'
+  +'<div><label>Grams remaining</label><input id="fGrams" type="number" value="'+esc(f.grams)+'"></div>'
+  +'<div><label>Spool cost $</label><input id="fCost" type="number" step="0.01" value="'+esc(f.cost)+'"></div>'
+  +'<div><label>Low-stock alert at (g)</label><input id="fLow" type="number" value="'+esc(f.lowAt)+'"></div></div>'
+  +'<div class="row" style="margin-top:8px"><button class="btn" data-act="saveFil" data-id="'+(f.id||"")+'">Save</button><button class="btn sec" data-act="cancelFil">Cancel</button></div></div>';
+}
+function viewOrders(){
+  var h='<div class="toolbar"><button class="btn" data-act="newOrd">+ Add order</button><button class="btn sec" data-act="newCust">+ Customer</button></div><div id="oForm"></div>';
+  h+='<div class="card"><h3>Orders</h3><table><tr><th>Date</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th></th></tr>';
+  DB.orders.slice().sort(function(a,b){return (b.date||"")<(a.date||"")?-1:1;}).forEach(function(o){
+    h+="<tr><td>"+esc(o.date)+"</td><td>"+esc(o.customer)+"</td><td>"+esc(o.items)+"</td><td>"+money(o.total)+"</td><td>"+esc(o.status||"")+'</td><td style="white-space:nowrap"><button class="btn sm sec" data-act="editOrd" data-id="'+o.id+'">Edit</button> <button class="btn sm danger" data-act="delOrd" data-id="'+o.id+'">✕</button></td></tr>';
+  });
+  h+="</table></div>";
+  if(DB.customers.length){h+='<div class="card"><h3>Customers</h3><table><tr><th>Name</th><th>Contact</th><th>Orders</th><th></th></tr>';
+    DB.customers.forEach(function(c){var n=DB.orders.filter(function(o){return o.customer===c.name;}).length;
+      h+="<tr><td><b>"+esc(c.name)+"</b></td><td>"+esc(c.contact||"")+"</td><td>"+n+'</td><td><button class="btn sm danger" data-act="delCust" data-id="'+c.id+'">✕</button></td></tr>';});
+    h+="</table></div>";}
+  return h;
+}
+function ordForm(o){
+  o=o||{date:todayLocal(),customer:"",items:"",total:"",status:"Paid"};
+  return '<div class="card"><h3>'+(o.id?"Edit order":"Add order")+'</h3><div class="row2" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">'
+  +'<div><label>Date</label><input type="date" id="oDate" value="'+esc(o.date)+'"></div>'
+  +'<div><label>Customer</label><input id="oCust" list="custList" value="'+esc(o.customer)+'"><datalist id="custList">'+DB.customers.map(function(c){return "<option>"+esc(c.name)+"</option>";}).join("")+'</datalist></div>'
+  +'<div><label>Items</label><input id="oItems" value="'+esc(o.items)+'"></div>'
+  +'<div><label>Total $</label><input id="oTotal" type="number" step="0.01" value="'+esc(o.total)+'"></div>'
+  +'<div><label>Status</label><select id="oStatus">'+["Paid","Shipped","Delivered","Pending","Cancelled"].map(function(st){return "<option "+(o.status===st?"selected":"")+">"+st+"</option>";}).join("")+'</select></div></div>'
+  +'<div class="row" style="margin-top:8px"><button class="btn" data-act="saveOrd" data-id="'+(o.id||"")+'">Save</button><button class="btn sec" data-act="cancelOrd">Cancel</button></div></div>';
+}
+function viewCharts(){
+  var byM={};DB.orders.forEach(function(o){if(o.date){var k=o.date.slice(0,7);byM[k]=(byM[k]||0)+num(o.total);}});
+  var ks=Object.keys(byM).sort().slice(-12),mx=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var revH=ks.map(function(k){var sel=ui.sel.rev===k,w=Math.max(Math.round(byM[k]/mx*100),4);
+    return '<div class="bar-row" data-vrev="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">$'+Math.round(byM[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No orders yet.</p>';
+  var byF={};DB.jobs.forEach(function(j){var f=DB.filament.find(function(x){return x.id===j.filamentId;});var n=f?f.name:"?";byF[n]=(byF[n]||0)+num(j.grams);});
+  var fk=Object.keys(byF).sort(function(a,b){return byF[b]-byF[a];}),mx2=Math.max.apply(null,fk.map(function(k){return byF[k];}).concat([1]));
+  var filH=fk.map(function(k){var sel=ui.sel.fil===k,w=Math.max(Math.round(byF[k]/mx2*100),4);
+    return '<div class="bar-row" data-vfil="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+Math.round(byF[k])+"g</div></div>";}).join("")||'<p style="color:var(--mut)">No jobs yet.</p>';
+  var pj=DB.jobs.map(function(j){return {n:j.name,id:j.id,p:jobProfit(j)};}).sort(function(a,b){return b.p-a.p;}).slice(0,8);
+  var mx3=Math.max.apply(null,pj.map(function(x){return Math.abs(x.p);}).concat([1]));
+  var profH=pj.map(function(x){var sel=ui.sel.prof===x.id,w=Math.max(Math.round(Math.abs(x.p)/mx3*100),4);
+    return '<div class="bar-row" data-vprof="'+x.id+'"><div class="bar-lbl">'+esc(x.n)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%;background:'+(x.p<0?"var(--warn)":"var(--acc2)")+'"></div></div><div class="bar-val">$'+Math.round(x.p)+"</div></div>";}).join("")||'<p style="color:var(--mut)">No jobs yet.</p>';
+  var st={};DB.orders.forEach(function(o){st[o.status||"—"]=(st[o.status||"—"]||0)+1;});
+  var sk=Object.keys(st),tot=sk.reduce(function(s,k){return s+st[k];},0);
+  var C=2*Math.PI*70,off=0,cols=["#2a7d4f","#c25e2a","#c9a227","#6a8fc2","#b3402a"];
+  var donut='<div class="donut-wrap" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><svg width="180" height="180" viewBox="0 0 180 180">';
+  sk.forEach(function(k,i){var frac=st[k]/tot,len=frac*C,sel=ui.sel.ostat===k;
+    donut+='<circle cx="90" cy="90" r="70" fill="none" stroke="'+cols[i%cols.length]+'" stroke-width="'+(sel?30:22)+'" stroke-dasharray="'+Math.max(len-1.5,.5)+" "+C+'" stroke-dashoffset="'+(-off)+'" data-vostat="'+esc(k)+'" style="cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>';
+    off+=len;});
+  donut+='<text x="90" y="86" text-anchor="middle" font-size="16" font-weight="800" fill="var(--ink)">'+tot+'</text><text x="90" y="106" text-anchor="middle" font-size="12" fill="var(--mut)">orders</text></svg><div class="legend" style="font-size:15px">';
+  sk.forEach(function(k){donut+='<div data-vostat="'+esc(k)+'" class="'+(ui.sel.ostat===k?"sel":"")+'" style="margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px">'+esc(k)+" — "+st[k]+"</div>";});
+  donut+="</div></div>";
+  if(!tot)donut='<p style="color:var(--mut)">No orders yet.</p>';
+  return '<div class="charts-grid">'
+  +'<div class="chart-card"><h3>Revenue by month</h3>'+revH+'</div>'
+  +'<div class="chart-card"><h3>Filament used by spool</h3>'+filH+'</div>'
+  +'<div class="chart-card"><h3>Profit by job</h3>'+profH+'</div>'
+  +'<div class="chart-card"><h3>Orders by status</h3>'+donut+'</div>'
+  +"</div><p style='color:var(--mut);font-size:14px'>Click a bar, slice, or legend row to spotlight it; click again to release.</p>";
+}
+function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;v=String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function viewRep(){
+  return '<div class="card"><h3>Printable quote</h3><p style="color:var(--mut)">Generate a customer-facing quote from the calculator.</p><div class="row"><button class="btn sec" data-act="printQuote">🖨 Print quote</button></div></div>'
+  +'<div class="card"><h3>Export / backup</h3><div class="row"><button class="btn sec" data-act="csvJ">⬇ Jobs CSV</button><button class="btn sec" data-act="csvF">⬇ Filament CSV</button><button class="btn sec" data-act="jsonB">⬇ JSON backup</button><label class="btn sec" style="cursor:pointer">⬆ Restore JSON<input type="file" id="restoreFile" accept=".json" class="hidden"></label></div></div>';
+}
+/* render + wire */
+function render(){
+  renderTabs();paintTheme();paintSnd();paintSample();
+  var v=$("#view");
+  v.innerHTML=ui.tab==="dash"?viewDash():ui.tab==="calc"?viewCalc():ui.tab==="jobs"?viewJobs():ui.tab==="fil"?viewFil():ui.tab==="orders"?viewOrders():ui.tab==="charts"?viewCharts():viewRep();
+  if(ui.tab==="jobs"&&ui._showJForm){var h=document.createElement("div");h.innerHTML=jobForm(ui._editJob?DB.jobs.find(function(x){return x.id===ui._editJob;}):null);v.appendChild(h);}
+  if(ui.tab==="fil"&&ui._showFForm){var h2=document.createElement("div");h2.innerHTML=filForm(ui._editFil?DB.filament.find(function(x){return x.id===ui._editFil;}):null);v.appendChild(h2);}
+  if(ui.tab==="orders"&&ui._showOForm){var h3=document.createElement("div");h3.innerHTML=ordForm(ui._editOrd?DB.orders.find(function(x){return x.id===ui._editOrd;}):null);v.appendChild(h3);}
+  wire();
+}
+function wire(){
+  qa("#tabs button").forEach(function(b){b.addEventListener("click",function(){ui.tab=b.getAttribute("data-tab");ui._showJForm=ui._showFForm=ui._showOForm=false;ui._editJob=ui._editFil=ui._editOrd=null;click();render();window.scrollTo(0,0);});});
+  qa("[data-vrev]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vrev");ui.sel.rev=ui.sel.rev===k?null:k;click();render();});});
+  qa("[data-vfil]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vfil");ui.sel.fil=ui.sel.fil===k?null:k;click();render();});});
+  qa("[data-vprof]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vprof");ui.sel.prof=ui.sel.prof===k?null:k;click();render();});});
+  qa("[data-vostat]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vostat");ui.sel.ostat=ui.sel.ostat===k?null:k;click();render();});});
+  qa("[data-act]").forEach(function(b){b.addEventListener("click",function(){act(b.getAttribute("data-act"),b);});});
+  var rf=$("#restoreFile");if(rf)rf.addEventListener("change",function(){doRestore(rf);});
+  ["cGrams","cHours","cKwh","cRate","cLaborMin","cLaborRate","cFail","cPack","cPrice","cQty","cFil"].forEach(function(id){var el=document.getElementById(id);if(el)el.addEventListener("input",calcShow);});
+  var ch=$("#cHours"),cw=$("#cWatts"),ck=$("#cKwh");
+  if(ch&&cw&&ck){var kwhDirty=false;ck.addEventListener("input",function(){kwhDirty=true;});var syncKwh=function(){if(!kwhDirty)ck.value=((num(ch.value)*num(cw.value))/1000).toFixed(2);calcShow();};ch.addEventListener("input",syncKwh);cw.addEventListener("input",syncKwh);syncKwh();}
+  if($("#cFil"))calcShow();
+}
+function deductFilament(filId,grams,qty){var f=DB.filament.find(function(x){return x.id===filId;});if(f)f.grams=Math.max(0,num(f.grams)-num(grams)*Math.max(1,Math.round(num(qty)||1)));}
+function act(a,b){
+  var id=b.getAttribute("data-id");
+  if(a==="calcGo"){calcShow();click();}
+  else if(a==="calcSave"){
+    var j=calcRead();
+    if(!j.name){toast("Give the job a name first.");return;}
+    if(!j.filamentId){toast("Add a filament spool first.");return;}
+    var rec={id:uid(),date:j.date,name:j.name,filamentId:j.filamentId,grams:j.grams,hours:j.hours,electricKwh:j.electricKwh,electricRate:j.electricRate,laborMin:j.laborMin,laborRate:j.laborRate,failPct:j.failPct,packaging:j.packaging,price:j.price,qty:j.qty};
+    DB.jobs.push(rec);deductFilament(rec.filamentId,rec.grams,rec.qty);save();click();toast("Job saved — filament deducted.");ui.tab="jobs";render();
+  }
+  else if(a==="newJob"){ui._editJob=null;ui._showJForm=true;click();render();}
+  else if(a==="editJob"){ui._editJob=id;ui._showJForm=true;click();render();}
+  else if(a==="cancelJob"){ui._showJForm=false;ui._editJob=null;click();render();}
+  else if(a==="saveJob"){
+    var r={date:$("#jDate").value||todayLocal(),name:$("#jName").value.trim(),filamentId:$("#jFil").value,grams:num($("#jGrams").value),hours:num($("#jHours").value),electricKwh:num($("#jKwh").value),electricRate:num($("#jRate").value),laborMin:num($("#jLaborMin").value),laborRate:num($("#jLaborRate").value),failPct:num($("#jFail").value),packaging:num($("#jPack").value),price:num($("#jPrice").value),qty:Math.max(1,Math.round(num($("#jQty").value)||1)),watts:num($("#jWatts").value)||150};
+    if(!r.name){toast("Job name is required.");return;}
+    if(id){var ex=DB.jobs.find(function(x){return x.id===id;});if(!ex){toast("Gone.");return;}
+      var of=DB.filament.find(function(x){return x.id===ex.filamentId;});if(of)of.grams=num(of.grams)+num(ex.grams)*Math.max(1,Math.round(num(ex.qty)||1));
+      Object.assign(ex,r);deductFilament(ex.filamentId,ex.grams,ex.qty);}
+    else{r.id=uid();DB.jobs.push(r);deductFilament(r.filamentId,r.grams,r.qty);}
+    save();ui._showJForm=false;ui._editJob=null;click();toast("Saved.");render();
+  }
+  else if(a==="delJob"){if(confirm("Delete this job? (Filament is not refunded.)")){DB.jobs=DB.jobs.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="newFil"){ui._editFil=null;ui._showFForm=true;click();render();}
+  else if(a==="editFil"){ui._editFil=id;ui._showFForm=true;click();render();}
+  else if(a==="cancelFil"){ui._showFForm=false;ui._editFil=null;click();render();}
+  else if(a==="saveFil"){
+    var fr={name:$("#fName").value.trim(),material:$("#fMat").value,color:$("#fColor").value.trim(),grams:num($("#fGrams").value),cost:num($("#fCost").value),lowAt:num($("#fLow").value)||100};
+    if(!fr.name){toast("Name is required.");return;}
+    if(id){var ef=DB.filament.find(function(x){return x.id===id;});if(!ef){toast("Gone.");return;}Object.assign(ef,fr);}
+    else{fr.id=uid();DB.filament.push(fr);}
+    save();ui._showFForm=false;ui._editFil=null;click();toast("Saved.");render();
+  }
+  else if(a==="delFil"){if(DB.jobs.some(function(j){return j.filamentId===id;})){toast("In use by jobs — reassign them first.");return;}if(confirm("Delete this spool?")){DB.filament=DB.filament.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="newOrd"){ui._editOrd=null;ui._showOForm=true;click();render();}
+  else if(a==="newCust"){openModal("Add customer",'<label>Name</label><input id="ncName"><label>Contact</label><input id="ncContact" placeholder="email or phone"><div class="row" style="margin-top:8px"><button class="btn" id="ncSave">Save</button></div>');
+    $("#ncSave").addEventListener("click",function(){var n=$("#ncName").value.trim();if(!n){toast("Name required.");return;}DB.customers.push({id:uid(),name:n,contact:$("#ncContact").value.trim()});save();closeModal();click();toast("Customer added.");render();});}
+  else if(a==="editOrd"){ui._editOrd=id;ui._showOForm=true;click();render();}
+  else if(a==="cancelOrd"){ui._showOForm=false;ui._editOrd=null;click();render();}
+  else if(a==="saveOrd"){
+    var or={date:$("#oDate").value||todayLocal(),customer:$("#oCust").value.trim(),items:$("#oItems").value.trim(),total:num($("#oTotal").value),status:$("#oStatus").value};
+    if(!or.customer){toast("Customer is required.");return;}
+    if(id){var eo=DB.orders.find(function(x){return x.id===id;});if(!eo){toast("Gone.");return;}Object.assign(eo,or);}
+    else{or.id=uid();DB.orders.push(or);}
+    save();ui._showOForm=false;ui._editOrd=null;click();toast("Saved.");render();
+  }
+  else if(a==="delOrd"){if(confirm("Delete this order?")){DB.orders=DB.orders.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="delCust"){if(confirm("Delete this customer?")){DB.customers=DB.customers.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="printQuote"){
+    var q=calcRead();
+    var c=jobCost({filamentId:q.filamentId,grams:q.grams,qty:q.qty,electricKwh:q.electricKwh,electricRate:q.electricRate,laborMin:q.laborMin,laborRate:q.laborRate,failPct:q.failPct,packaging:q.packaging});
+    var h="<h1>Print Quote</h1><p><b>Item:</b> "+esc(q.name||"—")+"</p><table border='1' cellpadding='6' style='border-collapse:collapse'><tr><th>Component</th><th>Amount</th></tr><tr><td>Filament ("+q.grams+"g)</td><td>"+money(c.fil)+"</td></tr><tr><td>Electricity</td><td>"+money(c.elec)+"</td></tr><tr><td>Labor</td><td>"+money(c.labor)+"</td></tr><tr><td>Packaging</td><td>"+money(c.pack)+"</td></tr><tr><td>Failed-print allowance</td><td>"+money(c.fail)+"</td></tr><tr><td>Quantity</td><td>"+q.qty+"</td></tr><tr><td><b>Quoted price</b></td><td><b>"+money(q.price)+"</b></td></tr></table><hr><p style='font-size:12px;color:#666'>Quote generated with SpoolCount.</p>";
+    var w=window.open("","_blank");if(!w){toast("Popup blocked — allow pop-ups to print.");return;}
+    w.document.write("<html><head><title>Quote</title></head><body style='font-family:sans-serif;max-width:800px;margin:20px'>"+h+"</body></html>");w.document.close();w.focus();w.print();
+  }
+  else if(a==="csvJ"){
+    var rows=[["Date","Job","Filament","Grams","Hours","Cost","Price","Profit"]];
+    DB.jobs.forEach(function(j){var f=DB.filament.find(function(x){return x.id===j.filamentId;});rows.push([j.date,j.name,f?f.name:"",j.grams,j.hours,jobCost(j).total.toFixed(2),(num(j.price)*num(j.qty||1)).toFixed(2),jobProfit(j).toFixed(2)]);});
+    dl("spoolcount-jobs.csv",rows.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");
+  }
+  else if(a==="csvF"){
+    var rows2=[["Spool","Material","Color","GramsRemaining","Cost"]];
+    DB.filament.forEach(function(f){rows2.push([f.name,f.material,f.color,Math.round(f.grams),f.cost]);});
+    dl("spoolcount-filament.csv",rows2.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");
+  }
+  else if(a==="jsonB"){dl("spoolcount-backup.json",JSON.stringify(DB,null,1),"application/json");}
+}
+function dl(name,text,mime){var u=URL.createObjectURL(new Blob([text],{type:mime}));var l=document.createElement("a");l.href=u;l.download=name;document.body.appendChild(l);l.click();setTimeout(function(){URL.revokeObjectURL(u);l.remove();},500);click();}
+function doRestore(rf){
+  var f=rf.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(){try{
+    var d=JSON.parse(r.result);
+    if(!d||!Array.isArray(d.filament)||!Array.isArray(d.jobs)||!Array.isArray(d.orders))throw 0;
+    var kids={};d.filament.forEach(function(x){kids[x.id]=1;});
+    var bad=d.filament.some(function(x){return !x||!x.id;})||d.jobs.some(function(j){return !j||!j.id||(j.filamentId&&!kids[j.filamentId]);})||d.orders.some(function(o){return !o||!o.id;});
+    if(bad)throw 0;
+    DB.filament=d.filament;DB.jobs=d.jobs;DB.orders=d.orders;DB.customers=Array.isArray(d.customers)?d.customers:[];DB.settings=d.settings||{};save();click();toast("Backup restored.");render();
+  }catch(e){toast("Invalid backup file.");}};
+  r.readAsText(f);rf.value="";
+}
+function openModal(title,bodyHtml){var m=$("#modal");m.classList.remove("hidden");m.innerHTML='<div class="box"><h3>'+title+'</h3><div style="margin-top:10px">'+bodyHtml+'</div><div class="row" style="margin-top:12px"><button class="btn sec" id="mClose">Close</button></div></div>';$("#mClose").addEventListener("click",closeModal);m.onclick=function(e){if(e.target===m)closeModal();};}
+function closeModal(){var m=$("#modal");m.classList.add("hidden");m.innerHTML="";}
+/* init */
+$("#btnSample").addEventListener("click",toggleSample);
+$("#btnTheme").addEventListener("click",function(){click();try{var d=document.documentElement.getAttribute("data-theme")==="dark";localStorage.setItem("spoolcount_theme",d?"":"dark");}catch(e){}paintTheme();});
+$("#btnSound").addEventListener("click",function(){sndOn=!sndOn;try{localStorage.setItem("spoolcount_snd",sndOn?"1":"0");}catch(e){}paintSnd();click();});
+render();
+</script>
+</body>
+</html>
