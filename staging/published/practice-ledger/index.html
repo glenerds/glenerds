@@ -63,6 +63,8 @@ th{color:var(--muted);font-weight:600}
 .heat{display:grid;grid-template-columns:repeat(17,1fr);gap:3px;max-width:560px}
 .heat i{aspect-ratio:1;border-radius:3px;background:var(--heat0);display:block}
 .heat i.h1{background:var(--heat1)}.heat i.h2{background:var(--heat2)}.heat i.h3{background:var(--heat3)}.heat i.h4{background:var(--heat4)}
+.heat i{position:relative;cursor:pointer}
+.heat i.sel::after{content:"";position:absolute;inset:-4px;border:2px solid var(--ink);border-radius:5px;pointer-events:none}
 .wkbar{display:flex;align-items:flex-end;gap:5px;height:170px;padding-top:8px}
 .wkbar .col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end;cursor:pointer}
 .wkbar .b{width:100%;max-width:44px;background:var(--accent2);border-radius:5px 5px 0 0;min-height:3px}
@@ -253,6 +255,8 @@ function renderDashboard(){
   el.innerHTML=h;
   el.querySelectorAll('[data-hm]').forEach(function(c){c.addEventListener('click',function(){
     var d=document.getElementById('hm-detail');
+    el.querySelectorAll('[data-hm].sel').forEach(function(x){x.classList.remove('sel');});
+    c.classList.add('sel');
     if(d)d.innerHTML='<b>'+esc(c.getAttribute('data-hm'))+'</b> — '+fmtMin(parseInt(c.getAttribute('data-mins'),10)||0)+' practiced.';sndClick();
   });});
 }
@@ -486,7 +490,7 @@ function renderCharts(){
     h+='<div class="donutwrap"><div style="display:flex;flex-direction:column;align-items:center;flex:0 0 auto"><svg width="280" height="280" viewBox="0 0 200 200" role="img" aria-label="Practice minutes by piece"><circle cx="100" cy="100" r="60" fill="none" stroke="var(--heat0)" stroke-width="28"/>'+paths
       +(function(){var sg=segs.find(function(x){return x.key===chartSel.piece;});
         return sg?('<text x="100" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="var(--ink)">'+fmtMin(sg.min)+'</text>'
-          +'<text x="100" y="115" text-anchor="middle" font-size="12" fill="var(--muted)" textLength="76" lengthAdjust="spacingAndGlyphs">'+esc(sg.label)+'</text>')
+          +'<text x="100" y="115" text-anchor="middle" font-size="12" fill="var(--muted)">'+Math.round(sg.min/total*100)+'% of total</text>')
         :('<text x="100" y="96" text-anchor="middle" font-size="18" font-weight="700" fill="var(--ink)">'+fmtMin(total)+'</text>'
           +'<text x="100" y="115" text-anchor="middle" font-size="12" fill="var(--muted)">total</text>');})()
       +'</svg></div>'
