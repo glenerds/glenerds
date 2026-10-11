@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teen Driving Practice Log — Supervised Hours Tracker & Printable Affidavit</title>
+<style>
+:root{--bg:#f4f6f8;--card:#ffffff;--ink:#1d2430;--mut:#66707f;--acc:#1e5aa8;--acc2:#e8a020;--ok:#2a7d4f;--warn:#b3402a;--line:#dde3ea;--pill:#e9eef4}
+[data-theme="dark"]{--bg:#14171c;--card:#1d222a;--ink:#eef1f5;--mut:#9aa4b2;--acc:#5b9bd9;--acc2:#e8a020;--ok:#5cb87f;--warn:#e0654a;--line:#2e3540;--pill:#262c36}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
+header{padding:0;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--line)}.hdr-in{max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px}
+.logo-badge{width:40px;height:40px;flex:0 0 40px;border-radius:10px;background:var(--acc);display:flex;align-items:center;justify-content:center}
+.logo-badge svg{width:24px;height:24px}
+.brand{font-weight:800;font-size:20px;letter-spacing:.2px}
+.hdr-btns{margin-left:auto;display:flex;gap:8px;align-items:center}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:10px 16px;font-weight:700;font-size:15px;min-height:44px}
+.btn:active{transform:scale(.96);filter:brightness(1.15)}
+.btn.sec{background:var(--pill);color:var(--ink)}
+.btn.sec:active{transform:scale(.96);filter:brightness(1.1)}
+.btn.danger{background:var(--warn);color:#fff}
+.btn.sm{padding:6px 10px;min-height:36px;font-size:14px}
+.pill{background:var(--pill);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-weight:700;font-size:14px;min-height:44px;text-decoration:none;display:inline-flex;align-items:center}
+.pill:active{transform:scale(.95)}
+.hdr-btns button{width:44px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--pill);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0}
+.hdr-btns button:active{transform:scale(.92);filter:brightness(1.15)}
+.hdr-btns button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.hdr-btns button svg{width:22px;height:22px}
+main{max-width:1100px;margin:0 auto;padding:16px}
+#tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+#tabs button{background:var(--pill);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px 14px;font-weight:700;font-size:15px;min-height:44px}
+#tabs button:active{transform:scale(.95)}
+#tabs button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h3{margin:0 0 8px;font-size:15px;color:var(--mut);font-weight:700}
+.big{font-size:28px;font-weight:800}
+.pos{color:var(--ok)}.neg{color:var(--warn)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--mut);font-size:13px;text-transform:uppercase;letter-spacing:.4px}
+.form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:13px;font-weight:700;color:var(--mut);margin-bottom:2px}
+input,select,textarea{width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);min-height:44px}
+textarea{min-height:70px;resize:vertical}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.searchbar{margin-bottom:12px}
+.hidden{display:none!important}
+.prog{background:var(--pill);border-radius:8px;height:26px;overflow:hidden;position:relative;margin:6px 0}
+.prog .fill{height:100%;background:var(--ok);border-radius:8px;transition:width .2s}
+.prog .plbl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}@media(max-width:760px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column}
+.chart-card h3{margin:0 0 10px;font-size:16px}
+.bar-row{display:flex;align-items:center;gap:8px;margin:7px 0;cursor:pointer;padding:2px 0}
+.bar-lbl{width:110px;flex:0 0 110px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;background:var(--pill);border-radius:6px;height:22px;position:relative;overflow:hidden}
+.bar-fill{height:100%;background:var(--acc);border-radius:6px;transition:transform .15s}
+.bar-fill.sel{background:var(--acc2);outline:3px solid var(--acc);outline-offset:-3px;filter:brightness(1.2);transform:scaleY(1.35)}
+.bar-val{width:76px;flex:0 0 76px;text-align:right;font-size:14px;font-weight:700}
+.spot{background:var(--acc);color:#fff;border-radius:8px;padding:8px 12px;margin:0 0 10px;font-size:15px;font-weight:700}
+.legend .sel{background:var(--acc);color:#fff}
+.donut-wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:10px;font-weight:700;z-index:50;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1}
+.cta-strip{margin:26px 0 10px;text-align:center}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:15px}
+.kv:last-child{border-bottom:none}
+@media(max-width:640px){.bar-lbl{width:80px;flex-basis:80px}.bar-val{width:64px;flex-basis:64px}th,td{font-size:14px}}
+@media print{header,#tabs,.cta-strip,.noprint{display:none!important}body{background:#fff;color:#000}main{max-width:100%}.card{border:1px solid #999;break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+<div class="hdr-in"><div class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c3-1 2-6 5-7s3-6 6-7 4-2 5-2"/><path d="M4 20h16"/><circle cx="18" cy="16" r="2.5"/></svg></div>
+<div class="brand">Road Hours</div>
+<div class="hdr-btns">
+<a class="pill" href="https://glenerds.gumroad.com">More Apps</a>
+<button id="btnSample" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></button>
+<button id="btnTheme" title="Dark mode" aria-label="Dark mode"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
+<button id="btnSound" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg></button>
+</div>
+</div>
+</header>
+<main>
+<div id="tabs" role="tablist"></div>
+<div id="app"></div>
+<div class="cta-strip"><a class="pill" href="https://glenerds.gumroad.com">More Apps from Glenerds</a></div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* Road Hours core */
+var LS="roadhours_v1",LSS="roadhours_sample_snap",LSO="roadhours_sample_on",LSND="roadhours_snd",LTH="roadhours_theme";
+function $(s){return document.querySelector(s);}
+function qa(s){return Array.prototype.slice.call(document.querySelectorAll(s));}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function num(v){v=parseFloat(v);return isNaN(v)?0:v;}
+function uid(){return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function today(){return new Date().toISOString().slice(0,10);}
+function hrs(min){var h=Math.floor(min/60),m=Math.round(min%60);return h+"h "+(m<10?"0":"")+m+"m";}
+var ui={tab:"dash",q:"",sel:{},_edit:null,_showForm:false};
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show");},2200);}
+/* sound */
+var sndOn=true;try{sndOn=localStorage.getItem(LSND)!=="0";}catch(e){}
+var AC=null;
+function tone(f){if(!sndOn)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.value=0.08;o.connect(g);g.connect(AC.destination);o.start();g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+0.12);o.stop(AC.currentTime+0.13);}catch(e){}}
+function click(){tone(660);}
+/* theme */
+function paintTheme(){var st=null;try{st=localStorage.getItem(LTH);}catch(e){}var dark=st==="dark"||(st==null&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",dark?"dark":"light");$("#btnTheme").classList.toggle("on",dark);}
+function paintSnd(){$("#btnSound").classList.toggle("on",sndOn);}
+/* state presets: total hrs, night hrs */
+var PRESETS={"Ohio":[50,10],"California":[50,10],"Pennsylvania":[65,10],"Texas":[40,10],"Florida":[50,10],"New York":[50,15],"Illinois":[50,10],"Michigan":[50,10],"Georgia":[40,6],"North Carolina":[60,10],"Virginia":[45,15],"Custom":[50,10]};
+function blankDB(){return {drives:[],req:{state:"Ohio",total:50,night:10},student:{name:"",permit:""}};}
+var DB=blankDB();
+function save(){try{localStorage.setItem(LS,JSON.stringify(DB));}catch(e){}}
+function load(){try{var s=localStorage.getItem(LS);if(s){var d=JSON.parse(s);if(Array.isArray(d.drives))DB.drives=d.drives;if(d.req&&typeof d.req.total==="number"){DB.req={state:typeof d.req.state==="string"?d.req.state:"Ohio",total:num(d.req.total),night:num(d.req.night)};}if(d.student)DB.student=d.student;}}catch(e){}}
+function driveMin(d){return num(d.dayMin)+num(d.nightMin);}
+function totals(){var t=0,n=0;DB.drives.forEach(function(d){t+=driveMin(d);n+=num(d.nightMin);});return {t:t,n:n};}
+function sampleData(){
+  var sups=["Mom","Dad","Mom","Dad","Mom"];
+  var roads=["Residential","City","Residential","Highway","Rural"];
+  var out=[],base=new Date(Date.now()-90*86400000);
+  for(var i=0;i<14;i++){var dt=new Date(base.getTime()+i*6*86400000);var night=i%3===0?30:0;
+    out.push({id:uid(),date:dt.toISOString().slice(0,10),dayMin:60-night,nightMin:night,road:roads[i%roads.length],conditions:i%4===0?"Rain":"Clear",supervisor:sups[i%sups.length],notes:""});}
+  return {drives:out,req:{state:"Ohio",total:50,night:10},student:{name:"Alex Rider",permit:"AB123456"}};
+}
+function toggleSample(){var on=false;try{on=localStorage.getItem(LSO)==="1";}catch(e){}
+  if(!on){try{localStorage.setItem(LSS,JSON.stringify(DB));localStorage.setItem(LSO,"1");}catch(e){}DB=sampleData();save();$("#btnSample").classList.add("on");toast("Sample data on — your data is saved.");}
+  else{try{var s=localStorage.getItem(LSS);DB=s?JSON.parse(s):blankDB();localStorage.setItem(LSO,"");}catch(e){DB=blankDB();}save();$("#btnSample").classList.remove("on");toast("Sample data off — your data restored.");}
+  render();}
+function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v.trim()))v="'"+v;return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function dl(name,content,type){var b=new Blob([content],{type:type});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(a.href);},2000);}
+/* views */
+var TABS=[["dash","Dashboard"],["drives","Drives"],["charts","Charts"],["affid","Affidavit"],["backup","Backup"]];
+function renderTabs(){$("#tabs").innerHTML=TABS.map(function(t){return '<button role="tab" data-tab="'+t[0]+'" class="'+(ui.tab===t[0]?"active":"")+'">'+t[1]+"</button>";}).join("");}
+function prog(cur,req){var pct=req>0?Math.min(100,Math.round(cur/req*100)):0;return '<div class="prog"><div class="fill" style="width:'+pct+'%"></div><div class="plbl">'+hrs(cur)+' / '+hrs(req)+' ('+pct+'%)</div></div>';}
+function viewDash(){
+  var t=totals(),req=DB.req;
+  var h='<div class="form noprint"><h3 style="margin-top:0">Driver &amp; requirement</h3><div class="fgrid">'
+  +'<div><label>Student name</label><input id="stName" value="'+esc(DB.student.name)+'"></div>'
+  +'<div><label>Permit number</label><input id="stPermit" value="'+esc(DB.student.permit)+'"></div>'
+  +'<div><label>State preset</label><select id="stState">'+Object.keys(PRESETS).map(function(k){return '<option'+(req.state===k?" selected":"")+'>'+k+'</option>';}).join("")+'</select></div>'
+  +'<div><label>Total hours required</label><input id="stTotal" type="number" step="1" value="'+num(req.total)+'"></div>'
+  +'<div><label>Night hours required</label><input id="stNight" type="number" step="1" value="'+num(req.night)+'"></div>'
+  +'</div><div class="row" style="margin-top:10px"><button class="btn" data-act="saveReq">Save</button></div></div>';
+  h+='<div class="cards">'
+  +'<div class="card"><h3>Total hours</h3><div class="big '+(t.t>=req.total*60?"pos":"")+'">'+hrs(t.t)+'</div>'+prog(t.t,req.total*60)+'</div>'
+  +'<div class="card"><h3>Night hours</h3><div class="big '+(t.n>=req.night*60?"pos":"")+'">'+hrs(t.n)+'</div>'+prog(t.n,req.night*60)+'</div>'
+  +'<div class="card"><h3>Drives logged</h3><div class="big">'+DB.drives.length+'</div><div class="kv"><span>Remaining</span><span><b>'+hrs(Math.max(0,req.total*60-t.t))+'</b></span></div></div>'
+  +'<div class="card"><h3>Day hours</h3><div class="big">'+hrs(t.t-t.n)+'</div><div class="kv"><span>Share of night</span><span><b>'+(t.t>0?Math.round(t.n/t.t*100):0)+'%</b></span></div></div>'
+  +'</div>';
+  var byS={};DB.drives.forEach(function(d){var s=d.supervisor||"—";byS[s]=(byS[s]||0)+driveMin(d);});
+  var sk=Object.keys(byS).sort(function(a,b){return byS[b]-byS[a];});
+  h+='<div class="card"><h3>Hours by supervisor</h3>'+(sk.length?'<table><tr><th>Supervisor</th><th>Hours</th><th>Drives</th></tr>'+sk.map(function(s){var n=DB.drives.filter(function(d){return (d.supervisor||"—")===s;}).length;return '<tr><td>'+esc(s)+'</td><td>'+hrs(byS[s])+'</td><td>'+n+'</td></tr>';}).join("")+'</table>':'<p style="color:var(--mut)">No drives yet.</p>')+'</div>';
+  return h;
+}
+function driveForm(d){
+  d=d||{date:today(),dayMin:60,nightMin:0,road:"Residential",conditions:"Clear",supervisor:"",notes:""};
+  return '<div class="form"><h3 style="margin-top:0">'+(d.id?"Edit drive":"Log a drive")+'</h3><div class="fgrid">'
+  +'<div><label>Date</label><input id="dDate" type="date" value="'+esc(d.date)+'"></div>'
+  +'<div><label>Day minutes</label><input id="dDay" type="number" step="1" min="0" value="'+num(d.dayMin)+'"></div>'
+  +'<div><label>Night minutes</label><input id="dNight" type="number" step="1" min="0" value="'+num(d.nightMin)+'"></div>'
+  +'<div><label>Road type</label><select id="dRoad">'+["Residential","City","Highway","Rural","Parking lot"].map(function(r){return '<option'+(d.road===r?" selected":"")+'>'+r+'</option>';}).join("")+'</select></div>'
+  +'<div><label>Conditions</label><select id="dCond">'+["Clear","Rain","Snow","Fog","Wind"].map(function(r){return '<option'+(d.conditions===r?" selected":"")+'>'+r+'</option>';}).join("")+'</select></div>'
+  +'<div><label>Supervisor</label><input id="dSup" value="'+esc(d.supervisor)+'" placeholder="Mom, Dad…"></div>'
+  +'</div><div style="margin-top:10px"><label>Notes</label><textarea id="dNotes">'+esc(d.notes)+'</textarea></div>'
+  +'<div class="row" style="margin-top:10px"><button class="btn" data-act="saveDrive" data-id="'+esc(d.id||"")+'">Save drive</button><button class="btn sec" data-act="cancelDrive">Cancel</button></div></div>';
+}
+function viewDrives(){
+  var h="";
+  if(ui._showForm){var d=ui._edit?DB.drives.find(function(x){return x.id===ui._edit;}):null;h+=driveForm(d);}
+  else h+='<div class="row noprint" style="margin-bottom:12px"><button class="btn" data-act="newDrive">+ Log a drive</button></div>';
+  h+='<div class="row searchbar noprint"><input id="q" placeholder="Search supervisor, road, notes…" value="'+esc(ui.q)+'" style="max-width:280px"></div>';
+  var q=ui.q.toLowerCase();
+  var list=DB.drives.filter(function(d){return !q||((d.supervisor+" "+d.road+" "+d.conditions+" "+d.notes).toLowerCase().indexOf(q)>=0);}).sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+  h+='<div class="card"><table><tr><th>Date</th><th>Time</th><th>Night</th><th>Road</th><th>Supervisor</th><th class="noprint"></th></tr>'
+  +list.map(function(d){return '<tr><td>'+esc(d.date)+'</td><td>'+hrs(driveMin(d))+'</td><td>'+hrs(num(d.nightMin))+'</td><td>'+esc(d.road)+'</td><td>'+esc(d.supervisor)+'</td><td class="noprint" style="white-space:nowrap"><button class="btn sm sec" data-act="editDrive" data-id="'+esc(d.id)+'">Edit</button> <button class="btn sm danger" data-act="delDrive" data-id="'+esc(d.id)+'">✕</button></td></tr>';}).join("")
+  +'</table>'+(list.length?"":'<p style="color:var(--mut)">No drives logged yet.</p>')+'</div>';
+  return h;
+}
+function viewCharts(){
+  var byM={};DB.drives.forEach(function(d){if(d.date){var k=d.date.slice(0,7);byM[k]=(byM[k]||0)+driveMin(d);}});
+  var ks=Object.keys(byM).sort().slice(-12),mx=Math.max.apply(null,ks.map(function(k){return byM[k];}).concat([1]));
+  var mSpot="";
+  if(ui.sel.mon){var sm=DB.drives.filter(function(d){return d.date&&d.date.slice(0,7)===ui.sel.mon;});var sn=sm.reduce(function(a,d){return a+num(d.nightMin);},0);mSpot='<div class="spot">'+esc(ui.sel.mon)+' — '+hrs(byM[ui.sel.mon]||0)+' total · '+hrs(sn)+' night · '+sm.length+' drives</div>';}
+  var monH=ks.map(function(k){var sel=ui.sel.mon===k,w=Math.max(Math.round(byM[k]/mx*100),4);
+    return '<div class="bar-row" data-vmon="'+k+'"><div class="bar-lbl">'+k+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+hrs(byM[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No drives yet.</p>';
+  var t=totals();
+  var dnSpot="";
+  if(ui.sel.dn){dnSpot='<div class="spot">'+(ui.sel.dn==="day"?"Daytime":"Night")+' — '+hrs(ui.sel.dn==="day"?t.t-t.n:t.n)+'</div>';}
+  var C=2*Math.PI*70,dayFrac=t.t>0?(t.t-t.n)/t.t:0;
+  var donut='<div class="donut-wrap"><svg width="180" height="180" viewBox="0 0 180 180" style="pointer-events:none">'
+  +'<circle cx="90" cy="90" r="70" fill="none" stroke="#1e5aa8" stroke-width="'+(ui.sel.dn==="day"?30:22)+'" stroke-dasharray="'+Math.max(dayFrac*C-1.5,0)+" "+C+'" stroke-dashoffset="0" data-vdn="day" style="pointer-events:stroke;cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>'
+  +'<circle cx="90" cy="90" r="70" fill="none" stroke="#e8a020" stroke-width="'+(ui.sel.dn==="night"?30:22)+'" stroke-dasharray="'+Math.max((1-dayFrac)*C-1.5,0)+" "+C+'" stroke-dashoffset="'+(-dayFrac*C)+'" data-vdn="night" style="pointer-events:stroke;cursor:pointer;transform:rotate(-90deg);transform-origin:center"/>'
+  +'<text x="90" y="86" pointer-events="none" text-anchor="middle" font-size="16" font-weight="800" fill="var(--ink)">'+hrs(t.t)+'</text><text x="90" y="106" pointer-events="none" text-anchor="middle" font-size="12" fill="var(--mut)">total</text></svg><div class="legend" style="font-size:15px">'
+  +'<div data-vdn="day" class="'+(ui.sel.dn==="day"?"sel":"")+'" style="margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px">Day — '+hrs(t.t-t.n)+'</div>'
+  +'<div data-vdn="night" class="'+(ui.sel.dn==="night"?"sel":"")+'" style="margin:4px 0;cursor:pointer;padding:2px 6px;border-radius:6px">Night — '+hrs(t.n)+'</div>'
+  +"</div></div>";
+  var byR={};DB.drives.forEach(function(d){var r=d.road||"—";byR[r]=(byR[r]||0)+driveMin(d);});
+  var rk=Object.keys(byR).sort(function(a,b){return byR[b]-byR[a];}),mx2=Math.max.apply(null,rk.map(function(k){return byR[k];}).concat([1]));
+  var rSpot="";
+  if(ui.sel.road){var sr=DB.drives.filter(function(d){return (d.road||"—")===ui.sel.road;});rSpot='<div class="spot">'+esc(ui.sel.road)+' — '+hrs(byR[ui.sel.road]||0)+' · '+sr.length+' drives</div>';}
+  var roadH=rk.map(function(k){var sel=ui.sel.road===k,w=Math.max(Math.round(byR[k]/mx2*100),4);
+    return '<div class="bar-row" data-vroad="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+hrs(byR[k])+"</div></div>";}).join("")||'<p style="color:var(--mut)">No drives yet.</p>';
+  var byC={};DB.drives.forEach(function(d){var c=d.conditions||"—";byC[c]=(byC[c]||0)+1;});
+  var ck=Object.keys(byC).sort(function(a,b){return byC[b]-byC[a];}),mx3=Math.max.apply(null,ck.map(function(k){return byC[k];}).concat([1]));
+  var cSpot="";
+  if(ui.sel.cond){cSpot='<div class="spot">'+esc(ui.sel.cond)+' — '+byC[ui.sel.cond]+' drives</div>';}
+  var condH=ck.map(function(k){var sel=ui.sel.cond===k,w=Math.max(Math.round(byC[k]/mx3*100),4);
+    return '<div class="bar-row" data-vcond="'+esc(k)+'"><div class="bar-lbl">'+esc(k)+'</div><div class="bar-track"><div class="bar-fill'+(sel?" sel":"")+'" style="width:'+w+'%"></div></div><div class="bar-val">'+byC[k]+"</div></div>";}).join("")||'<p style="color:var(--mut)">No drives yet.</p>';
+  return '<div class="charts-grid">'
+  +'<div class="chart-card"><h3>Hours by month</h3>'+mSpot+monH+'</div>'
+  +'<div class="chart-card"><h3>Day vs night</h3>'+dnSpot+donut+'</div>'
+  +'<div class="chart-card"><h3>Hours by road type</h3>'+rSpot+roadH+'</div>'
+  +'<div class="chart-card"><h3>Drives by conditions</h3>'+cSpot+condH+'</div>'
+  +"</div>";
+}
+function viewAffid(){
+  var t=totals(),req=DB.req;
+  var rows=DB.drives.slice().sort(function(a,b){return (a.date||"").localeCompare(b.date||"");}).map(function(d,i){
+    return "<tr><td>"+(i+1)+"</td><td>"+esc(d.date)+"</td><td>"+hrs(driveMin(d))+"</td><td>"+hrs(num(d.nightMin))+"</td><td>"+esc(d.road)+"</td><td>"+esc(d.conditions)+"</td><td>"+esc(d.supervisor)+"</td><td>"+esc(d.notes)+"</td></tr>";}).join("");
+  return '<div class="card"><h3>Supervised driving affidavit</h3>'
+  +'<p style="color:var(--mut)">Prints the full drive log with totals and signature lines. Check your state\'s exact form requirements — this is a practice log, not legal advice.</p>'
+  +'<div class="row noprint" style="margin-bottom:12px"><button class="btn" data-act="printAffid">🖨 Print affidavit</button></div>'
+  +'<div id="affidBody"><h2 style="text-align:center">Supervised Driving Practice Log</h2>'
+  +'<div class="kv"><span><b>Student:</b> '+esc(DB.student.name||"—")+'</span><span><b>Permit #:</b> '+esc(DB.student.permit||"—")+'</span></div>'
+  +'<div class="kv"><span><b>Requirement:</b> '+num(req.total)+' hours ('+num(req.night)+' night) — '+esc(req.state)+'</span><span><b>Logged:</b> '+hrs(t.t)+' total, '+hrs(t.n)+' night</span></div>'
+  +'<table style="margin-top:12px"><tr><th>#</th><th>Date</th><th>Time</th><th>Night</th><th>Road</th><th>Conditions</th><th>Supervisor</th><th>Notes</th></tr>'+rows+'</table>'
+  +'<p style="margin-top:16px">I certify that the supervised driving hours listed above are true and complete to the best of my knowledge.</p>'
+  +'<div class="kv"><span>Student signature: ___________________________</span><span>Date: __________</span></div>'
+  +'<div class="kv"><span>Parent/Guardian signature: ___________________________</span><span>Date: __________</span></div>'
+  +'<div class="kv"><span>Supervisor signature: ___________________________</span><span>Date: __________</span></div>'
+  +'</div></div>';
+}
+function viewBackup(){
+  return '<div class="card"><h3>CSV export</h3><div class="row"><button class="btn sec" data-act="csvD">⬇ Drives CSV</button></div></div>'
+  +'<div class="card"><h3>Full backup / restore</h3><div class="row"><button class="btn sec" data-act="jsonB">⬇ JSON backup</button><label class="btn sec" style="cursor:pointer">⬆ Restore JSON<input type="file" id="restoreFile" accept=".json" class="hidden"></label></div>'
+  +'<p style="color:var(--mut);font-size:14px">Your log lives in this browser only. Export a JSON backup regularly — clearing browser data without one deletes everything. This log may be required at the DMV; keep a printed copy too.</p></div>';
+}
+/* actions + render */
+function act(a,b){
+  var id=b.getAttribute("data-id");
+  if(a==="saveReq"){var st=$("#stState").value,pr=PRESETS[st]||[50,10];
+    DB.student.name=$("#stName").value.trim();DB.student.permit=$("#stPermit").value.trim();
+    var nt=num($("#stNight").value),tt=num($("#stTotal").value)||pr[0];if(nt>tt){toast("Night hours cannot exceed total hours.");return;}DB.req={state:st,total:tt,night:nt||pr[1]};
+    save();click();toast("Saved.");render();}
+  else if(a==="newDrive"){ui._edit=null;ui._showForm=true;click();render();}
+  else if(a==="editDrive"){ui._edit=id;ui._showForm=true;click();render();}
+  else if(a==="cancelDrive"){ui._showForm=false;ui._edit=null;click();render();}
+  else if(a==="saveDrive"){var rec={id:id||uid(),date:$("#dDate").value,dayMin:Math.max(0,Math.round(num($("#dDay").value))),nightMin:Math.max(0,Math.round(num($("#dNight").value))),road:$("#dRoad").value,conditions:$("#dCond").value,supervisor:$("#dSup").value.trim(),notes:$("#dNotes").value.trim()};
+    if(!rec.date){toast("Date required.");return;}if(rec.date>today()){toast("Drive date cannot be in the future.");return;}
+    if(driveMin(rec)<=0){toast("Enter some drive time.");return;}
+    if(id){var ix=DB.drives.findIndex(function(x){return x.id===id;});DB.drives[ix]=rec;}else DB.drives.push(rec);
+    save();ui._showForm=false;ui._edit=null;click();toast("Drive logged: "+hrs(driveMin(rec))+".");render();}
+  else if(a==="delDrive"){if(confirm("Delete this drive?")){DB.drives=DB.drives.filter(function(x){return x.id!==id;});save();click();render();}}
+  else if(a==="printAffid"){window.print();}
+  else if(a==="csvD"){var rows=[["Date","DayMin","NightMin","TotalMin","Road","Conditions","Supervisor","Notes"]];DB.drives.forEach(function(d){rows.push([d.date,d.dayMin,d.nightMin,driveMin(d),d.road,d.conditions,d.supervisor,d.notes]);});dl("roadhours-drives.csv",rows.map(function(r){return r.map(csvCell).join(",");}).join("\n"),"text/csv");click();}
+  else if(a==="jsonB"){dl("roadhours-backup.json",JSON.stringify(DB),"application/json");click();toast("Backup downloaded.");}
+}
+function render(){
+  renderTabs();
+  var h="";
+  if(ui.tab==="dash")h=viewDash();
+  else if(ui.tab==="drives")h=viewDrives();
+  else if(ui.tab==="charts")h=viewCharts();
+  else if(ui.tab==="affid")h=viewAffid();
+  else if(ui.tab==="backup")h=viewBackup();
+  $("#app").innerHTML=h;
+  qa("#tabs button").forEach(function(b){b.addEventListener("click",function(){ui.tab=b.getAttribute("data-tab");ui._showForm=false;ui._edit=null;click();render();window.scrollTo(0,0);});});
+  qa("[data-vmon]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vmon");ui.sel.mon=ui.sel.mon===k?null:k;click();render();});});
+  qa("[data-vdn]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vdn");ui.sel.dn=ui.sel.dn===k?null:k;click();render();});});
+  qa("[data-vroad]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vroad");ui.sel.road=ui.sel.road===k?null:k;click();render();});});
+  qa("[data-vcond]").forEach(function(el){el.addEventListener("click",function(){var k=el.getAttribute("data-vcond");ui.sel.cond=ui.sel.cond===k?null:k;click();render();});});
+  qa("[data-act]").forEach(function(b){b.addEventListener("click",function(){act(b.getAttribute("data-act"),b);});});
+  var st=$("#stState");if(st){st.addEventListener("change",function(){var pr=PRESETS[st.value]||[50,10];$("#stTotal").value=pr[0];$("#stNight").value=pr[1];});}
+  var q=$("#q");if(q){q.addEventListener("input",function(){ui.q=q.value;var pos=q.selectionStart;render();var q2=$("#q");if(q2){q2.focus();q2.setSelectionRange(pos,pos);}});}
+  var rf=$("#restoreFile");if(rf){rf.addEventListener("change",function(){var f=rf.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!Array.isArray(d.drives))throw 0;var b=blankDB();if(!(d.req&&typeof d.req.total==="number"))d.req=b.req;else d.req={state:typeof d.req.state==="string"?d.req.state:"Ohio",total:num(d.req.total),night:num(d.req.night)};if(!d.student)d.student=b.student;DB=d;save();click();toast("Restored.");render();}catch(e){toast("Invalid backup file.");}};r.readAsText(f);});}
+}
+/* init */
+load();paintTheme();paintSnd();
+try{if(localStorage.getItem(LSO)==="1")$("#btnSample").classList.add("on");}catch(e){}
+$("#btnSample").addEventListener("click",toggleSample);
+$("#btnTheme").addEventListener("click",function(){click();try{var d=document.documentElement.getAttribute("data-theme")==="dark";localStorage.setItem(LTH,d?"":"dark");}catch(e){}paintTheme();});
+$("#btnSound").addEventListener("click",function(){sndOn=!sndOn;try{localStorage.setItem(LSND,sndOn?"1":"0");}catch(e){}paintSnd();click();});
+render();
+</script>
+</body>
+</html>
