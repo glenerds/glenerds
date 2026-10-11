@@ -9,7 +9,7 @@
 [data-theme="dark"]{--bg:#17150f;--card:#211e16;--ink:#f0ead9;--mut:#a89f86;--acc:#e08a3c;--acc2:#5cb87f;--warn:#e0654a;--line:#3a352a;--pill:#2c2820}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.45}
-header{display:flex;align-items:center;gap:10px;padding:12px 16px;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--line)}
+header{padding:0;position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--line)}.hdr-in{max-width:1100px;margin:0 auto;width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px}
 .logo-badge{width:40px;height:40px;flex:0 0 40px;border-radius:10px;background:var(--acc);display:flex;align-items:center;justify-content:center}
 .logo-badge svg{width:24px;height:24px}
 .brand{font-weight:800;font-size:20px;letter-spacing:.2px}
@@ -74,13 +74,14 @@ textarea{min-height:70px;resize:vertical}
 </head>
 <body>
 <header>
-<div class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/><path d="M17 4l-2 2 2 2" opacity="0"/><path d="M7 3l5 5 5-5" transform="translate(0,1)"/></svg></div>
+<div class="hdr-in"><div class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5V8z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/><path d="M17 4l-2 2 2 2" opacity="0"/><path d="M7 3l5 5 5-5" transform="translate(0,1)"/></svg></div>
 <div class="brand">FlipCrate</div>
 <div class="hdr-btns">
 <a class="pill" href="https://glenerds.gumroad.com">More Apps</a>
 <button id="btnSample" title="Try sample data" aria-label="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></button>
 <button id="btnTheme" title="Dark mode" aria-label="Dark mode"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
 <button id="btnSound" title="Sound" aria-label="Sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg></button>
+</div>
 </div>
 </header>
 <main>
