@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medical Bill Tracker — EOB, Deductible &amp; Out-of-Pocket Max Organizer</title>
+<style>
+:root{
+  --bg:#f7f4ee; --card:#fffdf9; --ink:#2b2620; --mut:#6f6a60; --line:#e7e0d2;
+  --acc:#8a5a2b; --acc2:#b07a3f; --good:#2e7d4f; --warn:#b3541e; --bad:#b3372f;
+  --shadow:0 2px 10px rgba(60,45,25,.08);
+}
+[data-theme="dark"]{
+  --bg:#191613; --card:#221e19; --ink:#ece7dd; --mut:#a89f8f; --line:#38322a;
+  --acc:#d99a55; --acc2:#e8b06e; --good:#5cb87f; --warn:#e08a4e; --bad:#e0685e;
+  --shadow:0 2px 10px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);margin:0;font-size:16px;line-height:1.45}
+button{font:inherit;cursor:pointer;border:none;background:none;color:inherit}
+button:active{transform:scale(.96);filter:brightness(.94)}
+input,select,textarea{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:1px}
+label{font-size:15px;font-weight:600;display:block;margin:10px 0 4px}
+/* header */
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.hdr-in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.logo-badge{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:flex;align-items:center;justify-content:center;flex:none}
+.logo-badge svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.brand-name{font-size:20px;font-weight:800;letter-spacing:.01em}
+.brand-sub{font-size:15px;color:var(--mut);font-weight:500}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.hdr-btns button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:19px;display:flex;align-items:center;justify-content:center}
+.hdr-btns button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.pill{height:44px;padding:0 18px;border-radius:22px;background:var(--line);font-weight:700;font-size:15px;display:flex;align-items:center;color:var(--ink);text-decoration:none}
+/* tabs */
+.tabs{max-width:1100px;margin:0 auto;padding:14px 16px 0;display:flex;gap:8px;flex-wrap:wrap}
+.tab{padding:10px 20px;border-radius:12px 12px 0 0;font-weight:700;font-size:16px;color:var(--mut);border:1px solid transparent;border-bottom:none}
+.tab[aria-selected="true"]{background:var(--card);color:var(--ink);border-color:var(--line)}
+/* main */
+main{max-width:1100px;margin:0 auto;padding:16px}
+.panel{display:none}
+.panel.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 10px;font-size:20px}
+.card h3{margin:0 0 8px;font-size:17px}
+.muted{color:var(--mut);font-size:15px}
+.big{font-size:28px;font-weight:800}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+/* stat cards */
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px}
+.stat .lbl{font-size:15px;color:var(--mut);font-weight:600}
+.stat .val{font-size:26px;font-weight:800;margin-top:4px}
+.stat .sub{font-size:15px;color:var(--mut);margin-top:2px}
+/* progress bars */
+.pbar{height:14px;border-radius:8px;background:var(--line);overflow:hidden;margin-top:8px}
+.pbar>i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .4s}
+/* bills */
+.bill{border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:12px;background:var(--card)}
+.bill-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.bill-prov{font-weight:800;font-size:17px}
+.bill-amt{font-weight:800;font-size:18px}
+.bill-meta{font-size:15px;color:var(--mut);margin-top:4px}
+.tag{display:inline-block;font-size:14px;font-weight:700;padding:3px 10px;border-radius:20px;margin-right:6px}
+.t-unpaid{background:#fbe3e1;color:var(--bad)}[data-theme="dark"] .t-unpaid{background:#3a2320}
+.t-partial{background:#fdf0d8;color:var(--warn)}[data-theme="dark"] .t-partial{background:#3a2c1c}
+.t-paid{background:#dff0e4;color:var(--good)}[data-theme="dark"] .t-paid{background:#1d3325}
+.t-disputed{background:#e8e2f4;color:#5b4a9e}[data-theme="dark"] .t-disputed{background:#2a2540;color:#b9aef0}
+.t-appealed{background:#ddeaf5;color:#2b6cb0}[data-theme="dark"] .t-appealed{background:#1e2c3d;color:#8fb8e8}
+.flag{color:var(--bad);font-weight:700}
+.btn{background:var(--acc);color:#fff;border-radius:12px;padding:11px 20px;font-weight:700;font-size:16px}
+.btn.ghost{background:var(--line);color:var(--ink)}
+.btn.small{padding:8px 14px;font-size:15px}
+.btn.danger{background:var(--bad)}
+/* modal */
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-back.open{display:flex}
+.modal{background:var(--card);border-radius:18px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:22px}
+.modal h2{margin-top:0}
+/* charts */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column}
+.chart-card h3{margin:0 0 6px;font-size:17px}
+.chart-card svg{width:100%;height:auto;display:block}
+.seg{cursor:pointer;transition:transform .15s}
+.seg.sel{stroke:var(--ink);stroke-width:3}
+/* toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:var(--bg);padding:12px 22px;border-radius:30px;font-weight:600;opacity:0;transition:all .3s;z-index:99;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* footer cta */
+.cta-strip{text-align:center;margin:28px 0 10px}
+.disclaimer{font-size:14px;color:var(--mut);border-top:1px solid var(--line);margin-top:24px;padding-top:14px}
+.empty{text-align:center;color:var(--mut);padding:30px 10px;font-size:16px}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filters select{width:auto;min-width:150px}
+.kv{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--line);font-size:16px}
+.kv:last-child{border-bottom:none}
+.kv b{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <div class="hdr-in">
+    <div class="brand">
+      <span class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg></span>
+      <span><span class="brand-name">BillRecon</span><br><span class="brand-sub">every bill reconciled</span></span>
+    </div>
+    <nav class="hdr-btns" aria-label="App controls">
+      <a class="pill" href="https://glenerds.gumroad.com">More Apps</a>
+      <button id="btnSample" title="Try sample data" aria-label="Toggle sample data">⚗</button>
+      <button id="btnTheme" title="Dark mode" aria-label="Toggle dark mode">◐</button>
+      <button id="btnSound" title="Sound" aria-label="Toggle sound">🔊</button>
+    </nav>
+  </div>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" data-tab="bills" aria-selected="true">Bills</button>
+  <button class="tab" role="tab" data-tab="people" aria-selected="false">People</button>
+  <button class="tab" role="tab" data-tab="charts" aria-selected="false">Charts</button>
+  <button class="tab" role="tab" data-tab="backup" aria-selected="false">Backup</button>
+</div>
+
+<main>
+  <section class="panel active" id="p-bills">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Medical bills</h2>
+        <button class="btn small" id="btnAddBill">+ Add bill</button>
+      </div>
+      <div class="filters" style="margin-top:12px">
+        <select id="fPerson" aria-label="Filter by person"><option value="">All people</option></select>
+        <select id="fStatus" aria-label="Filter by status">
+          <option value="">All statuses</option><option value="unpaid">Unpaid</option>
+          <option value="partial">Partially paid</option><option value="paid">Paid</option>
+          <option value="disputed">Disputed</option><option value="appealed">Appealed</option>
+        </select>
+      </div>
+      <div id="billList"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-people">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">People &amp; plan</h2>
+        <button class="btn small" id="btnAddPerson">+ Add person</button>
+      </div>
+      <p class="muted">Enter each person's deductible and out-of-pocket max from their plan. Progress fills from what you owe on their bills.</p>
+      <div id="peopleList" class="grid2"></div>
+    </div>
+    <div class="card">
+      <h2>Family totals</h2>
+      <div id="familyTotals"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="p-charts">
+    <div class="chart-grid" id="chartGrid"></div>
+  </section>
+
+  <section class="panel" id="p-backup">
+    <div class="card">
+      <h2>Backup &amp; export</h2>
+      <p class="muted">Your data lives only in this browser. Export regularly — clearing browser data without a backup deletes everything.</p>
+      <div class="row">
+        <button class="btn" id="btnExportJSON">Export JSON backup</button>
+        <button class="btn ghost" id="btnExportCSV">Export bills CSV</button>
+        <button class="btn ghost" id="btnImport">Import JSON</button>
+        <input type="file" id="fileImport" accept=".json" style="display:none">
+        <button class="btn danger" id="btnWipe">Erase all data</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Printable summary</h2>
+      <p class="muted">A clean one-page summary of every bill, what you owe, and deductible progress — useful for calls with billing offices.</p>
+      <button class="btn" id="btnPrint">Print summary</button>
+    </div>
+  </section>
+
+  <div class="cta-strip">
+    <a class="pill" href="https://glenerds.gumroad.com" style="display:inline-flex">More Apps from Glenerds</a>
+  </div>
+  <p class="disclaimer">BillRecon is a personal organizer, not financial, legal, or medical advice. Amounts are computed from the numbers you enter — always verify against your actual EOBs and bills. Appeal deadlines shown are from your own entries; confirm them with your insurer.</p>
+</main>
+
+<div class="modal-back" id="modalBack"><div class="modal" id="modalBox" role="dialog" aria-modal="true"></div></div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============ utils ============ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const uid=()=>Math.random().toString(36).slice(2,10);
+const money=n=>"$"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const money0=n=>"$"+Math.round(Number(n||0)).toLocaleString("en-US");
+const todayISO=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+/* sound */
+let AC=null;
+function beep(f){ if(state.settings.sound===false) return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const o=AC.createOscillator(),g=AC.createGain(); o.connect(g);g.connect(AC.destination);o.frequency.value=f||520;g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.18);o.start();o.stop(AC.currentTime+.2);}catch(e){} }
+/* ============ state ============ */
+const LS="billrecon-v1";
+let state={people:[],bills:[],settings:{theme:null,sound:true,sample:false},_snap:null};
+function load(){ try{const r=localStorage.getItem(LS); if(r){const p=JSON.parse(r);
+    if(p&&typeof p==="object"&&Array.isArray(p.bills)&&Array.isArray(p.people)){state=Object.assign(state,p); state.settings=Object.assign({theme:null,sound:true,sample:false},p.settings||{});}
+    else if(r){ toast("Saved data had an unexpected shape — starting fresh. Your backup file is unaffected."); } }}catch(e){ toast("Saved data was unreadable — starting fresh. Export often!"); } }
+let saveFailed=false;
+function save(){ try{ localStorage.setItem(LS,JSON.stringify(state)); if(saveFailed){saveFailed=false;const w=$("#savewarn");if(w)w.remove();} }
+  catch(e){ saveFailed=true; toast("Could not save — browser storage is full. Export your backup now!");
+    if(!$("#savewarn")){ const d=document.createElement("div"); d.id="savewarn";
+      d.style.cssText="position:fixed;top:0;left:0;right:0;background:var(--bad);color:#fff;text-align:center;padding:10px;font-weight:700;z-index:200;font-size:15px";
+      d.textContent="⚠ Changes are NOT being saved (storage full). Export a JSON backup immediately."; document.body.prepend(d); } } }
+/* derived */
+const personName=id=>{const p=state.people.find(x=>x.id===id);return p?p.name:"—";};
+function billMath(b){
+  const r2=n=>Math.round((+n||0)*100)/100;
+  const billed=r2(b.billed), planPaid=r2(b.planPaid), iPaid=r2(b.iPaid);
+  const allowed=(b.allowed==null||b.allowed==="")?billed:r2(b.allowed);
+  const owe=Math.max(0,Math.round((allowed-planPaid)*100)/100), outstanding=Math.max(0,Math.round((owe-iPaid)*100)/100), writeoff=Math.max(0,Math.round((billed-allowed)*100)/100);
+  return {billed,allowed,planPaid,iPaid,owe,outstanding,writeoff};
+}
+function personStats(pid){
+  const bs=state.bills.filter(b=>b.personId===pid);
+  let owe=0,paid=0,out=0,ded=0;
+  bs.forEach(b=>{const m=billMath(b);owe+=m.owe;paid+=m.iPaid;out+=m.outstanding; if(b.countDed!==false) ded+=m.owe;});
+  return {owe,paid,out,ded,count:bs.length};
+}
+/* ============ theme ============ */
+function applyTheme(){ const st=state.settings.theme; const dark=st==="dark"||(st==null&&matchMedia("(prefers-color-scheme: dark)").matches); document.documentElement.dataset.theme=dark?"dark":""; $("#btnTheme").classList.toggle("on",dark); }
+
+/* ============ tabs ============ */
+$$(".tab").forEach(t=>t.addEventListener("click",()=>{ beep(600);
+  $$(".tab").forEach(x=>x.setAttribute("aria-selected","false")); t.setAttribute("aria-selected","true");
+  $$(".panel").forEach(p=>p.classList.remove("active")); $("#p-"+t.dataset.tab).classList.add("active");
+  if(t.dataset.tab==="charts") renderCharts();
+}));
+/* ============ dialogs (in-app) ============ */
+function openModal(html){ $("#modalBox").innerHTML=html; $("#modalBack").classList.add("open"); }
+function closeModal(){ $("#modalBack").classList.remove("open"); }
+$("#modalBack").addEventListener("click",e=>{ if(e.target.id==="modalBack") closeModal(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&$("#modalBack").classList.contains("open")) closeModal(); });
+function ask(title,msg,okLabel,danger){ return new Promise(res=>{ openModal(`<h2>${esc(title)}</h2><p>${esc(msg)}</p><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="mNo">Cancel</button><button class="btn ${danger?"danger":""}" id="mYes">${esc(okLabel||"OK")}</button></div>`);
+  $("#mNo").onclick=()=>{closeModal();res(false);}; $("#mYes").onclick=()=>{closeModal();res(true);}; }); }
+function promptDlg(title,label,def){ return new Promise(res=>{ openModal(`<h2>${esc(title)}</h2><label>${esc(label)}<input id="mIn" value="${esc(def||"")}"></label><div class="row" style="justify-content:flex-end;margin-top:16px"><button class="btn ghost" id="mNo">Cancel</button><button class="btn" id="mYes">Save</button></div>`);
+  const inp=$("#mIn"); inp.focus(); inp.select();
+  $("#mNo").onclick=()=>{closeModal();res(null);}; $("#mYes").onclick=()=>{closeModal();res(inp.value);}; }); }
+/* ============ bills ============ */
+const STATUS_LBL={unpaid:"Unpaid",partial:"Partially paid",paid:"Paid",disputed:"Disputed",appealed:"Appealed"};
+function renderBills(){
+  const fp=$("#fPerson"), fs=$("#fStatus");
+  const curP=fp.value, curS=fs.value;
+  fp.innerHTML='<option value="">All people</option>'+state.people.map(p=>`<option value="${esc(p.id)}" ${p.id===curP?"selected":""}>${esc(p.name)}</option>`).join("");
+  let list=[...state.bills].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  if(curP) list=list.filter(b=>b.personId===curP);
+  if(curS) list=list.filter(b=>b.status===curS);
+  const el=$("#billList");
+  if(!list.length){ el.innerHTML='<div class="empty">No bills yet. Add your first bill above — or tap ⚗ for sample data.</div>'; return; }
+  el.innerHTML=list.map(b=>{ const m=billMath(b);
+    let flags="";
+    if(m.writeoff>0) flags+=`<div class="bill-meta">Billed ${money(m.billed)} → allowed ${money(m.allowed)} — <b>${money(m.writeoff)}</b> adjusted off, don't pay it.</div>`;
+    if(m.outstanding>0&&b.status!=="paid") flags+=`<div class="bill-meta flag">Outstanding: ${money(m.outstanding)}</div>`;
+    if(b.appealDeadline){ const d=Math.ceil((new Date(b.appealDeadline+"T12:00:00")-Date.now())/864e5); flags+=`<div class="bill-meta ${d<0?"flag":""}">Appeal deadline: ${esc(b.appealDeadline)}${d<0?" — PASSED":d<=30?` — ${d} days left`:""}</div>`; }
+    return `<div class="bill" data-id="${esc(b.id)}">
+      <div class="bill-top"><span class="bill-prov">${esc(b.provider||"Unknown provider")}</span><span class="bill-amt">${money(m.owe)}</span></div>
+      <div class="bill-meta">${esc(b.service||"")} · ${esc(personName(b.personId))} · ${esc(b.date||"")}</div>
+      <div style="margin:6px 0"><span class="tag t-${b.status||"unpaid"}">${STATUS_LBL[b.status]||"Unpaid"}</span></div>
+      ${flags}
+      <div class="row" style="margin-top:8px">
+        <button class="btn small ghost" data-act="edit">Edit</button>
+        <button class="btn small ghost" data-act="paid">Mark paid</button>
+        <button class="btn small ghost" data-act="del">Delete</button>
+      </div></div>`; }).join("");
+  el.querySelectorAll(".bill").forEach(card=>{ const id=card.dataset.id;
+    card.querySelector('[data-act="edit"]').onclick=()=>billForm(id);
+    card.querySelector('[data-act="del"]').onclick=async()=>{ if(await ask("Delete bill?","This removes the bill and its history. This can't be undone.","Delete",true)){ state.bills=state.bills.filter(x=>x.id!==id); save(); beep(300); renderAll(); toast("Bill deleted."); } };
+    card.querySelector('[data-act="paid"]').onclick=()=>{ const b=state.bills.find(x=>x.id===id); const m=billMath(b); b.iPaid=m.owe; b.status="paid"; save(); beep(700); renderAll(); toast("Marked paid."); };
+  });
+}
+function billForm(id){
+  const b=id?state.people&&state.bills.find(x=>x.id===id):null;
+  const v=b||{personId:state.people[0]?.id||"",provider:"",service:"",date:todayISO(),billed:"",allowed:"",planPaid:"",iPaid:"",status:"unpaid",appealDeadline:"",notes:"",countDed:true};
+  openModal(`<h2>${b?"Edit bill":"Add bill"}</h2>
+    <label>Person<select id="bfPerson">${state.people.map(p=>`<option value="${esc(p.id)}" ${p.id===v.personId?"selected":""}>${esc(p.name)}</option>`).join("")}</select></label>
+    <div class="grid2"><div><label>Provider<input id="bfProv" value="${esc(v.provider)}" placeholder="City Hospital"></label></div>
+    <div><label>Service<input id="bfSvc" value="${esc(v.service)}" placeholder="ER visit, lab work…"></label></div></div>
+    <div class="grid2"><div><label>Date of service<input id="bfDate" type="date" value="${esc(v.date)}"></label></div>
+    <div><label>Status<select id="bfStatus">${Object.entries(STATUS_LBL).map(([k,l])=>`<option value="${k}" ${v.status===k?"selected":""}>${l}</option>`).join("")}</select></label></div></div>
+    <div class="grid2"><div><label>Amount billed ($)<input id="bfBilled" type="number" min="0" step="0.01" value="${v.billed}"></label></div>
+    <div><label>Allowed amount ($)<input id="bfAllowed" type="number" min="0" step="0.01" value="${v.allowed}" placeholder="from EOB"></label></div></div>
+    <div class="grid2"><div><label>Insurance paid ($)<input id="bfPlan" type="number" min="0" step="0.01" value="${v.planPaid}"></label></div>
+    <div><label>I've paid ($)<input id="bfIPaid" type="number" min="0" step="0.01" value="${v.iPaid}"></label></div></div>
+    <label>Appeal deadline (optional)<input id="bfAppeal" type="date" value="${esc(v.appealDeadline||"")}"></label>
+    <label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="bfDed" ${v.countDed!==false?"checked":""} style="width:auto"> Counts toward deductible</label>
+    <label>Notes<textarea id="bfNotes" rows="2">${esc(v.notes||"")}</textarea></label>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="bfCancel">Cancel</button><button class="btn" id="bfSave">Save bill</button></div>`);
+  $("#bfCancel").onclick=closeModal;
+  $("#bfSave").onclick=()=>{ const g=id2=>$("#"+id2).value; const nz=v=>Math.max(0,+v||0);
+    const rawAllowed=g("bfAllowed");
+    const nb={ id:b?.id||uid(), personId:g("bfPerson"), provider:g("bfProv").trim(), service:g("bfSvc").trim(), date:g("bfDate"),
+      billed:nz(g("bfBilled")), allowed:rawAllowed===""?nz(g("bfBilled")):nz(rawAllowed), planPaid:nz(g("bfPlan")), iPaid:nz(g("bfIPaid")),
+      status:g("bfStatus"), appealDeadline:g("bfAppeal")||"", notes:g("bfNotes").trim(), countDed:$("#bfDed").checked };
+    if(b) Object.assign(b,nb); else state.bills.push(nb);
+    save(); closeModal(); beep(700); renderAll(); toast(b?"Bill updated.":"Bill added.");
+  };
+}
+$("#btnAddBill").onclick=()=>{ if(!state.people.length){ toast("Add a person first."); return; } billForm(); };
+/* ============ people ============ */
+function renderPeople(){
+  const el=$("#peopleList");
+  el.innerHTML=state.people.map(p=>{ const s=personStats(p.id);
+    const dedP=p.deductible>0?Math.min(100,s.ded/p.deductible*100):0;
+    const oopP=p.oopMax>0?Math.min(100,s.owe/p.oopMax*100):0;
+    return `<div class="stat"><div class="row" style="justify-content:space-between"><b style="font-size:18px">${esc(p.name)}</b>
+      <span><button class="btn small ghost" data-pedit="${esc(p.id)}">Edit</button> <button class="btn small ghost" data-pdel="${esc(p.id)}">✕</button></span></div>
+      <div class="lbl" style="margin-top:8px">Deductible — ${money0(s.ded)} of ${money0(p.deductible)}</div><div class="pbar"><i style="width:${dedP}%"></i></div>
+      <div class="lbl" style="margin-top:8px">Out-of-pocket max — ${money0(s.owe)} of ${money0(p.oopMax)}</div><div class="pbar"><i style="width:${oopP}%"></i></div>
+      <div class="sub" style="margin-top:8px">${s.count} bill${s.count===1?"":"s"} · outstanding ${money(s.out)}</div></div>`; }).join("")
+    ||'<div class="empty">No people yet.</div>';
+  el.querySelectorAll("[data-pedit]").forEach(x=>x.onclick=()=>personForm(x.dataset.pedit));
+  el.querySelectorAll("[data-pdel]").forEach(x=>x.onclick=async()=>{ if(await ask("Remove person?","Their bills will be kept but unassigned.","Remove",true)){ state.people=state.people.filter(p=>p.id!==x.dataset.pdel); save(); renderAll(); } });
+  let tOwe=0,tOut=0,tPaid=0;
+  state.bills.forEach(b=>{const m=billMath(b);tOwe+=m.owe;tOut+=m.outstanding;tPaid+=m.iPaid;});
+  const tDed=state.people.reduce((a,p)=>a+(+p.deductible||0),0), tOop=state.people.reduce((a,p)=>a+(+p.oopMax||0),0);
+  $("#familyTotals").innerHTML=`<div class="kv"><span>Total patient responsibility</span><b>${money(tOwe)}</b></div>
+    <div class="kv"><span>Paid so far</span><b>${money(tPaid)}</b></div>
+    <div class="kv"><span>Still outstanding</span><b class="${tOut>0?"flag":""}">${money(tOut)}</b></div>
+    <div class="kv"><span>Combined deductibles</span><b>${money0(tDed)}</b></div>
+    <div class="kv"><span>Combined out-of-pocket max</span><b>${money0(tOop)}</b></div>`;
+}
+function personForm(id){
+  const p=id?state.people.find(x=>x.id===id):null;
+  const v=p||{name:"",deductible:2000,oopMax:8000};
+  openModal(`<h2>${p?"Edit person":"Add person"}</h2>
+    <label>Name<input id="pfName" value="${esc(v.name)}" placeholder="Alex"></label>
+    <div class="grid2"><div><label>Annual deductible ($)<input id="pfDed" type="number" min="0" step="1" value="${v.deductible}"></label></div>
+    <div><label>Out-of-pocket max ($)<input id="pfOop" type="number" min="0" step="1" value="${v.oopMax}"></label></div></div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="pfCancel">Cancel</button><button class="btn" id="pfSave">Save</button></div>`);
+  $("#pfCancel").onclick=closeModal;
+  $("#pfSave").onclick=()=>{ const np={id:p?.id||uid(),name:$("#pfName").value.trim()||"Person",deductible:+$("#pfDed").value||0,oopMax:+$("#pfOop").value||0};
+    if(p)Object.assign(p,np);else state.people.push(np); save();closeModal();beep(700);renderAll(); };
+}
+$("#btnAddPerson").onclick=()=>personForm();
+/* ============ charts ============ */
+let chartSel={};
+function toggleSeg(key,el){ if(chartSel[key]===el){chartSel[key]=null;}else{chartSel[key]=el;} renderCharts(); }
+function donut(segs,centerTop,centerBot){
+  const R=70,C=2*Math.PI*R; let off=25, s="";
+  segs.forEach((g,i)=>{ const frac=g.val>0?g.val/segs.reduce((a,x)=>a+x.val,0):0; const len=frac*C;
+    s+=`<circle class="seg ${chartSel.donut===("d"+i)?"sel":""}" data-k="donut" data-i="d${i}" cx="90" cy="90" r="${R}" fill="none" stroke="${g.color}" stroke-width="30" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"><title>${esc(g.label)}: ${money(g.val)}</title></circle>`; off+=len; });
+  return `<svg viewBox="0 0 180 180">${s}<text x="90" y="84" text-anchor="middle" font-size="20" font-weight="800" fill="var(--ink)" pointer-events="none">${esc(centerTop)}</text><text x="90" y="104" text-anchor="middle" font-size="13" fill="var(--mut)" pointer-events="none">${esc(centerBot)}</text></svg>
+  <div class="muted" style="font-size:14px;margin-top:6px">${segs.map((g,i)=>`<span style="color:${g.color}">●</span> ${esc(g.label)}`).join(" &nbsp; ")}</div>`;
+}
+function hbars(rows){
+  const max=Math.max(1,...rows.map(r=>r.val));
+  return `<svg viewBox="0 0 400 ${rows.length*54+6}">${rows.map((r,i)=>{ const w=Math.max(2,r.val/max*380); const vIn=w>300;
+    return `<text x="0" y="${i*54+15}" font-size="14" fill="var(--ink)">${esc(r.label)}</text>
+    <rect class="seg ${chartSel.bar===("b"+i)?"sel":""}" data-k="bar" data-i="b${i}" x="0" y="${i*54+21}" width="${w}" height="22" rx="6" fill="var(--acc)"><title>${esc(r.label)}: ${money(r.val)}</title></rect>
+    ${vIn?`<text x="${w-10}" y="${i*54+38}" font-size="14" text-anchor="end" fill="#fff" pointer-events="none">${money0(r.val)}</text>`
+         :`<text x="${w+8}" y="${i*54+38}" font-size="14" fill="var(--mut)">${money0(r.val)}</text>`}`; }).join("")}</svg>`;
+}
+function renderCharts(){
+  const g=$("#chartGrid"); if(!g) return;
+  let tOwe=0,tOut=0,tWrite=0; const byProv={}, byMonth={}, stCount={unpaid:0,partial:0,paid:0,disputed:0,appealed:0};
+  state.bills.forEach(b=>{ const m=billMath(b); tOwe+=m.owe;tOut+=m.outstanding;tWrite+=m.writeoff;
+    byProv[b.provider||"Unknown"]=(byProv[b.provider||"Unknown"]||0)+m.owe;
+    const mo=(b.date||"").slice(0,7); if(mo) byMonth[mo]=(byMonth[mo]||0)+m.iPaid;
+    stCount[b.status||"unpaid"]=(stCount[b.status||"unpaid"]||0)+1; });
+  const dedRows=state.people.map(p=>{const s=personStats(p.id);return{label:p.name+" deductible",val:p.deductible>0?Math.min(100,s.ded/p.deductible*100):0};});
+  const cards=[];
+  cards.push(`<div class="chart-card"><h3>Claim status</h3>${donut(
+    [{label:"Unpaid",val:stCount.unpaid,color:"var(--bad)"},{label:"Partial",val:stCount.partial,color:"var(--warn)"},{label:"Paid",val:stCount.paid,color:"var(--good)"},{label:"Disputed",val:stCount.disputed,color:"#8b7bd8"},{label:"Appealed",val:stCount.appealed,color:"#5b9bd5"}].filter(x=>x.val>0),
+    state.bills.length+"", "bills")}</div>`);
+  const provRows=Object.entries(byProv).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>({label:k,val:v}));
+  cards.push(`<div class="chart-card"><h3>You owe by provider</h3>${provRows.length?hbars(provRows):'<div class="empty">No data yet.</div>'}</div>`);
+  const moRows=Object.entries(byMonth).sort().slice(-6).map(([k,v])=>({label:k,val:v}));
+  cards.push(`<div class="chart-card"><h3>Paid per month</h3>${moRows.length?hbars(moRows):'<div class="empty">No payments logged yet.</div>'}</div>`);
+  cards.push(`<div class="chart-card"><h3>At a glance</h3>
+    <div class="kv"><span>Still outstanding</span><b class="${tOut>0?"flag":""}">${money(tOut)}</b></div>
+    <div class="kv"><span>Paid so far</span><b>${money(tOwe-tOut)}</b></div>
+    <div class="kv"><span>Adjusted off (don't pay)</span><b>${money(tWrite)}</b></div>
+    <div class="kv"><span>Deductible progress</span><b>${dedRows.length?dedRows.map(r=>esc(r.label.split(" ")[0])+": "+Math.round(r.val)+"%").join(", "):"—"}</b></div></div>`);
+  g.innerHTML=cards.join("");
+  g.querySelectorAll(".seg").forEach(el=>el.addEventListener("click",()=>{beep(650);toggleSeg(el.dataset.k,el.dataset.i);}));
+}
+
+/* ============ backup ============ */
+function download(name,content,type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+$("#btnExportJSON").onclick=()=>{ beep(700); download("billrecon-backup-"+todayISO()+".json",JSON.stringify(state,null,2),"application/json"); toast("Backup downloaded."); };
+$("#btnExportCSV").onclick=()=>{ const rows=[["provider","service","person","date","billed","allowed","plan_paid","you_owe","i_paid","outstanding","status","appeal_deadline"]];
+  state.bills.forEach(b=>{const m=billMath(b);rows.push([b.provider,b.service,personName(b.personId),b.date,m.billed,m.allowed,m.planPaid,m.owe,m.iPaid,m.outstanding,b.status,b.appealDeadline||""]);});
+  beep(700); download("billrecon-bills-"+todayISO()+".csv",rows.map(r=>r.map(x=>`"${String(x??"").replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv"); toast("CSV downloaded."); };
+$("#btnImport").onclick=()=>$("#fileImport").click();
+$("#fileImport").addEventListener("change",e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{ const p=JSON.parse(r.result); if(!p||typeof p!=="object"||!Array.isArray(p.bills)||!Array.isArray(p.people)) throw 0;
+      const okP=x=>x&&typeof x==="object"&&typeof x.id==="string"&&typeof x.name==="string";
+      const okB=x=>x&&typeof x==="object"&&typeof x.id==="string";
+      p.people=p.people.filter(okP); p.bills=p.bills.filter(okB);
+      state=Object.assign({settings:{theme:null,sound:true,sample:false}},p); save(); renderAll(); beep(800); toast("Backup imported."); }
+    catch(_){ toast("That file isn't a valid BillRecon backup."); } }; r.readAsText(f); e.target.value=""; });
+$("#btnWipe").onclick=async()=>{ if(await ask("Erase ALL data?","Every person, bill, and setting will be deleted. Export a backup first if you want to keep anything.","Erase everything",true)){ state={people:[],bills:[],settings:{theme:state.settings.theme,sound:state.settings.sound,sample:false},_snap:null}; save(); renderAll(); toast("All data erased."); } };
+$("#btnPrint").onclick=()=>{ beep(600); const w=window.open("","_blank"); if(!w){toast("Popup blocked — allow popups to print.");return;}
+  let tOwe=0,tOut=0,tPaid=0; const rows=state.bills.map(b=>{const m=billMath(b);tOwe+=m.owe;tOut+=m.outstanding;tPaid+=m.iPaid;
+    return `<tr><td>${esc(b.date||"")}</td><td>${esc(b.provider||"")}</td><td>${esc(personName(b.personId))}</td><td style="text-align:right">${money(m.billed)}</td><td style="text-align:right">${money(m.allowed)}</td><td style="text-align:right">${money(m.planPaid)}</td><td style="text-align:right"><b>${money(m.owe)}</b></td><td style="text-align:right">${money(m.outstanding)}</td><td>${STATUS_LBL[b.status]||""}</td></tr>`;}).join("");
+  w.document.write(`<html><head><title>BillRecon summary</title><style>body{font-family:system-ui,sans-serif;padding:24px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #ccc;padding:6px 8px;text-align:left}h1{font-size:22px}</style></head><body><h1>BillRecon — medical bill summary (${todayISO()})</h1><table><tr><th>Date</th><th>Provider</th><th>Person</th><th>Billed</th><th>Allowed</th><th>Plan paid</th><th>You owe</th><th>Outstanding</th><th>Status</th></tr>${rows}</table><p><b>Still outstanding: ${money(tOut)}</b> &nbsp;·&nbsp; Total patient responsibility: ${money(tOwe)} &nbsp;·&nbsp; Paid: ${money(tPaid)}</p><p style="color:#666;font-size:12px">Personal organizer — verify against your EOBs. Not financial or legal advice.</p><script>onload=()=>print()<\/script></body></html>`); w.document.close(); };
+/* ============ sample data ============ */
+function sampleData(){ return { people:[
+    {id:"p1",name:"Alex",deductible:2000,oopMax:8000},
+    {id:"p2",name:"Jordan",deductible:2000,oopMax:8000}],
+  bills:[
+    {id:"b1",personId:"p1",provider:"City General Hospital",service:"ER visit — sprained ankle",date:"2026-08-14",billed:4850,allowed:1980,planPaid:0,iPaid:0,status:"unpaid",appealDeadline:"",notes:"",countDed:true},
+    {id:"b2",personId:"p1",provider:"Lakeside Radiology",service:"X-ray, ankle",date:"2026-08-14",billed:890,allowed:320,planPaid:64,iPaid:0,status:"unpaid",appealDeadline:"",notes:"",countDed:true},
+    {id:"b3",personId:"p2",provider:"Family Care Clinic",service:"Annual physical + labs",date:"2026-09-02",billed:640,allowed:410,planPaid:410,iPaid:0,status:"paid",appealDeadline:"",notes:"Preventive — covered in full",countDed:false},
+    {id:"b4",personId:"p1",provider:"City General Hospital",service:"ER physician fee",date:"2026-08-14",billed:1750,allowed:620,planPaid:124,iPaid:200,status:"partial",appealDeadline:"",notes:"",countDed:true},
+    {id:"b5",personId:"p2",provider:"Vision Plus",service:"Eye exam + glasses",date:"2026-07-20",billed:380,allowed:380,planPaid:0,iPaid:380,status:"paid",appealDeadline:"",notes:"",countDed:true},
+    {id:"b6",personId:"p1",provider:"Metro Anesthesia",service:"Sedation — MRI",date:"2026-09-28",billed:2400,allowed:900,planPaid:0,iPaid:0,status:"disputed",appealDeadline:"2026-12-15",notes:"Billed as out-of-network; disputing",countDed:true}],
+  settings:{theme:null,sound:true,sample:true},_snap:null}; }
+$("#btnSample").onclick=()=>{ beep(700);
+  if(!state.settings.sample){ state._snap=JSON.stringify({people:state.people,bills:state.bills}); const s=sampleData(); state.people=s.people; state.bills=s.bills; state.settings.sample=true; }
+  else { try{ const p=JSON.parse(state._snap||"null"); if(p){state.people=p.people;state.bills=p.bills;} }catch(e){} state._snap=null; state.settings.sample=false; }
+  save(); renderAll(); $("#btnSample").classList.toggle("on",!!state.settings.sample); toast(state.settings.sample?"Sample data on — edits made now will be discarded.":"Sample data off — your data restored."); };
+/* ============ header buttons ============ */
+$("#btnTheme").onclick=()=>{ const dark=document.documentElement.dataset.theme==="dark"; state.settings.theme=dark?"light":"dark"; save(); applyTheme(); beep(600); };
+$("#btnSound").onclick=()=>{ state.settings.sound=state.settings.sound===false?true:false; save(); $("#btnSound").classList.toggle("on",state.settings.sound!==false); beep(700); toast(state.settings.sound!==false?"Sound on.":"Sound off."); };
+/* ============ init ============ */
+function renderAll(){ renderBills(); renderPeople(); if($("#p-charts").classList.contains("active")) renderCharts(); }
+load(); applyTheme();
+$("#btnSound").classList.toggle("on",state.settings.sound!==false);
+$("#btnSample").classList.toggle("on",!!state.settings.sample);
+renderAll();
+</script>
+</body>
+</html>
