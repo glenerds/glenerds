@@ -43,6 +43,7 @@ main{max-width:1100px;margin:0 auto;padding:16px}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:760px){.grid2{grid-template-columns:1fr}}
+@media(max-width:760px){.hdr-in{padding:10px 12px;gap:8px}.brand{font-size:16px;gap:6px}.logo-badge{width:28px;height:28px}.pillbtn{padding:0 10px}.hdr-btns{gap:6px}}
 label{font-size:15px;font-weight:600;color:var(--mut);display:block;margin-bottom:4px}
 input,select,textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:16px;width:100%}
 input[type="checkbox"]{width:auto}
@@ -199,6 +200,7 @@ input[type="checkbox"]{width:auto}
         <button id="seqClear">Clear</button>
       </div>
       <div class="seqview" id="seqView"></div>
+      <p class="muted" id="seqNote" style="margin-top:6px"></p>
       <h3>Shift times</h3>
       <div class="grid2">
         <div><label>Day shift starts</label><input type="time" id="patDayStart" value="06:00"></div>
@@ -395,7 +397,11 @@ function renderPatterns(){ const p=state.pattern;
   $("#patDayStart").value=p.dayStart; $("#patNightStart").value=p.nightStart;
   renderSeq();
 }
-function renderSeq(){ $("#seqView").textContent=(state.pattern.customSeq||[]).join(" ")||"—"; }
+function renderSeq(){ const p=state.pattern;
+  const pre=p.preset&&PRESETS[p.preset];
+  const seq=pre?pre.seq.split(""):(p.customSeq||[]);
+  $("#seqView").textContent=seq.join(" ")||"—";
+  $("#seqNote").textContent=pre?pre.name+" · "+seq.length+"-day cycle — repeats from the anchor date.":"Custom · "+seq.length+" entries — repeats from the anchor date."; }
 $("#patPreset").onchange=e=>{ state.pattern.preset=e.target.value; renderSeq(); };
 $("#seqD").onclick=()=>{beep(600);state.pattern.customSeq.push("D");state.pattern.preset="custom";renderPatterns();};
 $("#seqN").onclick=()=>{beep(600);state.pattern.customSeq.push("N");state.pattern.preset="custom";renderPatterns();};
