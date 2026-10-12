@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Clinical Hours Tracker — Licensure Hour Log, Supervision Tracker &amp; Practicum Hours Organizer</title>
+<style>
+:root{
+  --bg:#f4f7f8; --card:#ffffff; --ink:#1e2a30; --mut:#5d6f77; --line:#dfe7ea;
+  --acc:#1f6f8b; --acc-ink:#ffffff; --acc2:#3d94b0;
+  --good:#2e7d4f; --warn:#b3541e; --bad:#b3372f; --pill:#eef3f4;
+}
+html[data-theme="dark"]{
+  --bg:#141b1e; --card:#1d262a; --ink:#e8f0f2; --mut:#a3b4ba; --line:#314046;
+  --acc:#6fc3df; --acc-ink:#14242b; --acc2:#8fd4e8;
+  --good:#5cb87f; --warn:#e08a4e; --bad:#e0685e; --pill:#263236;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+header{border-bottom:1px solid var(--line);background:var(--bg)}
+.hdr-in{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}
+.logo-badge{width:40px;height:40px;border-radius:12px;background:var(--acc);display:flex;align-items:center;justify-content:center;flex:none}
+.logo-badge svg{width:24px;height:24px;fill:none;stroke:var(--acc-ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.brand-name{font-size:20px;font-weight:800;line-height:1.1}
+.brand-sub{font-size:14px;color:var(--mut)}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;height:44px;padding:0 18px;border-radius:22px;background:var(--pill);color:var(--ink);text-decoration:none;font-weight:700;font-size:15px;border:1px solid var(--line)}
+.pill:active{transform:scale(.95)}
+.hdr-btns button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.hdr-btns button svg{width:22px;height:22px}
+.hdr-btns button:active{transform:scale(.92);filter:brightness(1.12)}
+.hdr-btns button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--pill);color:var(--ink);border-radius:12px;padding:10px 16px;font-size:15px;font-weight:700;cursor:pointer}
+.tab:active{transform:scale(.95)}
+.tab[aria-selected="true"]{background:var(--card);color:var(--ink);border-color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:19px}
+.card h3{margin:0 0 6px;font-size:17px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{background:var(--acc);color:var(--acc-ink);border:none;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.btn:active{transform:scale(.96);filter:brightness(1.12)}
+.btn.ghost{background:var(--pill);color:var(--ink);border:1px solid var(--line)}
+.btn.danger{background:var(--bad);color:#fff}
+select,input,textarea{font-size:15px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%}
+label{display:block;font-size:15px;font-weight:600;margin:10px 0 4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+.entry{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:var(--card)}
+.entry .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.entry .meta{color:var(--mut);font-size:15px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:14px;font-weight:700;color:#fff}
+.filters{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.filters select{width:auto}
+.muted{color:var(--mut);font-size:15px}
+.warnbox{border:1px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,var(--card));border-radius:12px;padding:12px;margin:12px 0;font-size:15px}
+.disclaimer{border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0;font-size:15px;color:var(--mut);background:var(--card)}
+.pbar{height:16px;border-radius:8px;background:var(--pill);border:1px solid var(--line);overflow:hidden;margin:6px 0 12px}
+.pbar>div{height:100%;background:var(--acc);border-radius:8px;transition:width .3s}
+.reqrow{display:flex;justify-content:space-between;font-size:15px;margin-top:8px}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:stretch}
+@media(max-width:760px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;min-height:340px}
+.chart-card svg{width:100%;height:auto;display:block}
+.seg{cursor:pointer;transition:transform .15s,stroke-width .15s}
+rect.seg.sel{stroke:var(--ink);stroke-width:3}
+.legend{font-size:15px;margin-top:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:24px;font-size:15px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:60;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#quotaWarn{display:none;background:var(--bad);color:#fff;padding:12px 16px;font-size:15px;font-weight:600;text-align:center}
+#quotaWarn.show{display:block}
+#modalBack{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;align-items:center;justify-content:center;padding:16px}
+#modalBack.show{display:flex}
+#modal{background:var(--card);border-radius:16px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.empty{color:var(--mut);font-size:15px;padding:18px;text-align:center}
+footer{max-width:1100px;margin:0 auto;padding:20px 16px 40px;text-align:center}
+</style>
+</head>
+<body>
+<div id="quotaWarn" role="alert">Storage is full — your latest changes could not be saved. Export a backup to free space.</div>
+<header>
+  <div class="hdr-in">
+    <div class="brand">
+      <span class="logo-badge" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></span>
+      <span><span class="brand-name">ClinicalCount</span><br><span class="brand-sub">every hour counts</span></span>
+    </div>
+    <nav class="hdr-btns" aria-label="App controls">
+      <a class="pill" href="https://glenerds.gumroad.com">More Apps</a>
+      <button id="btnSample" title="Try sample data" aria-label="Toggle sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/></svg></button>
+      <button id="btnTheme" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
+      <button id="btnSound" title="Sound" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor" stroke="none"/><path d="M15.5 8.5a5 5 0 010 7"/><path d="M18.5 5.5a9 9 0 010 13"/></svg></button>
+    </nav>
+  </div>
+</header>
+<main>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="hours" aria-selected="true">Hours</button>
+    <button class="tab" role="tab" data-tab="supervision" aria-selected="false">Supervision</button>
+    <button class="tab" role="tab" data-tab="requirements" aria-selected="false">Requirements</button>
+    <button class="tab" role="tab" data-tab="profile" aria-selected="false">Profile</button>
+    <button class="tab" role="tab" data-tab="charts" aria-selected="false">Charts</button>
+    <button class="tab" role="tab" data-tab="backup" aria-selected="false">Backup</button>
+  </div>
+  <div id="view"></div>
+  <div class="disclaimer">ClinicalCount is a personal organizer, not professional, legal, or licensure advice. Requirements are the numbers you enter yourself — always verify them against your own licensing board. Hour totals are computed from the entries you log.</div>
+</main>
+<footer><a class="pill" href="https://glenerds.gumroad.com">More Apps</a></footer>
+<div id="toast" role="status"></div>
+<div id="modalBack"><div id="modal" role="dialog" aria-modal="true"></div></div>
+<script>
+"use strict";
+/* ============ utils ============ */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const r1=n=>Math.round((+n||0)*10)/10;
+const fmtH=n=>{n=r1(n);return n%1===0?n.toFixed(0):n.toFixed(1);};
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+const noShift=d=>{const x=new Date(d+"T12:00:00");return isNaN(x)?"":x.toISOString().slice(0,10);};
+const TYPES={
+  direct:{label:"Direct client contact",short:"Direct",color:"#2a7d4f"},
+  indirect:{label:"Indirect",short:"Indirect",color:"#6a8fc2"},
+  supervision:{label:"Supervision",short:"Supervision",color:"#b3541e"},
+  other:{label:"Other",short:"Other",color:"#8b7bd8"}
+};
+/* ============ sound ============ */
+let AC=null;
+function beep(f){ if(state.settings.sound===false)return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const o=AC.createOscillator(),g=AC.createGain(); o.type="sine"; o.frequency.value=f||650; g.gain.setValueAtTime(0.06,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+0.18); o.connect(g); g.connect(AC.destination); o.start(); o.stop(AC.currentTime+0.2);}catch(e){} }
+/* ============ toast ============ */
+let toastT=null;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+/* ============ state ============ */
+const LSKEY="clinicalcount-v1";
+let state;
+function blankState(){return {settings:{theme:null,sound:true,sample:false},profile:{name:"",license:""},req:{total:0,direct:0,supervision:0,targetDate:""},hours:[],supervision:[]};}
+function load(){ try{const raw=localStorage.getItem(LSKEY); if(!raw){state=blankState();return;} const d=JSON.parse(raw); if(!d||typeof d!=="object"||!d.settings||!Array.isArray(d.hours)){state=blankState();return;} state=Object.assign(blankState(),d);
+  state.hours=state.hours.filter(validHour);
+  state.supervision=Array.isArray(state.supervision)?state.supervision.filter(validSup):[];
+  if(!state.profile||typeof state.profile!=="object")state.profile={name:"",license:""};
+  if(!state.req||typeof state.req!=="object")state.req={total:0,direct:0,supervision:0,targetDate:""};
+  ["total","direct","supervision"].forEach(k=>{state.req[k]=isFinite(+state.req[k])&&+state.req[k]>=0?+state.req[k]:0;});
+  if(typeof state.req.targetDate!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(state.req.targetDate))state.req.targetDate="";
+}catch(e){state=blankState();} }
+let quotaWarned=false;
+function save(){ if(state.settings.sample)return; try{localStorage.setItem(LSKEY,JSON.stringify(state));quotaWarned=false;}catch(e){ if(!quotaWarned){quotaWarned=true;$("#quotaWarn").classList.add("show");} } }
+/* ============ sample data ============ */
+let snap=null;
+function makeSample(){
+  const sups=["Dr. Elena Marsh","Dr. David Okafor"], sites=["Riverside Counseling Center","Harborview Community Clinic"];
+  const types=["direct","direct","direct","indirect","supervision","other"];
+  let seed=20261012; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const hrs=[],sup=[]; let n=0;
+  const d=new Date(); d.setDate(d.getDate()-26*7);
+  const end=new Date();
+  while(d<end){
+    const k=2+Math.floor(rnd()*2);
+    for(let j=0;j<k;j++){ const t=types[Math.floor(rnd()*types.length)];
+      const h=t==="direct"?1+Math.floor(rnd()*4):0.5+Math.floor(rnd()*3);
+      hrs.push({id:uid()+(n++),date:d.toISOString().slice(0,10),hrs:h,type:t,site:sites[Math.floor(rnd()*sites.length)],supervisor:sups[Math.floor(rnd()*sups.length)],notes:""}); }
+    if(rnd()<0.55){ sup.push({id:uid()+(n++),date:d.toISOString().slice(0,10),supervisor:sups[Math.floor(rnd()*sups.length)],kind:rnd()<0.6?"individual":"group",hrs:1+Math.floor(rnd()*2)}); }
+    d.setDate(d.getDate()+7);
+  }
+  return {profile:{name:"Jordan",license:"LPC"},req:{total:3000,direct:1500,supervision:150,targetDate:""},hours:hrs,supervision:sup};
+}
+/* ============ modal ============ */
+function openModal(html){ $("#modal").innerHTML=html; $("#modalBack").classList.add("show"); const f=$("#modal input, #modal select, #modal textarea"); if(f)f.focus(); }
+function closeModal(){ $("#modalBack").classList.remove("show"); $("#modal").innerHTML=""; }
+$("#modalBack").addEventListener("click",e=>{ if(e.target.id==="modalBack")closeModal(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape")closeModal(); });
+/* ============ tabs ============ */
+let curTab="hours", curFilter="";
+$$(".tab").forEach(t=>t.addEventListener("click",()=>{ beep(600); curTab=t.dataset.tab;
+  $$(".tab").forEach(x=>x.setAttribute("aria-selected","false")); t.setAttribute("aria-selected","true"); renderAll(); }));
+/* ============ derived ============ */
+function typeTotals(){ const t={direct:0,indirect:0,supervision:0,other:0}; state.hours.forEach(h=>{ if(t[h.type]!=null)t[h.type]+= +h.hrs||0; }); return t; }
+function totalHours(){ return state.hours.reduce((s,h)=>s+(+h.hrs||0),0); }
+function pacing(){
+  const hs=[...state.hours].sort((a,b)=>a.date<b.date?-1:1);
+  if(hs.length<2||!(state.req.total>0))return null;
+  const done=totalHours();
+  const weeks=Math.max(1,(new Date(hs[hs.length-1].date)-new Date(hs[0].date))/6048e5);
+  const rate=done/weeks, remaining=state.req.total-done;
+  if(remaining<=0)return {done:true,rate};
+  if(!(rate>0))return null;
+  const wksLeft=remaining/rate;
+  const finish=new Date(); finish.setDate(finish.getDate()+Math.round(wksLeft*7));
+  let status="ontrack";
+  if(state.req.targetDate){ const tgt=new Date(state.req.targetDate+"T12:00:00"); status=finish>tgt?"behind":"ontrack"; }
+  return {done:false,rate,wksLeft,finish,status};
+}
+/* ============ hours tab ============ */
+function hourForm(h){
+  const v=h||{date:todayISO(),hrs:"",type:"direct",site:"",supervisor:"",notes:""};
+  openModal(`<h2>${h?"Edit":"Log"} hours</h2>
+    <div class="grid2"><div><label>Date<input id="hfDate" type="date" value="${esc(v.date||todayISO())}"></label></div>
+    <div><label>Hours<input id="hfHrs" type="number" min="0" step="0.25" value="${esc(v.hrs)}" placeholder="2.5"></label></div></div>
+    <label>Type<select id="hfType">${Object.entries(TYPES).map(([k,t])=>`<option value="${k}" ${v.type===k?"selected":""}>${t.label}</option>`).join("")}</select></label>
+    <div class="grid2"><div><label>Setting / site<input id="hfSite" value="${esc(v.site)}" placeholder="Riverside Counseling Center"></label></div>
+    <div><label>Supervisor<input id="hfSup" value="${esc(v.supervisor)}" placeholder="Dr. Marsh"></label></div></div>
+    <label>Notes<textarea id="hfNotes" rows="2">${esc(v.notes)}</textarea></label>
+    <div class="warnbox">Never enter client names or other patient-identifying information.</div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="hfCancel">Cancel</button><button class="btn" id="hfSave">Save</button></div>`);
+  $("#hfCancel").onclick=closeModal;
+  $("#hfSave").onclick=()=>{ const hrs=Math.max(0,+$("#hfHrs").value||0);
+    const rec={id:h?.id||uid(),date:noShift($("#hfDate").value)||todayISO(),hrs:r1(hrs),type:$("#hfType").value,site:$("#hfSite").value.trim(),supervisor:$("#hfSup").value.trim(),notes:$("#hfNotes").value.trim()};
+    if(h)Object.assign(h,rec);else state.hours.push(rec);
+    save();closeModal();beep(700);renderAll(); };
+}
+function renderHours(){
+  const list=[...state.hours].filter(h=>!curFilter||h.type===curFilter).sort((a,b)=>b.date<a.date?-1:1);
+  return `<div class="card"><div class="row" style="justify-content:space-between"><h2>Hour log</h2><button class="btn" id="btnAddH">+ Log hours</button></div>
+  <div class="filters"><select id="fType" aria-label="Filter by type"><option value="">All types</option>${Object.entries(TYPES).map(([k,t])=>`<option value="${k}" ${curFilter===k?"selected":""}>${t.label}</option>`).join("")}</select>
+  <span class="muted">${list.length} entr${list.length===1?"y":"ies"} · ${fmtH(list.reduce((s,h)=>s+(+h.hrs||0),0))} hrs</span></div>
+  ${list.length?list.map(h=>`<div class="entry"><div class="top"><div><b>${fmtH(h.hrs)} hrs</b> · ${esc(h.date)} <span class="badge" style="background:${TYPES[h.type]?.color||"#666"}">${esc(TYPES[h.type]?.label||h.type)}</span><div class="meta">${esc(h.site||"")}${h.site&&h.supervisor?" · ":""}${esc(h.supervisor||"")}${h.notes?"<br>"+esc(h.notes):""}</div></div>
+  <div class="row"><button class="btn ghost" data-eh="${esc(h.id)}">Edit</button><button class="btn danger" data-dh="${esc(h.id)}">Delete</button></div></div></div>`).join("")
+  :'<div class="empty">No hours logged yet.</div>'}</div>`;
+}
+/* ============ supervision tab ============ */
+function supForm(s){
+  const v=s||{date:todayISO(),supervisor:"",kind:"individual",hrs:""};
+  openModal(`<h2>${s?"Edit":"Log"} supervision</h2>
+    <div class="grid2"><div><label>Date<input id="sfDate" type="date" value="${esc(v.date||todayISO())}"></label></div>
+    <div><label>Hours<input id="sfHrs" type="number" min="0" step="0.25" value="${esc(v.hrs)}" placeholder="1.5"></label></div></div>
+    <label>Supervisor<input id="sfSup" value="${esc(v.supervisor)}" placeholder="Dr. Marsh"></label>
+    <label>Format<select id="sfKind"><option value="individual" ${v.kind==="individual"?"selected":""}>Individual</option><option value="group" ${v.kind==="group"?"selected":""}>Group</option></select></label>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn ghost" id="sfCancel">Cancel</button><button class="btn" id="sfSave">Save</button></div>`);
+  $("#sfCancel").onclick=closeModal;
+  $("#sfSave").onclick=()=>{ const rec={id:s?.id||uid(),date:noShift($("#sfDate").value)||todayISO(),supervisor:$("#sfSup").value.trim(),kind:$("#sfKind").value,hrs:r1(Math.max(0,+$("#sfHrs").value||0))};
+    if(s)Object.assign(s,rec);else state.supervision.push(rec);
+    save();closeModal();beep(700);renderAll(); };
+}
+function renderSup(){
+  const list=[...state.supervision].sort((a,b)=>b.date<a.date?-1:1);
+  return `<div class="card"><div class="row" style="justify-content:space-between"><h2>Supervision log</h2><button class="btn" id="btnAddS">+ Log supervision</button></div>
+  <p class="muted">Signed supervision sessions for your licensure packet. Supervision <i>hours</i> toward your requirement count from hour-log entries marked "Supervision".</p>
+  ${list.length?list.map(s=>`<div class="entry"><div class="top"><div><b>${fmtH(s.hrs)} hrs</b> · ${esc(s.date)} · ${esc(s.kind==="group"?"Group":"Individual")}<div class="meta">${esc(s.supervisor||"")}</div></div>
+  <div class="row"><button class="btn ghost" data-es="${esc(s.id)}">Edit</button><button class="btn danger" data-ds="${esc(s.id)}">Delete</button></div></div></div>`).join("")
+  :'<div class="empty">No supervision sessions logged yet.</div>'}</div>`;
+}
+/* ============ requirements tab ============ */
+function renderReq(){
+  const t=typeTotals(), tot=totalHours(), r=state.req;
+  const bar=(done,need)=>{const pct=need>0?Math.min(100,done/need*100):0;return `<div class="pbar"><div style="width:${pct}%"></div></div>`;};
+  const p=pacing();
+  let paceHtml="";
+  if(p&&p.done)paceHtml=`<div class="warnbox" style="border-color:var(--good)">Requirement met — ${fmtH(tot)} of ${fmtH(r.total)} hours logged.</div>`;
+  else if(p)paceHtml=`<div class="warnbox" style="border-color:${p.status==="behind"?"var(--bad)":"var(--good)"}">
+    <b>${p.status==="behind"?"Behind pace":"On track"}</b> — averaging ${fmtH(p.rate)} hrs/week. At this pace you'll reach ${fmtH(r.total)} hours in about ${Math.round(p.wksLeft)} weeks (around ${p.finish.toISOString().slice(0,10)}).${r.targetDate?` Your target date is ${esc(r.targetDate)}.`:""}</div>`;
+  else if(r.total>0)paceHtml=`<div class="warnbox">Log at least two dated entries to see your pace projection.</div>`;
+  return `<div class="card"><h2>Requirements</h2>
+  <p class="muted">Enter the totals from <b>your own licensing board</b>. This app never looks them up — requirements differ by state and license type.</p>
+  <div class="grid2">
+    <div><label>Total hours required<input id="rqTot" type="number" min="0" step="1" value="${r.total||""}" placeholder="3000"></label></div>
+    <div><label>Direct hours required<input id="rqDir" type="number" min="0" step="1" value="${r.direct||""}" placeholder="1500"></label></div>
+    <div><label>Supervision hours required<input id="rqSup" type="number" min="0" step="1" value="${r.supervision||""}" placeholder="150"></label></div>
+    <div><label>Target completion date (optional)<input id="rqDate" type="date" value="${esc(r.targetDate||"")}"></label></div>
+  </div>
+  <div class="row" style="margin-top:10px"><button class="btn" id="rqSave">Save requirements</button></div></div>
+  <div class="card"><h2>Progress</h2>
+  <div class="reqrow"><span><b>Overall</b> — ${fmtH(tot)}${r.total?` of ${fmtH(r.total)}`:""} hrs</span><span>${r.total?Math.min(100,Math.round(tot/r.total*100))+"%":""}</span></div>${bar(tot,r.total)}
+  <div class="reqrow"><span><b>Direct</b> — ${fmtH(t.direct)}${r.direct?` of ${fmtH(r.direct)}`:""} hrs</span><span>${r.direct?Math.min(100,Math.round(t.direct/r.direct*100))+"%":""}</span></div>${bar(t.direct,r.direct)}
+  <div class="reqrow"><span><b>Supervision</b> — ${fmtH(t.supervision)}${r.supervision?` of ${fmtH(r.supervision)}`:""} hrs</span><span>${r.supervision?Math.min(100,Math.round(t.supervision/r.supervision*100))+"%":""}</span></div>${bar(t.supervision,r.supervision)}
+  ${paceHtml}</div>`;
+}
+/* ============ profile tab ============ */
+function renderProfile(){
+  return `<div class="card"><h2>Trainee profile</h2>
+  <label>Your name<input id="pfName" value="${esc(state.profile.name)}" placeholder="Jordan"></label>
+  <label>License type sought (free text)<input id="pfLic" value="${esc(state.profile.license)}" placeholder="LPC"></label>
+  <div class="row" style="margin-top:12px"><button class="btn" id="pfSave">Save profile</button></div>
+  <p class="muted">Used on your printed licensure packet.</p></div>`;
+}
+/* ============ charts ============ */
+let chartSel={};
+function toggleSeg(key,el){ if(chartSel[key]===el){chartSel[key]=null;}else{chartSel[key]=el;} renderCharts(); }
+function donut(segs,totalTop,totalBot){
+  const R=70,C=2*Math.PI*R; let off=25,s="";
+  const selI=segs.findIndex((g,i)=>chartSel.donut===("d"+i));
+  const centerTop=selI>=0?fmtH(segs[selI].val):totalTop;
+  const centerBot=selI>=0?segs[selI].short:totalBot;
+  segs.forEach((g,i)=>{ const frac=g.val>0?g.val/segs.reduce((a,x)=>a+x.val,0):0; const len=frac*C; const sel=chartSel.donut===("d"+i);
+    s+=`<circle class="seg" data-k="donut" data-i="d${i}" cx="90" cy="90" r="${R}" fill="none" stroke="${g.color}" stroke-width="${sel?38:30}" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" transform="rotate(-90 90 90)"><title>${esc(g.label)}: ${fmtH(g.val)} hrs</title></circle>`; off+=len; });
+  return `<svg viewBox="0 0 180 180">${s}<text x="90" y="84" text-anchor="middle" font-size="20" font-weight="800" fill="var(--ink)" pointer-events="none">${esc(centerTop)}</text><text x="90" y="104" text-anchor="middle" font-size="13" fill="var(--mut)" pointer-events="none">${esc(centerBot)}</text></svg>
+  <div class="legend">${segs.map(g=>`<span style="color:${g.color}">●</span> ${esc(g.label)}`).join(" &nbsp; ")}</div>`;
+}
+function hbars(rows){
+  const max=Math.max(1,...rows.map(r=>r.val));
+  return `<svg viewBox="0 0 400 ${rows.length*54+6}">${rows.map((r,i)=>{ const w=Math.max(2,r.val/max*380); const vIn=w>300; const sel=chartSel.bar===("b"+i); const bh=sel?28:22; const by=i*54+21-(sel?3:0);
+    return `<text x="0" y="${i*54+15}" font-size="14" fill="var(--ink)">${esc(r.label)}</text>
+    <rect class="seg ${sel?"sel":""}" data-k="bar" data-i="b${i}" x="0" y="${by}" width="${w}" height="${bh}" rx="6" fill="var(--acc)"><title>${esc(r.label)}: ${fmtH(r.val)} hrs</title></rect>
+    ${vIn?`<text x="${w-10}" y="${i*54+38}" font-size="14" text-anchor="end" fill="#fff" pointer-events="none">${fmtH(r.val)}</text>`
+         :`<text x="${w+8}" y="${i*54+38}" font-size="14" fill="var(--mut)">${fmtH(r.val)}</text>`}`; }).join("")}</svg>`;
+}
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function renderCharts(){
+  const t=typeTotals();
+  const byType=Object.entries(TYPES).map(([k,ty])=>({label:ty.label,short:ty.short,val:r1(t[k]),color:ty.color})).filter(x=>x.val>0);
+  const byMo={},bySup={};
+  state.hours.forEach(h=>{ const mo=(h.date||"").slice(0,7); if(mo)byMo[mo]=(byMo[mo]||0)+(+h.hrs||0);
+    const s=h.supervisor||"Unassigned"; bySup[s]=(bySup[s]||0)+(+h.hrs||0); });
+  const moRows=Object.entries(byMo).sort().slice(-8).map(([k,v])=>{const[y,m]=k.split("-");return{label:MON[+m-1]+" '"+y.slice(2),val:r1(v)};});
+  const supRows=Object.entries(bySup).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([k,v])=>({label:k,val:r1(v)}));
+  const tot=fmtH(totalHours());
+  $("#chartGrid").innerHTML=
+   `<div class="chart-card"><h3>Hours by type</h3>${byType.length?donut(byType,tot,"hours"):'<div class="empty">No data yet.</div>'}</div>
+    <div class="chart-card"><h3>Hours by month</h3>${moRows.length?hbars(moRows):'<div class="empty">No data yet.</div>'}</div>
+    <div class="chart-card"><h3>Hours by supervisor</h3>${supRows.length?hbars(supRows):'<div class="empty">No data yet.</div>'}</div>
+    <div class="chart-card"><h3>At a glance</h3><div style="font-size:15px;line-height:2">
+      <div><b>${tot}</b> total hours logged</div>
+      <div><b>${state.hours.length}</b> hour entries</div>
+      <div><b>${state.supervision.length}</b> supervision sessions</div>
+      <div><b>${fmtH(state.supervision.reduce((s,x)=>s+(+x.hrs||0),0))}</b> supervision session hours</div>
+      ${state.req.total?`<div><b>${Math.min(100,Math.round(totalHours()/state.req.total*100))}%</b> of required total</div>`:""}
+    </div></div>`;
+  $("#chartGrid").querySelectorAll(".seg").forEach(el=>el.addEventListener("click",()=>{beep(650);toggleSeg(el.dataset.k,el.dataset.i);}));
+}
+function renderChartsTab(){ return `<div class="chart-grid" id="chartGrid"></div>`; }
+/* ============ backup ============ */
+function download(name,content,type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+function renderBackup(){
+  return `<div class="card"><h2>Backup</h2>
+  <div class="row"><button class="btn" id="bkJSON">Download JSON backup</button><button class="btn ghost" id="bkCSV">Download hours CSV</button><button class="btn ghost" id="bkCSV2">Download supervision CSV</button></div>
+  <label style="margin-top:14px">Restore from JSON backup<input type="file" id="bkFile" accept=".json,application/json"></label>
+  <p class="muted">Restoring replaces everything currently in the app.</p></div>
+  <div class="card"><h2>Licensure packet</h2><p class="muted">Printable summary: totals vs your requirements, full hour log, and the supervision log with signature lines.</p>
+  <div class="row"><button class="btn" id="bkPrint">Print licensure packet</button></div></div>
+  <div class="card"><h2>Danger zone</h2><div class="row"><button class="btn danger" id="bkWipe">Delete all data</button></div></div>`;
+}
+function validHour(h){ return h&&typeof h==="object"&&typeof h.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(h.date)&&!isNaN(new Date(h.date+"T12:00:00"))&&isFinite(+h.hrs)&&+h.hrs>=0&&TYPES[h.type]; }
+function validSup(s){ return s&&typeof s==="object"&&typeof s.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&!isNaN(new Date(s.date+"T12:00:00"))&&isFinite(+s.hrs)&&+s.hrs>=0&&(s.kind==="individual"||s.kind==="group"); }
+function printPacket(){
+  const t=typeTotals(),tot=totalHours(),r=state.req,p=state.profile;
+  const hrows=[...state.hours].sort((a,b)=>a.date<b.date?-1:1).map(h=>`<tr><td>${esc(h.date)}</td><td>${esc(TYPES[h.type]?.label||h.type)}</td><td>${fmtH(h.hrs)}</td><td>${esc(h.site||"")}</td><td>${esc(h.supervisor||"")}</td><td>${esc(h.notes||"")}</td></tr>`).join("");
+  const srows=[...state.supervision].sort((a,b)=>a.date<b.date?-1:1).map(s=>`<tr><td>${esc(s.date)}</td><td>${esc(s.supervisor||"")}</td><td>${s.kind==="group"?"Group":"Individual"}</td><td>${fmtH(s.hrs)}</td><td style="border-bottom:1px solid #000;min-width:110px"></td></tr>`).join("");
+  const w=window.open("","_blank");
+  if(!w){ toast("Popup blocked — allow popups for this page to print the packet."); return; }
+  w.document.write(`<html><head><title>ClinicalCount licensure packet</title><style>body{font-family:system-ui,sans-serif;padding:24px;color:#111}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #ccc;padding:6px 8px;text-align:left}h1{font-size:22px}h2{font-size:17px;margin-top:26px}.sig{height:34px}</style></head><body>
+  <h1>Clinical hours summary — ${esc(p.name||"")}${p.license?` (${esc(p.license)})`:""} (${todayISO()})</h1>
+  <h2>Totals vs requirements</h2><table><tr><th>Category</th><th>Logged</th><th>Required</th></tr>
+  <tr><td>Total hours</td><td>${fmtH(tot)}</td><td>${r.total?fmtH(r.total):"—"}</td></tr>
+  <tr><td>Direct client contact</td><td>${fmtH(t.direct)}</td><td>${r.direct?fmtH(r.direct):"—"}</td></tr>
+  <tr><td>Supervision</td><td>${fmtH(t.supervision)}</td><td>${r.supervision?fmtH(r.supervision):"—"}</td></tr>
+  <tr><td>Indirect</td><td>${fmtH(t.indirect)}</td><td>—</td></tr>
+  <tr><td>Other</td><td>${fmtH(t.other)}</td><td>—</td></tr></table>
+  <h2>Hour log (${state.hours.length} entries)</h2><table><tr><th>Date</th><th>Type</th><th>Hours</th><th>Site</th><th>Supervisor</th><th>Notes</th></tr>${hrows}</table>
+  <h2>Supervision log (${state.supervision.length} sessions)</h2><table><tr><th>Date</th><th>Supervisor</th><th>Format</th><th>Hours</th><th>Supervisor signature</th></tr>${srows}</table>
+  <p style="color:#555;font-size:12px">Personal organizer — verify against your licensing board's requirements. Not professional, legal, or licensure advice.</p>
+  <script>onload=()=>print()<\/script></body></html>`); w.document.close();
+}
+/* ============ render ============ */
+function renderAll(){
+  const v=$("#view");
+  if(curTab==="hours")v.innerHTML=renderHours();
+  else if(curTab==="supervision")v.innerHTML=renderSup();
+  else if(curTab==="requirements")v.innerHTML=renderReq();
+  else if(curTab==="profile")v.innerHTML=renderProfile();
+  else if(curTab==="charts"){v.innerHTML=renderChartsTab();renderCharts();}
+  else if(curTab==="backup")v.innerHTML=renderBackup();
+  bind();
+}
+function bind(){
+  const q=s=>$(s);
+  if(q("#btnAddH"))q("#btnAddH").onclick=()=>hourForm();
+  if(q("#fType"))q("#fType").onchange=e=>{curFilter=e.target.value;renderAll();};
+  $$("[data-eh]").forEach(b=>b.onclick=()=>hourForm(state.hours.find(h=>h.id===b.dataset.eh)));
+  $$("[data-dh]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this entry?")){ state.hours=state.hours.filter(h=>h.id!==b.dataset.dh); save();beep(400);renderAll(); }});
+  if(q("#btnAddS"))q("#btnAddS").onclick=()=>supForm();
+  $$("[data-es]").forEach(b=>b.onclick=()=>supForm(state.supervision.find(s=>s.id===b.dataset.es)));
+  $$("[data-ds]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this session?")){ state.supervision=state.supervision.filter(s=>s.id!==b.dataset.ds); save();beep(400);renderAll(); }});
+  if(q("#rqSave"))q("#rqSave").onclick=()=>{ state.req={total:Math.max(0,+q("#rqTot").value||0),direct:Math.max(0,+q("#rqDir").value||0),supervision:Math.max(0,+q("#rqSup").value||0),targetDate:q("#rqDate").value||""}; save();beep(700);toast("Requirements saved.");renderAll(); };
+  if(q("#pfSave"))q("#pfSave").onclick=()=>{ state.profile={name:q("#pfName").value.trim(),license:q("#pfLic").value.trim()}; save();beep(700);toast("Profile saved.");renderAll(); };
+  if(q("#bkJSON"))q("#bkJSON").onclick=()=>{ download("clinicalcount-backup-"+todayISO()+".json",JSON.stringify({app:"clinicalcount",v:1,profile:state.profile,req:state.req,hours:state.hours,supervision:state.supervision},null,2),"application/json"); beep(700); };
+  if(q("#bkCSV"))q("#bkCSV").onclick=()=>{ const rows=[["date","hours","type","site","supervisor","notes"],...state.hours.map(h=>[h.date,h.hrs,TYPES[h.type]?.label||h.type,h.site,h.supervisor,h.notes])]; download("clinicalcount-hours-"+todayISO()+".csv",rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv"); beep(700); };
+  if(q("#bkCSV2"))q("#bkCSV2").onclick=()=>{ const rows=[["date","supervisor","format","hours"],...state.supervision.map(s=>[s.date,s.supervisor,s.kind,s.hrs])]; download("clinicalcount-supervision-"+todayISO()+".csv",rows.map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv"); beep(700); };
+  if(q("#bkFile"))q("#bkFile").onchange=e=>{ const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+    r.onload=()=>{ try{ const d=JSON.parse(r.result);
+      if(!d||typeof d!=="object"||!Array.isArray(d.hours)||!Array.isArray(d.supervision))throw new Error("bad shape");
+      const hours=d.hours.filter(validHour).map(h=>({id:String(h.id||uid()),date:h.date,hrs:r1(Math.max(0,+h.hrs)),type:h.type,site:String(h.site||""),supervisor:String(h.supervisor||""),notes:String(h.notes||"")}));
+      const sup=d.supervision.filter(validSup).map(s=>({id:String(s.id||uid()),date:s.date,supervisor:String(s.supervisor||""),kind:s.kind,hrs:r1(Math.max(0,+s.hrs))}));
+      const dropped=(d.hours.length-hours.length)+(d.supervision.length-sup.length);
+      state.hours=hours; state.supervision=sup;
+      if(d.profile&&typeof d.profile==="object")state.profile={name:String(d.profile.name||""),license:String(d.profile.license||"")};
+      if(d.req&&typeof d.req==="object")state.req={total:Math.max(0,+d.req.total||0),direct:Math.max(0,+d.req.direct||0),supervision:Math.max(0,+d.req.supervision||0),targetDate:/^\d{4}-\d{2}-\d{2}$/.test(d.req.targetDate||"")?d.req.targetDate:""};
+      save();beep(700);toast(dropped?`Backup restored — ${dropped} invalid record${dropped===1?"":"s"} skipped.`:"Backup restored.");renderAll();
+    }catch(_){ toast("That file isn't a valid ClinicalCount backup."); } }; r.readAsText(f); e.target.value=""; };
+  if(q("#bkPrint"))q("#bkPrint").onclick=()=>{beep(700);printPacket();};
+  if(q("#bkWipe"))q("#bkWipe").onclick=()=>{ if(confirm("Delete ALL data? This cannot be undone.")){ const s=state.settings; state=blankState(); state.settings=s; save();beep(400);renderAll(); }};
+}
+/* ============ theme / sound / sample ============ */
+function applyTheme(){ const st=state.settings.theme; const dark=st==="dark"||(st==null&&matchMedia("(prefers-color-scheme: dark)").matches); document.documentElement.dataset.theme=dark?"dark":""; $("#btnTheme").classList.toggle("on",dark); }
+$("#btnTheme").onclick=()=>{ const dark=document.documentElement.dataset.theme==="dark"; state.settings.theme=dark?"light":"dark"; save(); applyTheme(); beep(600); };
+$("#btnSound").onclick=()=>{ state.settings.sound=state.settings.sound===false?true:false; save(); $("#btnSound").classList.toggle("on",state.settings.sound!==false); beep(700); toast(state.settings.sound!==false?"Sound on.":"Sound off."); };
+$("#btnSample").onclick=()=>{ beep(700);
+  if(!state.settings.sample){ snap=JSON.stringify({profile:state.profile,req:state.req,hours:state.hours,supervision:state.supervision}); const s=makeSample(); state.profile=s.profile; state.req=s.req; state.hours=s.hours; state.supervision=s.supervision; state.settings.sample=true; }
+  else { if(snap){ try{const d=JSON.parse(snap); state.profile=d.profile; state.req=d.req; state.hours=d.hours; state.supervision=d.supervision;}catch(e){} snap=null; } state.settings.sample=false; save(); }
+  renderAll(); $("#btnSample").classList.toggle("on",!!state.settings.sample); toast(state.settings.sample?"Sample data on — edits made now will be discarded.":"Sample data off — your data restored."); };
+/* ============ init ============ */
+load();
+applyTheme();
+$("#btnSound").classList.toggle("on",state.settings.sound!==false);
+$("#btnSample").classList.toggle("on",!!state.settings.sample);
+renderAll();
+</script>
+</body>
+</html>
