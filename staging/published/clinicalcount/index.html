@@ -118,7 +118,7 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const r1=n=>Math.round((+n||0)*10)/10;
 const fmtH=n=>{n=r1(n);return n%1===0?n.toFixed(0):n.toFixed(1);};
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
-const noShift=d=>{const x=new Date(d+"T12:00:00");return isNaN(x)?"":x.toISOString().slice(0,10);};
+const noShift=d=>strictDate(d)?d:"";
 const TYPES={
   direct:{label:"Direct client contact",short:"Direct",color:"#2a7d4f"},
   indirect:{label:"Indirect",short:"Indirect",color:"#6a8fc2"},
@@ -328,8 +328,9 @@ function renderBackup(){
   <div class="row"><button class="btn" id="bkPrint">Print licensure packet</button></div></div>
   <div class="card"><h2>Danger zone</h2><div class="row"><button class="btn danger" id="bkWipe">Delete all data</button></div></div>`;
 }
-function validHour(h){ return h&&typeof h==="object"&&typeof h.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(h.date)&&!isNaN(new Date(h.date+"T12:00:00"))&&isFinite(+h.hrs)&&+h.hrs>=0&&TYPES[h.type]; }
-function validSup(s){ return s&&typeof s==="object"&&typeof s.date==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(s.date)&&!isNaN(new Date(s.date+"T12:00:00"))&&isFinite(+s.hrs)&&+s.hrs>=0&&(s.kind==="individual"||s.kind==="group"); }
+function strictDate(ds){ if(!/^\d{4}-\d{2}-\d{2}$/.test(ds))return false; const[y,m,d]=ds.split("-").map(Number); const dt=new Date(y,m-1,d); return dt.getFullYear()===y&&dt.getMonth()===m-1&&dt.getDate()===d; }
+function validHour(h){ return h&&typeof h==="object"&&strictDate(h.date)&&isFinite(+h.hrs)&&+h.hrs>=0&&TYPES[h.type]; }
+function validSup(s){ return s&&typeof s==="object"&&strictDate(s.date)&&isFinite(+s.hrs)&&+s.hrs>=0&&(s.kind==="individual"||s.kind==="group"); }
 function printPacket(){
   const t=typeTotals(),tot=totalHours(),r=state.req,p=state.profile;
   const hrows=[...state.hours].sort((a,b)=>a.date<b.date?-1:1).map(h=>`<tr><td>${esc(h.date)}</td><td>${esc(TYPES[h.type]?.label||h.type)}</td><td>${fmtH(h.hrs)}</td><td>${esc(h.site||"")}</td><td>${esc(h.supervisor||"")}</td><td>${esc(h.notes||"")}</td></tr>`).join("");
@@ -381,12 +382,14 @@ function bind(){
       const sup=d.supervision.filter(validSup).map(s=>({id:String(s.id||uid()),date:s.date,supervisor:String(s.supervisor||""),kind:s.kind,hrs:r1(Math.max(0,+s.hrs))}));
       const dropped=(d.hours.length-hours.length)+(d.supervision.length-sup.length);
       state.hours=hours; state.supervision=sup;
+      snap=null; state.settings.sample=false;
+      q("#btnSample").classList.remove("on");
       if(d.profile&&typeof d.profile==="object")state.profile={name:String(d.profile.name||""),license:String(d.profile.license||"")};
       if(d.req&&typeof d.req==="object")state.req={total:Math.max(0,+d.req.total||0),direct:Math.max(0,+d.req.direct||0),supervision:Math.max(0,+d.req.supervision||0),targetDate:/^\d{4}-\d{2}-\d{2}$/.test(d.req.targetDate||"")?d.req.targetDate:""};
       save();beep(700);toast(dropped?`Backup restored — ${dropped} invalid record${dropped===1?"":"s"} skipped.`:"Backup restored.");renderAll();
     }catch(_){ toast("That file isn't a valid ClinicalCount backup."); } }; r.readAsText(f); e.target.value=""; };
   if(q("#bkPrint"))q("#bkPrint").onclick=()=>{beep(700);printPacket();};
-  if(q("#bkWipe"))q("#bkWipe").onclick=()=>{ if(confirm("Delete ALL data? This cannot be undone.")){ const s=state.settings; state=blankState(); state.settings=s; save();beep(400);renderAll(); }};
+  if(q("#bkWipe"))q("#bkWipe").onclick=()=>{ if(confirm("Delete ALL data? This cannot be undone.")){ snap=null; const s=state.settings; s.sample=false; state=blankState(); state.settings=s; save();beep(400);renderAll(); q("#btnSample").classList.remove("on"); }};
 }
 /* ============ theme / sound / sample ============ */
 function applyTheme(){ const st=state.settings.theme; const dark=st==="dark"||(st==null&&matchMedia("(prefers-color-scheme: dark)").matches); document.documentElement.dataset.theme=dark?"dark":""; $("#btnTheme").classList.toggle("on",dark); }
