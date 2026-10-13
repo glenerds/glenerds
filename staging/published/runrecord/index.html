@@ -62,7 +62,8 @@ textarea{min-height:70px;resize:vertical}
 .chart-card h3{margin:0 0 6px;font-size:16px}
 .chart-card svg{width:100%;height:auto;display:block}
 .chart-val{font-size:15px;font-weight:700;margin-top:6px;min-height:22px}
-.chart-card .sel{outline:3px solid var(--warn);outline-offset:2px}
+#tab-charts g[data-k],#tab-charts .seg{outline:none;-webkit-tap-highlight-color:transparent}
+#tab-charts g[data-k]:focus,#tab-charts .seg:focus{outline:none}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
 .dialog{background:var(--card);border-radius:16px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
 .dialog h2{margin:0 0 12px;font-size:20px}
@@ -345,8 +346,11 @@ function renderCharts(){ const el=$("#tab-charts");
   const ptsByM=months.map(m=>({l:monthLabel(m),v:r1(rs.filter(r=>monthKey(r.date)===m).reduce((t,r)=>t+(r.q?+r.points:0),0))}));
   const byCls=CLASSES.filter(c=>rs.some(r=>r.cls===c)).map(c=>{ const cr=rs.filter(r=>r.cls===c); return {l:c.slice(0,8),v:Math.round(cr.filter(r=>r.q).length/cr.length*100),n:cr.length}; });
   const donutSegs=[{k:"dq",label:"Q",v:q,color:"var(--q)"},{k:"dn",label:"NQ",v:nq,color:"var(--nq)"}];
+  const dSel=donutSegs.find(sg=>sg.k===chartSel);
+  const dTop=dSel?dSel.label:(rs.length?`${qRate}% Q`:"No data");
+  const dSub=dSel?`${dSel.v} runs`:(rs.length?`${q}/${rs.length}`:"");
   el.innerHTML=`<div class="charts">
-    <div class="chart-card"><h3>Q rate</h3>${donutSVG(donutSegs,rs.length?`${qRate}% Q`:"No data",rs.length?`${q}/${rs.length}`:"")}<div class="chart-val" id="cv0">${rs.length?`${qRate}% qualifying (${q}/${rs.length})`:"No runs yet."}</div></div>
+    <div class="chart-card"><h3>Q rate</h3>${donutSVG(donutSegs,dTop,dSub)}<div class="chart-val" id="cv0">${rs.length?`${qRate}% qualifying (${q}/${rs.length})`:"No runs yet."}</div></div>
     <div class="chart-card"><h3>Runs per month</h3>${barsSVG(runsByM,"var(--acc)","m")}<div class="chart-val" id="cv1">${runsByM.reduce((t,d)=>t+d.v,0)} runs in 6 months</div></div>
     <div class="chart-card"><h3>Points per month</h3>${barsSVG(ptsByM,"var(--warn)","p")}<div class="chart-val" id="cv2">${r1(ptsByM.reduce((t,d)=>t+d.v,0))} points in 6 months</div></div>
     <div class="chart-card"><h3>Q rate by class</h3>${barsSVG(byCls,"var(--q)","c","%")}<div class="chart-val" id="cv3">${byCls.length?byCls.length+" classes":"No runs yet."}</div></div>
