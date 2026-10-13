@@ -6,7 +6,7 @@
 <title>PowderRoom — Reloading Log</title>
 <style>
 :root{--bg:#f7f5f0;--card:#fff;--ink:#22201c;--mut:#6b655c;--line:#e3ddd2;--acc:#b3541e;--acc-ink:#fff;--q:#3d9a50;--nq:#d64545;--warn:#c77b1a}
-html[data-theme="dark"]{--bg:#1c1a17;--card:#26231e;--ink:#f0ece4;--mut:#a8a094;--line:#3a352c;--acc:#e07b39;--acc-ink:#1c1a17;--q:#5cc475;--nq:#e86a6a;--warn:#e0a04a}
+html[data-theme="dark"]{--bg:#1c1a17;--card:#26231e;--ink:#f0ece4;--mut:#c6beb0;--line:#3a352c;--acc:#e07b39;--acc-ink:#1c1a17;--q:#5cc475;--nq:#e86a6a;--warn:#e0a04a}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
 .wrap{max-width:1100px;margin:0 auto;padding:0 16px}
@@ -349,15 +349,16 @@ function rangeForm(g){ const isNew=!g; g=g||{recipeId:state.recipes[0].id,date:t
     if(isNew)state.results.push(rec); else Object.assign(state.results.find(x=>x.id===g.id),rec);
     save(); beep(700); closeModal(); renderAll(); toast(isNew?"Result logged.":"Result updated."); }; }
 /* ============ charts ============ */
+function shortLabel(l){ const w=String(l).split(" "); if(/^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)$/.test(w[0]))return w[0]; let t=w[0]; if(w[1]&&(t+" "+w[1]).length<=6)t+=" "+w[1]; return t; }
 function barsSVG(data,color,unit,suffix){ const mx=Math.max(...data.map(d=>d.v),1); const W=300,H=170,bw=W/Math.max(data.length,1);
   return `<svg viewBox="-55 0 ${W+55} ${H}" role="img">`+data.map((d,i)=>{ const h=Math.max(2,(d.v/mx)*(H-58)); const x=i*bw+4;
     const sel=chartSel===unit+i; const cx=(x+(bw-8)/2).toFixed(1);
-    return `<g data-k="${unit+i}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-50-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/><text x="${cx}" y="${H-10}" text-anchor="end" font-size="15" fill="var(--mut)" transform="rotate(45 ${cx} ${H-10})">${esc(d.l)}</text></g>`; }).join("")+`</svg>`; }
+    return `<g data-k="${unit+i}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-50-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/><text x="${cx}" y="${H-12}" text-anchor="middle" font-size="15" fill="var(--mut)">${esc(shortLabel(d.l))}</text></g>`; }).join("")+`</svg>`; }
 function renderCharts(){ const el=$("#tab-charts");
   const months=[]; const now=new Date(); for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")); }
   const rpm=months.map(m=>({l:monthLabel(m),v:state.batches.filter(b=>monthKey(b.date)===m).reduce((t,b)=>t+b.rounds,0)}));
-  const vel=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.velocity>0); return {l:r.name.slice(0,10),v:rs.length?Math.round(rs.reduce((t,x)=>t+x.velocity,0)/rs.length):0}; }).filter(d=>d.v>0);
-  const grp=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.groupIn>0); return {l:r.name.slice(0,10),v:rs.length?r2(rs.reduce((t,x)=>t+x.groupIn,0)/rs.length):0}; }).filter(d=>d.v>0);
+  const vel=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.velocity>0); return {l:r.name,v:rs.length?Math.round(rs.reduce((t,x)=>t+x.velocity,0)/rs.length):0}; }).filter(d=>d.v>0);
+  const grp=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.groupIn>0); return {l:r.name,v:rs.length?r2(rs.reduce((t,x)=>t+x.groupIn,0)/rs.length):0}; }).filter(d=>d.v>0);
   const cpr=state.recipes.map(r=>({l:r.name.slice(0,10),v:r1(costPerRound(r).total*100)/100})).filter(d=>d.v>0);
   el.innerHTML=`<div class="charts">
     <div class="chart-card"><h3>Rounds loaded / month</h3>${barsSVG(rpm,"var(--acc)","m")}<div class="chart-val" id="cv0">${rpm.reduce((t,d)=>t+d.v,0)} rounds in 6 months</div></div>
