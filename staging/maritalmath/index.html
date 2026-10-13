@@ -83,7 +83,7 @@ input[type=number].pct{width:70px;font-size:15px;padding:8px;border:1px solid va
 </head>
 <body>
 <header><div class="hdr-inner">
-<div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="17" y="4" width="6" height="10" rx="2" fill="#0f766e"/><rect x="6" y="14" width="28" height="3" rx="1.5" fill="#0f766e"/><line x1="10" y1="17" x2="6" y2="30" stroke="#0f766e" stroke-width="2.5"/><line x1="30" y1="17" x2="34" y2="30" stroke="#0f766e" stroke-width="2.5"/><path d="M2 30 L10 30 L6 36 Z" fill="#7c6bc4"/><path d="M38 30 L30 30 L34 36 Z" fill="#c4781a"/><rect x="18.5" y="36" width="3" height="2" fill="#0f766e"/></svg><span>MaritalMath</span></div>
+<div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="4.5" r="2.4" fill="#0f766e"/><rect x="18.8" y="6.5" width="2.4" height="24" rx="1.2" fill="#0f766e"/><rect x="5" y="9" width="30" height="2.6" rx="1.3" fill="#0f766e"/><line x1="9" y1="11.6" x2="6" y2="20" stroke="#0f766e" stroke-width="1.6"/><line x1="9" y1="11.6" x2="12" y2="20" stroke="#0f766e" stroke-width="1.6"/><line x1="31" y1="11.6" x2="28" y2="20" stroke="#0f766e" stroke-width="1.6"/><line x1="31" y1="11.6" x2="34" y2="20" stroke="#0f766e" stroke-width="1.6"/><path d="M3 20 A6 6 0 0 0 15 20 Z" fill="#c4781a"/><path d="M25 20 A6 6 0 0 0 37 20 Z" fill="#c4781a"/><path d="M14 31 h12 l-2.5 5 h-7 Z" fill="#0f766e"/></svg><span>MaritalMath</span></div>
 <div class="hdr-btns">
 <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
 <button id="btnSample" title="Sample data" aria-label="Toggle sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5.5L4.5 18a2.4 2.4 0 0 0 2.1 3.5h10.8a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 14h9"/></svg></button>
@@ -204,21 +204,21 @@ function donutSVG(segs,unit,vid){ // segs:[{k,l,v,color}]
     const large=frac>0.5?1:0;
     if(frac>0)paths+=`<g data-k="${s.k}" style="cursor:pointer" transform="translate(${ox.toFixed(1)},${oy.toFixed(1)})"><path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${xi1.toFixed(1)} ${yi1.toFixed(1)} A${IR} ${IR} 0 ${large} 0 ${xi0.toFixed(1)} ${yi0.toFixed(1)} Z" fill="${s.color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/></g>`;
     a0=a1; });
-  const cxTot=String(money0(tot));
-  const fs=cxTot.length>9?13:cxTot.length>7?15:17;
-  return `<svg viewBox="0 0 220 200" role="img"><g>${paths}</g><text x="${CX}" y="${CY-4}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="var(--ink)" pointer-events="none">${esc(money0(tot))}</text><text x="${CX}" y="${CY+16}" text-anchor="middle" font-size="13" fill="var(--mut)" pointer-events="none">${esc(unit)}</text></svg>`; }
-function barsSVG(data,unit,vid,stagger){ const mx=Math.max(...data.map(d=>d.v),1), W=300,H=170,bw=W/Math.max(data.length,1);
+  const selSeg=segs.find(s=>chartSel===s.k);
+  const cxNum=String(selSeg?money0(Math.max(0,selSeg.v)):money0(tot));
+  const cxSub=selSeg?String(selSeg.l).slice(0,18):unit;
+  const fs=cxNum.length>9?13:cxNum.length>7?15:17;
+  return `<svg viewBox="0 0 220 200" role="img"><g>${paths}</g><text x="${CX}" y="${CY-4}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="var(--ink)" pointer-events="none">${esc(cxNum)}</text><text x="${CX}" y="${CY+16}" text-anchor="middle" font-size="13" fill="var(--mut)" pointer-events="none">${esc(cxSub)}</text></svg>`; }
+function barsSVG(data,unit,vid,stagger,wide){ const mx=Math.max(...data.map(d=>d.v),1), W=wide||300,H=170,bw=W/Math.max(data.length,1);
   const topPad=stagger?70:50;
   return `<svg viewBox="-10 0 ${W+10} ${H}" role="img">`+data.map((d,i)=>{ const h=Math.max(2,(d.v/mx)*(H-topPad-8)); const x=i*bw+4;
     const sel=chartSel===d.k, cx=(x+(bw-8)/2).toFixed(1);
-    const lbl=d.l.length>10?d.l.slice(0,9)+"…":d.l;
-    const ly=stagger?(i%2?H-30:H-12):H-12;
-    return `<g data-k="${d.k}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-topPad-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${d.color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/><text x="${cx}" y="${ly}" text-anchor="middle" font-size="15" fill="var(--mut)" pointer-events="none">${esc(lbl)}</text></g>`; }).join("")+`</svg>`; }
+    const parts=String(d.l).split("·");
+    const lab=(stagger&&parts.length>1)
+      ?`<text x="${cx}" y="${H-32}" text-anchor="middle" font-size="15" fill="var(--mut)" pointer-events="none">${esc(parts[0])}</text><text x="${cx}" y="${H-14}" text-anchor="middle" font-size="15" fill="var(--ink)" font-weight="700" pointer-events="none">${esc(parts[1])}</text>`
+      :`<text x="${cx}" y="${H-12}" text-anchor="middle" font-size="15" fill="var(--mut)" pointer-events="none">${esc(d.l.length>10?d.l.slice(0,9)+"…":d.l)}</text>`;
+    return `<g data-k="${d.k}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-topPad-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${d.color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/>${lab}</g>`; }).join("")+`</svg>`; }
 function chartFoot(vid,def){ const t=chartSelInfo&&chartSelInfo.vid===vid?chartSelInfo.text:def; return `<div class="cfoot" id="cf-${vid}">${esc(t)}</div>`; }
-function wireCharts(){ $$("#chartsGrid [data-k]").forEach(g=>g.addEventListener("click",()=>{ const k=g.getAttribute("data-k");
-    if(chartSel===k){ chartSel=null; chartSelInfo=null; }
-    else{ chartSel=k; const hit=chartsFlat().find(x=>x.s.k===k); chartSelInfo=hit?{vid:hit.vid,text:hit.fmt(hit.s)}:null; }
-    beep(660); $("#main").innerHTML=renderCharts(); wireCharts(); })); }
 function chartsFlat(){ return chartSegsCache; }
 let chartSegsCache=[];
 function flagBadge(f){ return f==="marital"?'<span class="badge marital">marital</span>':f==="contested"?'<span class="badge contested">contested</span>':'<span class="badge separate">separate</span>'; }
@@ -243,9 +243,13 @@ function renderDash(){ const n=spouseNets(null), eq=equalize(n.netA,n.netB);
   <div class="grid">
   <div class="card"><h3>Inventory</h3><div class="kv"><span>Assets</span><b>${state.assets.length}</b></div><div class="kv"><span>Debts</span><b>${state.debts.length}</b></div><div class="kv"><span>Scenarios</span><b>${state.scenarios.length}</b></div></div>
   <div class="card"><h3>Budget — ${esc(state.names.a)}</h3>${budgetSummary()}</div>
+  <div class="card"><h3>Net share split</h3>${donutSVG(dashSegs(),"net estate","dn")}${chartFoot("dn",esc(state.names.a)+": "+money(n.netA)+" · "+esc(state.names.b)+": "+money(n.netB))}</div>
   </div>
   <div class="rowbtns"><button class="btn pri noprint" id="btnPrint">Print summary packet</button></div>`;
 }
+function dashSegs(){ const n=spouseNets(null);
+  const sg=[{k:"dn:a",l:state.names.a,v:Math.max(0,n.netA),color:"var(--qa)"},{k:"dn:b",l:state.names.b,v:Math.max(0,n.netB),color:"var(--qb)"}];
+  sg.forEach(x=>chartSegsCache.push({s:x,vid:"dn",fmt:y=>`${y.l}: net ${money(y.v)}`})); return sg; }
 function budgetSummary(){ const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0), s=bi-be;
   return `<div class="kv"><span>Monthly income</span><b>${money(bi)}</b></div><div class="kv"><span>Monthly expenses</span><b>${money(be)}</b></div><div class="kv"><span>Surplus / deficit</span><b style="color:${s>=0?"var(--good)":"var(--bad)"}">${money(s)}</b></div>`; }
 
@@ -335,11 +339,14 @@ function scenarioModal(s){ const isNew=!s; s=s||{name:"Scenario "+(state.scenari
 
 /* ============ budget ============ */
 function budgetRows(list,kind){ return list.map(l=>`<tr><td>${esc(l.name)}</td><td style="text-align:right">${money(l.amtC)}</td><td class="noprint"><button class="iconbtn" data-bedit="${kind}:${l.id}">Edit</button> <button class="iconbtn" data-bdel="${kind}:${l.id}">Delete</button></td></tr>`).join(""); }
-function renderBudget(){ const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0), s=bi-be;
+function renderBudget(){ const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0), s=bi-be; const eSegs=bgSegs();
   return `<div class="card"><h2>Post-divorce budget — ${esc(state.names.a)}</h2><div class="muted">Monthly household budget after the split. Enter your own numbers.</div></div>
   <div class="grid"><div class="card"><h3>Monthly income</h3><table><tbody>${budgetRows(state.budget.income,"i")||'<tr><td class="muted">None yet.</td></tr>'}</tbody></table><div class="kv"><span><b>Total</b></span><b>${money(bi)}</b></div><div class="rowbtns"><button class="btn small pri" id="biAdd">Add income</button></div></div>
-  <div class="card"><h3>Monthly expenses</h3><table><tbody>${budgetRows(state.budget.expenses,"e")||'<tr><td class="muted">None yet.</td></tr>'}</tbody></table><div class="kv"><span><b>Total</b></span><b>${money(be)}</b></div><div class="rowbtns"><button class="btn small pri" id="beAdd">Add expense</button></div></div></div>
+  <div class="card"><h3>Monthly expenses</h3><table><tbody>${budgetRows(state.budget.expenses,"e")||'<tr><td class="muted">None yet.</td></tr>'}</tbody></table><div class="kv"><span><b>Total</b></span><b>${money(be)}</b></div><div class="rowbtns"><button class="btn small pri" id="beAdd">Add expense</button></div></div>
+  <div class="card"><h3>Where expenses go</h3>${eSegs.length?donutSVG(eSegs,"expenses","bg"):'<div class="muted">Add expenses to see the breakdown.</div>'}${chartFoot("bg",state.budget.expenses.length+" expense lines")}</div></div>
   <div class="eqbox"><div class="big" style="color:${s>=0?"var(--good)":"var(--bad)"}">${s>=0?"Surplus":"Deficit"}: ${money(Math.abs(s))}/mo</div><div class="muted">Income minus expenses. This is arithmetic on your entries — not financial advice.</div></div>`; }
+function bgSegs(){ const sg=state.budget.expenses.map((l,i)=>({k:"bg:"+l.id,l:l.name,v:l.amtC,color:PAL[i%PAL.length]}));
+  sg.forEach(x=>chartSegsCache.push({s:x,vid:"bg",fmt:y=>`${y.l}: ${money(y.v)}/mo`})); return sg; }
 function budgetModal(kind,l){ const isNew=!l; l=l||{name:"",amtC:0};
   openModal(`<h2>${isNew?"Add":"Edit"} ${kind==="i"?"income":"expense"}</h2>
   <div class="field"><label>Name</label><input id="fName" value="${esc(l.name)}" maxlength="60"></div>
@@ -357,7 +364,6 @@ function renderCharts(){ const n=spouseNets(null);
   const aByType={}, dByType={};
   for(const a of state.assets)if(isMaritalPool(a.flag))aByType[a.type]=(aByType[a.type]||0)+a.valueC;
   for(const d of state.debts)if(isMaritalPool(d.flag))dByType[d.type]=(dByType[d.type]||0)+d.balanceC;
-  chartSegsCache=[];
   const aSegs=Object.keys(aByType).map((t,i)=>{ const s={k:"ca:"+t,l:t,v:aByType[t],color:PAL[i%PAL.length]}; chartSegsCache.push({s,vid:"ca",fmt:x=>`${x.l}: ${money(x.v)}`}); return s; });
   const dSegs=Object.keys(dByType).map((t,i)=>{ const s={k:"cd:"+t,l:t,v:dByType[t],color:PAL[(i+2)%PAL.length]}; chartSegsCache.push({s,vid:"cd",fmt:x=>`${x.l}: ${money(x.v)}`}); return s; });
   const netSegs=[{k:"nb:a",l:state.names.a,v:Math.max(0,n.netA),color:"var(--qa)"},{k:"nb:b",l:state.names.b,v:Math.max(0,n.netB),color:"var(--qb)"}];
@@ -370,7 +376,7 @@ function renderCharts(){ const n=spouseNets(null);
   <div class="chart-card" id="tab-charts"><h3>Marital assets by type</h3>${donutSVG(aSegs,"assets","ca")}${chartFoot("ca",state.assets.length+" assets in pool")}</div>
   <div class="chart-card"><h3>Marital debts by type</h3>${donutSVG(dSegs,"debts","cd")}${chartFoot("cd",state.debts.length+" debts in pool")}</div>
   <div class="chart-card"><h3>Net per spouse (current splits)</h3>${barsSVG(netSegs,"nb","nb")}${chartFoot("nb","A: "+money(n.netA)+" · B: "+money(n.netB))}</div>
-  <div class="chart-card"><h3>Scenario comparison</h3>${scSegs.length?barsSVG(scSegs,"sc","sc",true):'<div class="muted">Add scenarios to compare.</div>'}${chartFoot("sc",state.scenarios.length+" scenarios")}</div>
+  <div class="chart-card"><h3>Scenario comparison</h3>${scSegs.length?barsSVG(scSegs,"sc","sc",true,430):'<div class="muted">Add scenarios to compare.</div>'}${chartFoot("sc",state.scenarios.length+" scenarios")}</div>
   </div>`; }
 
 /* ============ backup ============ */
@@ -404,7 +410,7 @@ function buildPacket(){ const n=spouseNets(null), eq=equalize(n.netA,n.netB);
   <h2>Post-divorce budget — ${esc(state.names.a)}</h2><p>Income: ${money(bi)}/mo · Expenses: ${money(be)}/mo · <b>${bi-be>=0?"Surplus":"Deficit"}: ${money(Math.abs(bi-be))}/mo</b></p>
   <p><b>${esc(dis)}</b></p>`; }
 /* ============ render + wiring ============ */
-function renderAll(){ const m=$("#main");
+function renderAll(){ const m=$("#main"); chartSegsCache=[];
   if(curTab==="dash")m.innerHTML=renderDash();
   else if(curTab==="assets")m.innerHTML=renderAssets();
   else if(curTab==="debts")m.innerHTML=renderDebts();
@@ -412,7 +418,11 @@ function renderAll(){ const m=$("#main");
   else if(curTab==="budget")m.innerHTML=renderBudget();
   else if(curTab==="charts")m.innerHTML=renderCharts();
   else m.innerHTML=renderBackup();
-  wire(); if(curTab==="charts")wireCharts(); }
+  wire();
+  $$("#main [data-k]").forEach(g=>g.addEventListener("click",()=>{ const k=g.getAttribute("data-k");
+    if(chartSel===k){ chartSel=null; chartSelInfo=null; }
+    else{ chartSel=k; const hit=chartSegsCache.find(x=>x.s.k===k); chartSelInfo=hit?{vid:hit.vid,text:hit.fmt(hit.s)}:null; }
+    beep(660); renderAll(); })); }
 function wire(){
   const nmA=$("#nmA"), nmB=$("#nmB");
   if(nmA)nmA.addEventListener("change",()=>{ state.names.a=nmA.value.trim()||"Spouse A"; save(); renderAll(); });
