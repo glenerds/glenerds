@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowderRoom — Reloading Log</title>
+<style>
+:root{--bg:#f7f5f0;--card:#fff;--ink:#22201c;--mut:#6b655c;--line:#e3ddd2;--acc:#b3541e;--acc-ink:#fff;--q:#3d9a50;--nq:#d64545;--warn:#c77b1a}
+html[data-theme="dark"]{--bg:#1c1a17;--card:#26231e;--ink:#f0ece4;--mut:#a8a094;--line:#3a352c;--acc:#e07b39;--acc-ink:#1c1a17;--q:#5cc475;--nq:#e86a6a;--warn:#e0a04a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header{background:var(--bg);border-bottom:1px solid var(--line)}
+.hdr-inner{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;margin-right:auto}
+.brand svg{width:34px;height:34px}
+.hdr-btns{display:flex;align-items:center;gap:8px}
+.hdr-btns button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.hdr-btns button:active{transform:scale(.93);filter:brightness(.94)}
+.hdr-btns button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.hdr-btns button svg{width:22px;height:22px}
+.pill{height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;padding:0 18px;font-size:15px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center}
+.pill:active{transform:scale(.95);filter:brightness(.94)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.tabs button:active{transform:scale(.95)}
+.tabs button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:20px}
+.card h3{margin:14px 0 8px;font-size:17px}
+.muted{color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:15px;padding:3px 0}
+.kv b{font-weight:700}
+.badge{display:inline-block;font-size:15px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--line);color:var(--ink)}
+.badge.low{background:var(--warn);color:#fff}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;min-height:44px}
+.btn:active{transform:scale(.95);filter:brightness(.94)}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.danger{background:var(--nq);color:#fff;border-color:var(--nq)}
+.btn.small{min-height:40px;padding:8px 14px}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:600;cursor:pointer;min-height:40px}
+.iconbtn:active{transform:scale(.94);filter:brightness(.94)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:700}
+#quotaWarn{display:none;background:var(--nq);color:#fff;padding:10px 16px;border-radius:10px;margin-bottom:12px;font-size:15px;font-weight:600}
+#quotaWarn.show{display:block}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:15px;font-weight:600;max-width:90vw;z-index:99;display:none}
+#modalHost:empty{display:none}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--card);color:var(--ink);border-radius:14px;padding:20px;max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 12px;font-size:20px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:15px;font-weight:700;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px;font-family:inherit}
+.field textarea{min-height:80px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column}
+.chart-card h3{margin:0 0 8px;font-size:17px}
+.chart-card svg{width:100%;height:auto}
+.chart-val{font-size:15px;font-weight:700;margin-top:8px;min-height:22px}
+#tab-charts g[data-k]{outline:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+#tab-charts g[data-k]:focus{outline:none}
+.disclaimer{background:var(--card);border:2px solid var(--warn);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin-bottom:14px}
+#printArea{display:none}
+@media print{
+  body>*{display:none!important}
+  #printArea{display:block!important;color:#000}
+  #printArea h1{font-size:22px;margin:0 0 8px}
+  #printArea h2{font-size:18px;margin:14px 0 6px}
+  #printArea table{width:100%;border-collapse:collapse;font-size:13px}
+  #printArea th,#printArea td{border:1px solid #999;padding:5px 7px;text-align:left}
+  .plabel{border:2px solid #000;padding:10px;margin:8px 0;page-break-inside:avoid}
+  .plabel b{font-size:16px}
+}
+@media(max-width:760px){
+  .hdr-inner{flex-wrap:wrap}
+  .brand{font-size:19px}
+  .pill{font-size:14px;padding:0 12px;height:40px}
+  .frow{grid-template-columns:1fr}
+  .charts{grid-template-columns:1fr}
+  th,td{font-size:15px}
+}
+</style>
+</head>
+<body>
+<header><div class="hdr-inner">
+  <div class="brand"><svg viewBox="0 0 34 34" aria-hidden="true"><g><rect x="13" y="4" width="8" height="7" rx="2" fill="#b3541e"/><path d="M13 11h8l3 5v13a2 2 0 01-2 2h-10a2 2 0 01-2-2V16l3-5z" fill="#e07b39" stroke="#7a3a12" stroke-width="1.5"/><rect x="14.5" y="17" width="5" height="9" rx="1" fill="#7a3a12"/></g></svg>PowderRoom</div>
+  <div class="hdr-btns">
+    <a class="pill" href="https://glenerds.gumroad.com">More Apps</a>
+    <button id="btnSample" title="Sample data" aria-label="Toggle sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6M10 3v6.3L4.8 18a2 2 0 001.8 3h10.8a2 2 0 001.8-3L14 9.3V3"/><path d="M7.5 14h9"/></svg></button>
+    <button id="btnTheme" title="Toggle dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
+    <button id="btnSound" title="Toggle sound" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 010 7"/></svg></button>
+  </div>
+</div></header>
+<main class="wrap">
+  <div id="quotaWarn">Storage is full — your latest change was not saved. Free up space and try again.</div>
+  <div class="disclaimer">⚠️ PowderRoom contains no published load data. Always work up loads from published manuals and never exceed maximum charges.</div>
+  <nav class="tabs" id="tabs">
+    <button data-t="recipes" class="on">Recipes</button>
+    <button data-t="comps">Components</button>
+    <button data-t="batches">Batches</button>
+    <button data-t="range">Range</button>
+    <button data-t="charts">Charts</button>
+    <button data-t="backup">Backup</button>
+  </nav>
+  <section id="tab-recipes"></section>
+  <section id="tab-comps" hidden></section>
+  <section id="tab-batches" hidden></section>
+  <section id="tab-range" hidden></section>
+  <section id="tab-charts" hidden></section>
+  <section id="tab-backup" hidden></section>
+</main>
+<div id="modalHost"></div>
+<div id="toast"></div>
+<div id="printArea"></div>
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const LSKEY="powderroom-v1";
+function uid(){ return "x"+Date.now().toString(36)+Math.floor(Math.random()*1e6).toString(36); }
+function esc(s){ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function noProto(k,v){ return k==="__proto__"?undefined:v; }
+function strictDate(s){ if(!/^\d{4}-\d{2}-\d{2}$/.test(s||""))return false; const[a,b,c]=s.split("-").map(Number); if(b<1||b>12||c<1||c>31)return false; const d=new Date(a,b-1,c); return d.getFullYear()===a&&d.getMonth()===b-1&&d.getDate()===c; }
+function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function addDays(iso,n){ const[a,b,c]=iso.split("-").map(Number); const d=new Date(a,b-1,c); d.setDate(d.getDate()+n); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function fmtDate(iso){ if(!strictDate(iso))return "—"; const[a,b,c]=iso.split("-").map(Number); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][b-1]+" "+c+", "+a; }
+function monthKey(iso){ return iso.slice(0,7); }
+function monthLabel(m){ const[y,mo]=m.split("-").map(Number); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][mo-1]+" '"+String(y).slice(2); }
+function r1(v){ return Math.round(v*10)/10; }
+function r2(v){ return Math.round(v*100)/100; }
+function money(v){ return "$"+(Math.round(v*100)/100).toFixed(2); }
+function beep(f){ if(state.settings.sound===false)return; try{ const ctx=beep.c||(beep.c=new (window.AudioContext||window.webkitAudioContext)()); const o=ctx.createOscillator(),g=ctx.createGain(); o.frequency.value=f||600; o.type="sine"; g.gain.setValueAtTime(.08,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+.16); }catch(e){} }
+let toastT=null;
+function toast(m){ const t=$("#toast"); t.textContent=m; t.style.display="block"; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display="none",2800); }
+function blankState(){ return {recipes:[],comps:[],batches:[],results:[],settings:{sound:true,theme:null,sample:false}}; }
+let state=blankState(), quotaWarned=false;
+function save(){ if(state.settings.sample)return; try{ localStorage.setItem(LSKEY,JSON.stringify(state)); quotaWarned=false; $("#quotaWarn").classList.remove("show"); }catch(e){ if(!quotaWarned){quotaWarned=true; $("#quotaWarn").classList.add("show");} } }
+function validRecipe(r){ return r&&typeof r==="object"&&typeof r.name==="string"&&r.name.trim().length>0; }
+function validComp(c){ return c&&typeof c==="object"&&["powder","primer","bullet","brass"].includes(c.type)&&typeof c.name==="string"&&c.name.trim().length>0; }
+function validBatch(b){ return b&&typeof b==="object"&&typeof b.recipeId==="string"&&strictDate(b.date)&&Number.isFinite(+b.rounds)&&+b.rounds>0; }
+function validResult(r){ return r&&typeof r==="object"&&typeof r.recipeId==="string"&&strictDate(r.date); }
+function sanitizeRecipe(r){ return {id:String(r.id||uid()),name:String(r.name),caliber:String(r.caliber||""),bulletGr:Math.min(1000,Math.max(0,+r.bulletGr||0)),bulletType:String(r.bulletType||""),powder:String(r.powder||""),chargeGr:Math.min(150,Math.max(0,+r.chargeGr||0)),primer:String(r.primer||""),brass:String(r.brass||""),coal:Math.min(10,Math.max(0,+r.coal||0)),velRef:Math.min(5000,Math.max(0,+r.velRef||0)),notes:String(r.notes||"")}; }
+function sanitizeComp(c){ return {id:String(c.id||uid()),type:["powder","primer","bullet","brass"].includes(c.type)?c.type:"powder",name:String(c.name),qty:Math.min(1e9,Math.max(0,+c.qty||0)),cost:Math.min(1e9,Math.max(0,+c.cost||0))}; }
+function sanitizeBatch(b){ return {id:String(b.id||uid()),recipeId:String(b.recipeId),date:strictDate(b.date)?b.date:todayISO(),rounds:Math.min(100000,Math.max(1,Math.floor(+b.rounds||1))),lot:String(b.lot||""),notes:String(b.notes||"")}; }
+function sanitizeResult(r){ return {id:String(r.id||uid()),recipeId:String(r.recipeId),date:strictDate(r.date)?r.date:todayISO(),groupIn:r2(Math.min(100,Math.max(0,+r.groupIn||0))),yards:Math.min(2000,Math.max(0,+r.yards||100)),velocity:Math.min(5000,Math.max(0,+r.velocity||0)),sd:Math.min(500,Math.max(0,+r.sd||0)),es:Math.min(1000,Math.max(0,+r.es||0)),notes:String(r.notes||"")}; }
+function load(){ try{ const raw=localStorage.getItem(LSKEY); if(!raw){state=blankState();return;} const d=JSON.parse(raw,noProto); if(!d||typeof d!=="object"||!d.settings){state=blankState();return;} state=Object.assign(blankState(),d);
+  const dedupe=arr=>{ const seen=new Set(); return arr.filter(x=>{ if(seen.has(x.id))return false; seen.add(x.id); return true; }); };
+  state.recipes=dedupe((Array.isArray(d.recipes)?d.recipes:[]).filter(validRecipe).map(sanitizeRecipe));
+  state.comps=dedupe((Array.isArray(d.comps)?d.comps:[]).filter(validComp).map(sanitizeComp));
+  const rids=new Set(state.recipes.map(x=>x.id));
+  state.batches=(Array.isArray(d.batches)?d.batches:[]).filter(validBatch).filter(b=>rids.has(b.recipeId)).map(sanitizeBatch);
+  state.results=(Array.isArray(d.results)?d.results:[]).filter(validResult).filter(x=>rids.has(x.recipeId)).map(sanitizeResult);
+  state.settings=Object.assign(blankState().settings,d.settings||{});
+  if(typeof state.settings.sound!=="boolean")state.settings.sound=true;
+ }catch(e){ state=blankState(); } }
+/* ============ helpers ============ */
+function recipeName(id){ const r=state.recipes.find(x=>x.id===id); return r?r.name:"—"; }
+function findComp(type,name){ const n=String(name||"").trim().toLowerCase(); if(!n)return null; return state.comps.find(c=>c.type===type&&c.name.trim().toLowerCase()===n)||null; }
+function bulletName(r){ return r.bulletType?r.bulletGr+"gr "+r.bulletType:String(r.bulletGr)+"gr"; }
+function findBullet(r){ const w=new RegExp("\\b"+r.bulletGr+"(gr)?\\b","i"); return findComp("bullet",bulletName(r))||state.comps.find(c=>c.type==="bullet"&&w.test(c.name))||null; }
+function costPerRound(r){ // powder + primer + bullet (brass is reusable)
+  const pw=findComp("powder",r.powder), pr=findComp("primer",r.primer), bl=findBullet(r);
+  const pc=pw?(r.chargeGr/7000)*pw.cost:0, prc=pr?pr.cost/1000:0, blc=bl?bl.cost/100:0;
+  return {total:r1((pc+prc+blc)*100)/100,pc,prc,blc,missing:[!pw&&r.powder?"powder":null,!pr&&r.primer?"primer":null,!bl?"bullet":null].filter(Boolean)};
+}
+function deductForBatch(r,rounds){ // returns {ok,used,warnings}; brass is reusable -> never auto-deducted
+  const needs=[
+    {type:"powder",name:r.powder,amt:r1(rounds*r.chargeGr/7000*1000)/1000,unit:" lb"},
+    {type:"primer",name:r.primer,amt:rounds,unit:""},
+    {type:"bullet",name:bulletName(r),amt:rounds,unit:"",fuzzy:findBullet(r)}
+  ];
+  const short=needs.map(n=>{ const c=n.fuzzy||findComp(n.type,n.name);
+    if(!c)return `No ${n.type} "${n.name}" in inventory.`;
+    if(c.qty<n.amt-1e-9)return `Not enough ${c.name}: need ${n.amt}${n.unit}, have ${c.qty}${n.unit}.`;
+    return null; }).filter(Boolean);
+  if(short.length)return {ok:false,short};
+  const used=[],warnings=[];
+  needs.forEach(n=>{ const c=n.fuzzy||findComp(n.type,n.name);
+    c.qty=r1((c.qty-n.amt)*100)/100;
+    used.push(`${c.name}: −${n.amt}${n.unit}`);
+    if(c.qty<=0)warnings.push(`${c.name} is depleted.`); });
+  return {ok:true,used,warnings};
+}
+function lowStock(c){ return (c.type==="powder"&&c.qty<0.5)||(c.type==="primer"&&c.qty<200)||(c.type==="bullet"&&c.qty<100)||(c.type==="brass"&&c.qty<100); }
+function compUnit(c){ return c.type==="powder"?"lb":c.type==="primer"?"ct":"ct"; }
+/* ============ sample data ============ */
+function makeSample(){ let seed=20261013; const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const recipes=[
+    {id:"rc1",name:"308 Match",caliber:".308 Win",bulletGr:168,bulletType:"SMK HPBT",powder:"Varget",chargeGr:43.5,primer:"CCI 200 Large Rifle",brass:"Lapua .308",coal:2.8,velRef:2650,notes:"Go-to 600yd load. Work up from 41.0gr."},
+    {id:"rc2",name:"9mm Plinking",caliber:"9mm Luger",bulletGr:124,bulletType:"FMJ RN",powder:"CFE Pistol",chargeGr:4.8,primer:"CCI 500 Small Pistol",brass:"Mixed 9mm",coal:1.15,velRef:1080,notes:"Soft shooting practice load."},
+    {id:"rc3",name:"223 Varmint",caliber:".223 Rem",bulletGr:55,bulletType:"FMJ BT",powder:"H335",chargeGr:25.3,primer:"CCI 400 Small Rifle",brass:"LC .223",coal:2.26,velRef:3200,notes:"Prairie dog load."},
+    {id:"rc4",name:"45 ACP Target",caliber:".45 ACP",bulletGr:230,bulletType:"FMJ RN",powder:"Bullseye",chargeGr:5.0,primer:"WLP Large Pistol",brass:"Starline .45",coal:1.26,velRef:830,notes:"Classic bullseye recipe."},
+    {id:"rc5",name:"6.5 CM Long Range",caliber:"6.5 Creedmoor",bulletGr:140,bulletType:"ELD-M",powder:"H4350",chargeGr:41.0,primer:"CCI 200 Large Rifle",brass:"Hornady 6.5CM",coal:2.8,velRef:2750,notes:"PRS club match load."}];
+  const comps=[
+    {id:"cp1",type:"powder",name:"Varget",qty:2.4,cost:42.99},{id:"cp2",type:"powder",name:"CFE Pistol",qty:1.1,cost:32.99},
+    {id:"cp3",type:"powder",name:"H335",qty:3.2,cost:36.99},{id:"cp4",type:"powder",name:"Bullseye",qty:0.8,cost:29.99},
+    {id:"cp5",type:"powder",name:"H4350",qty:1.6,cost:44.99},
+    {id:"cp6",type:"primer",name:"CCI 200 Large Rifle",qty:2400,cost:89.99},{id:"cp7",type:"primer",name:"CCI 500 Small Pistol",qty:1800,cost:79.99},
+    {id:"cp8",type:"primer",name:"CCI 400 Small Rifle",qty:3200,cost:84.99},{id:"cp9",type:"primer",name:"WLP Large Pistol",qty:900,cost:82.99},
+    {id:"cp10",type:"bullet",name:"168gr SMK HPBT",qty:850,cost:42.99},{id:"cp11",type:"bullet",name:"124gr FMJ RN",qty:1500,cost:18.99},
+    {id:"cp12",type:"bullet",name:"55gr FMJ BT",qty:2200,cost:12.99},{id:"cp13",type:"bullet",name:"230gr FMJ RN",qty:600,cost:24.99},
+    {id:"cp14",type:"bullet",name:"140gr ELD-M",qty:400,cost:38.99},
+    {id:"cp15",type:"brass",name:"Lapua .308",qty:300,cost:0},{id:"cp16",type:"brass",name:"Mixed 9mm",qty:1200,cost:0},
+    {id:"cp17",type:"brass",name:"LC .223",qty:900,cost:0},{id:"cp18",type:"brass",name:"Starline .45",qty:450,cost:0},
+    {id:"cp19",type:"brass",name:"Hornady 6.5CM",qty:200,cost:0}];
+  const batches=[],results=[]; const start=addDays(todayISO(),-180);
+  for(let i=0;i<20;i++){ const r=pick(recipes); const d=addDays(start,Math.floor(rnd()*180)); const rounds=pick([50,50,100,100,100,200,20]);
+    batches.push({id:"b"+i,recipeId:r.id,date:d,rounds,lot:"LOT-"+(1000+i),notes:rnd()<.3?"Chronographed this lot.":""}); }
+  const velBase={"rc1":2650,"rc2":1080,"rc3":3200,"rc4":830,"rc5":2750};
+  const grpBase={"rc1":0.8,"rc2":2.1,"rc3":1.1,"rc4":2.4,"rc5":0.6};
+  for(let i=0;i<15;i++){ const r=pick(recipes); const d=addDays(start,Math.floor(rnd()*180));
+    const v=Math.round(velBase[r.id]*(1+(rnd()-.5)*.02)), sd=r1(rnd()*12+2), es=Math.round(sd*(2+rnd()*2));
+    results.push({id:"g"+i,recipeId:r.id,date:d,groupIn:r2(grpBase[r.id]*(0.8+rnd()*0.5)),yards:r.caliber==="9mm Luger"||r.caliber===".45 ACP"?25:100,velocity:v,sd,es,notes:rnd()<.25?"Calm day, good data.":""}); }
+  batches.sort((a,b)=>b.date.localeCompare(a.date)); results.sort((a,b)=>b.date.localeCompare(a.date));
+  return {recipes,comps,batches,results};
+}
+/* ============ tabs ============ */
+let curTab="recipes", chartSel=null, chartSelInfo=null;
+function showTab(t){ curTab=t; document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));
+  ["recipes","comps","batches","range","charts","backup"].forEach(x=>$("#tab-"+x).hidden=x!==t);
+  ({recipes:renderRecipes,comps:renderComps,batches:renderBatches,range:renderRange,charts:renderCharts,backup:renderBackup})[t](); }
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{beep(500);showTab(b.dataset.t);});
+function renderAll(){ showTab(curTab); }
+/* ---- recipes ---- */
+function renderRecipes(){ const el=$("#tab-recipes");
+  el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Load recipes (${state.recipes.length})</h2><button class="btn small pri" id="rcAdd">+ Add recipe</button><button class="btn small" id="rcPrint">🖨 Print bench report</button></div>
+  <p class="muted">Your own data only — PowderRoom ships with no published load data.</p></div>
+  <div class="grid">${state.recipes.map(r=>{ const c=costPerRound(r); const nb=state.batches.filter(b=>b.recipeId===r.id).length, nr=state.results.filter(x=>x.recipeId===r.id).length;
+    return `<div class="card"><h2 style="font-size:18px">${esc(r.name)}</h2><div class="muted">${esc(r.caliber)}</div>
+    <div class="kv"><span>Bullet</span><b>${r.bulletGr}gr ${esc(r.bulletType)}</b></div>
+    <div class="kv"><span>Powder</span><b>${esc(r.powder)} ${r.chargeGr}gr</b></div>
+    <div class="kv"><span>Primer</span><b>${esc(r.primer)}</b></div>
+    <div class="kv"><span>Brass</span><b>${esc(r.brass)}</b></div>
+    <div class="kv"><span>COAL</span><b>${r.coal?r.coal+' in':"—"}</b></div>
+    <div class="kv"><span>Cost / round</span><b>${money(c.total)}</b></div>
+    ${c.missing.length?`<div class="muted">Missing inventory for cost: ${c.missing.map(esc).join(", ")}</div>`:""}
+    <div class="muted">${nb} batches · ${nr} range results</div>
+    ${r.notes?`<div class="muted" style="margin-top:6px">${esc(r.notes)}</div>`:""}
+    <div class="rowbtns"><button class="iconbtn" data-re="${esc(r.id)}">Edit</button><button class="iconbtn" data-rx="${esc(r.id)}">Delete</button><button class="iconbtn" data-rp="${esc(r.id)}">🖨 Label</button></div></div>`; }).join("")||'<div class="card"><p class="muted">No recipes yet. Add your first load above.</p></div>'}</div>`;
+  $("#rcAdd").onclick=()=>recipeForm();
+  $("#rcPrint").onclick=()=>{ buildPrintReport(); window.print(); };
+  el.querySelectorAll("[data-re]").forEach(b=>b.onclick=()=>recipeForm(state.recipes.find(x=>x.id===b.dataset.re)));
+  el.querySelectorAll("[data-rp]").forEach(b=>b.onclick=()=>{ buildPrintLabel(state.recipes.find(x=>x.id===b.dataset.rp)); window.print(); });
+  el.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{ const r=state.recipes.find(x=>x.id===b.dataset.rx);
+    if(confirm(`Delete recipe "${r.name}" and ALL its batches and range results? This cannot be undone.`)){ state.recipes=state.recipes.filter(x=>x.id!==r.id); state.batches=state.batches.filter(x=>x.recipeId!==r.id); state.results=state.results.filter(x=>x.recipeId!==r.id); save(); beep(400); renderAll(); toast("Recipe deleted."); } }); }
+function recipeForm(r){ const isNew=!r; r=r||{name:"",caliber:"",bulletGr:"",bulletType:"",powder:"",chargeGr:"",primer:"",brass:"",coal:"",velRef:"",notes:""};
+  const dl=(type)=>[...new Set(state.comps.filter(c=>c.type===type).map(c=>c.name))].map(n=>`<option value="${esc(n)}">`).join("");
+  openModal(`<h2>${isNew?"Add":"Edit"} recipe</h2>
+    <div class="field"><label>Recipe name</label><input id="fName" value="${esc(r.name)}" placeholder="e.g. 308 Match"></div>
+    <div class="frow"><div class="field"><label>Caliber</label><input id="fCal" value="${esc(r.caliber)}" placeholder=".308 Win"></div>
+    <div class="field"><label>Bullet weight (gr)</label><input id="fBgr" type="number" min="0" max="1000" step="1" value="${esc(r.bulletGr)}"></div></div>
+    <div class="field"><label>Bullet type</label><input id="fBt" value="${esc(r.bulletType)}" placeholder="SMK HPBT"></div>
+    <div class="frow"><div class="field"><label>Powder</label><input id="fPw" list="dlPw" value="${esc(r.powder)}"><datalist id="dlPw">${dl("powder")}</datalist></div>
+    <div class="field"><label>Charge (grains)</label><input id="fCh" type="number" min="0" max="150" step="0.1" value="${esc(r.chargeGr)}"></div></div>
+    <div class="frow"><div class="field"><label>Primer</label><input id="fPr" list="dlPr" value="${esc(r.primer)}"><datalist id="dlPr">${dl("primer")}</datalist></div>
+    <div class="field"><label>Brass</label><input id="fBr" list="dlBr" value="${esc(r.brass)}"><datalist id="dlBr">${dl("brass")}</datalist></div></div>
+    <div class="frow"><div class="field"><label>COAL (in)</label><input id="fCoal" type="number" min="0" max="10" step="0.001" value="${esc(r.coal)}"></div>
+    <div class="field"><label>Ref velocity (fps, optional)</label><input id="fVel" type="number" min="0" max="5000" step="1" value="${esc(r.velRef)}"></div></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes">${esc(r.notes)}</textarea></div>
+    <div class="rowbtns"><button class="btn pri" id="mSave">Save recipe</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim(); if(!name){toast("Give the recipe a name.");return;}
+    const charge=+$("#fCh").value||0; if(charge<0||charge>150){toast("Charge must be 0–150 grains.");return;}
+    const rec={id:isNew?uid():r.id,name,caliber:$("#fCal").value.trim(),bulletGr:Math.max(0,Math.min(1000,+$("#fBgr").value||0)),bulletType:$("#fBt").value.trim(),powder:$("#fPw").value.trim(),chargeGr:charge,primer:$("#fPr").value.trim(),brass:$("#fBr").value.trim(),coal:Math.max(0,Math.min(10,+$("#fCoal").value||0)),velRef:Math.max(0,Math.min(5000,+$("#fVel").value||0)),notes:$("#fNotes").value.trim()};
+    if(isNew)state.recipes.push(rec); else Object.assign(state.recipes.find(x=>x.id===r.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast(isNew?"Recipe added.":"Recipe updated."); }; }
+/* ---- components ---- */
+const CTYPES={powder:"Powder",primer:"Primers",bullet:"Bullets",brass:"Brass"};
+function renderComps(){ const el=$("#tab-comps");
+  el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Component inventory</h2><button class="btn small pri" id="cAdd">+ Add component</button></div>
+  <p class="muted">Powder in pounds · primers/bullets/brass in counts. Costs feed the cost-per-round math.</p></div>
+  ${Object.keys(CTYPES).map(t=>{ const list=state.comps.filter(c=>c.type===t);
+    return `<div class="card"><h3>${CTYPES[t]} (${list.length})</h3>${list.length?`<table><tr><th>Name</th><th>On hand</th><th>Cost</th><th></th></tr>${list.map(c=>`<tr><td>${esc(c.name)} ${lowStock(c)?'<span class="badge low">Low</span>':""}</td><td>${c.qty} ${compUnit(c)}</td><td>${c.type==="powder"?money(c.cost)+"/lb":c.type==="primer"?money(c.cost)+"/1k":money(c.cost)+"/100"}</td><td style="white-space:nowrap"><button class="iconbtn" data-ce="${esc(c.id)}">Edit</button> <button class="iconbtn" data-cx="${esc(c.id)}">✕</button></td></tr>`).join("")}</table>`:'<p class="muted">None yet.</p>'}</div>`; }).join("")}`;
+  $("#cAdd").onclick=()=>compForm();
+  el.querySelectorAll("[data-ce]").forEach(b=>b.onclick=()=>compForm(state.comps.find(x=>x.id===b.dataset.ce)));
+  el.querySelectorAll("[data-cx]").forEach(b=>b.onclick=()=>{ const c=state.comps.find(x=>x.id===b.dataset.cx);
+    const refs=state.recipes.filter(r=>r.powder===c.name||r.primer===c.name||r.brass===c.name||bulletName(r)===c.name||(c.type==="bullet"&&new RegExp("\\b"+r.bulletGr+"(gr)?\\b","i").test(c.name))).length;
+    if(confirm(`Delete ${c.name} from inventory?${refs?` ${refs} recipe${refs===1?"":"s"} use${refs===1?"s":""} it — their costs will show as missing.`:""}`)){ state.comps=state.comps.filter(x=>x.id!==c.id); save(); beep(400); renderAll(); toast("Component deleted."); } }); }
+function compForm(c){ const isNew=!c; c=c||{type:"powder",name:"",qty:"",cost:""};
+  openModal(`<h2>${isNew?"Add":"Edit"} component</h2>
+    <div class="field"><label>Type</label><select id="fType">${Object.keys(CTYPES).map(t=>`<option value="${t}"${c.type===t?" selected":""}>${CTYPES[t]}</option>`).join("")}</select></div>
+    <div class="field"><label>Name</label><input id="fName" value="${esc(c.name)}" placeholder="e.g. Varget"></div>
+    <div class="frow"><div class="field"><label>On hand (<span id="uQty">lb</span>)</label><input id="fQty" type="number" min="0" step="0.01" value="${esc(c.qty)}"></div>
+    <div class="field"><label>Cost (<span id="uCost">$/lb</span>)</label><input id="fCost" type="number" min="0" step="0.01" value="${esc(c.cost)}"></div></div>
+    <div class="rowbtns"><button class="btn pri" id="mSave">Save</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  const units={powder:["lb","$/lb"],primer:["count","$/1k"],bullet:["count","$/100"],brass:["count","$/100"]};
+  const upd=()=>{ const u=units[$("#fType").value]; $("#uQty").textContent=u[0]; $("#uCost").textContent=u[1]; };
+  $("#fType").onchange=upd; upd();
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim(); if(!name){toast("Name the component.");return;}
+    const qty=Math.max(0,+$("#fQty").value||0), cost=Math.max(0,+$("#fCost").value||0);
+    const rec={id:isNew?uid():c.id,type:$("#fType").value,name,qty:r1(qty*100)/100,cost:r1(cost*100)/100};
+    if(isNew)state.comps.push(rec); else Object.assign(state.comps.find(x=>x.id===c.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast(isNew?"Component added.":"Component updated."); }; }
+/* ---- batches ---- */
+function renderBatches(){ const el=$("#tab-batches");
+  const list=state.batches.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  const totR=list.reduce((t,b)=>t+b.rounds,0);
+  el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Batches (${list.length} · ${totR} rounds)</h2><button class="btn small pri" id="bAdd" ${state.recipes.length?"":"disabled"}>+ Log batch</button></div>
+  <p class="muted">Logging a batch auto-deducts powder, primers and bullets from inventory. Brass is reusable — adjust its count by hand.</p></div>
+  ${list.length?`<div class="card"><table><tr><th>Date</th><th>Recipe</th><th>Rounds</th><th>Lot</th><th></th></tr>${list.map(b=>`<tr><td>${fmtDate(b.date)}</td><td>${esc(recipeName(b.recipeId))}</td><td>${b.rounds}</td><td>${esc(b.lot)||"—"}</td><td style="white-space:nowrap"><button class="iconbtn" data-bx="${esc(b.id)}">✕</button></td></tr>`).join("")}</table></div>`:'<div class="card"><p class="muted">No batches logged yet.</p></div>'}`;
+  if(state.recipes.length)$("#bAdd").onclick=()=>batchForm();
+  el.querySelectorAll("[data-bx]").forEach(x=>x.onclick=()=>{ if(confirm("Delete this batch? (Inventory is NOT restored.)")){ state.batches=state.batches.filter(b=>b.id!==x.dataset.bx); save(); beep(400); renderAll(); toast("Batch deleted."); } }); }
+function batchForm(){ const r0=state.recipes[0];
+  openModal(`<h2>Log batch</h2>
+    <div class="field"><label>Recipe</label><select id="fR">${state.recipes.map(r=>`<option value="${esc(r.id)}">${esc(r.name)} — ${esc(r.caliber)}</option>`).join("")}</select></div>
+    <div class="frow"><div class="field"><label>Date</label><input id="fD" type="date" value="${todayISO()}"></div>
+    <div class="field"><label>Rounds loaded</label><input id="fN" type="number" min="1" max="100000" step="1" value="50"></div></div>
+    <div class="field"><label>Lot number</label><input id="fLot" placeholder="optional"></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes"></textarea></div>
+    <div class="rowbtns"><button class="btn pri" id="mSave">Log batch & deduct</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const date=$("#fD").value; if(!strictDate(date)){toast("Pick a real date.");return;}
+    const rounds=Math.max(1,Math.min(100000,Math.floor(+$("#fN").value||0)));
+    const r=state.recipes.find(x=>x.id===$("#fR").value); if(!r){toast("Pick a recipe.");return;}
+    const chk=deductForBatch(r,rounds);
+    if(!chk.ok){ toast("Batch not logged — "+chk.short.join(" ")); return; }
+    state.batches.push({id:uid(),recipeId:r.id,date,rounds,lot:$("#fLot").value.trim(),notes:$("#fNotes").value.trim()});
+    save(); beep(700); closeModal(); renderAll();
+    toast("Batch logged."+(chk.used.length?" Deducted: "+chk.used.join(", ")+".":"")+(chk.warnings.length?" ⚠ "+chk.warnings.join(" "):"")); }; }
+/* ---- range ---- */
+function renderRange(){ const el=$("#tab-range");
+  const list=state.results.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  el.innerHTML=`<div class="card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0;flex:1">Range results (${list.length})</h2><button class="btn small pri" id="gAdd" ${state.recipes.length?"":"disabled"}>+ Log result</button></div></div>
+  ${list.length?`<div class="card"><table><tr><th>Date</th><th>Recipe</th><th>Group</th><th>Velocity</th><th>SD/ES</th><th></th></tr>${list.map(g=>`<tr><td>${fmtDate(g.date)}</td><td>${esc(recipeName(g.recipeId))}</td><td>${g.groupIn?g.groupIn+' in @ '+g.yards+' yd':"—"}</td><td>${g.velocity?g.velocity+" fps":"—"}</td><td>${g.sd||g.es?g.sd+"/"+g.es:"—"}</td><td style="white-space:nowrap"><button class="iconbtn" data-ge="${esc(g.id)}">Edit</button> <button class="iconbtn" data-gx="${esc(g.id)}">✕</button></td></tr>`).join("")}</table></div>`:'<div class="card"><p class="muted">No range results yet.</p></div>'}`;
+  if(state.recipes.length)$("#gAdd").onclick=()=>rangeForm();
+  el.querySelectorAll("[data-ge]").forEach(b=>b.onclick=()=>rangeForm(state.results.find(x=>x.id===b.dataset.ge)));
+  el.querySelectorAll("[data-gx]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this range result?")){ state.results=state.results.filter(x=>x.id!==b.dataset.gx); save(); beep(400); renderAll(); toast("Result deleted."); } }); }
+function rangeForm(g){ const isNew=!g; g=g||{recipeId:state.recipes[0].id,date:todayISO(),groupIn:"",yards:100,velocity:"",sd:"",es:"",notes:""};
+  openModal(`<h2>${isNew?"Log":"Edit"} range result</h2>
+    <div class="frow"><div class="field"><label>Recipe</label><select id="fR">${state.recipes.map(r=>`<option value="${esc(r.id)}"${r.id===g.recipeId?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>Date</label><input id="fD" type="date" value="${esc(g.date)}"></div></div>
+    <div class="frow"><div class="field"><label>Group size (in)</label><input id="fG" type="number" min="0" max="100" step="0.01" value="${esc(g.groupIn)}"></div>
+    <div class="field"><label>Distance (yards)</label><input id="fY" type="number" min="0" max="2000" step="1" value="${esc(g.yards)||100}"></div></div>
+    <div class="frow"><div class="field"><label>Velocity (fps)</label><input id="fV" type="number" min="0" max="5000" step="1" value="${esc(g.velocity)}"></div>
+    <div class="field"><label>SD</label><input id="fSd" type="number" min="0" max="500" step="0.1" value="${esc(g.sd)}"></div></div>
+    <div class="field"><label>ES</label><input id="fEs" type="number" min="0" max="1000" step="1" value="${esc(g.es)}"></div>
+    <div class="field"><label>Notes</label><textarea id="fNotes">${esc(g.notes)}</textarea></div>
+    <div class="rowbtns"><button class="btn pri" id="mSave">Save result</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const date=$("#fD").value; if(!strictDate(date)){toast("Pick a real date.");return;}
+    const velocity=Math.max(0,Math.min(5000,+$("#fV").value||0));
+    const rec={id:isNew?uid():g.id,recipeId:$("#fR").value,date,groupIn:r2(Math.max(0,Math.min(100,+$("#fG").value||0))),yards:Math.max(0,Math.min(2000,+$("#fY").value||100)),velocity,sd:Math.max(0,Math.min(500,+$("#fSd").value||0)),es:Math.max(0,Math.min(1000,+$("#fEs").value||0)),notes:$("#fNotes").value.trim()};
+    if(isNew)state.results.push(rec); else Object.assign(state.results.find(x=>x.id===g.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast(isNew?"Result logged.":"Result updated."); }; }
+/* ============ charts ============ */
+function barsSVG(data,color,unit,suffix){ const mx=Math.max(...data.map(d=>d.v),1); const W=300,H=170,bw=W/Math.max(data.length,1);
+  return `<svg viewBox="-55 0 ${W+55} ${H}" role="img">`+data.map((d,i)=>{ const h=Math.max(2,(d.v/mx)*(H-58)); const x=i*bw+4;
+    const sel=chartSel===unit+i; const cx=(x+(bw-8)/2).toFixed(1);
+    return `<g data-k="${unit+i}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-50-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/><text x="${cx}" y="${H-10}" text-anchor="end" font-size="15" fill="var(--mut)" transform="rotate(45 ${cx} ${H-10})">${esc(d.l)}</text></g>`; }).join("")+`</svg>`; }
+function renderCharts(){ const el=$("#tab-charts");
+  const months=[]; const now=new Date(); for(let i=5;i>=0;i--){ const d=new Date(now.getFullYear(),now.getMonth()-i,1); months.push(d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")); }
+  const rpm=months.map(m=>({l:monthLabel(m),v:state.batches.filter(b=>monthKey(b.date)===m).reduce((t,b)=>t+b.rounds,0)}));
+  const vel=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.velocity>0); return {l:r.name.slice(0,10),v:rs.length?Math.round(rs.reduce((t,x)=>t+x.velocity,0)/rs.length):0}; }).filter(d=>d.v>0);
+  const grp=state.recipes.map(r=>{ const rs=state.results.filter(x=>x.recipeId===r.id&&x.groupIn>0); return {l:r.name.slice(0,10),v:rs.length?r2(rs.reduce((t,x)=>t+x.groupIn,0)/rs.length):0}; }).filter(d=>d.v>0);
+  const cpr=state.recipes.map(r=>({l:r.name.slice(0,10),v:r1(costPerRound(r).total*100)/100})).filter(d=>d.v>0);
+  el.innerHTML=`<div class="charts">
+    <div class="chart-card"><h3>Rounds loaded / month</h3>${barsSVG(rpm,"var(--acc)","m")}<div class="chart-val" id="cv0">${rpm.reduce((t,d)=>t+d.v,0)} rounds in 6 months</div></div>
+    <div class="chart-card"><h3>Avg velocity by recipe (fps)</h3>${vel.length?barsSVG(vel,"var(--q)","v"):'<p class="muted">Log range results with velocity to see this chart.</p>'}<div class="chart-val" id="cv1">${vel.length?vel.length+" recipes":"No data yet"}</div></div>
+    <div class="chart-card"><h3>Avg group size by recipe (in)</h3>${grp.length?barsSVG(grp,"var(--warn)","g"):'<p class="muted">Log range results with group sizes to see this chart.</p>'}<div class="chart-val" id="cv2">${grp.length?grp.length+" recipes":"No data yet"}</div></div>
+    <div class="chart-card"><h3>Cost per round by recipe</h3>${cpr.length?barsSVG(cpr,"var(--q)","c","$"):'<p class="muted">Add component costs to see this chart.</p>'}<div class="chart-val" id="cv3">${cpr.length?"Lower is cheaper":"No data yet"}</div></div>
+  </div>`;
+  wireCharts([
+    {segs:rpm.map((d,i)=>({k:"m"+i,label:d.l,v:d.v})),vid:"cv0",fmt:s=>`${s.label}: ${s.v} rounds`},
+    {segs:vel.map((d,i)=>({k:"v"+i,label:d.l,v:d.v})),vid:"cv1",fmt:s=>`${s.label}: ${s.v} fps avg`},
+    {segs:grp.map((d,i)=>({k:"g"+i,label:d.l,v:d.v})),vid:"cv2",fmt:s=>`${s.label}: ${s.v} in avg`},
+    {segs:cpr.map((d,i)=>({k:"c"+i,label:d.l,v:d.v})),vid:"cv3",fmt:s=>`${s.label}: ${money(s.v)}/round`}]);
+  if(chartSelInfo){ const t=document.getElementById(chartSelInfo.vid); if(t)t.textContent=chartSelInfo.text; } }
+function wireCharts(charts){ document.querySelectorAll("#tab-charts g[data-k]").forEach(g=>{
+  g.onclick=()=>{ const k=g.dataset.k; beep(650);
+    if(chartSel===k){ chartSel=null; chartSelInfo=null; }
+    else{ chartSel=k; const hit=charts.flatMap(c=>c.segs.map(s=>({s,vid:c.vid,fmt:c.fmt}))).find(x=>x.s.k===k);
+      chartSelInfo=hit?{vid:hit.vid,text:hit.fmt(hit.s)}:null; }
+    renderCharts(); }; }); }
+/* ============ print ============ */
+function buildPrintLabel(r){ const c=costPerRound(r);
+  $("#printArea").innerHTML=`<div class="plabel"><b>${esc(r.name)} — ${esc(r.caliber)}</b><br>
+  Bullet: ${r.bulletGr}gr ${esc(r.bulletType)} · Powder: ${esc(r.powder)} ${r.chargeGr}gr · Primer: ${esc(r.primer)}<br>
+  Brass: ${esc(r.brass)} · COAL: ${r.coal||"—"} in · Cost/round: ${money(c.total)}<br>
+  <span style="font-size:12px">PowderRoom — your own data. Verify against published manuals. Never exceed maximum charges.</span></div>`; }
+function buildPrintReport(){ $("#printArea").innerHTML=`<h1>PowderRoom bench report — ${fmtDate(todayISO())}</h1>`+state.recipes.map(r=>{ const c=costPerRound(r);
+    const bs=state.batches.filter(b=>b.recipeId===r.id), rs=state.results.filter(x=>x.recipeId===r.id);
+    const totR=bs.reduce((t,b)=>t+b.rounds,0);
+    const avgV=rs.filter(x=>x.velocity>0), bestG=rs.filter(x=>x.groupIn>0);
+    return `<h2>${esc(r.name)} — ${esc(r.caliber)}</h2><table>
+    <tr><th>Bullet</th><td>${r.bulletGr}gr ${esc(r.bulletType)}</td><th>Powder</th><td>${esc(r.powder)} ${r.chargeGr}gr</td></tr>
+    <tr><th>Primer</th><td>${esc(r.primer)}</td><th>Brass</th><td>${esc(r.brass)}</td></tr>
+    <tr><th>COAL</th><td>${r.coal||"—"} in</td><th>Cost/round</th><td>${money(c.total)}</td></tr>
+    <tr><th>Batches</th><td>${bs.length} (${totR} rounds)</td><th>Range results</th><td>${rs.length}</td></tr>
+    <tr><th>Avg velocity</th><td>${avgV.length?Math.round(avgV.reduce((t,x)=>t+x.velocity,0)/avgV.length)+" fps":"—"}</td><th>Best group</th><td>${bestG.length?r2(Math.min(...bestG.map(x=>x.groupIn)))+" in":"—"}</td></tr></table>
+    ${r.notes?`<p>${esc(r.notes)}</p>`:""}`; }).join("")+`<p style="font-size:12px">PowderRoom contains no published load data. Always work up loads from published manuals and never exceed maximum charges.</p>`; }
+/* ============ backup ============ */
+function renderBackup(){ const el=$("#tab-backup");
+  el.innerHTML=`<div class="card"><h2>Backup &amp; restore</h2>
+  <p class="muted">Your data lives only in this browser. Export a backup before clearing browser data or switching devices.</p>
+  <div class="rowbtns"><button class="btn small" id="bkJson">Download JSON</button><button class="btn small" id="bkCsv">Download CSV</button></div>
+  <h3>Restore</h3>
+  <input type="file" id="bkFile" accept=".json,application/json" style="max-width:420px">
+  <p class="muted">Restoring replaces everything currently in the app. Invalid entries are skipped.</p>
+  <h3>Danger zone</h3>
+  <button class="btn small danger" id="bkWipe">Delete all data</button></div>`;
+  const needSample=()=>{ if(state.settings.sample){toast("Turn off sample data first — this would export the demo data.");return true;} return false; };
+  const download=(name,text,mime)=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type:mime})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400); };
+  $("#bkJson").onclick=()=>{ if(needSample())return; beep(700); download("powderroom-backup.json",JSON.stringify(state),"application/json"); toast("Backup downloaded."); };
+  $("#bkCsv").onclick=()=>{ if(needSample())return; beep(700);
+    const rows=[["type","id","name","detail","date","rounds_or_qty","cost","extra"]];
+    state.recipes.forEach(r=>rows.push(["recipe",r.id,r.name,r.caliber+" | "+r.bulletGr+"gr "+r.bulletType+" | "+r.powder+" "+r.chargeGr+"gr | "+r.primer,"","","",r.coal+" COAL"]));
+    state.comps.forEach(c=>rows.push(["component",c.id,c.name,c.type,"",c.qty,c.cost,""]));
+    state.batches.forEach(b=>rows.push(["batch",b.id,recipeName(b.recipeId),b.lot,b.date,b.rounds,"",b.notes]));
+    state.results.forEach(g=>rows.push(["range",g.id,recipeName(g.recipeId),g.groupIn+"in@"+g.yards+"yd",g.date,"",g.velocity+"fps","SD "+g.sd+" ES "+g.es]));
+    const csvCell=c=>{ let v=String(c??""); if(/^[=+\-@]/.test(v))v="'"+v; return `"${v.replace(/"/g,'""')}"`; };
+    const csv=rows.map(row=>row.map(csvCell).join(",")).join("\n");
+    download("powderroom-backup.csv",csv,"text/csv"); toast("CSV downloaded."); };
+  $("#bkFile").onchange=e=>{ const f=e.target.files[0]; if(!f)return; if(state.settings.sample){toast("Turn off sample data first — restore is disabled while previewing.");e.target.value="";return;}
+    if(f.size>5*1024*1024){toast("That file is too large to be a PowderRoom backup.");e.target.value="";return;}
+    const rd=new FileReader();
+    rd.onload=()=>{ try{ const d=JSON.parse(rd.result,noProto);
+      if(!d||typeof d!=="object"||!Array.isArray(d.recipes))throw new Error("bad");
+      const seenR=new Set(); let dupeR=0;
+      const recipes=d.recipes.filter(validRecipe).map(sanitizeRecipe).filter(x=>{ if(seenR.has(x.id)){dupeR++;return false;} seenR.add(x.id); return true; });
+      const rids=new Set(recipes.map(x=>x.id));
+      const seenC=new Set(); let dupeC=0;
+      const comps=(Array.isArray(d.comps)?d.comps:[]).filter(validComp).map(sanitizeComp).filter(x=>{ if(seenC.has(x.id)){dupeC++;return false;} seenC.add(x.id); return true; });
+      const seenB=new Set(); let dupeB=0;
+      const batches=(Array.isArray(d.batches)?d.batches:[]).filter(validBatch).filter(b=>rids.has(String(b.recipeId))).map(sanitizeBatch).filter(x=>{ if(seenB.has(x.id)){dupeB++;return false;} seenB.add(x.id); return true; });
+      const seenG=new Set(); let dupeG=0;
+      const results=(Array.isArray(d.results)?d.results:[]).filter(validResult).filter(x=>rids.has(String(x.recipeId))).map(sanitizeResult).filter(x=>{ if(seenG.has(x.id)){dupeG++;return false;} seenG.add(x.id); return true; });
+      const dropped=(d.recipes.length-recipes.length)+((d.comps||[]).length-comps.length)+((d.batches||[]).length-batches.length)+((d.results||[]).length-results.length)+dupeR+dupeC+dupeB+dupeG;
+      state.recipes=recipes; state.comps=comps; state.batches=batches; state.results=results;
+      if(d.settings&&typeof d.settings==="object"){ state.settings.sample=false; if(typeof d.settings.sound==="boolean")state.settings.sound=d.settings.sound; if(d.settings.theme==="dark"||d.settings.theme==="light")state.settings.theme=d.settings.theme; }
+      snap=null; state.settings.sample=false; chartSel=null; chartSelInfo=null;
+      $("#btnSample").classList.remove("on"); applyTheme(); applySound();
+      save(); beep(700); renderAll();
+      toast(dropped?`Backup restored — ${dropped} invalid entr${dropped===1?"y":"ies"} skipped.`:"Backup restored.");
+    }catch(_){ toast("That file isn't a valid PowderRoom backup."); } }; rd.readAsText(f); e.target.value=""; };
+  $("#bkWipe").onclick=()=>{ if(state.settings.sample){toast("Turn off sample data first — wipe is disabled while previewing.");return;}
+    if(confirm("Delete ALL recipes, components, batches, and range results? This cannot be undone.")){ snap=null; chartSel=null; chartSelInfo=null;
+      const s=state.settings; s.sample=false; state=blankState(); state.settings=s; save(); beep(400); renderAll(); $("#btnSample").classList.remove("on"); toast("All data deleted."); } }; }
+/* ============ modal ============ */
+function openModal(html){ $("#modalHost").innerHTML=`<div class="modal-back" id="mBack"><div class="modal">${html}</div></div>`;
+  $("#mBack").addEventListener("mousedown",e=>{ if(e.target.id==="mBack")closeModal(); }); }
+function closeModal(){ $("#modalHost").innerHTML=""; }
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ const m=$("#modalHost"); if(m&&m.innerHTML.trim())closeModal(); } });
+/* ============ header controls ============ */
+let snap=null;
+function applyTheme(){ const st=state.settings.theme; const dark=st==="dark"||(st==null&&matchMedia("(prefers-color-scheme: dark)").matches); document.documentElement.dataset.theme=dark?"dark":""; $("#btnTheme").classList.toggle("on",dark); }
+$("#btnTheme").onclick=()=>{ const dark=document.documentElement.dataset.theme==="dark"; state.settings.theme=dark?"light":"dark"; save(); applyTheme(); beep(600); };
+function applySound(){ $("#btnSound").classList.toggle("on",state.settings.sound!==false); }
+$("#btnSound").onclick=()=>{ state.settings.sound=state.settings.sound===false?true:false; save(); applySound(); beep(700); toast(state.settings.sound!==false?"Sound on.":"Sound off."); };
+$("#btnSample").onclick=()=>{ if(state.settings.sample){ if(snap){ try{const d=JSON.parse(snap,noProto); state.recipes=d.recipes; state.comps=d.comps; state.batches=d.batches; state.results=d.results;}catch(e){} snap=null; } state.settings.sample=false; save(); }
+  else{ snap=JSON.stringify({recipes:state.recipes,comps:state.comps,batches:state.batches,results:state.results}); quotaWarned=false; $("#quotaWarn").classList.remove("show"); const s=makeSample(); state.recipes=s.recipes; state.comps=s.comps; state.batches=s.batches; state.results=s.results; state.settings.sample=true; }
+  chartSel=null; chartSelInfo=null;
+  $("#btnSample").classList.toggle("on",state.settings.sample);
+  beep(700); renderAll(); toast(state.settings.sample?"Sample data on — edits made now will be discarded.":"Sample data off — your data restored."); };
+/* ============ init ============ */
+load(); applyTheme(); applySound();
+$("#btnSample").classList.toggle("on",!!state.settings.sample);
+renderAll();
+</script>
+</body>
+</html>
