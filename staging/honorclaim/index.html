@@ -639,7 +639,7 @@ function conditionForm(c,showEvidence){
     '<div id="ct-ev-pane"'+(showEvidence?"":" hidden")+'>'+evHtml+'</div>'+
     '<div class="mrow"><button class="btn" id="cf-cancel">Cancel</button><button class="btn primary" id="cf-save">Save</button></div>');
   $("ct-det").addEventListener("click",()=>{$("ct-det").classList.add("active");$("ct-ev").classList.remove("active");$("ct-det-pane").hidden=false;$("ct-ev-pane").hidden=true;});
-  $("ct-ev").addEventListener("click",()=>{$("ct-ev").classList.add("active");$("ct-det").classList.remove("active");$("ct-ev-pane").hidden=true;$("ct-det-pane").hidden=false;});
+  $("ct-ev").addEventListener("click",()=>{$("ct-ev").classList.add("active");$("ct-det").classList.remove("active");$("ct-ev-pane").hidden=false;$("ct-det-pane").hidden=true;});
   $("cf-cancel").addEventListener("click",closeModal);
   $("cf-save").addEventListener("click",()=>{
     const name=$("cf-name").value.trim();
@@ -995,6 +995,7 @@ function sevLineChart(points,sel){ // points: {x(date), sev, label, note}
   points.forEach((p,i)=>{
     const isSel=sel===i;
     s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="16" fill="transparent"/>'+
       (isSel?'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="11" fill="var(--acc)" opacity="0.25"/>':"")+
       '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="'+(isSel?7:5)+'" fill="'+(isSel?"var(--acc)":"var(--card)")+'" stroke="var(--acc)" stroke-width="3"/>'+
       (i%Math.ceil(n/6)===0?'<text x="'+X(i).toFixed(1)+'" y="'+(H-padB+18)+'" text-anchor="middle" font-size="12" fill="var(--muted)">'+esc(p.short)+'</text>':"")+
