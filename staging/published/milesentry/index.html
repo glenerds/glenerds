@@ -63,6 +63,16 @@ main{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
 .bucket .pts{font-weight:800;font-size:20px}
 .prow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:15px;flex-wrap:wrap}
 .prow:first-of-type{border-top:0}
+.clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.card.clickable{transition:transform .08s ease,box-shadow .12s ease}
+.card.clickable:hover{box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.card.clickable:active{transform:scale(.985)}
+.prow.clickable,.bucket.clickable{border-radius:10px;transition:background .12s ease,transform .08s ease}
+.prow.clickable:hover{background:var(--hover,rgba(0,0,0,.045))}
+.prow.clickable:active{transform:scale(.99)}
+.bucket.clickable:hover{background:var(--hover,rgba(0,0,0,.045))}
+.bucket.clickable:active{transform:scale(.99)}
+.bucket.sel{outline:2px solid var(--bc,#999);outline-offset:2px}
 /* tables */
 table{width:100%;border-collapse:collapse;font-size:15px}
 th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -164,6 +174,7 @@ footer .cta{margin:14px 0}
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
         <div style="flex:1;min-width:180px"><label for="f-q">Search</label><input id="f-q" placeholder="program name or notes"></div>
         <div style="min-width:150px"><label for="f-type">Type</label><select id="f-type"><option value="">All types</option><option>airline</option><option>hotel</option><option>card</option><option>other</option></select></div>
+        <div><label for="f-bucket">Urgency</label><select id="f-bucket"><option value="">All urgency</option><option value="risk">At risk ≤ 30 days</option><option value="expired">Expired</option><option value="critical">≤ 7 days</option><option value="warning">8–30 days</option><option value="watch">31–60 days</option><option value="notice">61–90 days</option><option value="safe">90+ days</option><option value="never">Never expires</option><option value="unknown">Unknown</option></select></div>
         <div><button class="btn primary" id="p-add">Add program</button></div>
       </div>
     </div>
@@ -414,34 +425,54 @@ function sortedByUrgency(list){
     return (da===Infinity?1e9:da===null?1e8:da)-(db===Infinity?1e9:db===null?1e8:db);
   });
 }
+function goTab(name){
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.toggle("active",x.id==="tab-"+name));
+  if(name==="charts")drawCharts();
+  sndOk();
+}
+let dashBucket=null; // dashboard "what expires next" bucket filter
 function renderDash(){
   const progs=DB.programs;
   const totalPts=progs.reduce((s,p)=>s+p.balance,0);
   const risk=progs.filter(atRisk);
   const riskPts=risk.reduce((s,p)=>s+p.balance,0);
   const exp=progs.filter(p=>bucketOf(p)==="expired").length;
-  const next=sortedByUrgency(progs.filter(p=>!["never","safe"].includes(bucketOf(p)))).slice(0,6);
+  const pool=sortedByUrgency(progs.filter(p=>!["never","safe"].includes(bucketOf(p))));
+  const next=(dashBucket?pool.filter(p=>bucketOf(p)===dashBucket):pool).slice(0,6);
   $("dash-cards").innerHTML=
-    card("Total points tracked",'<div class="bignum">'+fmtN(totalPts)+'</div><div class="sub">'+progs.length+' programs</div>')+
-    card("Points at risk ≤ 30 days",'<div class="bignum" style="color:var(--crit)">'+fmtN(riskPts)+'</div><div class="sub">'+risk.length+' programs</div>')+
-    card("Expired programs",'<div class="bignum" style="color:var(--crit)">'+exp+'</div><div class="sub">act before more lapse</div>')+
-    card("Next expiry", next.length?'<div class="bignum" style="font-size:26px">'+esc(next[0].name)+'</div><div class="sub">'+fmtN(next[0].balance)+' pts · '+daysText(next[0])+' days left</div>':'<div class="sub">No upcoming expiries</div>');
+    card("Total points tracked",'<div class="bignum">'+fmtN(totalPts)+'</div><div class="sub">'+progs.length+' programs</div>',"all")+
+    card("Points at risk ≤ 30 days",'<div class="bignum" style="color:var(--crit)">'+fmtN(riskPts)+'</div><div class="sub">'+risk.length+' programs</div>',"risk")+
+    card("Expired programs",'<div class="bignum" style="color:var(--crit)">'+exp+'</div><div class="sub">act before more lapse</div>',"expired")+
+    card("Next expiry", next.length?'<div class="bignum" style="font-size:26px">'+esc(next[0].name)+'</div><div class="sub">'+fmtN(next[0].balance)+' pts · '+daysText(next[0])+' days left</div>':'<div class="sub">No upcoming expiries</div>',"next");
+  const cards=$("dash-cards").children;
+  const go=(fb)=>{goTab("programs");$("f-q").value="";$("f-type").value="";$("f-bucket").value=fb;renderPrograms();};
+  cards[0].addEventListener("click",()=>go(""));
+  cards[1].addEventListener("click",()=>go("risk"));
+  cards[2].addEventListener("click",()=>go("expired"));
+  if(pool.length)cards[3].addEventListener("click",()=>programForm(pool[0]));
   $("next-list").innerHTML=next.length?next.map(p=>{
     const b=bucketOf(p);
-    return '<div class="prow"><span><strong>'+esc(p.name)+'</strong><br><span class="sub">'+fmtN(p.balance)+' pts · expires '+esc(expiryText(p))+'</span></span><span class="tag '+b+'">'+daysText(p)+'d</span></div>';
-  }).join(""):'<p class="sub">Nothing expiring soon. Add programs to start tracking.</p>';
+    return '<div class="prow clickable" data-pid="'+p.id+'"><span><strong>'+esc(p.name)+'</strong><br><span class="sub">'+fmtN(p.balance)+' pts · expires '+esc(expiryText(p))+'</span></span><span class="tag '+b+'">'+daysText(p)+'d</span></div>';
+  }).join(""):'<p class="sub">'+(dashBucket?"Nothing in this bucket.":"Nothing expiring soon. Add programs to start tracking.")+'</p>';
+  $("next-list").querySelectorAll("[data-pid]").forEach(r=>r.addEventListener("click",()=>{
+    const p=DB.programs.find(x=>x.id===r.dataset.pid);if(p)programForm(p);
+  }));
   const counts={};BUCKETS.forEach(b=>counts[b.k]=0);let cpts={};BUCKETS.forEach(b=>cpts[b.k]=0);
   progs.forEach(p=>{const b=bucketOf(p);counts[b]++;cpts[b]+=p.balance;});
   $("bucket-list").innerHTML=BUCKETS.filter(b=>counts[b.k]>0).map(b=>
-    '<div class="bucket" style="--bc:'+b.color+'"><h4>'+b.label+'</h4><div class="pts">'+fmtN(cpts[b.k])+' pts <span class="sub">· '+counts[b.k]+' program'+(counts[b.k]>1?"s":"")+'</span></div></div>'
+    '<div class="bucket clickable'+(dashBucket===b.k?" sel":"")+'" data-bk="'+b.k+'" style="--bc:'+b.color+'"><h4>'+b.label+'</h4><div class="pts">'+fmtN(cpts[b.k])+' pts <span class="sub">· '+counts[b.k]+' program'+(counts[b.k]>1?"s":"")+'</span></div></div>'
   ).join("")||'<p class="sub">No programs yet.</p>';
+  $("bucket-list").querySelectorAll("[data-bk]").forEach(r=>r.addEventListener("click",()=>{
+    dashBucket=(dashBucket===r.dataset.bk?null:r.dataset.bk);renderDash();sndOk();
+  }));
 }
-function card(h,inner){return '<div class="card"><h3>'+h+'</h3>'+inner+'</div>';}
+function card(h,inner,act){return '<div class="card clickable"'+(act?' data-act="'+act+'"':"")+'><h3>'+h+'</h3>'+inner+'</div>';}
 
 /* ---------- programs tab ---------- */
 function renderPrograms(){
-  const q=$("f-q").value.toLowerCase(),t=$("f-type").value;
-  const rows=DB.programs.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.notes.toLowerCase().includes(q))&&(!t||p.type===t));
+  const q=$("f-q").value.toLowerCase(),t=$("f-type").value,fb=$("f-bucket").value;
+  const rows=DB.programs.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.notes.toLowerCase().includes(q))&&(!t||p.type===t)&&(!fb||(fb==="risk"?atRisk(p):bucketOf(p)===fb)));
   const tb=$("prog-table").querySelector("tbody");
   tb.innerHTML=rows.map(p=>{
     const b=bucketOf(p);
@@ -461,7 +492,7 @@ function renderPrograms(){
   }));
   tb.querySelectorAll("[data-edit]").forEach(x=>x.addEventListener("click",()=>programForm(DB.programs.find(p=>p.id===x.dataset.edit))));
 }
-["f-q","f-type"].forEach(i=>$(i).addEventListener("input",renderPrograms));
+["f-q","f-type","f-bucket"].forEach(i=>$(i).addEventListener("input",renderPrograms));
 $("p-add").addEventListener("click",()=>programForm(null));
 
 /* ---------- activity tab ---------- */
@@ -530,10 +561,13 @@ function donutChart(items,total,sel){
     a=a1;
   });
   // center label in bounded box: hole diameter 124 minus 24 padding -> width <= 100
-  const t=fmtN(total);
+  // when a slice is selected, swap the center to that segment's numbers
+  const selIt=(sel!=null&&items[sel])?items[sel]:null;
+  const clabel=selIt?String(selIt.label).slice(0,22):"total points";
+  const t=fmtN(selIt?selIt.v:total);
   const fs=t.length>7?20:t.length>5?26:32;
   return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Points by program">'+paths+
-    '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="15" fill="var(--muted)">total points</text>'+
+    '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="15" fill="var(--muted)">'+esc(clabel)+'</text>'+
     '<text x="'+cx+'" y="'+(cy+22)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="var(--ink)"'+(t.length>7?' textLength="96" lengthAdjust="spacingAndGlyphs"':"")+'>'+t+'</text></svg>';
 }
 function hbarChart(items,sel){ // items: {label, v, c}
@@ -548,9 +582,10 @@ function hbarChart(items,sel){ // items: {label, v, c}
     const anchor=inside?"end":"start";
     const tfill=inside?"#fff":"var(--muted)";
     s+='<g data-seg="'+i+'" style="cursor:pointer">'+
-      '<text x="0" y="'+(y+15)+'" font-size="15" fill="var(--ink)">'+esc(it.label).slice(0,18)+'</text>'+
-      '<rect x="165" y="'+y+'" width="'+w.toFixed(0)+'" height="20" rx="5" fill="'+it.c+'"'+(isSel?' stroke="#111" stroke-width="3" transform="translate(0 -4)"':"")+'/>'+
-      '<text x="'+tx.toFixed(0)+'" y="'+(y+16)+'" font-size="15" font-weight="'+(inside?"700":"400")+'" text-anchor="'+anchor+'" fill="'+tfill+'">'+it.txt+'</text></g>';
+      (isSel?'<rect x="-8" y="'+(y-7)+'" width="'+(W-2)+'" height="34" rx="9" fill="var(--acc)" opacity="0.16"/>':"")+
+      '<text x="0" y="'+(y+15)+'" font-size="15" font-weight="'+(isSel?"700":"400")+'" fill="var(--ink)">'+esc(it.label).slice(0,18)+'</text>'+
+      '<rect x="165" y="'+y+'" width="'+w.toFixed(0)+'" height="20" rx="5" fill="'+it.c+'"/>'+
+      '<text x="'+tx.toFixed(0)+'" y="'+(y+16)+'" font-size="15" font-weight="'+(isSel||inside?"700":"400")+'" text-anchor="'+anchor+'" fill="'+tfill+'">'+it.txt+'</text></g>';
   });
   return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Days remaining by program">'+s+'</svg>';
 }
