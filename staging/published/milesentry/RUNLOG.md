@@ -28,3 +28,26 @@ All hands-on tests in Chromium (patchright, real clicks, DOM assertions — eval
 - Gallery: 1-dashboard-light, 2-charts-light, 3-dashboard-dark, 4-charts-dark, 5-mobile-dashboard, 6-mobile-charts, 7-reports-light.
 - Known limitations: expiry reminders are visual only (no push/email — offline by design); sample data fixed dates drift over time; donut shows top 8 programs + Other.
 - Final MD5: c10d408243ef460a879f42a8c34e720a
+
+## 2026-10-13 pipeline (parent agent run)
+- MD5 verified before work: c10d408243ef460a879f42a8c34e720a — matched, proceeded.
+- Thumbnail: Glen approved media-generation-milesentry-thumb-g5 (250,000 PTS medallion, plain flat gold lettering, organized card row). Converted to 1080x1080 PNG: ~/workspace/thumb-audit/new/milesentry-APPROVED.png
+- Cover 1280x720 derived from thumbnail: ~/workspace/thumb-audit/new/milesentry-cover-1280.png (name top, medallion middle, one plain line bottom). Visually verified.
+- Gallery: 8th screenshot added (8-reports-dark.png, dark-mode reports tab, toast-free). All 8 are current app UI.
+- Bench (API legs):
+  - functional/gemini.md (gemini-3.1-pro-preview): 8 claims, all rejected on code inspection.
+  - functional/groq.md (gpt-oss-120b, core functions): 6 claims, all rejected.
+  - functional/openrouter.md (Cohere command-a-03-2025 substituted; OpenRouter free models 404, Mistral errored): 1 minor hardening accepted -> effTheme now validates stored value; 9 rejected.
+  - Fixes: removed dead activity `note` field; effTheme validation. Targeted Chromium re-verification: zero console errors, activity logging works, theme fallback correct. Final MD5: cf6d04ae2df506573fc3d06a48b8defb
+  - copy_seo/gemini.md + groq.md delivered; adjudicated into gumroad-listing.md (no brand in title, no "free", no "spreadsheet").
+  - images/gemini.md: thumbnail legible, flat lettering, balanced; 2 minor background artifacts, image unchanged (Glen-approved final).
+  - Pending (need live browser): ChatGPT + Grok hands-on legs, Perplexity copy/SEO leg.
+- ZIP: milesentry-1.0.0.zip (index.html only); extracted MD5 matches cf6d04ae2df506573fc3d06a48b8defb.
+- Moved staging/milesentry -> staging/published/milesentry.
+- Done page: MileSentry row added at top with plain-English description; count 68 -> 69. NOTE: Gumroad cell links https://glenerds.gumroad.com/l/milesentry as PLACEHOLDER — replace with real product URL after draft creation.
+- Push: push-dir failed (1549-file drift, GitHub 502 on blob upload). Fell back to per-file Contents API PUTs: 13/13 OK (12 new + done page update).
+- push-guard: recorded push-20261013-174157; verify --id returned OK.
+- Live verification: https://glenerds.github.io/glenerds/staging/published/milesentry/index.html -> 200, MD5 cf6d04ae2df506573fc3d06a48b8defb MATCHES local.
+- Old staging URL https://glenerds.github.io/glenerds/staging/milesentry/index.html -> 404 (never pushed).
+- Done page live: "69 apps" + milesentry row present.
+- REMAINING: Gumroad unpublished draft creation + 8 screenshots + thumbnail upload + publish (needs browser task with Glen's login). Then replace placeholder Gumroad URL on done page + push.
