@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaritalMath — Divorce Financial Settlement Organizer</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#23211c;--mut:#6a6459;--line:#e2dccd;--acc:#0f766e;--acc-ink:#fff;--qa:#0f766e;--qb:#7c6bc4;--qc:#c4781a;--qd:#b23a5e;--qe:#3d7ab5;--qf:#5a8f3c;--good:#2f8f46;--bad:#c04545;--warn:#b97a1a}
+html[data-theme="dark"]{--bg:#191713;--card:#24211b;--ink:#f0ece3;--mut:#c2b9a8;--line:#3b362a;--acc:#2aa79c;--acc-ink:#101210;--qa:#2aa79c;--qb:#9d8fe0;--qc:#e0a04a;--qd:#e0688a;--qe:#6aa3dd;--qf:#8fc46a;--good:#5cc475;--bad:#e86a6a;--warn:#e0a04a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+header{background:var(--bg);border-bottom:1px solid var(--line)}
+.hdr-inner{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;margin-right:auto}
+.brand svg{width:34px;height:34px;flex:none}
+.hdr-btns{display:flex;align-items:center;gap:8px}
+.hdr-btns button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.hdr-btns button:active{transform:scale(.93);filter:brightness(.94)}
+.hdr-btns button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.hdr-btns button svg{width:22px;height:22px}
+.pill{height:44px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;padding:0 18px;font-size:15px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center}
+.pill:active{transform:scale(.95);filter:brightness(.94)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer}
+.tabs button:active{transform:scale(.95)}
+.tabs button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{margin:0 0 10px;font-size:20px}
+.card h3{margin:14px 0 8px;font-size:17px}
+.muted{color:var(--mut);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.kv{display:flex;justify-content:space-between;gap:8px;font-size:15px;padding:3px 0}
+.kv b{font-weight:700}
+.badge{display:inline-block;font-size:15px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--line);color:var(--ink);white-space:nowrap}
+.badge.marital{background:var(--qa);color:#fff}
+.badge.separate{background:var(--qe);color:#fff}
+.badge.contested{background:var(--warn);color:#fff}
+.rowbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;min-height:44px}
+.btn:active{transform:scale(.95);filter:brightness(.94)}
+.btn.pri{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.btn.danger{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn.small{min-height:40px;padding:8px 14px}
+.iconbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;font-size:15px;font-weight:600;cursor:pointer;min-height:40px}
+.iconbtn:active{transform:scale(.94);filter:brightness(.94)}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--mut);font-weight:700}
+input[type=range]{width:110px;accent-color:var(--acc)}
+input[type=number].pct{width:70px;font-size:15px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+#quotaWarn{display:none;background:var(--bad);color:#fff;padding:10px 16px;border-radius:10px;margin-bottom:12px;font-size:15px;font-weight:600}
+#quotaWarn.show{display:block}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-size:15px;font-weight:600;max-width:90vw;z-index:99;display:none}
+#modalHost:empty{display:none}
+.modal-back{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal{background:var(--card);color:var(--ink);border-radius:14px;padding:20px;max-width:560px;width:100%;max-height:90vh;overflow:auto}
+.modal h2{margin:0 0 12px;font-size:20px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:15px;font-weight:700;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);min-height:44px;font-family:inherit}
+.field textarea{min-height:70px;resize:vertical}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column}
+.chart-card h3{margin:0 0 8px;font-size:17px}
+.chart-card svg{width:100%;height:auto;display:block}
+.chart-card .cfoot{margin-top:auto;padding-top:8px;font-size:15px;font-weight:700}
+@media(max-width:700px){.charts{grid-template-columns:1fr}}
+.disclaim{background:var(--card);border:2px solid var(--warn);border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;margin:14px 0}
+.big{font-size:26px;font-weight:800}
+.eqbox{background:var(--card);border:2px solid var(--acc);border-radius:14px;padding:16px;margin-bottom:14px}
+.sampbar{display:none;background:var(--warn);color:#fff;text-align:center;padding:10px;font-size:15px;font-weight:700;border-radius:10px;margin:12px 0}
+.sampbar.show{display:block}
+#printPacket{display:none}
+@media print{
+  header,.tabs,.hdr-btns,#toast,#modalHost,.rowbtns,.sampbar,#quotaWarn,.noprint{display:none!important}
+  #printPacket{display:block!important}
+  body{background:#fff;color:#000}
+  .card{border:1px solid #999;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header><div class="hdr-inner">
+<div class="brand"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="17" y="4" width="6" height="10" rx="2" fill="#0f766e"/><rect x="6" y="14" width="28" height="3" rx="1.5" fill="#0f766e"/><line x1="10" y1="17" x2="6" y2="30" stroke="#0f766e" stroke-width="2.5"/><line x1="30" y1="17" x2="34" y2="30" stroke="#0f766e" stroke-width="2.5"/><path d="M2 30 L10 30 L6 36 Z" fill="#7c6bc4"/><path d="M38 30 L30 30 L34 36 Z" fill="#c4781a"/><rect x="18.5" y="36" width="3" height="2" fill="#0f766e"/></svg><span>MaritalMath</span></div>
+<div class="hdr-btns">
+<a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+<button id="btnSample" title="Sample data" aria-label="Toggle sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v5.5L4.5 18a2.4 2.4 0 0 0 2.1 3.5h10.8a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 14h9"/></svg></button>
+<button id="btnTheme" title="Dark mode" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+<button id="btnSound" title="Sound" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
+</div></div></header>
+<div class="wrap">
+<div class="disclaim" role="note">⚖️ MaritalMath is an organizer, not legal or financial advice. It does not recommend any split. Talk to a licensed attorney about your situation.</div>
+<div id="quotaWarn" role="alert"></div>
+<div class="sampbar" id="sampBar">Sample data is ON — your entries are hidden while sampling. Turn the flask off to restore.</div>
+<nav class="tabs" id="tabs" aria-label="Sections">
+<button data-t="dash" class="on">Dashboard</button>
+<button data-t="assets">Assets</button>
+<button data-t="debts">Debts</button>
+<button data-t="scen">Scenarios</button>
+<button data-t="budget">Budget</button>
+<button data-t="charts">Charts</button>
+<button data-t="backup">Backup</button>
+</nav>
+<main id="main"></main>
+</div>
+<div id="modalHost"></div>
+<div id="toast" role="status"></div>
+<div id="printPacket"></div>
+<script>
+"use strict";
+/* ============ utils ============ */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function uid(){ return "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,9); }
+function noProto(k,v){ return k==="__proto__"||k==="constructor"||k==="prototype"?undefined:v; }
+function money(c){ const neg=c<0, a=Math.abs(Math.round(c)); const d=Math.floor(a/100), r=a%100; return (neg?"-$":"$")+d.toLocaleString("en-US")+"."+String(r).padStart(2,"0"); }
+function money0(c){ const neg=c<0, a=Math.abs(Math.round(c)); return (neg?"-$":"$")+Math.round(a/100).toLocaleString("en-US"); }
+function dollarsToCents(d){ const n=parseFloat(d); return isNaN(n)?0:Math.round(n*100); }
+const LSKEY="maritalmath.v1";
+let state=null, snap=null, toastT=null, quotaWarned=false;
+
+/* ============ sound ============ */
+function beep(f){ if(state&&state.settings.sound===false)return; try{ const ctx=beep.c||(beep.c=new (window.AudioContext||window.webkitAudioContext)()); const o=ctx.createOscillator(),g=ctx.createGain(); o.frequency.value=f||600; o.type="sine"; g.gain.setValueAtTime(.08,ctx.currentTime); g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.15); o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+.16); }catch(e){} }
+function toast(m){ const t=$("#toast"); t.textContent=m; t.style.display="block"; clearTimeout(toastT); toastT=setTimeout(()=>t.style.display="none",2800); }
+
+/* ============ state ============ */
+function blankState(){ return {settings:{theme:null,sound:true,sample:false},names:{a:"Spouse A",b:"Spouse B"},
+  assets:[],debts:[],scenarios:[],budget:{income:[],expenses:[]}}; }
+function cleanPct(v,def){ if(v==null||v===""||isNaN(+v))return def; return Math.max(0,Math.min(100,+v)); }
+function dedupeIds(arr){ const seen=new Set(); for(const r of arr){ if(!r.id||seen.has(r.id))r.id=uid(); seen.add(r.id); } }
+function sanitize(){ for(const a of state.assets){ a.splitA=cleanPct(a.splitA,50); a.valueC=Math.max(0,Math.round(+a.valueC||0)); }
+  for(const d of state.debts){ d.splitA=cleanPct(d.splitA,50); d.balanceC=Math.max(0,Math.round(+d.balanceC||0)); }
+  for(const l of state.budget.income.concat(state.budget.expenses))l.amtC=Math.max(0,Math.round(+l.amtC||0));
+  for(const sc of state.scenarios)for(const k in sc.splits)sc.splits[k]=cleanPct(sc.splits[k],50);
+  dedupeIds(state.assets); dedupeIds(state.debts); dedupeIds(state.budget.income); dedupeIds(state.budget.expenses); dedupeIds(state.scenarios); }
+function save(){ if(state.settings.sample)return; try{ localStorage.setItem(LSKEY,JSON.stringify(state)); quotaWarned=false; const q=$("#quotaWarn"); q.classList.remove("show"); q.textContent=""; }catch(e){ if(!quotaWarned){quotaWarned=true; const q=$("#quotaWarn"); q.textContent="Storage is full — export a JSON backup now so you don't lose data."; q.classList.add("show");} } }
+function load(){ try{ const raw=localStorage.getItem(LSKEY); if(!raw){state=blankState();return;} const d=JSON.parse(raw,noProto); if(!d||typeof d!=="object"||!d.settings){state=blankState();return;} state=Object.assign(blankState(),d); sanitize(); }catch(e){ state=blankState(); } }
+
+/* ============ math (integer cents) ============ */
+function isMaritalPool(flag){ return flag==="marital"||flag==="contested"; }
+function spouseNets(over){ // over: optional {assetId:pctA, debtId:pctA}
+  let aA=0,bA=0,aD=0,bD=0,poolAssets=0,poolDebts=0,sepA=0,sepB=0;
+  for(const a of state.assets){ const p=(over&&over["a:"+a.id]!=null)?over["a:"+a.id]:a.splitA;
+    if(isMaritalPool(a.flag)){ const sa=Math.round(a.valueC*p/100); aA+=sa; bA+=a.valueC-sa; poolAssets+=a.valueC; }
+    else if(a.flag==="separateA")sepA+=a.valueC; else if(a.flag==="separateB")sepB+=a.valueC; }
+  for(const d of state.debts){ const p=(over&&over["d:"+d.id]!=null)?over["d:"+d.id]:d.splitA;
+    if(isMaritalPool(d.flag)){ const sa=Math.round(d.balanceC*p/100); aD+=sa; bD+=d.balanceC-sa; poolDebts+=d.balanceC; }
+    else if(d.flag==="separateA")sepA-=d.balanceC; else if(d.flag==="separateB")sepB-=d.balanceC; }
+  return {aA,bA,aD,bD,netA:aA-aD,netB:bA-bD,poolAssets,poolDebts,sepA,sepB,poolNet:poolAssets-poolDebts};
+}
+function equalize(netA,netB){ const diff=netA-netB; if(diff===0)return {payer:null,amtC:0};
+  const amtC=Math.round(Math.abs(diff)/2); return diff>0?{payer:"a",amtC}:{payer:"b",amtC}; }
+function scenarioOver(s){ const o={}; for(const k in (s.splits||{}))o[k]=s.splits[k]; return o; }
+
+/* ============ sample data ============ */
+function sampleState(){ const s=blankState(); s.settings.sample=true;
+  const A=(name,type,valueC,flag,splitA,notes)=>({id:uid(),name,type,valueC,flag,splitA,notes:notes||""});
+  const D=(name,type,balanceC,flag,splitA,notes)=>({id:uid(),name,type,balanceC,flag,splitA,notes:notes||""});
+  s.assets=[
+    A("Family home","home",42000000,"marital",50,"3-bed colonial, appraised Jun 2026"),
+    A("Joint checking","account",1845000,"marital",50,""),
+    A("Spouse A 401(k)","retirement",9650000,"marital",60,"Through Spouse A's employer"),
+    A("Spouse B IRA","retirement",4120000,"marital",40,""),
+    A("SUV","vehicle",2350000,"marital",50,"2019 model, KBB mid"),
+    A("Spouse A brokerage","account",1500000,"separateA",100,"Opened before marriage"),
+    A("Boat","vehicle",1800000,"contested",50,"Bought during marriage, titled to B")];
+  s.debts=[
+    D("Mortgage","mortgage",28750000,"marital",50,"30-yr fixed"),
+    D("SUV loan","loan",980000,"marital",50,""),
+    D("Visa joint","card",1240000,"marital",50,""),
+    D("Spouse B student loan","loan",2100000,"separateB",0,"From before marriage")];
+  const mk=(name,items)=>({id:uid(),name,splits:items});
+  const ov=(list,pct)=>{ const o={}; for(const x of list)o[x.k]=pct; return o; };
+  const aset=s.assets.map(a=>({k:"a:"+a.id})), dst=s.debts.map(d=>({k:"d:"+d.id}));
+  s.scenarios=[
+    mk("50/50 baseline",Object.assign(ov(aset,50),ov(dst,50))),
+    mk("A keeps the house",Object.assign({},ov(aset,50),ov(dst,50),{["a:"+s.assets[0].id]:100,["d:"+s.debts[0].id]:60})),
+    mk("B keeps the house",Object.assign({},ov(aset,50),ov(dst,50),{["a:"+s.assets[0].id]:0,["d:"+s.debts[0].id]:40}))];
+  s.budget.income=[{id:uid(),name:"Salary (take-home)",amtC:520000},{id:uid(),name:"Side work",amtC:60000}];
+  s.budget.expenses=[{id:uid(),name:"Rent",amtC:160000},{id:uid(),name:"Groceries",amtC:55000},{id:uid(),name:"Car + insurance",amtC:48000},{id:uid(),name:"Utilities",amtC:22000},{id:uid(),name:"Child costs",amtC:60000}];
+  return s; }
+
+/* ============ theme ============ */
+function applyTheme(){ const st=state.settings.theme; const dark=st==="dark"||(st==null&&window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+  $("#btnTheme").classList.toggle("on",dark); }
+/* ============ modal ============ */
+function openModal(html){ const h=$("#modalHost"); h.innerHTML=`<div class="modal-back" id="mBack"><div class="modal" role="dialog">${html}</div></div>`;
+  $("#mBack").addEventListener("click",e=>{ if(e.target.id==="mBack")closeModal(); }); }
+function closeModal(){ $("#modalHost").innerHTML=""; }
+
+/* ============ charts ============ */
+let curTab="dash", chartSel=null, chartSelInfo=null;
+const PAL=["var(--qa)","var(--qb)","var(--qc)","var(--qd)","var(--qe)","var(--qf)"];
+function donutSVG(segs,unit,vid){ // segs:[{k,l,v,color}]
+  const tot=segs.reduce((t,s)=>t+Math.max(0,s.v),0), R=90, CX=110, CY=100, IR=52;
+  let a0=-Math.PI/2, paths="";
+  segs.forEach((s,i)=>{ const v=Math.max(0,s.v), frac=tot>0?v/tot:0, a1=a0+frac*Math.PI*2;
+    const sel=chartSel===s.k, mid=(a0+a1)/2, ox=sel?Math.cos(mid)*10:0, oy=sel?Math.sin(mid)*10:0;
+    const x0=CX+R*Math.cos(a0),y0=CY+R*Math.sin(a0),x1=CX+R*Math.cos(a1),y1=CY+R*Math.sin(a1);
+    const xi1=CX+IR*Math.cos(a1),yi1=CY+IR*Math.sin(a1),xi0=CX+IR*Math.cos(a0),yi0=CY+IR*Math.sin(a0);
+    const large=frac>0.5?1:0;
+    if(frac>0)paths+=`<g data-k="${s.k}" style="cursor:pointer" transform="translate(${ox.toFixed(1)},${oy.toFixed(1)})"><path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 ${large} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} L${xi1.toFixed(1)} ${yi1.toFixed(1)} A${IR} ${IR} 0 ${large} 0 ${xi0.toFixed(1)} ${yi0.toFixed(1)} Z" fill="${s.color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/></g>`;
+    a0=a1; });
+  const cxTot=String(money0(tot));
+  const fs=cxTot.length>9?13:cxTot.length>7?15:17;
+  return `<svg viewBox="0 0 220 200" role="img"><g>${paths}</g><text x="${CX}" y="${CY-4}" text-anchor="middle" font-size="${fs}" font-weight="800" fill="var(--ink)" pointer-events="none">${esc(money0(tot))}</text><text x="${CX}" y="${CY+16}" text-anchor="middle" font-size="13" fill="var(--mut)" pointer-events="none">${esc(unit)}</text></svg>`; }
+function barsSVG(data,unit,vid,stagger){ const mx=Math.max(...data.map(d=>d.v),1), W=300,H=170,bw=W/Math.max(data.length,1);
+  const topPad=stagger?70:50;
+  return `<svg viewBox="-10 0 ${W+10} ${H}" role="img">`+data.map((d,i)=>{ const h=Math.max(2,(d.v/mx)*(H-topPad-8)); const x=i*bw+4;
+    const sel=chartSel===d.k, cx=(x+(bw-8)/2).toFixed(1);
+    const lbl=d.l.length>10?d.l.slice(0,9)+"…":d.l;
+    const ly=stagger?(i%2?H-30:H-12):H-12;
+    return `<g data-k="${d.k}" style="cursor:pointer" transform="translate(0,${sel?-6:0})"><rect x="${x}" y="${(H-topPad-h).toFixed(1)}" width="${bw-8}" height="${h.toFixed(1)}" rx="4" fill="${d.color}" stroke="${sel?"var(--ink)":"none"}" stroke-width="${sel?3:0}"/><text x="${cx}" y="${ly}" text-anchor="middle" font-size="15" fill="var(--mut)" pointer-events="none">${esc(lbl)}</text></g>`; }).join("")+`</svg>`; }
+function chartFoot(vid,def){ const t=chartSelInfo&&chartSelInfo.vid===vid?chartSelInfo.text:def; return `<div class="cfoot" id="cf-${vid}">${esc(t)}</div>`; }
+function wireCharts(){ $$("#chartsGrid [data-k]").forEach(g=>g.addEventListener("click",()=>{ const k=g.getAttribute("data-k");
+    if(chartSel===k){ chartSel=null; chartSelInfo=null; }
+    else{ chartSel=k; const hit=chartsFlat().find(x=>x.s.k===k); chartSelInfo=hit?{vid:hit.vid,text:hit.fmt(hit.s)}:null; }
+    beep(660); $("#main").innerHTML=renderCharts(); wireCharts(); })); }
+function chartsFlat(){ return chartSegsCache; }
+let chartSegsCache=[];
+function flagBadge(f){ return f==="marital"?'<span class="badge marital">marital</span>':f==="contested"?'<span class="badge contested">contested</span>':'<span class="badge separate">separate</span>'; }
+function flagName(f){ return f==="marital"?"Marital":f==="contested"?"Contested":f==="separateA"?("Separate — "+state.names.a):("Separate — "+state.names.b); }
+
+/* ============ dashboard ============ */
+function renderDash(){ const n=spouseNets(null), eq=equalize(n.netA,n.netB);
+  const eqLine=eq.payer?`${esc(eq.payer==="a"?state.names.a:state.names.b)} owes ${esc(eq.payer==="a"?state.names.b:state.names.a)} ${money(eq.amtC)} to equalize`:"Both spouses are already equal — no payment needed";
+  const contested=state.assets.filter(a=>a.flag==="contested").length+state.debts.filter(d=>d.flag==="contested").length;
+  return `<div class="card"><h2>Settlement overview</h2>
+  <div class="frow" style="margin-bottom:10px"><div class="field"><label>${esc(state.names.a)}'s label</label><input id="nmA" value="${esc(state.names.a)}" maxlength="30"></div>
+  <div class="field"><label>${esc(state.names.b)}'s label</label><input id="nmB" value="${esc(state.names.b)}" maxlength="30"></div></div>
+  <div class="kv"><span>Marital assets in pool</span><b>${money(n.poolAssets)}</b></div>
+  <div class="kv"><span>Marital debts in pool</span><b>${money(n.poolDebts)}</b></div>
+  <div class="kv"><span>Net marital estate</span><b>${money(n.poolNet)}</b></div>
+  <div class="kv"><span>${esc(state.names.a)} — net share</span><b>${money(n.netA)}</b></div>
+  <div class="kv"><span>${esc(state.names.b)} — net share</span><b>${money(n.netB)}</b></div>
+  ${contested?`<div class="kv"><span>Contested items (included in pool, characterization disputed)</span><b>${contested}</b></div>`:""}
+  <div class="muted">Separate property is listed for the record and excluded from the split pool.</div></div>
+  <div class="eqbox"><div class="big">${esc(eqLine)}</div>
+  <div class="muted">Based on the split percentages on the Assets and Debts tabs. This is arithmetic on your entries — not a recommendation.</div></div>
+  <div class="grid">
+  <div class="card"><h3>Inventory</h3><div class="kv"><span>Assets</span><b>${state.assets.length}</b></div><div class="kv"><span>Debts</span><b>${state.debts.length}</b></div><div class="kv"><span>Scenarios</span><b>${state.scenarios.length}</b></div></div>
+  <div class="card"><h3>Budget — ${esc(state.names.a)}</h3>${budgetSummary()}</div>
+  </div>
+  <div class="rowbtns"><button class="btn pri noprint" id="btnPrint">Print summary packet</button></div>`;
+}
+function budgetSummary(){ const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0), s=bi-be;
+  return `<div class="kv"><span>Monthly income</span><b>${money(bi)}</b></div><div class="kv"><span>Monthly expenses</span><b>${money(be)}</b></div><div class="kv"><span>Surplus / deficit</span><b style="color:${s>=0?"var(--good)":"var(--bad)"}">${money(s)}</b></div>`; }
+
+/* ============ assets ============ */
+const ATYPES=["home","vehicle","account","retirement","business","other"];
+function renderAssets(){ const rows=state.assets.map(a=>{ const sa=Math.round(a.valueC*a.splitA/100);
+  return `<tr><td><b>${esc(a.name)}</b><div class="muted">${esc(a.type)}${a.notes?" — "+esc(a.notes):""}</div></td>
+  <td>${flagBadge(a.flag)}</td><td style="text-align:right">${money(a.valueC)}</td>
+  <td><input type="range" min="0" max="100" value="${a.splitA}" data-aid="${a.id}" data-f="splitA" aria-label="Percent to ${esc(state.names.a)}"> <input type="number" class="pct" min="0" max="100" value="${a.splitA}" data-aid="${a.id}" data-f="splitN" aria-label="Percent number">%</td>
+  <td style="text-align:right" data-share="a:${a.id}">${money(sa)}</td>
+  <td class="noprint"><button class="iconbtn" data-edit-a="${a.id}">Edit</button> <button class="iconbtn" data-del-a="${a.id}">Delete</button></td></tr>`; }).join("");
+  return `<div class="card"><h2>Assets <span class="muted">(${state.assets.length})</span></h2>
+  <div class="muted">Split % = share to ${esc(state.names.a)}. Contested items are included in the marital pool for modeling; their characterization is disputed.</div>
+  <div style="overflow-x:auto"><table><thead><tr><th>Asset</th><th>Flag</th><th style="text-align:right">Value</th><th>% to ${esc(state.names.a)}</th><th style="text-align:right">${esc(state.names.a)}'s share</th><th class="noprint"></th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">No assets yet.</td></tr>'}</tbody></table></div>
+  <div class="rowbtns"><button class="btn pri" id="aAdd">Add asset</button></div></div>`; }
+function assetModal(a){ const isNew=!a; a=a||{name:"",type:"home",valueC:0,flag:"marital",splitA:50,notes:""};
+  openModal(`<h2>${isNew?"Add":"Edit"} asset</h2>
+  <div class="field"><label>Name</label><input id="fName" value="${esc(a.name)}" maxlength="80"></div>
+  <div class="frow"><div class="field"><label>Type</label><select id="fType">${ATYPES.map(t=>`<option ${a.type===t?"selected":""}>${t}</option>`).join("")}</select></div>
+  <div class="field"><label>Value ($)</label><input id="fVal" type="number" min="0" step="0.01" value="${(a.valueC/100).toFixed(2)}"></div></div>
+  <div class="frow"><div class="field"><label>Flag</label><select id="fFlag"><option value="marital" ${a.flag==="marital"?"selected":""}>marital</option><option value="separateA" ${a.flag==="separateA"?"selected":""}>separate — ${esc(state.names.a)}</option><option value="separateB" ${a.flag==="separateB"?"selected":""}>separate — ${esc(state.names.b)}</option><option value="contested" ${a.flag==="contested"?"selected":""}>contested</option></select></div>
+  <div class="field"><label>% to ${esc(state.names.a)}</label><input id="fSplit" type="number" min="0" max="100" value="${a.splitA}"></div></div>
+  <div class="field"><label>Notes</label><textarea id="fNotes">${esc(a.notes)}</textarea></div>
+  <div class="rowbtns"><button class="btn pri" id="mSave">Save</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim(); if(!name){toast("Name is required.");return;}
+    const rec={id:isNew?uid():a.id,name,type:$("#fType").value,valueC:Math.max(0,dollarsToCents($("#fVal").value)),flag:$("#fFlag").value,splitA:cleanPct($("#fSplit").value,50),notes:$("#fNotes").value.trim()};
+    if(isNew)state.assets.push(rec); else Object.assign(state.assets.find(x=>x.id===a.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast(isNew?"Asset added.":"Asset updated."); }; }
+
+/* ============ debts ============ */
+const DTYPES=["mortgage","loan","card","tax","other"];
+function renderDebts(){ const rows=state.debts.map(d=>{ const sa=Math.round(d.balanceC*d.splitA/100);
+  return `<tr><td><b>${esc(d.name)}</b><div class="muted">${esc(d.type)}${d.notes?" — "+esc(d.notes):""}</div></td>
+  <td>${flagBadge(d.flag)}</td><td style="text-align:right">${money(d.balanceC)}</td>
+  <td><input type="range" min="0" max="100" value="${d.splitA}" data-did="${d.id}" data-f="splitA" aria-label="Percent to ${esc(state.names.a)}"> <input type="number" class="pct" min="0" max="100" value="${d.splitA}" data-did="${d.id}" data-f="splitN" aria-label="Percent number">%</td>
+  <td style="text-align:right" data-share="d:${d.id}">${money(sa)}</td>
+  <td class="noprint"><button class="iconbtn" data-edit-d="${d.id}">Edit</button> <button class="iconbtn" data-del-d="${d.id}">Delete</button></td></tr>`; }).join("");
+  return `<div class="card"><h2>Debts <span class="muted">(${state.debts.length})</span></h2>
+  <div class="muted">Split % = share assigned to ${esc(state.names.a)}.</div>
+  <div style="overflow-x:auto"><table><thead><tr><th>Debt</th><th>Flag</th><th style="text-align:right">Balance</th><th>% to ${esc(state.names.a)}</th><th style="text-align:right">${esc(state.names.a)}'s share</th><th class="noprint"></th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">No debts yet.</td></tr>'}</tbody></table></div>
+  <div class="rowbtns"><button class="btn pri" id="dAdd">Add debt</button></div></div>`; }
+function debtModal(d){ const isNew=!d; d=d||{name:"",type:"loan",balanceC:0,flag:"marital",splitA:50,notes:""};
+  openModal(`<h2>${isNew?"Add":"Edit"} debt</h2>
+  <div class="field"><label>Name</label><input id="fName" value="${esc(d.name)}" maxlength="80"></div>
+  <div class="frow"><div class="field"><label>Type</label><select id="fType">${DTYPES.map(t=>`<option ${d.type===t?"selected":""}>${t}</option>`).join("")}</select></div>
+  <div class="field"><label>Balance ($)</label><input id="fVal" type="number" min="0" step="0.01" value="${(d.balanceC/100).toFixed(2)}"></div></div>
+  <div class="frow"><div class="field"><label>Flag</label><select id="fFlag"><option value="marital" ${d.flag==="marital"?"selected":""}>marital</option><option value="separateA" ${d.flag==="separateA"?"selected":""}>separate — ${esc(state.names.a)}</option><option value="separateB" ${d.flag==="separateB"?"selected":""}>separate — ${esc(state.names.b)}</option><option value="contested" ${d.flag==="contested"?"selected":""}>contested</option></select></div>
+  <div class="field"><label>% to ${esc(state.names.a)}</label><input id="fSplit" type="number" min="0" max="100" value="${d.splitA}"></div></div>
+  <div class="field"><label>Notes</label><textarea id="fNotes">${esc(d.notes)}</textarea></div>
+  <div class="rowbtns"><button class="btn pri" id="mSave">Save</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim(); if(!name){toast("Name is required.");return;}
+    const rec={id:isNew?uid():d.id,name,type:$("#fType").value,balanceC:Math.max(0,dollarsToCents($("#fVal").value)),flag:$("#fFlag").value,splitA:cleanPct($("#fSplit").value,50),notes:$("#fNotes").value.trim()};
+    if(isNew)state.debts.push(rec); else Object.assign(state.debts.find(x=>x.id===d.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast(isNew?"Debt added.":"Debt updated."); }; }
+/* ============ scenarios ============ */
+function renderScen(){ const cards=state.scenarios.map(s=>{ const n=spouseNets(scenarioOver(s)), eq=equalize(n.netA,n.netB);
+  const eqT=eq.payer?`${eq.payer==="a"?state.names.a:state.names.b} owes ${money(eq.amtC)}`:"Equal — no payment";
+  return `<div class="card"><h3>${esc(s.name)}</h3>
+  <div class="kv"><span>${esc(state.names.a)} net</span><b>${money(n.netA)}</b></div>
+  <div class="kv"><span>${esc(state.names.b)} net</span><b>${money(n.netB)}</b></div>
+  <div class="kv"><span>Equalizing payment</span><b>${esc(eqT)}</b></div>
+  <div class="rowbtns"><button class="btn small" data-edit-s="${s.id}">Edit splits</button><button class="btn small" data-dup-s="${s.id}">Duplicate</button><button class="btn small danger" data-del-s="${s.id}">Delete</button></div></div>`; }).join("");
+  return `<div class="card"><h2>Scenarios</h2><div class="muted">Model up to three different split arrangements side by side. Each scenario stores its own % splits per asset and debt; editing a scenario never changes your main inventory.</div></div>
+  <div class="grid">${cards||'<div class="card muted">No scenarios yet.</div>'}</div>
+  <div class="rowbtns"><button class="btn pri" id="sAdd" ${state.scenarios.length>=3?"disabled":""}>Add scenario</button></div>`; }
+function scenarioModal(s){ const isNew=!s; s=s||{name:"Scenario "+(state.scenarios.length+1),splits:{}};
+  const cur=scenarioOver(s);
+  const itemRow=(kind,r,label,val)=>{ const k=kind+":"+r.id, v=cur[k]!=null?cur[k]:r.splitA;
+    return `<div class="kv"><span>${esc(label)} <span class="muted">${money(kind==="a"?r.valueC:r.balanceC)}</span></span><span><input type="range" min="0" max="100" value="${v}" data-sk="${k}" style="width:90px"> <input type="number" class="pct" min="0" max="100" value="${v}" data-skn="${k}">%</span></div>`; };
+  const aRows=state.assets.map(a=>itemRow("a",a,a.name+" ("+flagName(a.flag)+")",a.valueC)).join("");
+  const dRows=state.debts.map(d=>itemRow("d",d,d.name+" ("+flagName(d.flag)+")",d.balanceC)).join("");
+  openModal(`<h2>${isNew?"Add":"Edit"} scenario</h2>
+  <div class="field"><label>Scenario name</label><input id="fName" value="${esc(s.name)}" maxlength="60"></div>
+  <h3>Asset splits (% to ${esc(state.names.a)})</h3>${aRows||'<div class="muted">No assets.</div>'}
+  <h3>Debt splits (% to ${esc(state.names.a)})</h3>${dRows||'<div class="muted">No debts.</div>'}
+  <div class="rowbtns"><button class="btn pri" id="mSave">Save scenario</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $$("#modalHost [data-sk]").forEach(r=>r.addEventListener("input",()=>{ const n=$(`#modalHost [data-skn="${r.getAttribute("data-sk")}"]`); if(n)n.value=r.value; }));
+  $$("#modalHost [data-skn]").forEach(n=>n.addEventListener("input",()=>{ const r=$(`#modalHost [data-sk="${n.getAttribute("data-skn")}"]`); if(r)r.value=Math.max(0,Math.min(100,+n.value||0)); }));
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim()||s.name; const splits={};
+    $$("#modalHost [data-sk]").forEach(r=>{ splits[r.getAttribute("data-sk")]=Math.max(0,Math.min(100,+r.value||0)); });
+    const rec={id:isNew?uid():s.id,name,splits};
+    if(isNew)state.scenarios.push(rec); else Object.assign(state.scenarios.find(x=>x.id===s.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast("Scenario saved."); }; }
+
+/* ============ budget ============ */
+function budgetRows(list,kind){ return list.map(l=>`<tr><td>${esc(l.name)}</td><td style="text-align:right">${money(l.amtC)}</td><td class="noprint"><button class="iconbtn" data-bedit="${kind}:${l.id}">Edit</button> <button class="iconbtn" data-bdel="${kind}:${l.id}">Delete</button></td></tr>`).join(""); }
+function renderBudget(){ const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0), s=bi-be;
+  return `<div class="card"><h2>Post-divorce budget — ${esc(state.names.a)}</h2><div class="muted">Monthly household budget after the split. Enter your own numbers.</div></div>
+  <div class="grid"><div class="card"><h3>Monthly income</h3><table><tbody>${budgetRows(state.budget.income,"i")||'<tr><td class="muted">None yet.</td></tr>'}</tbody></table><div class="kv"><span><b>Total</b></span><b>${money(bi)}</b></div><div class="rowbtns"><button class="btn small pri" id="biAdd">Add income</button></div></div>
+  <div class="card"><h3>Monthly expenses</h3><table><tbody>${budgetRows(state.budget.expenses,"e")||'<tr><td class="muted">None yet.</td></tr>'}</tbody></table><div class="kv"><span><b>Total</b></span><b>${money(be)}</b></div><div class="rowbtns"><button class="btn small pri" id="beAdd">Add expense</button></div></div></div>
+  <div class="eqbox"><div class="big" style="color:${s>=0?"var(--good)":"var(--bad)"}">${s>=0?"Surplus":"Deficit"}: ${money(Math.abs(s))}/mo</div><div class="muted">Income minus expenses. This is arithmetic on your entries — not financial advice.</div></div>`; }
+function budgetModal(kind,l){ const isNew=!l; l=l||{name:"",amtC:0};
+  openModal(`<h2>${isNew?"Add":"Edit"} ${kind==="i"?"income":"expense"}</h2>
+  <div class="field"><label>Name</label><input id="fName" value="${esc(l.name)}" maxlength="60"></div>
+  <div class="field"><label>Monthly amount ($)</label><input id="fVal" type="number" min="0" step="0.01" value="${(l.amtC/100).toFixed(2)}"></div>
+  <div class="rowbtns"><button class="btn pri" id="mSave">Save</button><button class="btn" id="mCancel">Cancel</button></div>`);
+  $("#mCancel").onclick=closeModal;
+  $("#mSave").onclick=()=>{ const name=$("#fName").value.trim(); if(!name){toast("Name is required.");return;}
+    const rec={id:isNew?uid():l.id,name,amtC:Math.max(0,dollarsToCents($("#fVal").value))};
+    const list=kind==="i"?state.budget.income:state.budget.expenses;
+    if(isNew)list.push(rec); else Object.assign(list.find(x=>x.id===l.id),rec);
+    save(); beep(700); closeModal(); renderAll(); toast("Saved."); }; }
+
+/* ============ charts tab ============ */
+function renderCharts(){ const n=spouseNets(null);
+  const aByType={}, dByType={};
+  for(const a of state.assets)if(isMaritalPool(a.flag))aByType[a.type]=(aByType[a.type]||0)+a.valueC;
+  for(const d of state.debts)if(isMaritalPool(d.flag))dByType[d.type]=(dByType[d.type]||0)+d.balanceC;
+  chartSegsCache=[];
+  const aSegs=Object.keys(aByType).map((t,i)=>{ const s={k:"ca:"+t,l:t,v:aByType[t],color:PAL[i%PAL.length]}; chartSegsCache.push({s,vid:"ca",fmt:x=>`${x.l}: ${money(x.v)}`}); return s; });
+  const dSegs=Object.keys(dByType).map((t,i)=>{ const s={k:"cd:"+t,l:t,v:dByType[t],color:PAL[(i+2)%PAL.length]}; chartSegsCache.push({s,vid:"cd",fmt:x=>`${x.l}: ${money(x.v)}`}); return s; });
+  const netSegs=[{k:"nb:a",l:state.names.a,v:Math.max(0,n.netA),color:"var(--qa)"},{k:"nb:b",l:state.names.b,v:Math.max(0,n.netB),color:"var(--qb)"}];
+  netSegs.forEach(s=>chartSegsCache.push({s,vid:"nb",fmt:x=>`${x.l}: net ${money(x.v)}`}));
+  const scSegs=[]; state.scenarios.slice(0,3).forEach((s2,si)=>{ const nn=spouseNets(scenarioOver(s2));
+    [["a",state.names.a+" net","var(--qa)"],["b",state.names.b+" net","var(--qb)"]].forEach(([w,lbl,c])=>{ const nm=s2.name.length>7?s2.name.slice(0,6)+"…":s2.name; const s2s={k:"sc:"+si+":"+w,l:nm+"·"+(w==="a"?"A":"B"),v:Math.max(0,w==="a"?nn.netA:nn.netB),color:c};
+      chartSegsCache.push({s:s2s,vid:"sc",fmt:x=>`${s2.name} — ${lbl}: ${money(w==="a"?nn.netA:nn.netB)}`}); scSegs.push(s2s); }); });
+  return `<div class="card"><h2>Charts</h2><div class="muted">Marital pool only. Select any segment for its value.</div></div>
+  <div class="charts" id="chartsGrid">
+  <div class="chart-card" id="tab-charts"><h3>Marital assets by type</h3>${donutSVG(aSegs,"assets","ca")}${chartFoot("ca",state.assets.length+" assets in pool")}</div>
+  <div class="chart-card"><h3>Marital debts by type</h3>${donutSVG(dSegs,"debts","cd")}${chartFoot("cd",state.debts.length+" debts in pool")}</div>
+  <div class="chart-card"><h3>Net per spouse (current splits)</h3>${barsSVG(netSegs,"nb","nb")}${chartFoot("nb","A: "+money(n.netA)+" · B: "+money(n.netB))}</div>
+  <div class="chart-card"><h3>Scenario comparison</h3>${scSegs.length?barsSVG(scSegs,"sc","sc",true):'<div class="muted">Add scenarios to compare.</div>'}${chartFoot("sc",state.scenarios.length+" scenarios")}</div>
+  </div>`; }
+
+/* ============ backup ============ */
+function dl(name,content,type){ const b=new Blob([content],{type}), u=URL.createObjectURL(b), a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},500); }
+function csvEsc(v){ v=String(v==null?"":v); return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v; }
+function renderBackup(){ return `<div class="card"><h2>Backup &amp; restore</h2>
+  <div class="muted">Your data lives in this browser only. Export regularly.</div>
+  <div class="rowbtns"><button class="btn pri" id="bkJson">Export JSON</button><button class="btn" id="bkCsvA">Export CSV (all)</button></div>
+  <div class="field" style="margin-top:12px"><label>Restore from JSON file</label><input type="file" id="bkFile" accept=".json,application/json"></div>
+  <div class="rowbtns"><button class="btn danger" id="bkWipe">Delete ALL data</button></div></div>`; }
+function exportCSV(){ const rows=[["section","name","type","flag","amount_cents","pct_to_A","notes"]];
+  for(const a of state.assets)rows.push(["asset",a.name,a.type,a.flag,a.valueC,a.splitA,a.notes||""]);
+  for(const d of state.debts)rows.push(["debt",d.name,d.type,d.flag,d.balanceC,d.splitA,d.notes||""]);
+  for(const l of state.budget.income)rows.push(["income",l.name,"","",l.amtC,"",""]);
+  for(const l of state.budget.expenses)rows.push(["expense",l.name,"","",l.amtC,"",""]);
+  dl("maritalmath.csv",rows.map(r=>r.map(csvEsc).join(",")).join("\n"),"text/csv"); }
+
+/* ============ print packet ============ */
+function buildPacket(){ const n=spouseNets(null), eq=equalize(n.netA,n.netB);
+  const dis="MaritalMath is an organizer, not legal or financial advice. Talk to a licensed attorney about your situation.";
+  const aRows=state.assets.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.type)}</td><td>${esc(flagName(a.flag))}</td><td style="text-align:right">${money(a.valueC)}</td><td style="text-align:right">${a.splitA}%</td></tr>`).join("");
+  const dRows=state.debts.map(d=>`<tr><td>${esc(d.name)}</td><td>${esc(d.type)}</td><td>${esc(flagName(d.flag))}</td><td style="text-align:right">${money(d.balanceC)}</td><td style="text-align:right">${d.splitA}%</td></tr>`).join("");
+  const sRows=state.scenarios.map(s=>{ const nn=spouseNets(scenarioOver(s)), e2=equalize(nn.netA,nn.netB);
+    return `<tr><td>${esc(s.name)}</td><td style="text-align:right">${money(nn.netA)}</td><td style="text-align:right">${money(nn.netB)}</td><td>${e2.payer?(e2.payer==="a"?"A":"B")+" owes "+money(e2.amtC):"Equal"}</td></tr>`; }).join("");
+  const bi=state.budget.income.reduce((t,l)=>t+l.amtC,0), be=state.budget.expenses.reduce((t,l)=>t+l.amtC,0);
+  $("#printPacket").innerHTML=`<h1>MaritalMath — Settlement Summary</h1><p><b>${esc(dis)}</b></p><p>Prepared ${new Date().toLocaleDateString("en-US")}. Figures are user-entered; MaritalMath recommends nothing.</p>
+  <h2>Assets</h2><table border="1" cellpadding="6" cellspacing="0"><tr><th>Name</th><th>Type</th><th>Flag</th><th>Value</th><th>% to ${esc(state.names.a)}</th></tr>${aRows}</table>
+  <h2>Debts</h2><table border="1" cellpadding="6" cellspacing="0"><tr><th>Name</th><th>Type</th><th>Flag</th><th>Balance</th><th>% to ${esc(state.names.a)}</th></tr>${dRows}</table>
+  <h2>Equalization (current splits)</h2><p>Net marital estate: ${money(n.poolNet)}. ${esc(state.names.a)}: ${money(n.netA)}; ${esc(state.names.b)}: ${money(n.netB)}.<br><b>${eq.payer?("Equalizing payment: "+(eq.payer==="a"?state.names.a:state.names.b)+" owes "+money(eq.amtC)):"No equalizing payment needed."}</b></p>
+  <h2>Scenarios</h2><table border="1" cellpadding="6" cellspacing="0"><tr><th>Scenario</th><th>${esc(state.names.a)} net</th><th>${esc(state.names.b)} net</th><th>Equalizer</th></tr>${sRows}</table>
+  <h2>Post-divorce budget — ${esc(state.names.a)}</h2><p>Income: ${money(bi)}/mo · Expenses: ${money(be)}/mo · <b>${bi-be>=0?"Surplus":"Deficit"}: ${money(Math.abs(bi-be))}/mo</b></p>
+  <p><b>${esc(dis)}</b></p>`; }
+/* ============ render + wiring ============ */
+function renderAll(){ const m=$("#main");
+  if(curTab==="dash")m.innerHTML=renderDash();
+  else if(curTab==="assets")m.innerHTML=renderAssets();
+  else if(curTab==="debts")m.innerHTML=renderDebts();
+  else if(curTab==="scen")m.innerHTML=renderScen();
+  else if(curTab==="budget")m.innerHTML=renderBudget();
+  else if(curTab==="charts")m.innerHTML=renderCharts();
+  else m.innerHTML=renderBackup();
+  wire(); if(curTab==="charts")wireCharts(); }
+function wire(){
+  const nmA=$("#nmA"), nmB=$("#nmB");
+  if(nmA)nmA.addEventListener("change",()=>{ state.names.a=nmA.value.trim()||"Spouse A"; save(); renderAll(); });
+  if(nmB)nmB.addEventListener("change",()=>{ state.names.b=nmB.value.trim()||"Spouse B"; save(); renderAll(); });
+  const bp=$("#btnPrint"); if(bp)bp.onclick=()=>{ buildPacket(); window.print(); };
+  const aa=$("#aAdd"); if(aa)aa.onclick=()=>assetModal(null);
+  const da=$("#dAdd"); if(da)da.onclick=()=>debtModal(null);
+  const sa=$("#sAdd"); if(sa)sa.onclick=()=>scenarioModal(null);
+  const bia=$("#biAdd"); if(bia)bia.onclick=()=>budgetModal("i",null);
+  const bea=$("#beAdd"); if(bea)bea.onclick=()=>budgetModal("e",null);
+  $$("[data-edit-a]").forEach(b=>b.onclick=()=>assetModal(state.assets.find(x=>x.id===b.getAttribute("data-edit-a"))));
+  $$("[data-del-a]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this asset?")){ state.assets=state.assets.filter(x=>x.id!==b.getAttribute("data-del-a")); save(); beep(400); renderAll(); } });
+  $$("[data-edit-d]").forEach(b=>b.onclick=()=>debtModal(state.debts.find(x=>x.id===b.getAttribute("data-edit-d"))));
+  $$("[data-del-d]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this debt?")){ state.debts=state.debts.filter(x=>x.id!==b.getAttribute("data-del-d")); save(); beep(400); renderAll(); } });
+  $$("[data-edit-s]").forEach(b=>b.onclick=()=>scenarioModal(state.scenarios.find(x=>x.id===b.getAttribute("data-edit-s"))));
+  $$("[data-dup-s]").forEach(b=>b.onclick=()=>{ if(state.scenarios.length>=3){ toast("Three scenarios max — delete one first."); return; } const s=state.scenarios.find(x=>x.id===b.getAttribute("data-dup-s")); const c={id:uid(),name:s.name+" (copy)",splits:Object.assign({},s.splits)}; state.scenarios.push(c); save(); renderAll(); toast("Scenario duplicated."); });
+  $$("[data-del-s]").forEach(b=>b.onclick=()=>{ if(confirm("Delete this scenario?")){ state.scenarios=state.scenarios.filter(x=>x.id!==b.getAttribute("data-del-s")); save(); beep(400); renderAll(); } });
+  $$("[data-bedit]").forEach(b=>b.onclick=()=>{ const[kind,id]=b.getAttribute("data-bedit").split(":"); const l=(kind==="i"?state.budget.income:state.budget.expenses).find(x=>x.id===id); budgetModal(kind,l); });
+  $$("[data-bdel]").forEach(b=>b.onclick=()=>{ const[kind,id]=b.getAttribute("data-bdel").split(":"); if(confirm("Delete this line?")){ if(kind==="i")state.budget.income=state.budget.income.filter(x=>x.id!==id); else state.budget.expenses=state.budget.expenses.filter(x=>x.id!==id); save(); beep(400); renderAll(); } });
+  function shareCell(kind,id){ const el=document.querySelector(`[data-share="${kind}:${id}"]`); return el; }
+  $$("input[data-aid]").forEach(inp=>inp.addEventListener("input",()=>{ const a=state.assets.find(x=>x.id===inp.getAttribute("data-aid")); if(!a)return;
+    const v=Math.max(0,Math.min(100,+inp.value||0)); a.splitA=v;
+    $$(`input[data-aid="${a.id}"]`).forEach(o=>{ if(o!==inp)o.value=v; });
+    const c=shareCell("a",a.id); if(c)c.textContent=money(Math.round(a.valueC*v/100)); save(); }));
+  $$("input[data-aid]").forEach(inp=>inp.addEventListener("change",()=>{ const a=state.assets.find(x=>x.id===inp.getAttribute("data-aid")); if(a)inp.value=a.splitA; }));
+  $$("input[data-did]").forEach(inp=>inp.addEventListener("input",()=>{ const d=state.debts.find(x=>x.id===inp.getAttribute("data-did")); if(!d)return;
+    const v=Math.max(0,Math.min(100,+inp.value||0)); d.splitA=v;
+    $$(`input[data-did="${d.id}"]`).forEach(o=>{ if(o!==inp)o.value=v; });
+    const c=shareCell("d",d.id); if(c)c.textContent=money(Math.round(d.balanceC*v/100)); save(); }));
+  $$("input[data-did]").forEach(inp=>inp.addEventListener("change",()=>{ const d=state.debts.find(x=>x.id===inp.getAttribute("data-did")); if(d)inp.value=d.splitA; }));
+  const bj=$("#bkJson"); if(bj)bj.onclick=()=>{ const c=JSON.parse(JSON.stringify(state)); c.settings.sample=false; dl("maritalmath-backup.json",JSON.stringify(c),"application/json"); toast("JSON exported."); };
+  const bca=$("#bkCsvA"); if(bca)bca.onclick=()=>{ exportCSV(); toast("CSV exported."); };
+  const bf=$("#bkFile"); if(bf)bf.addEventListener("change",()=>{ const f=bf.files[0]; if(!f)return; const r=new FileReader();
+    r.onload=()=>{ try{ const d=JSON.parse(r.result,noProto); if(!d||typeof d!=="object"||!d.settings)throw 0; state=Object.assign(blankState(),d); state.settings.sample=false; snap=null; sanitize(); save(); chartSel=null; $("#btnSample").classList.remove("on"); $("#sampBar").classList.remove("show"); renderAll(); toast("Backup restored."); }catch(e){ toast("That file is not a valid backup."); } };
+    r.readAsText(f); });
+  const bw=$("#bkWipe"); if(bw)bw.onclick=()=>{ if(state.settings.sample){ toast("Turn off sample data first — wiping now would destroy your real entries."); return; } if(confirm("Delete ALL assets, debts, scenarios, and budget lines? This cannot be undone.")){ snap=null; chartSel=null; state=blankState(); save(); renderAll(); toast("All data deleted."); } };
+}
+$$("#tabs button").forEach(b=>b.addEventListener("click",()=>{ $$("#tabs button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); curTab=b.getAttribute("data-t"); chartSel=null; chartSelInfo=null; beep(520); renderAll(); }));
+$("#btnTheme").addEventListener("click",()=>{ const cur=document.documentElement.getAttribute("data-theme")==="dark"; state.settings.theme=cur?"light":"dark"; save(); applyTheme(); beep(560); });
+$("#btnSound").addEventListener("click",()=>{ state.settings.sound=state.settings.sound===false?true:false; save(); $("#btnSound").classList.toggle("on",state.settings.sound!==false); if(state.settings.sound!==false)beep(700); });
+$("#btnSample").addEventListener("click",()=>{ if(state.settings.sample){ if(snap){state=snap; snap=null;} state.settings.sample=false; }
+  else{ snap=state; state=sampleState(); }
+  save(); chartSel=null; chartSelInfo=null; $("#btnSample").classList.toggle("on",!!state.settings.sample); $("#sampBar").classList.toggle("show",!!state.settings.sample); beep(760); renderAll(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape")closeModal(); });
+load(); applyTheme();
+$("#btnSound").classList.toggle("on",state.settings.sound!==false);
+renderAll();
+</script>
+</body>
+</html>
