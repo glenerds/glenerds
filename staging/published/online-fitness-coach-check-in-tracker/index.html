@@ -1,372 +1,1144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Online Fitness Coach Check-In Tracker — Client Check-Ins, Comparisons &amp; Feedback Drafts | Glenerds</title>
-<meta name="description" content="Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.">
-<link rel="canonical" href="https://glenerds.github.io/glenerds/staging/published/online-fitness-coach-check-in-tracker/">
-<script>
-(function(){try{var t=localStorage.getItem('glenerds-theme');if(!t&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches){t='dark';}document.documentElement.setAttribute('data-theme',t||'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();
-</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitnessCheckIn — Weekly Client Check-In Dashboard for Online Coaches</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230f766e'/%3E%3Cpath d='M18 34l8 8 18-20' stroke='%23fff' stroke-width='7' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
 :root{
-  --bg:#faf6f1; --card:#ffffff; --ink:#231a12; --muted:#6b5d4f; --border:#e9ddcd;
-  --accent:#ea580c; --accent-ink:#c2410c; --accent-soft:#fdeadb;
-  --good:#15803d; --bad:#b91c1c;
-  --shadow:0 2px 10px rgba(234,88,12,.08);
+  --teal:#0f766e; --teal-dark:#115e59; --teal-soft:#ccfbf1;
+  --ink:#1c1917; --muted:#78716c; --line:#e7e5e4; --bg:#fafaf9; --card:#ffffff;
+  --gray-soft:#f5f5f4;
+  --amber:#b45309; --amber-soft:#fef3c7; --red:#b91c1c; --red-soft:#fee2e2;
+  --radius:12px; --shadow:0 1px 3px rgba(0,0,0,.08);
 }
-html[data-theme="dark"]{
-  --bg:#14100c; --card:#1e1813; --ink:#f3ece2; --muted:#b3a48f; --border:#382c20;
-  --accent:#fb923c; --accent-ink:#fdba74; --accent-soft:#2c1f14;
-  --good:#4ade80; --bad:#f87171;
-  --shadow:0 2px 12px rgba(0,0,0,.35);
+/* Dark mode — every color variable flipped for readability on dark backgrounds. */
+[data-theme="dark"]{
+  --teal:#2dd4bf; --teal-dark:#5eead4; --teal-soft:#134e4a;
+  --ink:#e8ecf1; --muted:#9aa4b0; --line:#2c3540; --bg:#12161c; --card:#1a2029;
+  --gray-soft:#242c36;
+  --amber:#fbbf24; --amber-soft:#45310a; --red:#f87171; --red-soft:#3d1518;
+  --shadow:0 1px 3px rgba(0,0,0,.45);
 }
+[data-theme="dark"] button.btn{color:#0b1f1c}
+.themetoggle{position:absolute;top:16px;right:0;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:19px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+.themetoggle:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.55}
-main{max-width:960px;margin:0 auto;padding:0 1rem 3rem}
-header.top{display:flex;align-items:center;gap:.9rem;max-width:960px;margin:0 auto;
-  padding:.9rem 1rem;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:var(--ink);margin-right:auto}
-.brand .badge{width:44px;height:44px;flex:none;border-radius:12px;
-  background:linear-gradient(135deg,#fb923c,#9a3412);display:flex;align-items:center;justify-content:center;
-  box-shadow:var(--shadow)}
-.brand .badge svg{width:28px;height:28px}
-.brand .bname{font-weight:800;font-size:1.3rem;letter-spacing:-.01em;line-height:1.1}
-.brand .bsub{display:block;font-size:15px;font-weight:500;color:var(--muted)}
-.actions{display:flex;align-items:center;gap:8px}
-.more-apps{display:inline-flex;align-items:center;background:var(--accent);color:#fff;border-radius:999px;
-  padding:0 18px;height:44px;font-size:16px;font-weight:700;text-decoration:none;white-space:nowrap}
-.more-apps:hover{filter:brightness(1.08)}
-.icon-btn{width:44px;height:44px;min-width:44px;border-radius:999px;display:inline-flex;align-items:center;
-  justify-content:center;cursor:pointer;background:var(--card);border:1px solid var(--border);
-  color:var(--ink);box-shadow:var(--shadow);padding:0}
-.icon-btn svg{width:24px;height:24px}
-.icon-btn:hover{border-color:var(--accent)}
-.icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.icon-btn[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
-.hero{padding:1.2rem 0 .4rem}
-.hero h1{font-size:1.9rem;margin:.2rem 0 .6rem;letter-spacing:-.015em;line-height:1.25}
-.hero .lead{font-size:17px;color:var(--muted);max-width:44rem;margin:0 0 1rem}
-.pricebox{display:inline-block;font-size:1.15rem;font-weight:800;color:var(--accent-ink);
-  background:var(--accent-soft);border:1px solid var(--border);border-radius:12px;padding:.45rem .9rem;margin:.4rem 0 .8rem}
-.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.6rem 1.3rem;
-  border-radius:12px;border:0;background:var(--accent);color:#fff;font-size:16px;font-weight:700;cursor:pointer;text-decoration:none}
-.btn:hover{filter:brightness(1.08)}
-.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--border)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;
-  box-shadow:var(--shadow);padding:1.25rem 1.25rem 1.1rem;margin:1.25rem 0}
-.card h2{font-size:1.25rem;margin:0 0 .8rem;letter-spacing:-.01em}
-.demo-head{display:flex;gap:1rem;flex-wrap:wrap;align-items:end;margin-bottom:.6rem}
-.field{display:flex;flex-direction:column;gap:.3rem;font-size:15px;font-weight:600}
-.field select{font-size:16px;padding:.6rem .7rem;border-radius:10px;border:1px solid var(--border);
-  background:var(--bg);color:var(--ink);min-height:44px}
-.field select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-table.cmp{width:100%;border-collapse:collapse;font-size:15px;margin:.4rem 0}
-table.cmp th,table.cmp td{padding:.55rem .6rem;border-bottom:1px solid var(--border);text-align:left}
-table.cmp th{color:var(--muted);font-size:15px}
-table.cmp td.num,table.cmp th.num{text-align:right;font-variant-numeric:tabular-nums}
-table.cmp tr.mrow{cursor:pointer}
-table.cmp tr.mrow:hover td{background:var(--accent-soft)}
-table.cmp tr.mrow.sel td{background:var(--accent-soft);box-shadow:inset 0 0 0 2px var(--accent)}
-table.cmp tr.mrow:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
-.d-up{color:var(--bad);font-weight:700}.d-dn{color:var(--good);font-weight:700}.d-eq{color:var(--muted)}
-#cb-detail{margin:.7rem 0;font-size:15px;color:var(--muted);min-height:1.2em}
-#cb-detail strong{color:var(--ink)}
-#cb-draft{width:100%;min-height:170px;font-size:15px;line-height:1.55;padding:.8rem;border-radius:12px;
-  border:1px solid var(--border);background:var(--bg);color:var(--ink);margin-top:.6rem;resize:vertical}
-.prose h2{font-size:1.3rem;margin:1.8rem 0 .5rem}
-.prose p,.prose li{font-size:16px}
-.prose ul{padding-left:1.3rem}
-.prose details{background:var(--card);border:1px solid var(--border);border-radius:12px;
-  padding:.8rem 1rem;margin:.55rem 0}
-.prose summary{font-weight:700;font-size:16px;cursor:pointer}
-.prose summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.cta-strip{margin:2rem 0 0;padding:1.6rem 1.4rem;border-radius:16px;text-align:center;
-  background:var(--accent-soft);border:1px solid var(--border)}
-.cta-strip h2{margin:0 0 .5rem;font-size:1.35rem}
-.cta-strip p{margin:.4rem auto 1rem;font-size:16px;color:var(--muted);max-width:38rem}
-.cta-strip .row{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap}
-footer.site{max-width:960px;margin:0 auto;padding:2rem 1rem 2.5rem;color:var(--muted);font-size:15px}
-footer.site a{color:var(--accent-ink)}
-a{color:var(--accent-ink)}
-.small{font-size:15px;color:var(--muted)}
-@media print{.actions,.cta-strip{display:none!important}}
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:16px;line-height:1.5}
+#app{max-width:820px;margin:0 auto;padding:0 16px 110px}
+header.apphead{padding:20px 0 8px;position:relative}
+.wordmark{font-size:24px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.wordmark .accent{color:var(--teal)}
+.tagline{color:var(--muted);font-size:14px;margin-top:2px}
+.savepill{display:inline-block;margin-top:8px;font-size:12px;font-weight:600;
+  background:var(--teal-soft);color:var(--teal-dark);border-radius:999px;padding:3px 12px}
+.savepill.dirty{background:var(--amber-soft);color:var(--amber)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0;border-bottom:2px solid var(--line);
+  position:sticky;top:0;background:var(--bg);z-index:5}
+nav.tabs button{flex:0 0 auto;border:0;background:none;padding:10px 14px;font-size:15px;font-weight:600;
+  color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;min-height:44px}
+nav.tabs button.active{color:var(--teal-dark);border-bottom-color:var(--teal)}
+nav.tabs button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+section.view{display:none;padding:18px 0}
+section.view.active{display:block}
+h2{font-size:20px;margin:6px 0 12px}
+h3{font-size:16px;margin:18px 0 8px}
+p.hint{color:var(--muted);font-size:14px;margin:6px 0 12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px;margin:0 0 14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>.grow{flex:1 1 200px}
+label.f{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--ink)}
+input[type=text],input[type=date],input[type=number],select,textarea{
+  width:100%;padding:10px 12px;font-size:16px;border:1px solid var(--line);border-radius:8px;
+  background:var(--card);color:var(--ink);font-family:inherit}
+textarea{min-height:90px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+  outline:2px solid var(--teal);outline-offset:1px}
+button.btn{border:0;border-radius:8px;padding:11px 18px;font-size:15px;font-weight:700;cursor:pointer;
+  min-height:44px;background:var(--teal);color:#fff}
+button.btn:hover{background:var(--teal-dark)}
+button.btn.ghost{background:var(--card);color:var(--teal-dark);border:1px solid var(--teal)}
+button.btn.warn{background:var(--card);color:var(--red);border:1px solid var(--red)}
+button.btn.small{padding:7px 12px;font-size:13px;min-height:36px}
+button.btn:disabled{opacity:.5;cursor:not-allowed}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+table.cmp th,table.cmp td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.cmp th{background:var(--teal-soft);color:var(--teal-dark);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.delta-up{color:var(--teal-dark);font-weight:700}
+.delta-down{color:var(--amber);font-weight:700}
+.delta-flat{color:var(--muted)}
+.checkitem{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);min-height:44px}
+.checkitem input{width:22px;height:22px;accent-color:var(--teal)}
+.checkitem input,.checkitem label{cursor:pointer}
+.pill{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 10px;background:var(--teal-soft);color:var(--teal-dark)}
+.pill.gray{background:var(--gray-soft);color:var(--muted)}
+.pill.amber{background:var(--amber-soft);color:var(--amber)}
+.statcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px}
+.stat .k{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat .v{font-size:22px;font-weight:800;margin-top:2px}
+.stat .d{font-size:13px;margin-top:2px}
+.declog{border-left:3px solid var(--teal);padding:8px 0 8px 14px;margin:0 0 12px}
+.declog .meta{font-size:12px;color:var(--muted)}
+.declog .txt{margin-top:4px}
+.draftbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;
+  white-space:pre-wrap;font-size:15px;margin:12px 0}
+.empty{border:1px dashed var(--line);border-radius:var(--radius);padding:24px;text-align:center;color:var(--muted);margin:12px 0}
+.banner{background:var(--red-soft);color:var(--red);border:1px solid var(--red);border-radius:8px;
+  padding:10px 14px;margin:12px 0;font-size:14px}
+.banner.info{background:var(--amber-soft);color:var(--amber);border-color:var(--amber)}
+footer.appfoot{margin-top:30px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+footer.appfoot p{margin:4px 0}
+.listhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 6px}
+.listhead h3{margin:0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+#importFile{display:none}
+#printArea{display:none}
+@media print{
+  body{background:#fff}
+  header.apphead nav.tabs,#app>header .savepill,#app>header .themetoggle,#printBtnRow,footer.appfoot,#viewbar{display:none!important}
+  #printArea{display:block!important}
+  .card{box-shadow:none}
+}
+@media (max-width:640px){
+  #app{padding:0 12px 130px}
+  nav.tabs{position:fixed;bottom:0;left:0;right:0;top:auto;border-bottom:0;border-top:2px solid var(--line);
+    background:var(--bg);justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  nav.tabs button{border-bottom:0;border-top:3px solid transparent;margin-bottom:0;padding:8px 6px;font-size:12px;min-height:52px}
+  nav.tabs button.active{border-top-color:var(--teal)}
+  .grid2,.grid3,.grid4{grid-template-columns:1fr 1fr}
+  table.cmp{font-size:12px}
+  table.cmp th,table.cmp td{padding:6px 6px}
+  .cmpwrap{overflow-x:auto}
+}
 </style>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":["Product","SoftwareApplication"],"name":"Coach Board",
-"description":"Offline client check-in tracker for online fitness coaches: log weekly check-ins, compare weeks side by side, generate client feedback in one click. $29 one-time, no subscription.",
-"url":"https://glenerds.github.io/glenerds/staging/published/online-fitness-coach-check-in-tracker/",
-"brand":{"@type":"Brand","name":"Glenerds"},"applicationCategory":"UtilitiesApplication",
-"operatingSystem":"Any modern web browser",
-"offers":{"@type":"Offer","price":"29","priceCurrency":"USD","availability":"https://schema.org/InStock",
-"url":"https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker"}}
-</script>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-{"@type":"Question","name":"Do my clients need accounts too?","acceptedAnswer":{"@type":"Answer","text":"No. This is your coaching dashboard — clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for."}},
-{"@type":"Question","name":"Where is client data stored?","acceptedAnswer":{"@type":"Answer","text":"On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee — but keep your own backups."}},
-{"@type":"Question","name":"Does it replace my coaching app?","acceptedAnswer":{"@type":"Answer","text":"It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live."}},
-{"@type":"Question","name":"Is it really a one-time purchase?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing."}}
-]}
-</script>
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="../" aria-label="Coach Board — all apps">
-    <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2" stroke="#fff" stroke-width="1.8"/><path d="M9 4a3 3 0 0 1 6 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M8.5 13l2.2 2.2 4.8-5" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-    <span><span class="bname">Coach Board</span><span class="bsub">Fitness coach check-in tracker</span></span>
-  </a>
-  <div class="actions">
-    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
-    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
-    <button id="sound-toggle" class="icon-btn" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
-  </div>
-</header>
-<main>
-<section class="hero">
-  <h1>Online Fitness Coach Check-In Tracker &mdash; Client Check-Ins, Comparisons &amp; Feedback Drafts</h1>
-  <p class="lead">Online coaches lose hours every week to messy check-ins scattered across DMs, spreadsheets, and screenshots. Coach Board gives you one offline home for your whole roster: log each client&rsquo;s weekly check-in, compare any two weeks side by side, and turn the numbers into a feedback message draft with a single click.</p>
-  <p><span class="pricebox">$29 one-time</span></p>
-  <p><a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a></p>
-  <p class="small">One-time purchase. The tool runs offline in your browser &mdash; no account, no subscription.</p>
-</section>
+<div id="app">
+  <header class="apphead">
+    <div class="wordmark" id="wordmark">Fitness<span class="accent">CheckIn</span></div>
+    <div class="tagline" id="tagline"></div>
+    <div><span class="savepill" id="savePill">Saved</span></div>
+    <button id="themeToggle" class="themetoggle" aria-label="Switch to dark mode">&#127769;</button>
+  </header>
+  <nav class="tabs" id="viewbar" aria-label="Sections"></nav>
 
-<section class="card" role="region" aria-label="Interactive demo: week comparison">
-  <h2>Try it: week-over-week comparison</h2>
-  <p class="small">A taste of the real thing &mdash; pick any two check-in weeks for a sample client, tap a metric row for the coach&rsquo;s read, then generate the feedback draft.</p>
-  <div class="demo-head">
-    <label class="field">Week A<select id="cb-wa" aria-label="Week A"></select></label>
-    <label class="field">Week B<select id="cb-wb" aria-label="Week B"></select></label>
-    <button class="btn ghost" id="cb-swap" type="button">Swap weeks</button>
-  </div>
-  <div id="cb-table"></div>
-  <div id="cb-detail" aria-live="polite"></div>
-  <p><button class="btn" id="cb-draft-btn" type="button">Generate feedback draft</button></p>
-  <textarea id="cb-draft" aria-label="Generated feedback draft" placeholder="Your feedback draft will appear here…" readonly></textarea>
-</section>
+  <section class="view" id="view-guide" aria-label="Guide">
+    <div class="card" id="onboardingCard" style="display:none">
+      <h2>Welcome to FitnessCheckIn</h2>
+      <p class="hint">One place for every client's weekly check-ins: photos, measurements, macros, adherence, your notes — then comparisons, decision logs, and feedback drafts in one click.</p>
+      <div class="actions">
+        <button class="btn" id="btnSample">Load sample data</button>
+        <button class="btn ghost" id="btnEmpty">Start empty</button>
+      </div>
+    </div>
+    <h2>How it works</h2>
+    <div class="card">
+      <h3>1 · Add clients</h3>
+      <p class="hint">Clients tab → New client. Name, division, start date, goal. That's the roster.</p>
+      <h3>2 · Log the weekly check-in</h3>
+      <p class="hint">Check-Ins tab → pick a client → New check-in. Tick off the photo protocol, enter weight and measurements, targets vs actual macros, 1–10 adherence scores, and your notes. ~2 minutes per client.</p>
+      <h3>3 · Compare week over week</h3>
+      <p class="hint">Compare tab → pick a client. Deltas vs the previous week, automatically.</p>
+      <h3>4 · Log the decision</h3>
+      <p class="hint">Decisions tab → record what you changed (macros, training, cardio…) linked to the check-in that triggered it. Your paper trail, searchable forever.</p>
+      <h3>5 · Send the feedback</h3>
+      <p class="hint">Draft tab → pick a client. A message draft is composed from the latest check-in and decision. Copy it into WhatsApp, DM, or email.</p>
+    </div>
+    <div class="card">
+      <h3>What this tool is (and isn't)</h3>
+      <p class="hint" id="disclaimerGuide"></p>
+    </div>
+  </section>
 
-<section class="prose">
-  <h2>What it does</h2>
-  <ul>
-    <li>Client roster with per-client weekly check-in history, stored locally on your device</li>
-    <li>Photo protocol checklists so clients submit the right shots every week</li>
-    <li>Weight, measurements, macros vs. actuals, and 1–10 adherence scores per check-in</li>
-    <li>Side-by-side week comparison to spot trends at a glance</li>
-    <li>One-click client feedback message draft built from the week&rsquo;s data</li>
-    <li>Runs offline in any modern browser &mdash; no account, no subscription, no uploads</li>
-  </ul>
-  <h2>Who this is for</h2>
-  <ul>
-    <li>Physique and prep coaches managing weekly client check-ins</li>
-    <li>Online coaches who want macros-vs-actuals tracking without a spreadsheet</li>
-    <li>Coaches tired of digging through chat history for last week&rsquo;s numbers</li>
-  </ul>
-  <h2>Who this isn&rsquo;t for</h2>
-  <ul>
-    <li>You need client data synced automatically across your phone and laptop</li>
-    <li>Multiple coaches share one client roster</li>
-    <li>You want programming, billing, or messaging built into the same app</li>
-  </ul>
-  <p>The honest filter: if you want a simple offline tool you pay for once and own forever, this fits. If you need cloud sync, team seats, or integrations with other platforms, you&rsquo;ll be happier with a subscription product &mdash; and that&rsquo;s fine. This tool is deliberately not that.</p>
-  <h2>Frequently asked questions</h2>
-  <details><summary>Do my clients need accounts too?</summary><p>No. This is your coaching dashboard &mdash; clients send check-ins however they already do, and you log them here. Nothing for them to install or sign up for.</p></details>
-  <details><summary>Where is client data stored?</summary><p>On your device, in your browser. No cloud sync means no data-processing worries and no monthly fee &mdash; but keep your own backups.</p></details>
-  <details><summary>Does it replace my coaching app?</summary><p>It replaces the check-in spreadsheet and the DM archaeology. Programming, billing, and messaging stay wherever they already live.</p></details>
-  <details><summary>Is it really a one-time purchase?</summary><p>Yes. Pay once, download the file, use it forever. No subscription, no per-client pricing.</p></details>
-</section>
+  <section class="view" id="view-clients" aria-label="Clients">
+    <div class="listhead"><h2>Clients</h2><button class="btn small" id="btnNewClient">+ New client</button></div>
+    <div id="clientForm" class="card" style="display:none"></div>
+    <div id="clientList"></div>
+  </section>
 
-<div class="cta-strip">
-  <h2>Get Coach Board today</h2>
-  <p><strong>$29 one-time</strong> &mdash; yours forever. No subscription. Client roster, weekly check-ins, week-over-week comparisons, and one-click feedback drafts, all offline.</p>
-  <div class="row">
-    <a class="btn" href="https://glenerds.gumroad.com/l/online-fitness-coach-check-in-tracker">Get it on Gumroad</a>
-    <a class="btn ghost" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
-  </div>
+  <section class="view" id="view-checkins" aria-label="Check-Ins">
+    <div class="listhead"><h2>Check-Ins</h2><button class="btn small" id="btnNewCheckin">+ New check-in</button></div>
+    <div class="card">
+      <label class="f" for="ciClientFilter">Client</label>
+      <select id="ciClientFilter"></select>
+    </div>
+    <div id="checkinForm" class="card" style="display:none"></div>
+    <div id="checkinList"></div>
+  </section>
+
+  <section class="view" id="view-compare" aria-label="Compare">
+    <h2>Week-over-Week</h2>
+    <div class="card">
+      <label class="f" for="cmpClient">Client</label>
+      <select id="cmpClient"></select>
+    </div>
+    <div id="cmpOut"></div>
+  </section>
+
+  <section class="view" id="view-decisions" aria-label="Decisions">
+    <div class="listhead"><h2>Program-Adjustment Log</h2><button class="btn small" id="btnNewDecision">+ Log decision</button></div>
+    <div id="decisionForm" class="card" style="display:none"></div>
+    <div class="card">
+      <label class="f" for="decClientFilter">Filter by client</label>
+      <select id="decClientFilter"></select>
+    </div>
+    <div id="decisionList"></div>
+  </section>
+
+  <section class="view" id="view-draft" aria-label="Draft">
+    <h2>Client Feedback Draft</h2>
+    <div class="card">
+      <label class="f" for="draftClient">Client</label>
+      <select id="draftClient"></select>
+      <div class="actions" id="printBtnRow">
+        <button class="btn" id="btnGenDraft">Generate draft</button>
+        <button class="btn ghost" id="btnCopyDraft" disabled>Copy to clipboard</button>
+        <button class="btn ghost" id="btnPrintSummary">Print summary</button>
+      </div>
+    </div>
+    <div class="draftbox" id="draftOut" style="display:none"></div>
+    <p class="hint" id="draftStatus"></p>
+  </section>
+
+  <section class="view" id="view-data" aria-label="Data">
+    <h2>Data &amp; Settings</h2>
+    <div class="card">
+      <h3>Coach settings</h3>
+      <label class="f" for="setCoachName">Coach name (used in message drafts)</label>
+      <input type="text" id="setCoachName" maxlength="80">
+      <label class="f" for="setBusiness">Business / team name (optional)</label>
+      <input type="text" id="setBusiness" maxlength="80">
+      <label class="f" for="setUnits">Units</label>
+      <select id="setUnits">
+        <option value="imperial">Imperial (lb / in)</option>
+        <option value="metric">Metric (kg / cm)</option>
+      </select>
+      <label class="f" for="setPhoto">Photo protocol items (one per line)</label>
+      <textarea id="setPhoto" rows="6"></textarea>
+      <div class="actions"><button class="btn" id="btnSaveSettings">Save settings</button></div>
+      <p class="hint">Switching units changes labels only — existing numbers are not converted.</p>
+    </div>
+    <div class="card">
+      <h3>Backup &amp; export</h3>
+      <div class="actions">
+        <button class="btn ghost" id="btnExportJSON">Download JSON backup</button>
+        <button class="btn ghost" id="btnImportJSON">Restore from JSON</button>
+        <input type="file" id="importFile" accept="application/json,.json">
+        <button class="btn ghost" id="btnExportCSV">Download check-ins CSV</button>
+      </div>
+      <p class="hint" id="dataMsg"></p>
+    </div>
+    <div class="card">
+      <h3>Danger zone</h3>
+      <div class="actions"><button class="btn warn" id="btnErase">Erase all data</button></div>
+      <p class="hint">Double-click the button to confirm. This cannot be undone.</p>
+    </div>
+    <div class="card">
+      <h3>About</h3>
+      <p class="hint" id="aboutLine"></p>
+      <p class="hint" id="disclaimerData"></p>
+    </div>
+  </section>
+
+  <div id="printArea"></div>
+
+  <footer class="appfoot">
+    <p id="footBrand"></p>
+    <p id="disclaimerFoot"></p>
+    <p>All data stays in this browser (localStorage). No accounts, no network, no subscriptions.</p>
+  </footer>
 </div>
-</main>
-<footer class="site">
-  <p><strong>Coach Board</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p>
-  <p>&copy; 2026 Glenerds.</p>
-</footer>
 <script>
-/* ---------- theme toggle ---------- */
-(function(){
-  var KEY='glenerds-theme',root=document.documentElement,btn=document.getElementById('theme-toggle');
-  var SUN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
-  var MOON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
-  function sysDark(){return window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;}
-  function cur(){try{var s=localStorage.getItem(KEY);if(s==='dark'||s==='light')return s;}catch(e){}return sysDark()?'dark':'light';}
-  function paint(){var t=cur();root.setAttribute('data-theme',t);
-    if(btn){btn.innerHTML=t==='dark'?SUN:MOON;
-      var lbl=t==='dark'?'Switch to light mode':'Switch to dark mode';
-      btn.setAttribute('aria-label',lbl);btn.title=lbl;btn.setAttribute('aria-pressed',t==='dark'?'true':'false');}}
-  if(btn){btn.addEventListener('click',function(){var n=cur()==='dark'?'light':'dark';try{localStorage.setItem(KEY,n);}catch(e){}paint();Sound.click();});}
-  paint();
-})();
-/* ---------- sounds (Web Audio oscillator, on user interaction only) ---------- */
-var Sound=(function(){
-  var KEY='online-fitness-coach-check-in-tracker.sound',on=true,ctx=null;
-  try{if(window.localStorage.getItem(KEY)==='off')on=false;}catch(e){}
-  function ac(){try{
-    if(!ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ctx=new AC();}
-    return ctx;}catch(e){return null;}}
-  function tone(freq,dur,type,vol,delay){
-    var c=ac();if(!c)return;
-    function play(){try{
-      var t=c.currentTime+(delay||0),o=c.createOscillator(),g=c.createGain();
-      o.type=type||'sine';o.frequency.value=freq;
-      g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(vol||0.06,t+0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-      o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+dur+0.05);}catch(e){}}
-    if(c.state==='suspended'){c.resume().then(play,play);}else{play();}
+/* Theme: dark mode toggle. Reads localStorage 'theme'; falls back to
+   prefers-color-scheme on first load. Persists choice across sessions. */
+(function () {
+  var root = document.documentElement;
+  function applyTheme(t) {
+    root.dataset.theme = t;
+    try { localStorage.setItem('theme', t); } catch (e) {}
+    var btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.textContent = (t === 'dark') ? '\u2600' : '\u{1F319}';
+      btn.setAttribute('aria-label', (t === 'dark') ? 'Switch to light mode' : 'Switch to dark mode');
+    }
   }
-  return{
-    isOn:function(){return on;},
-    toggle:function(){on=!on;try{window.localStorage.setItem(KEY,on?'on':'off');}catch(e){}return on;},
-    click:function(){if(on)tone(520,0.06,'sine',0.045);},
-    select:function(){if(on){tone(660,0.07,'sine',0.055);tone(880,0.09,'sine',0.045,0.06);}},
-    success:function(){if(on){tone(660,0.09,'sine',0.06);tone(990,0.12,'sine',0.05,0.08);}},
-    error:function(){if(on)tone(170,0.16,'sawtooth',0.045);}
+  var saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+  var initial = (saved === 'dark' || saved === 'light') ? saved :
+    ((window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light');
+  applyTheme(initial);
+  var btn = document.getElementById('themeToggle');
+  if (btn) btn.addEventListener('click', function () {
+    applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+  });
+  window.__theme = applyTheme;
+})();
+'use strict';
+/* ============================================================
+ * FitnessCheckIn v1.0.0 — offline weekly check-in dashboard
+ * for online physique / prep coaches. Single file, no network.
+ * ============================================================ */
+
+/* §0 — Branding: every visible name/tagline renders from here. */
+const BRAND = {
+  name: 'FitnessCheckIn',
+  tagline: 'Turn weekly client check-ins into comparisons, decisions, and feedback drafts — offline, no subscription.',
+  fileSlug: 'fitnesscheckin',
+  version: '1.0.0'
+};
+const DB_KEY = 'checkincompiler.db.v1';
+const DISCLAIMER = 'FitnessCheckIn is a data-organization tool for coaches. It does not provide medical, nutrition, or training advice. All program decisions remain the coach\u2019s professional responsibility; consult qualified professionals where required.';
+const DECISION_CATS = ['Macros', 'Training', 'Cardio', 'Peak week', 'Posing', 'Other'];
+const MEAS_KEYS = ['waist', 'hips', 'chest', 'thigh', 'arm', 'glute', 'shoulder'];
+const MEAS_LABELS = { waist:'Waist', hips:'Hips', chest:'Chest', thigh:'Thigh', arm:'Arm', glute:'Glute', shoulder:'Shoulder' };
+const ADHERE_KEYS = ['training', 'nutrition', 'cardio', 'sleep'];
+const ADHERE_LABELS = { training:'Training', nutrition:'Nutrition', cardio:'Cardio', sleep:'Sleep' };
+const MACRO_KEYS = ['p', 'c', 'f', 'cal'];
+const MACRO_LABELS = { p:'Protein (g)', c:'Carbs (g)', f:'Fat (g)', cal:'Calories' };
+
+/* ---------- tiny DOM helpers (DOM built via createElement/textContent only) ---------- */
+function el(tag, attrs, children) {
+  const n = document.createElement(tag);
+  if (attrs) for (const k of Object.keys(attrs)) {
+    if (k === 'text') n.textContent = attrs[k];
+    else if (k === 'htmlFor') n.htmlFor = attrs[k];
+    else if (k === 'dataset') for (const d of Object.keys(attrs[k])) n.dataset[d] = attrs[k][d];
+    else n.setAttribute(k, attrs[k]);
+  }
+  if (children !== undefined && children !== null) {
+    const arr = Array.isArray(children) ? children : [children];
+    for (const c of arr) {
+      if (c === null || c === undefined || c === false) continue;
+      n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    }
+  }
+  return n;
+}
+function $(id) { return document.getElementById(id); }
+function escNum(v) { const n = parseFloat(v); return Number.isFinite(n) ? n : null; }
+function uid() { return 'id' + Date.now().toString(36) + Math.random().toString(36).slice(2, 9); }
+function todayISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const p = String(iso).split('-');
+  if (p.length !== 3) return String(iso);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[parseInt(p[1], 10) - 1] + ' ' + parseInt(p[2], 10) + ', ' + p[0];
+}
+function fmtDelta(v, unit) {
+  if (v === null || v === undefined) return { text: '—', cls: 'delta-flat' };
+  const r = Math.round(v * 10) / 10;
+  if (r === 0) return { text: '±0 ' + unit, cls: 'delta-flat' };
+  return { text: (r > 0 ? '+' : '') + r + ' ' + unit, cls: r > 0 ? 'delta-up' : 'delta-down' };
+}
+
+/* ---------- storage ---------- */
+let saveTimer = null;
+let storageOK = true;
+function blankDB() {
+  return {
+    schema: 1,
+    settings: {
+      coachName: '', businessName: '', units: 'imperial',
+      photoProtocol: ['Front relaxed', 'Front flexed', 'Side relaxed', 'Side flexed', 'Back relaxed', 'Back flexed']
+    },
+    clients: [], checkins: [], decisions: []
   };
-})();
-(function(){
-  var btn=document.getElementById('sound-toggle');
-  var ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg>';
-  var OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M16 9l6 6M22 9l-6 6"/></svg>';
-  function paint(){var on=Sound.isOn();btn.innerHTML=on?ON:OFF;
-    btn.setAttribute('aria-pressed',on?'true':'false');
-    var lbl='Sound: '+(on?'on':'off');btn.setAttribute('aria-label',lbl);btn.title='Toggle sounds ('+(on?'on':'off')+')';}
-  btn.addEventListener('click',function(){Sound.toggle();paint();Sound.click();});
-  paint();
-})();
-/* ---------- Coach Board demo: week comparison + feedback draft ---------- */
-(function(){
-  var CLIENT='Alex Rivera';
-  var EMPTY_WEEKS=[
-    {w:'Week 1',wt:null,waist:null,prot:null,carb:null,adh:null},
-    {w:'Week 2',wt:null,waist:null,prot:null,carb:null,adh:null},
-    {w:'Week 3',wt:null,waist:null,prot:null,carb:null,adh:null},
-    {w:'Week 4',wt:null,waist:null,prot:null,carb:null,adh:null}
-  ];
-  var SAMPLE_WEEKS=[
-    {w:'Week 1',wt:184.2,waist:33.5,prot:165,carb:210,adh:8},
-    {w:'Week 2',wt:183.0,waist:33.2,prot:172,carb:198,adh:9},
-    {w:'Week 3',wt:181.8,waist:32.9,prot:158,carb:225,adh:6},
-    {w:'Week 4',wt:180.6,waist:32.6,prot:170,carb:205,adh:9}
-  ];
-  var weeks=JSON.parse(JSON.stringify(EMPTY_WEEKS));
-  var METRICS=[
-    {k:'wt',label:'Weight (lbs)',fmt:function(v){return v.toFixed(1);},downGood:true,
-     note:function(d){if(d<-2)return 'Down more than 2 lbs in a week — fast for most clients; check whether intake actually matched the plan.';if(d<0)return 'Down a bit — a healthy weekly rate for a cut.';if(d>0)return 'Up this week — flag it in the check-in reply and look at adherence below.';return 'Unchanged — weight alone never tells the story; check waist and adherence.';}},
-    {k:'waist',label:'Waist (in)',fmt:function(v){return v.toFixed(1);},downGood:true,
-     note:function(d){if(d<0)return 'Waist trending down while weight moves — real fat loss, not just water.';if(d>0)return 'Waist up — worth a closer look at the weekend intake.';return 'Waist steady — consistent with the weight trend.';}},
-    {k:'prot',label:'Protein (g, avg)',fmt:function(v){return Math.round(v);},downGood:false,
-     note:function(d){if(d>0)return 'Protein up — good: it protects muscle during a deficit.';if(d<0)return 'Protein slipped — the first thing to fix next week.';return 'Protein steady — hold the line.';}},
-    {k:'carb',label:'Carbs (g, avg)',fmt:function(v){return Math.round(v);},downGood:false,
-     note:function(d){if(d>25)return 'Carbs jumped — likely the weekend; ask, don\u2019t accuse.';if(d<-25)return 'Carbs dropped hard — fine if planned, flag if it wasn\u2019t.';return 'Carbs in the usual band.';}},
-    {k:'adh',label:'Adherence (1–10)',fmt:function(v){return v;},downGood:false,
-     note:function(d){if(d>=2)return 'Adherence jumped — momentum is building; reinforce it by name.';if(d<=-2)return 'Adherence fell — lead with curiosity: what got in the way?';return 'Adherence steady.';}}
-  ];
-  function $(id){return document.getElementById(id);}
-  var wa=$('cb-wa'),wb=$('cb-wb'),table=$('cb-table'),detail=$('cb-detail'),draft=$('cb-draft'),selMetric=-1;
-  function opts(){
-    [wa,wb].forEach(function(s){s.innerHTML='';});
-    weeks.forEach(function(wk,i){
-      [wa,wb].forEach(function(s){
-        var o=document.createElement('option');o.value=i;o.textContent=wk.w;s.appendChild(o);
-      });
-    });
-    wa.value=Math.max(0,weeks.length-2);wb.value=weeks.length-1;
+}
+let DB = blankDB();
+function loadDB() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.schema !== 1 || !Array.isArray(parsed.clients)) return false;
+    DB = Object.assign(blankDB(), parsed);
+    DB.settings = Object.assign(blankDB().settings, parsed.settings || {});
+    return true;
+  } catch (e) { return false; }
+}
+function saveDB() {
+  const pill = $('savePill');
+  pill.textContent = 'Saving…'; pill.classList.add('dirty');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem(DB_KEY, JSON.stringify(DB)); storageOK = true; }
+    catch (e) { storageOK = false; }
+    pill.textContent = storageOK ? 'Saved' : 'Storage blocked';
+    pill.classList.remove('dirty');
+  }, 350);
+}
+function clientById(id) { return DB.clients.find(c => c.id === id) || null; }
+function checkinsFor(clientId) {
+  return DB.checkins.filter(c => c.clientId === clientId).sort((a, b) => a.date < b.date ? -1 : 1);
+}
+function decisionsFor(clientId) {
+  return DB.decisions.filter(d => !clientId || d.clientId === clientId)
+    .sort((a, b) => b.ts.localeCompare(a.ts));
+}
+
+/* ---------- sample data ---------- */
+function sampleDB() {
+  const db = blankDB();
+  db.settings.coachName = 'Alex Rivera';
+  db.settings.businessName = 'Apex Prep Coaching';
+  const maya = uid();
+  db.clients.push({ id: maya, name: 'Maya Chen', division: 'Bikini', startDate: '2026-07-06', goal: 'Regional qualifier — 12 weeks out', notes: 'Prefers morning check-ins.', active: true });
+  const derek = uid();
+  db.clients.push({ id: derek, name: 'Derek Moss', division: "Men's Physique", startDate: '2026-08-17', goal: 'Off-season lean gain', notes: '', active: true });
+  const mk = (date, weight, waist, hips, chest, thigh, arm, glute, shoulder, tP, tC, tF, tCal, aP, aC, aF, aCal, tr, nu, ca, sl, notes, photosDone) => ({
+    id: uid(), clientId: maya, date,
+    photos: Object.fromEntries(db.settings.photoProtocol.map((p, i) => [p, photosDone ? i < photosDone : true])),
+    weight, meas: { waist, hips, chest, thigh, arm, glute, shoulder },
+    targets: { p: tP, c: tC, f: tF, cal: tCal }, actuals: { p: aP, c: aC, f: aF, cal: aCal },
+    adhere: { training: tr, nutrition: nu, cardio: ca, sleep: sl }, notes
+  });
+  const w1 = mk('2026-08-28', 132.4, 26.5, 36.0, 33.5, 22.0, 11.5, 37.0, 40.0, 150, 170, 45, 1685, 148, 172, 46, 1702, 9, 8, 8, 7, 'Solid first week. Posing needs work on quarter turns.', 6);
+  const w2 = mk('2026-09-04', 131.8, 26.2, 35.8, 33.4, 21.9, 11.5, 36.8, 39.9, 150, 170, 45, 1685, 150, 165, 44, 1656, 9, 9, 9, 8, 'Waist responding. Sleep improved with earlier bedtime.', 6);
+  const w3 = mk('2026-09-11', 130.9, 25.9, 35.5, 33.2, 21.7, 11.4, 36.5, 39.7, 150, 170, 45, 1685, 151, 158, 43, 1615, 10, 9, 9, 8, 'Down again. Energy good, no excessive hunger.', 6);
+  db.checkins.push(w1, w2, w3);
+  db.decisions.push({ id: uid(), clientId: maya, checkinId: w3.id, ts: '2026-09-11T14:30:00', category: 'Macros', text: 'Holding macros steady — rate of loss is on target at ~1 lb/week. Revisit if weight stalls two weeks in a row.' });
+  const d1 = {
+    id: uid(), clientId: derek, date: '2026-09-11',
+    photos: Object.fromEntries(db.settings.photoProtocol.map(p => [p, true])),
+    weight: 178.2, meas: { waist: 31.0, hips: 38.5, chest: 41.0, thigh: 24.5, arm: 15.0, glute: 39.0, shoulder: 48.0 },
+    targets: { p: 200, c: 320, f: 70, cal: 2710 }, actuals: { p: 198, c: 305, f: 72, cal: 2652 },
+    adhere: { training: 10, nutrition: 8, cardio: 7, sleep: 7 }, notes: 'First check-in. Baseline set.'
+  };
+  db.checkins.push(d1);
+  return db;
+}
+
+/* ---------- JSON import validation ---------- */
+function validateImport(obj) {
+  if (!obj || typeof obj !== 'object') return 'File is not a valid backup object.';
+  if (obj.schema !== 1) return 'Unsupported backup version (expected schema 1).';
+  if (!Array.isArray(obj.clients) || !Array.isArray(obj.checkins) || !Array.isArray(obj.decisions))
+    return 'Backup is missing client, check-in, or decision data.';
+  return null;
+}
+
+/* ---------- tab routing ---------- */
+const TABS = [
+  ['guide', 'Guide'], ['clients', 'Clients'], ['checkins', 'Check-Ins'],
+  ['compare', 'Compare'], ['decisions', 'Decisions'], ['draft', 'Draft'], ['data', 'Data']
+];
+let activeTab = 'guide';
+function buildTabs() {
+  const bar = $('viewbar');
+  for (const [key, label] of TABS) {
+    const b = el('button', { type: 'button', text: label, dataset: { tab: key }, id: 'tab-' + key });
+    b.addEventListener('click', () => showTab(key));
+    bar.appendChild(b);
   }
-  function val(wk,k){return wk[k];}
-  function render(){
-    var a=parseInt(wa.value,10),b=parseInt(wb.value,10);
-    var html='<table class="cmp"><thead><tr><th>Metric</th><th class="num">'+weeks[a].w+'</th><th class="num">'+weeks[b].w+'</th><th class="num">Change</th></tr></thead><tbody>';
-    METRICS.forEach(function(m,i){
-      var va=val(weeks[a],m.k),vb=val(weeks[b],m.k),cell;
-      if(va==null||vb==null){cell='<td class="num d-eq">—</td>';}
-      else{
-        var d=vb-va,arrow=d>0?'▲':d<0?'▼':'•',cls=d===0?'d-eq':(m.downGood?d<0:d>0)?'d-dn':'d-up';
-        var mag=Math.abs(d)<0.05?0:d;
-        cell='<td class="num"><span class="'+cls+'">'+arrow+' '+(m.k==='wt'||m.k==='waist'?mag.toFixed(1):Math.abs(Math.round(d)))+'</span></td>';
+}
+function showTab(key) {
+  activeTab = key;
+  for (const [k] of TABS) {
+    $('view-' + k).classList.toggle('active', k === key);
+    $('tab-' + k).classList.toggle('active', k === key);
+  }
+  if (key === 'clients') renderClients();
+  if (key === 'checkins') renderCheckins();
+  if (key === 'compare') renderCompare();
+  if (key === 'decisions') renderDecisions();
+  if (key === 'draft') renderDraftSelectors();
+  if (key === 'data') renderSettings();
+}
+
+/* ---------- CLIENTS ---------- */
+let editingClient = null;
+function renderClients() {
+  const list = $('clientList');
+  while (list.firstChild) list.removeChild(list.firstChild);
+  if (!DB.clients.length) {
+    list.appendChild(el('div', { class: 'empty', text: 'No clients yet. Add your first client to get started.' }));
+    return;
+  }
+  const sorted = DB.clients.slice().sort((a, b) => a.name.localeCompare(b.name));
+  for (const c of sorted) {
+    const n = checkinsFor(c.id).length;
+    const card = el('div', { class: 'card' });
+    const head = el('div', { class: 'row' });
+    head.appendChild(el('div', { class: 'grow' }, [
+      el('strong', { text: c.name }),
+      el('div', { class: 'hint', text: (c.division || '—') + ' · ' + n + ' check-in' + (n === 1 ? '' : 's') })
+    ]));
+    const acts = el('div', { class: 'actions' });
+    const eb = el('button', { class: 'btn small ghost', type: 'button', text: 'Edit' });
+    eb.addEventListener('click', () => openClientForm(c));
+    const db2 = el('button', { class: 'btn small warn', type: 'button', text: 'Delete' });
+    db2.addEventListener('click', () => {
+      if (!confirm('Delete ' + c.name + ' and all their check-ins and decisions?')) return;
+      DB.clients = DB.clients.filter(x => x.id !== c.id);
+      DB.checkins = DB.checkins.filter(x => x.clientId !== c.id);
+      DB.decisions = DB.decisions.filter(x => x.clientId !== c.id);
+      saveDB(); renderClients();
+    });
+    acts.appendChild(eb); acts.appendChild(db2);
+    head.appendChild(acts);
+    card.appendChild(head);
+    if (c.goal) card.appendChild(el('p', { class: 'hint', text: 'Goal: ' + c.goal }));
+    list.appendChild(card);
+  }
+}
+function openClientForm(c) {
+  editingClient = c ? c.id : null;
+  const f = $('clientForm');
+  while (f.firstChild) f.removeChild(f.firstChild);
+  f.style.display = 'block';
+  f.appendChild(el('h3', { text: c ? 'Edit client' : 'New client' }));
+  const nameI = el('input', { type: 'text', id: 'cfName', maxlength: '80', value: c ? c.name : '' });
+  const divI = el('input', { type: 'text', id: 'cfDiv', maxlength: '60', value: c ? (c.division || '') : '' });
+  const startI = el('input', { type: 'date', id: 'cfStart', value: c ? (c.startDate || '') : todayISO() });
+  const goalI = el('input', { type: 'text', id: 'cfGoal', maxlength: '140', value: c ? (c.goal || '') : '' });
+  const noteI = el('textarea', { id: 'cfNotes', rows: '2' });
+  if (c && c.notes) noteI.value = c.notes;
+  f.appendChild(el('label', { class: 'f', htmlFor: 'cfName', text: 'Name' })); f.appendChild(nameI);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'cfDiv', text: 'Division / category' })); f.appendChild(divI);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'cfStart', text: 'Start date' })); f.appendChild(startI);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'cfGoal', text: 'Goal' })); f.appendChild(goalI);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'cfNotes', text: 'Notes' })); f.appendChild(noteI);
+  const acts = el('div', { class: 'actions' });
+  const sv = el('button', { class: 'btn', type: 'button', text: 'Save client' });
+  sv.addEventListener('click', () => {
+    const name = nameI.value.trim();
+    if (!name) { alert('Client name is required.'); nameI.focus(); return; }
+    if (editingClient) {
+      const cl = clientById(editingClient);
+      cl.name = name; cl.division = divI.value.trim(); cl.startDate = startI.value;
+      cl.goal = goalI.value.trim(); cl.notes = noteI.value.trim();
+    } else {
+      DB.clients.push({ id: uid(), name, division: divI.value.trim(), startDate: startI.value, goal: goalI.value.trim(), notes: noteI.value.trim(), active: true });
+    }
+    saveDB(); f.style.display = 'none'; renderClients();
+  });
+  const cx = el('button', { class: 'btn ghost', type: 'button', text: 'Cancel' });
+  cx.addEventListener('click', () => { f.style.display = 'none'; });
+  acts.appendChild(sv); acts.appendChild(cx);
+  f.appendChild(acts);
+  nameI.focus();
+}
+
+/* ---------- CHECK-INS ---------- */
+let editingCheckin = null;
+function fillClientSelect(sel, includeAll, allLabel) {
+  const prev = sel.value;
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  const sorted = DB.clients.slice().sort((a, b) => a.name.localeCompare(b.name));
+  if (includeAll) sel.appendChild(el('option', { value: '', text: allLabel || 'All clients' }));
+  for (const c of sorted) sel.appendChild(el('option', { value: c.id, text: c.name }));
+  if (prev) {
+    const vals = Array.prototype.map.call(sel.options, o => o.value);
+    if (vals.indexOf(prev) !== -1) sel.value = prev;
+  }
+}
+function renderCheckins() {
+  fillClientSelect($('ciClientFilter'), false);
+  const list = $('checkinList');
+  while (list.firstChild) list.removeChild(list.firstChild);
+  const cid = $('ciClientFilter').value;
+  if (!cid) {
+    list.appendChild(el('div', { class: 'empty', text: DB.clients.length ? 'Select a client to see their check-ins.' : 'Add a client first.' }));
+    return;
+  }
+  const rows = checkinsFor(cid).slice().reverse();
+  if (!rows.length) {
+    list.appendChild(el('div', { class: 'empty', text: 'No check-ins yet for this client.' }));
+    return;
+  }
+  for (const r of rows) {
+    const c = clientById(cid);
+    const card = el('div', { class: 'card' });
+    const head = el('div', { class: 'row' });
+    head.appendChild(el('div', { class: 'grow' }, [
+      el('strong', { text: fmtDate(r.date) }),
+      el('div', { class: 'hint', text: weightLabel(r) + ' · ' + adherenceAvg(r) + ' adherence avg' })
+    ]));
+    const acts = el('div', { class: 'actions' });
+    const eb = el('button', { class: 'btn small ghost', type: 'button', text: 'Edit' });
+    eb.addEventListener('click', () => openCheckinForm(r));
+    const db2 = el('button', { class: 'btn small warn', type: 'button', text: 'Delete' });
+    db2.addEventListener('click', () => {
+      if (!confirm('Delete the check-in from ' + fmtDate(r.date) + '? Linked decisions stay but lose their link.')) return;
+      DB.checkins = DB.checkins.filter(x => x.id !== r.id);
+      for (const d of DB.decisions) if (d.checkinId === r.id) d.checkinId = '';
+      saveDB(); renderCheckins();
+    });
+    acts.appendChild(eb); acts.appendChild(db2);
+    head.appendChild(acts);
+    card.appendChild(head);
+    const done = DB.settings.photoProtocol.filter(p => r.photos && r.photos[p]).length;
+    card.appendChild(el('p', { class: 'hint', text: 'Photos: ' + done + '/' + DB.settings.photoProtocol.length + ' · ' + (r.notes || 'No notes') }));
+    list.appendChild(card);
+  }
+}
+function unitW() { return DB.settings.units === 'metric' ? 'kg' : 'lb'; }
+function unitM() { return DB.settings.units === 'metric' ? 'cm' : 'in'; }
+function weightLabel(r) { return r.weight === null || r.weight === undefined || r.weight === '' ? 'No weight' : r.weight + ' ' + unitW(); }
+function adherenceAvg(r) {
+  const vals = ADHERE_KEYS.map(k => escNum(r.adhere && r.adhere[k])).filter(v => v !== null);
+  if (!vals.length) return '—';
+  return (Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10) + '/10';
+}
+function numField(id, label, val, step) {
+  const wrap = el('div');
+  wrap.appendChild(el('label', { class: 'f', htmlFor: id, text: label }));
+  const i = el('input', { type: 'number', id, step: step || '0.1', inputmode: 'decimal' });
+  if (val !== null && val !== undefined && val !== '') i.value = val;
+  wrap.appendChild(i);
+  return { wrap, input: i };
+}
+function openCheckinForm(r) {
+  editingCheckin = r ? r.id : null;
+  const cid = $('ciClientFilter').value;
+  if (!cid && !r) { alert('Select a client first.'); return; }
+  const clientId = r ? r.clientId : cid;
+  const f = $('checkinForm');
+  while (f.firstChild) f.removeChild(f.firstChild);
+  f.style.display = 'block';
+  const cl = clientById(clientId);
+  f.appendChild(el('h3', { text: (r ? 'Edit' : 'New') + ' check-in — ' + (cl ? cl.name : '') }));
+
+  const dWrap = el('div');
+  dWrap.appendChild(el('label', { class: 'f', htmlFor: 'ciDate', text: 'Check-in date' }));
+  const dIn = el('input', { type: 'date', id: 'ciDate', value: r ? r.date : todayISO() });
+  dWrap.appendChild(dIn); f.appendChild(dWrap);
+
+  f.appendChild(el('h3', { text: 'Photo protocol' }));
+  const photoChecks = [];
+  for (const p of DB.settings.photoProtocol) {
+    const idp = 'ph_' + uid();
+    const lab = el('label', { class: 'checkitem', htmlFor: idp });
+    const cb = el('input', { type: 'checkbox', id: idp });
+    cb.checked = !!(r && r.photos && r.photos[p]);
+    lab.appendChild(cb); lab.appendChild(el('span', { text: p }));
+    f.appendChild(lab); photoChecks.push({ label: p, box: cb });
+  }
+
+  f.appendChild(el('h3', { text: 'Weight & measurements (' + unitW() + ' / ' + unitM() + ')' }));
+  const wg = numField('ciWeight', 'Weight (' + unitW() + ')', r ? r.weight : '', '0.1');
+  f.appendChild(wg.wrap);
+  const measGrid = el('div', { class: 'grid3' });
+  const measInputs = {};
+  for (const k of MEAS_KEYS) {
+    const nf = numField('ciM_' + k, MEAS_LABELS[k] + ' (' + unitM() + ')', r && r.meas ? r.meas[k] : '', '0.1');
+    measGrid.appendChild(nf.wrap); measInputs[k] = nf.input;
+  }
+  f.appendChild(measGrid);
+
+  f.appendChild(el('h3', { text: 'Macros — targets vs actuals' }));
+  const macroGrid = el('div', { class: 'grid2' });
+  const tInputs = {}, aInputs = {};
+  for (const k of MACRO_KEYS) {
+    const t = numField('ciT_' + k, 'Target ' + MACRO_LABELS[k], r && r.targets ? r.targets[k] : '', k === 'cal' ? '1' : '1');
+    const a = numField('ciA_' + k, 'Actual ' + MACRO_LABELS[k], r && r.actuals ? r.actuals[k] : '', k === 'cal' ? '1' : '1');
+    macroGrid.appendChild(t.wrap); macroGrid.appendChild(a.wrap);
+    tInputs[k] = t.input; aInputs[k] = a.input;
+  }
+  f.appendChild(macroGrid);
+
+  f.appendChild(el('h3', { text: 'Adherence (1–10)' }));
+  const adGrid = el('div', { class: 'grid4' });
+  const adInputs = {};
+  for (const k of ADHERE_KEYS) {
+    const nf = numField('ciAd_' + k, ADHERE_LABELS[k], r && r.adhere ? r.adhere[k] : '', '1');
+    nf.input.min = '1'; nf.input.max = '10';
+    adGrid.appendChild(nf.wrap); adInputs[k] = nf.input;
+  }
+  f.appendChild(adGrid);
+
+  f.appendChild(el('label', { class: 'f', htmlFor: 'ciNotes', text: 'Coach notes' }));
+  const notesI = el('textarea', { id: 'ciNotes' });
+  if (r && r.notes) notesI.value = r.notes;
+  f.appendChild(notesI);
+
+  const acts = el('div', { class: 'actions' });
+  const sv = el('button', { class: 'btn', type: 'button', text: 'Save check-in' });
+  sv.addEventListener('click', () => {
+    const photos = {};
+    for (const pc of photoChecks) photos[pc.label] = pc.box.checked;
+    const meas = {}; for (const k of MEAS_KEYS) meas[k] = escNum(measInputs[k].value);
+    const tg = {}; for (const k of MACRO_KEYS) tg[k] = escNum(tInputs[k].value);
+    const ac = {}; for (const k of MACRO_KEYS) ac[k] = escNum(aInputs[k].value);
+    const ad = {};
+    for (const k of ADHERE_KEYS) {
+      let v = escNum(adInputs[k].value);
+      if (v !== null) v = Math.min(10, Math.max(1, Math.round(v)));
+      ad[k] = v;
+    }
+    const rec = {
+      id: editingCheckin || uid(), clientId, date: dIn.value || todayISO(),
+      photos, weight: escNum(wg.input.value), meas, targets: tg, actuals: ac,
+      adhere: ad, notes: notesI.value.trim()
+    };
+    if (editingCheckin) {
+      const ix = DB.checkins.findIndex(x => x.id === editingCheckin);
+      DB.checkins[ix] = rec;
+    } else DB.checkins.push(rec);
+    saveDB(); f.style.display = 'none'; renderCheckins();
+  });
+  const cx = el('button', { class: 'btn ghost', type: 'button', text: 'Cancel' });
+  cx.addEventListener('click', () => { f.style.display = 'none'; });
+  acts.appendChild(sv); acts.appendChild(cx);
+  f.appendChild(acts);
+  dIn.focus();
+}
+
+/* ---------- COMPARE ---------- */
+function deltaNum(cur, prev) {
+  if (cur === null || cur === undefined || prev === null || prev === undefined) return null;
+  return Math.round((cur - prev) * 10) / 10;
+}
+function renderCompare() {
+  fillClientSelect($('cmpClient'), false);
+  const out = $('cmpOut');
+  while (out.firstChild) out.removeChild(out.firstChild);
+  const cid = $('cmpClient').value;
+  if (!cid) { out.appendChild(el('div', { class: 'empty', text: DB.clients.length ? 'Select a client.' : 'Add a client first.' })); return; }
+  const rows = checkinsFor(cid);
+  if (rows.length < 1) { out.appendChild(el('div', { class: 'empty', text: 'No check-ins yet for this client.' })); return; }
+
+  if (rows.length >= 2) {
+    const latest = rows[rows.length - 1], prev = rows[rows.length - 2];
+    const cards = el('div', { class: 'statcards' });
+    const wD = deltaNum(latest.weight, prev.weight);
+    const waistD = deltaNum(latest.meas && latest.meas.waist, prev.meas && prev.meas.waist);
+    const aD = (() => {
+      const la = adherenceAvg(latest), pa = adherenceAvg(prev);
+      if (la === '—' || pa === '—') return null;
+      return Math.round((parseFloat(la) - parseFloat(pa)) * 10) / 10;
+    })();
+    const mkCard = (k, v, d, unit) => {
+      const s = el('div', { class: 'stat' });
+      s.appendChild(el('div', { class: 'k', text: k }));
+      s.appendChild(el('div', { class: 'v', text: v }));
+      const dd = fmtDelta(d, unit);
+      s.appendChild(el('div', { class: dd.cls, text: 'vs prev: ' + dd.text }));
+      return s;
+    };
+    cards.appendChild(mkCard('Weight', weightLabel(latest), wD, unitW()));
+    cards.appendChild(mkCard('Waist', latest.meas && latest.meas.waist !== null ? latest.meas.waist + ' ' + unitM() : '—', waistD, unitM()));
+    cards.appendChild(mkCard('Adherence', adherenceAvg(latest), aD, 'pts'));
+    cards.appendChild(mkCard('Macros hit', macrosHit(latest), deltaPct(latest, prev), 'pp'));
+    out.appendChild(cards);
+    out.appendChild(weightChart(rows));
+  }
+
+  const wrap = el('div', { class: 'cmpwrap' });
+  const t = el('table', { class: 'cmp' });
+  const thead = el('thead'); const hr = el('tr');
+  for (const h of ['Date', 'Weight', 'Waist', 'Hips', 'Adherence', 'Macros hit', 'Notes']) hr.appendChild(el('th', { text: h }));
+  thead.appendChild(hr); t.appendChild(thead);
+  const tb = el('tbody');
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i], prev = i > 0 ? rows[i - 1] : null;
+    const tr = el('tr');
+    tr.appendChild(el('td', { text: fmtDate(r.date) }));
+    const wCell = el('td');
+    wCell.appendChild(document.createTextNode(r.weight !== null && r.weight !== '' ? String(r.weight) : '—'));
+    if (prev) { const d = fmtDelta(deltaNum(r.weight, prev.weight), unitW()); wCell.appendChild(el('div', { class: d.cls, text: d.text })); }
+    tr.appendChild(wCell);
+    const wm = r.meas ? r.meas.waist : null;
+    const waistCell = el('td');
+    waistCell.appendChild(document.createTextNode(wm !== null && wm !== '' ? String(wm) : '—'));
+    if (prev) { const d = fmtDelta(deltaNum(wm, prev.meas ? prev.meas.waist : null), unitM()); waistCell.appendChild(el('div', { class: d.cls, text: d.text })); }
+    tr.appendChild(waistCell);
+    tr.appendChild(el('td', { text: r.meas && r.meas.hips !== null && r.meas.hips !== '' ? String(r.meas.hips) : '—' }));
+    tr.appendChild(el('td', { text: adherenceAvg(r) }));
+    const mhCell = el('td');
+    mhCell.appendChild(document.createTextNode(macrosHit(r)));
+    if (prev) { const d = fmtDelta(deltaPct(r, prev), 'pp'); mhCell.appendChild(el('div', { class: d.cls, text: d.text })); }
+    tr.appendChild(mhCell);
+    const ntd = el('td'); ntd.appendChild(document.createTextNode(r.notes ? (r.notes.length > 60 ? r.notes.slice(0, 60) + '…' : r.notes) : '—'));
+    tr.appendChild(ntd);
+    tb.appendChild(tr);
+  }
+  t.appendChild(tb); wrap.appendChild(t); out.appendChild(wrap);
+}
+function weightChart(rows) {
+  // inline SVG weight trend (visual representation): latest rows left->right
+  const pts = rows.map(r => ({ d: r.date, w: escNum(r.weight) })).filter(p => p.w !== null);
+  const host = el('div', { class: 'card', style: 'margin:12px 0;padding:14px' });
+  if (pts.length < 2) {
+    host.appendChild(el('div', { class: 'empty', text: 'Log at least two check-ins with weight to see the trend chart.' }));
+    return host;
+  }
+  host.appendChild(el('h3', { text: 'Weight trend', style: 'margin:0 0 8px' }));
+  const W = 640, H = 240, pL = 52, pR = 18, pT = 20, pB = 34;
+  const ws = pts.map(p => p.w);
+  let lo = Math.min.apply(null, ws), hi = Math.max.apply(null, ws);
+  if (lo === hi) { lo -= 2; hi += 2; } else { lo -= 1; hi += 1; }
+  const X = i => pL + (pts.length === 1 ? 0 : i * (W - pL - pR) / (pts.length - 1));
+  const Y = w => pT + (1 - (w - lo) / (hi - lo)) * (H - pT - pB);
+  const esc2 = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  let s = '';
+  for (let g = 0; g <= 3; g++) {
+    const v = lo + (hi - lo) * g / 3, y = Y(v);
+    s += '<line x1="' + pL + '" y1="' + y.toFixed(1) + '" x2="' + (W - pR) + '" y2="' + y.toFixed(1) + '" stroke="var(--line)" stroke-width="1"/>';
+    s += '<text x="' + (pL - 8) + '" y="' + (y + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + Math.round(v) + '</text>';
+  }
+  s += '<polyline fill="none" stroke="var(--teal)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" points="' +
+    pts.map((p, i) => X(i).toFixed(1) + ',' + Y(p.w).toFixed(1)).join(' ') + '"/>';
+  pts.forEach((p, i) => {
+    const x = X(i), y = Y(p.w);
+    s += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="4.5" fill="var(--teal)" stroke="var(--card)" stroke-width="2"><title>' + esc2(fmtDate(p.d)) + ': ' + p.w + '</title></circle>';
+    s += '<text x="' + x.toFixed(1) + '" y="' + (y - 10).toFixed(1) + '" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">' + p.w + '</text>';
+    if (i === 0 || i === pts.length - 1 || (pts.length > 4 && i === Math.floor((pts.length - 1) / 2)))
+      s += '<text x="' + x.toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle" font-size="10" fill="var(--muted)">' + esc2(fmtDate(p.d)) + '</text>';
+  });
+  const wrap = el('div');
+  wrap.innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" style="width:100%;height:auto;display:block" aria-label="Weight trend: ' +
+    pts.map(p => fmtDate(p.d) + ' ' + p.w).join(', ') + '"><title>Weight trend over ' + pts.length + ' check-ins</title>' + s + '</svg>';
+  host.appendChild(wrap);
+  return host;
+}
+function macrosHitNum(r) {
+  if (!r.targets || !r.actuals) return null;
+  let hit = 0, n = 0;
+  for (const k of ['p', 'c', 'f']) {
+    const t = escNum(r.targets[k]), a = escNum(r.actuals[k]);
+    if (t !== null && t > 0 && a !== null) { n++; if (Math.abs(a - t) / t <= 0.1) hit++; }
+  }
+  if (!n) return null;
+  return Math.round(hit / n * 100);
+}
+function macrosHit(r) {
+  const v = macrosHitNum(r);
+  return v === null ? '—' : v + '%';
+}
+function deltaPct(cur, prev) {
+  const a = macrosHitNum(cur), b = macrosHitNum(prev);
+  if (a === null || b === null) return null;
+  return a - b;
+}
+
+/* ---------- DECISIONS ---------- */
+let editingDecision = null;
+function renderDecisions() {
+  fillClientSelect($('decClientFilter'), true, 'All clients');
+  const list = $('decisionList');
+  while (list.firstChild) list.removeChild(list.firstChild);
+  const cid = $('decClientFilter').value;
+  const rows = decisionsFor(cid);
+  if (!rows.length) {
+    list.appendChild(el('div', { class: 'empty', text: 'No decisions logged yet. Log one after each check-in review.' }));
+    return;
+  }
+  for (const d of rows) {
+    const cl = clientById(d.clientId);
+    const linked = d.checkinId ? DB.checkins.find(x => x.id === d.checkinId) : null;
+    const box = el('div', { class: 'declog' });
+    box.appendChild(el('div', { class: 'meta', text:
+      (cl ? cl.name : 'Unknown client') + ' · ' + new Date(d.ts).toLocaleString() +
+      ' · ' + d.category + (linked ? ' · linked to ' + fmtDate(linked.date) + ' check-in' : '')
+    }));
+    box.appendChild(el('div', { class: 'txt', text: d.text }));
+    const acts = el('div', { class: 'actions' });
+    const eb = el('button', { class: 'btn small ghost', type: 'button', text: 'Edit' });
+    eb.addEventListener('click', () => openDecisionForm(d));
+    const db2 = el('button', { class: 'btn small warn', type: 'button', text: 'Delete' });
+    db2.addEventListener('click', () => {
+      if (!confirm('Delete this decision?')) return;
+      DB.decisions = DB.decisions.filter(x => x.id !== d.id);
+      saveDB(); renderDecisions();
+    });
+    acts.appendChild(eb); acts.appendChild(db2);
+    box.appendChild(acts);
+    list.appendChild(box);
+  }
+}
+function openDecisionForm(d) {
+  editingDecision = d ? d.id : null;
+  const f = $('decisionForm');
+  while (f.firstChild) f.removeChild(f.firstChild);
+  f.style.display = 'block';
+  f.appendChild(el('h3', { text: d ? 'Edit decision' : 'Log program decision' }));
+
+  f.appendChild(el('label', { class: 'f', htmlFor: 'decClient', text: 'Client' }));
+  const cSel = el('select', { id: 'decClient' });
+  f.appendChild(cSel);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'decLink', text: 'Linked check-in' }));
+  const lSel = el('select', { id: 'decLink' });
+  f.appendChild(lSel);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'decCat', text: 'Category' }));
+  const catSel = el('select', { id: 'decCat' });
+  for (const c of DECISION_CATS) catSel.appendChild(el('option', { value: c, text: c }));
+  f.appendChild(catSel);
+  f.appendChild(el('label', { class: 'f', htmlFor: 'decText', text: 'Decision / adjustment' }));
+  const tIn = el('textarea', { id: 'decText' });
+  f.appendChild(tIn);
+
+  const refreshLinks = (cid) => {
+    while (lSel.firstChild) lSel.removeChild(lSel.firstChild);
+    lSel.appendChild(el('option', { value: '', text: 'No link' }));
+    for (const r of checkinsFor(cid).slice().reverse())
+      lSel.appendChild(el('option', { value: r.id, text: fmtDate(r.date) + ' — ' + weightLabel(r) }));
+  };
+  const sorted = DB.clients.slice().sort((a, b) => a.name.localeCompare(b.name));
+  if (!sorted.length) { f.appendChild(el('p', { class: 'hint', text: 'Add a client first.' })); return; }
+  for (const c of sorted) cSel.appendChild(el('option', { value: c.id, text: c.name }));
+  cSel.addEventListener('change', () => refreshLinks(cSel.value));
+  if (d) {
+    cSel.value = d.clientId; refreshLinks(d.clientId);
+    lSel.value = d.checkinId || ''; catSel.value = d.category; tIn.value = d.text;
+  } else { refreshLinks(cSel.value); }
+
+  const acts = el('div', { class: 'actions' });
+  const sv = el('button', { class: 'btn', type: 'button', text: 'Save decision' });
+  sv.addEventListener('click', () => {
+    const text = tIn.value.trim();
+    if (!text) { alert('Decision text is required.'); tIn.focus(); return; }
+    const rec = { id: editingDecision || uid(), clientId: cSel.value, checkinId: lSel.value, ts: d ? d.ts : new Date().toISOString(), category: catSel.value, text };
+    if (editingDecision) {
+      const ix = DB.decisions.findIndex(x => x.id === editingDecision);
+      DB.decisions[ix] = rec;
+    } else DB.decisions.push(rec);
+    saveDB(); f.style.display = 'none'; renderDecisions();
+  });
+  const cx = el('button', { class: 'btn ghost', type: 'button', text: 'Cancel' });
+  cx.addEventListener('click', () => { f.style.display = 'none'; });
+  acts.appendChild(sv); acts.appendChild(cx);
+  f.appendChild(acts);
+}
+
+/* ---------- DRAFT ---------- */
+let lastDraft = '';
+function renderDraftSelectors() {
+  fillClientSelect($('draftClient'), false);
+  $('draftOut').style.display = 'none';
+  $('btnCopyDraft').disabled = true;
+  $('draftStatus').textContent = '';
+}
+function buildDraft(clientId) {
+  const cl = clientById(clientId);
+  if (!cl) return '';
+  const rows = checkinsFor(clientId);
+  if (!rows.length) return '';
+  const latest = rows[rows.length - 1];
+  const prev = rows.length > 1 ? rows[rows.length - 2] : null;
+  const coach = DB.settings.coachName || 'Coach';
+  const lines = [];
+  lines.push('Hi ' + cl.name + ' — great check-in for the week of ' + fmtDate(latest.date) + '.');
+  lines.push('');
+  const wD = prev ? deltaNum(latest.weight, prev.weight) : null;
+  lines.push('Weight: ' + weightLabel(latest) + (wD !== null && prev ? ' (' + fmtDelta(wD, unitW()).text + ' vs last week)' : '') + '.');
+  const waist = latest.meas ? latest.meas.waist : null;
+  const waistD = prev ? deltaNum(waist, prev.meas ? prev.meas.waist : null) : null;
+  if (waist !== null && waist !== '') lines.push('Waist: ' + waist + ' ' + unitM() + (waistD !== null && prev ? ' (' + fmtDelta(waistD, unitM()).text + ' vs last week)' : '') + '.');
+  lines.push('Adherence — training ' + (latest.adhere.training ?? '—') + '/10, nutrition ' + (latest.adhere.nutrition ?? '—') + '/10, cardio ' + (latest.adhere.cardio ?? '—') + '/10, sleep ' + (latest.adhere.sleep ?? '—') + '/10.');
+  const linked = DB.decisions.filter(dd => dd.checkinId === latest.id).sort((a, b) => b.ts.localeCompare(a.ts))[0];
+  lines.push('');
+  if (linked) lines.push('Adjustment this week (' + linked.category + '): ' + linked.text);
+  else lines.push('No program changes this week — keep executing.');
+  lines.push('');
+  lines.push('Keep up the consistency. Questions, shoot them over before the next check-in.');
+  lines.push('');
+  lines.push('— ' + coach + (DB.settings.businessName ? ', ' + DB.settings.businessName : ''));
+  return lines.join('\n');
+}
+
+/* ---------- DATA / SETTINGS ---------- */
+function renderSettings() {
+  $('setCoachName').value = DB.settings.coachName || '';
+  $('setBusiness').value = DB.settings.businessName || '';
+  $('setUnits').value = DB.settings.units || 'imperial';
+  $('setPhoto').value = (DB.settings.photoProtocol || []).join('\n');
+  $('dataMsg').textContent = '';
+}
+function csvCell(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function exportCSV() {
+  const head = ['client', 'date', 'weight', 'units'];
+  for (const k of MEAS_KEYS) head.push(MEAS_LABELS[k].toLowerCase());
+  for (const k of MACRO_KEYS) head.push('target_' + k);
+  for (const k of MACRO_KEYS) head.push('actual_' + k);
+  for (const k of ADHERE_KEYS) head.push('adherence_' + k);
+  head.push('photos_done', 'photos_total', 'notes');
+  const lines = [head.map(csvCell).join(',')];
+  const sorted = DB.clients.slice().sort((a, b) => a.name.localeCompare(b.name));
+  for (const c of sorted) {
+    for (const r of checkinsFor(c.id)) {
+      const row = [c.name, r.date, r.weight === null ? '' : r.weight, DB.settings.units];
+      for (const k of MEAS_KEYS) row.push(r.meas && r.meas[k] !== null ? r.meas[k] : '');
+      for (const k of MACRO_KEYS) row.push(r.targets && r.targets[k] !== null ? r.targets[k] : '');
+      for (const k of MACRO_KEYS) row.push(r.actuals && r.actuals[k] !== null ? r.actuals[k] : '');
+      for (const k of ADHERE_KEYS) row.push(r.adhere && r.adhere[k] !== null ? r.adhere[k] : '');
+      const done = DB.settings.photoProtocol.filter(p => r.photos && r.photos[p]).length;
+      row.push(done, DB.settings.photoProtocol.length, r.notes || '');
+      lines.push(row.map(csvCell).join(','));
+    }
+  }
+  downloadBlob(lines.join('\n'), BRAND.fileSlug + '-checkins.csv', 'text/csv');
+}
+function downloadBlob(text, filename, mime) {
+  const blob = new Blob([text], { type: mime + ';charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+/* ---------- PRINT ---------- */
+function printSummary() {
+  const cid = $('draftClient').value;
+  const cl = clientById(cid);
+  const area = $('printArea');
+  while (area.firstChild) area.removeChild(area.firstChild);
+  if (!cl) { alert('Select a client first.'); return; }
+  const rows = checkinsFor(cid);
+  area.appendChild(el('h2', { text: cl.name + ' — Check-In Summary' }));
+  area.appendChild(el('p', { text: (DB.settings.businessName || DB.settings.coachName || '') + ' · Generated ' + fmtDate(todayISO()) }));
+  if (!rows.length) { area.appendChild(el('p', { text: 'No check-ins recorded.' })); }
+  else {
+    const latest = rows[rows.length - 1];
+    const card = el('div', { class: 'card' });
+    card.appendChild(el('h3', { text: 'Latest check-in — ' + fmtDate(latest.date) }));
+    card.appendChild(el('p', { text: 'Weight: ' + weightLabel(latest) + ' · Waist: ' + ((latest.meas && latest.meas.waist !== null) ? latest.meas.waist + ' ' + unitM() : '—') + ' · Adherence: ' + adherenceAvg(latest) }));
+    card.appendChild(el('p', { text: 'Macros hit: ' + macrosHit(latest) }));
+    if (latest.notes) card.appendChild(el('p', { text: 'Notes: ' + latest.notes }));
+    area.appendChild(card);
+    const decs = decisionsFor(cid).slice(0, 5);
+    if (decs.length) {
+      area.appendChild(el('h3', { text: 'Recent decisions' }));
+      for (const d of decs) {
+        const b = el('div', { class: 'declog' });
+        b.appendChild(el('div', { class: 'meta', text: new Date(d.ts).toLocaleString() + ' · ' + d.category }));
+        b.appendChild(el('div', { class: 'txt', text: d.text }));
+        area.appendChild(b);
       }
-      var sa=va==null?'—':m.fmt(va),sb=vb==null?'—':m.fmt(vb);
-      html+='<tr class="mrow'+(i===selMetric?' sel':'')+'" data-m="'+i+'" tabindex="0" role="button" aria-label="'+m.label+': activate for the coach\u2019s read."><td>'+m.label+'</td><td class="num">'+sa+'</td><td class="num">'+sb+'</td>'+cell+'</tr>';
-    });
-    html+='</tbody></table>';
-    table.innerHTML=html;
-    detail.textContent='';
-    var rows=table.querySelectorAll('.mrow');
-    for(var ri=0;ri<rows.length;ri++){
-      (function(tr,i){
-        function act(){
-          if(i===selMetric){selMetric=-1;detail.textContent='';tr.classList.remove('sel');Sound.click();return;}
-          selMetric=i;Sound.select();
-          for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');
-          tr.classList.add('sel');
-          var m=METRICS[i],a2=parseInt(wa.value,10),b2=parseInt(wb.value,10);
-          var va=weeks[a2][m.k],vb=weeks[b2][m.k];
-          var txt=va==null||vb==null?'No data logged for one of these weeks — log a check-in first.':m.note(vb-va);
-          detail.innerHTML='<strong>'+m.label+' — '+weeks[a2].w+' → '+weeks[b2].w+':</strong> '+txt;
-        }
-        tr.addEventListener('click',act);
-        tr.addEventListener('keydown',function(e){
-          if(e.key==='Enter'||e.key===' '){e.preventDefault();act();}
-          if(e.key==='Escape'){selMetric=-1;detail.textContent='';for(var q=0;q<rows.length;q++)rows[q].classList.remove('sel');}
-        });
-      })(rows[ri],ri);
     }
   }
-  function makeDraft(){
-    var b=parseInt(wb.value,10),wk=weeks[b];
-    if(wk.wt==null){draft.value='Log a check-in for '+wk.w+' first — the draft writes itself from the week\u2019s data.';return;}
-    var dAdh=b>0&&weeks[b-1].adh!=null?wk.adh-weeks[b-1].adh:0;
-    var dWt=b>0&&weeks[b-1].wt!=null?wk.wt-weeks[b-1].wt:0;
-    var lines=['Hey '+CLIENT.split(' ')[0]+' — '+wk.w+' check-in review:',''];
-    lines.push('• Weight: '+wk.wt.toFixed(1)+' lbs'+(b>0&&weeks[b-1].wt!=null?' ('+(dWt<=0?'down ':'up ')+Math.abs(dWt).toFixed(1)+' from last week)':'')+'.');
-    lines.push('• Waist: '+wk.waist.toFixed(1)+' in — '+(dWt<0?'trending the right way.':'holding; let\u2019s see next week.'));
-    lines.push('• Protein averaged '+Math.round(wk.prot)+'g — '+(wk.prot>=165?'right where it should be.':'a touch low; make this the one fix.'));
-    lines.push('• Adherence '+wk.adh+'/10'+(dAdh!==0?' ('+(dAdh>0?'up':'down')+' '+Math.abs(dAdh)+' from last week)':'')+'.');
-    lines.push('');
-    lines.push(wk.adh>=8?'Keep doing exactly what you\u2019re doing — consistency is the whole program.':'One priority for next week: tell me the single biggest thing that got in the way, and we\u2019ll plan around it.');
-    lines.push('');
-    lines.push('— Coach');
-    draft.value=lines.join('\n');
-    Sound.success();
-  }
-  wa.addEventListener('change',function(){render();Sound.click();});
-  wb.addEventListener('change',function(){render();Sound.click();});
-  $('cb-swap').addEventListener('click',function(){var t=wa.value;wa.value=wb.value;wb.value=t;render();Sound.click();});
-  $('cb-draft-btn').addEventListener('click',makeDraft);
-  /* ---------- sample data toggle: snapshot demo state, fill, restore ---------- */
-  var sampleOn=false,sampleSnap=null;
-  var sbtn=$('sample-toggle');
-  function paintSample(){
-    var lbl=sampleOn?'Clear sample data':'Try sample data';
-    sbtn.setAttribute('aria-pressed',sampleOn?'true':'false');
-    sbtn.setAttribute('aria-label',lbl);sbtn.title=lbl;
-  }
-  if(sbtn){sbtn.addEventListener('click',function(){
-    if(!sampleOn){
-      sampleSnap={weeks:JSON.parse(JSON.stringify(weeks)),wa:wa.value,wb:wb.value,draft:draft.value};
-      sampleOn=true;weeks=JSON.parse(JSON.stringify(SAMPLE_WEEKS));
-    }else{
-      sampleOn=false;
-      var s=sampleSnap||{weeks:JSON.parse(JSON.stringify(EMPTY_WEEKS)),wa:'0',wb:'1',draft:''};
-      weeks=s.weeks;draft.value=s.draft;
+  area.appendChild(el('p', { text: DISCLAIMER }));
+  window.print();
+}
+
+/* ---------- INIT ---------- */
+function init() {
+  $('wordmark').textContent = '';
+  $('wordmark').appendChild(el('span', { text: 'Fitness' }));
+  $('wordmark').appendChild(el('span', { class: 'accent', text: 'CheckIn' }));
+  $('tagline').textContent = BRAND.tagline;
+  $('disclaimerGuide').textContent = DISCLAIMER;
+  $('disclaimerData').textContent = DISCLAIMER;
+  $('disclaimerFoot').textContent = DISCLAIMER;
+  $('aboutLine').textContent = BRAND.name + ' v' + BRAND.version + ' — single-file offline app. Your data never leaves this browser.';
+  $('footBrand').textContent = BRAND.name + ' v' + BRAND.version;
+  buildTabs();
+  const had = loadDB();
+  if (!had) { $('onboardingCard').style.display = 'block'; }
+  $('btnSample').addEventListener('click', () => {
+    DB = sampleDB(); saveDB();
+    $('onboardingCard').style.display = 'none';
+    showTab('clients');
+  });
+  $('btnEmpty').addEventListener('click', () => { $('onboardingCard').style.display = 'none'; showTab('clients'); });
+  $('btnNewClient').addEventListener('click', () => openClientForm(null));
+  $('btnNewCheckin').addEventListener('click', () => openCheckinForm(null));
+  $('ciClientFilter').addEventListener('change', renderCheckins);
+  $('cmpClient').addEventListener('change', renderCompare);
+  $('btnNewDecision').addEventListener('click', () => openDecisionForm(null));
+  $('decClientFilter').addEventListener('change', renderDecisions);
+  $('btnGenDraft').addEventListener('click', () => {
+    lastDraft = buildDraft($('draftClient').value);
+    const out = $('draftOut');
+    while (out.firstChild) out.removeChild(out.firstChild);
+    if (!lastDraft) {
+      out.style.display = 'block';
+      out.appendChild(el('span', { text: 'Select a client with at least one check-in.' }));
+      $('btnCopyDraft').disabled = true;
+      return;
     }
-    selMetric=-1;opts();
-    if(sampleOn){wa.value=weeks.length-2;wb.value=weeks.length-1;}
-    else{wa.value=sampleSnap?sampleSnap.wa:'0';wb.value=sampleSnap?sampleSnap.wb:'1';}
-    sampleSnap=sampleOn?sampleSnap:null;
-    render();paintSample();Sound.click();
-  });paintSample();}
-  opts();render();
-})();
+    out.style.display = 'block';
+    out.appendChild(document.createTextNode(lastDraft));
+    $('btnCopyDraft').disabled = false;
+    $('draftStatus').textContent = 'Draft ready — review, then copy into WhatsApp, DM, or email.';
+  });
+  $('btnCopyDraft').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(lastDraft); $('draftStatus').textContent = 'Copied to clipboard.'; }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = lastDraft; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); $('draftStatus').textContent = 'Copied to clipboard.'; }
+      catch (e2) { $('draftStatus').textContent = 'Copy failed — select the text manually.'; }
+      ta.remove();
+    }
+  });
+  $('btnPrintSummary').addEventListener('click', printSummary);
+  $('btnSaveSettings').addEventListener('click', () => {
+    DB.settings.coachName = $('setCoachName').value.trim().slice(0, 80);
+    DB.settings.businessName = $('setBusiness').value.trim().slice(0, 80);
+    DB.settings.units = $('setUnits').value === 'metric' ? 'metric' : 'imperial';
+    const lines = $('setPhoto').value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 20);
+    if (lines.length) DB.settings.photoProtocol = lines;
+    saveDB();
+    $('dataMsg').textContent = 'Settings saved.';
+  });
+  $('btnExportJSON').addEventListener('click', () => {
+    downloadBlob(JSON.stringify(DB, null, 2), BRAND.fileSlug + '-backup.json', 'application/json');
+  });
+  $('btnImportJSON').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', () => {
+    const f = $('importFile').files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      let obj = null;
+      try { obj = JSON.parse(rd.result); } catch (e) { $('dataMsg').textContent = 'That file is not valid JSON.'; return; }
+      const err = validateImport(obj);
+      if (err) { $('dataMsg').textContent = 'Import failed: ' + err; return; }
+      if (!confirm('Replace ALL current data with this backup?')) return;
+      DB = Object.assign(blankDB(), obj);
+      DB.settings = Object.assign(blankDB().settings, obj.settings || {});
+      saveDB(); renderSettings(); showTab('clients');
+      $('dataMsg').textContent = 'Backup restored.';
+    };
+    rd.readAsText(f);
+    $('importFile').value = '';
+  });
+  $('btnExportCSV').addEventListener('click', exportCSV);
+  let eraseArmed = false, eraseTimer = null;
+  $('btnErase').addEventListener('click', () => {
+    if (!eraseArmed) {
+      eraseArmed = true;
+      $('btnErase').textContent = 'Click again to ERASE everything';
+      $('dataMsg').textContent = 'Armed — click again within 10 seconds to erase all data. (You can restore from a JSON backup.)';
+      eraseTimer = setTimeout(() => {
+        eraseArmed = false;
+        $('btnErase').textContent = 'Erase all data';
+        $('dataMsg').textContent = '';
+      }, 10000);
+      return;
+    }
+    clearTimeout(eraseTimer); eraseArmed = false;
+    DB = blankDB(); saveDB(); renderSettings(); showTab('guide');
+    $('onboardingCard').style.display = 'block';
+    $('btnErase').textContent = 'Erase all data';
+    $('dataMsg').textContent = 'All data erased.';
+  });
+  showTab('guide');
+  /* test hooks */
+  window.__cc = { BRAND, get DB() { return DB; }, saveDB, sampleDB, blankDB, validateImport, buildDraft, deltaNum, macrosHit, macrosHitNum, deltaPct, adherenceAvg, checkinsFor };
+}
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
