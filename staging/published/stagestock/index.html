@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Staging Inventory Tracker — Furniture &amp; Decor Job Manager</title>
+<meta name="description" content="StageStock: track staging inventory, assign pieces to jobs, and tally per-job fees. Offline, private, single file.">
+<style>
+:root{
+  --bg:#f7f4ee; --card:#fffdf8; --text:#2b2620; --muted:#6f6759;
+  --acc:#b4552d; --acc2:#2d7a6f; --border:#e4dccb; --input:#fffdf8;
+  --good:#2e7d4f; --warn:#b8860b; --bad:#b23a3a;
+  --shadow:0 2px 10px rgba(60,45,25,.08);
+}
+html[data-theme="dark"]{
+  --bg:#1d1a15; --card:#26211a; --text:#f0e9da; --muted:#b3a88f;
+  --acc:#e08a54; --acc2:#5fb3a6; --border:#3d362a; --input:#2c2720;
+  --good:#6fbf8a; --warn:#d9a93b; --bad:#e07a7a;
+  --shadow:0 2px 10px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header.top{background:var(--bg);border-bottom:1px solid var(--border)}
+.hwrap{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+a.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text);font-weight:700;font-size:22px}
+.badge{width:40px;height:40px;border-radius:10px;background:var(--acc);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.badge svg{width:26px;height:26px}
+.actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.more-apps{display:inline-flex;align-items:center;justify-content:center;height:44px;padding:0 18px;border-radius:22px;background:var(--acc2);color:#fff;text-decoration:none;font-weight:600;font-size:15px;white-space:nowrap}
+.more-apps:active{transform:scale(.96)}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn:active{transform:scale(.92);filter:brightness(.92)}
+.icon-btn.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{min-height:44px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:16px;font-weight:600;cursor:pointer}
+.tabs button:active{transform:scale(.96)}
+.tabs button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+.card h2{margin:0 0 12px;font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat .v{font-size:30px;font-weight:700}
+.stat .l{font-size:15px;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+label{display:block;font-size:15px;font-weight:600;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px 12px;font-size:16px;border:1px solid var(--border);border-radius:10px;background:var(--input);color:var(--text)}
+textarea{min-height:64px;resize:vertical}
+button.btn{min-height:44px;padding:10px 20px;border-radius:12px;border:none;background:var(--acc);color:#fff;font-size:16px;font-weight:600;cursor:pointer}
+button.btn:active{transform:scale(.96);filter:brightness(.94)}
+button.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+button.btn.small{min-height:40px;padding:8px 14px;font-size:15px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+th{font-size:15px;color:var(--muted)}
+tr.sel{background:rgba(180,85,45,.12)}
+.pill{display:inline-block;padding:3px 12px;border-radius:20px;font-size:15px;font-weight:600}
+.pill.warehouse{background:#e7f0e7;color:#2e7d4f}
+.pill.staged{background:#fdeede;color:#9a5b12}
+.pill.maintenance{background:#f7e3e3;color:#a33}
+html[data-theme="dark"] .pill.warehouse{background:#23402c;color:#8fd6a4}
+html[data-theme="dark"] .pill.staged{background:#4a3617;color:#f0bd6b}
+html[data-theme="dark"] .pill.maintenance{background:#4d2222;color:#f09696}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:12px}
+.toolbar>div{flex:1;min-width:160px}
+.muted{color:var(--muted);font-size:15px}
+.notice{background:#fdf3e0;border:1px solid var(--warn);border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:15px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+html[data-theme="dark"] .notice{background:#3a2f1a}
+.notice .btn{margin-left:auto}
+.money{font-weight:700;white-space:nowrap}
+.jobhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.fees{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
+.fee{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.fee .v{font-size:22px;font-weight:700}
+.fee.total{background:var(--acc);color:#fff;border:none}
+.fee.total .l{color:#fff}
+/* charts */
+.chartgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:760px){.chartgrid{grid-template-columns:1fr}}
+.chartcard{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:16px;height:360px;display:flex;flex-direction:column}
+.chartcard h3{margin:0 0 4px;font-size:17px}
+.chartcard .sub{font-size:15px;color:var(--muted);margin-bottom:6px}
+.chartcard svg{flex:1;width:100%;min-height:0}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:1px 10px;font-size:15px;padding-top:4px}
+.legend span{display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.legend i{width:12px;height:12px;border-radius:4px;flex:none;font-style:normal}
+.slice{cursor:pointer;transition:transform .18s ease}
+.slice.selected{stroke:#fff;stroke-width:3}
+.bar{cursor:pointer;transition:transform .18s ease}
+.bar.selected{stroke:#fff;stroke-width:3}
+.dot{cursor:pointer}
+.dot.selected{stroke:#fff;stroke-width:3}
+footer{border-top:1px solid var(--border);margin-top:30px;padding:24px 16px;text-align:center;color:var(--muted);font-size:15px}
+.cta{margin:18px auto 6px;max-width:1100px;padding:0 16px}
+.cta .box{background:var(--acc2);color:#fff;border-radius:14px;padding:20px;text-align:center}
+.cta a{color:#fff;font-weight:700;font-size:17px}
+/* print */
+#print-area{display:none}
+@media print{
+  header.top,.tabs,.actions,.cta,footer,.noprint{display:none!important}
+  main{max-width:100%}
+  #print-area{display:block}
+  .card{box-shadow:none;break-inside:avoid}
+  body{background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="hwrap">
+    <a class="brand" href="../" aria-label="StageStock — all apps">
+      <span class="badge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 11V8.5A2.5 2.5 0 0 1 7.5 6h9A2.5 2.5 0 0 1 19 8.5V11" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><rect x="4" y="11" width="16" height="5.5" rx="2" stroke="#fff" stroke-width="1.8"/><path d="M6.5 16.5 5.5 20M17.5 16.5l1 3.5" stroke="#ffd9a8" stroke-width="1.8" stroke-linecap="round"/><path d="M9 13.8h6" stroke="#7dd3fc" stroke-width="1.4" stroke-linecap="round"/></svg></span>
+      <span>StageStock</span>
+    </a>
+    <div class="actions">
+      <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+      <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+      <button id="sound-toggle" class="icon-btn on" aria-pressed="true" aria-label="Sound: on" title="Toggle sounds (on)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5H4z" fill="currentColor" stroke="none"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 6.8a7.4 7.4 0 0 1 0 10.4"/></svg></button>
+    </div>
+  </div>
+</header>
+<main>
+  <div id="sample-notice" class="notice" hidden><span><strong>Sample data mode</strong> — changes you make now won't be saved.</span><button class="btn small ghost" id="sample-off">Exit sample mode</button></div>
+  <nav class="tabs" role="tablist">
+    <button data-tab="dash" class="active" role="tab">Dashboard</button>
+    <button data-tab="inv" role="tab">Inventory</button>
+    <button data-tab="jobs" role="tab">Jobs</button>
+    <button data-tab="charts" role="tab">Charts</button>
+    <button data-tab="reports" role="tab">Reports</button>
+  </nav>
+
+  <section id="tab-dash">
+    <div class="stats">
+      <div class="stat"><div class="v" id="st-active">0</div><div class="l">Active jobs</div></div>
+      <div class="stat"><div class="v" id="st-mrr">$0</div><div class="l">Monthly rental revenue</div></div>
+      <div class="stat"><div class="v" id="st-value">$0</div><div class="l">Inventory value</div></div>
+      <div class="stat"><div class="v" id="st-util">0%</div><div class="l">Utilization</div></div>
+    </div>
+    <div class="card"><div class="two">
+      <div><h2>Active jobs</h2><div id="dash-jobs"></div></div>
+      <div><h2>Recently returned</h2><div id="dash-recent"></div></div>
+    </div></div>
+  </section>
+
+  <section id="tab-inv" hidden>
+    <div class="card">
+      <h2>Add a piece</h2>
+      <div class="two">
+        <div><label>Name <input id="p-name" placeholder="Mid-century armchair"></label></div>
+        <div><label>Category <select id="p-cat"></select></label></div>
+      </div>
+      <div class="two">
+        <div><label>Condition <select id="p-cond"><option>Excellent</option><option>Good</option><option>Fair</option><option>Needs repair</option></select></label></div>
+        <div><label>Status <select id="p-status"><option value="warehouse">Warehouse</option><option value="maintenance">Maintenance</option></select></label></div>
+      </div>
+      <div class="two">
+        <div><label>Purchase cost ($) <input id="p-cost" type="number" min="0" step="1" placeholder="250"></label></div>
+        <div><label>Monthly rental rate ($) <input id="p-rate" type="number" min="0" step="1" placeholder="45"></label></div>
+      </div>
+      <label>Dimensions <input id="p-dims" placeholder='32"W × 34"D × 30"H'></label>
+      <label>Notes <textarea id="p-notes" placeholder="Beige linen, pairs with the matching loveseat"></textarea></label>
+      <div style="margin-top:12px"><button class="btn" id="p-add">Add piece</button></div>
+    </div>
+    <div class="card">
+      <h2>Inventory</h2>
+      <div class="toolbar">
+        <div><label>Search <input id="f-q" placeholder="name or notes"></label></div>
+        <div><label>Category <select id="f-cat"><option value="">All</option></select></label></div>
+        <div><label>Status <select id="f-status"><option value="">All</option><option value="warehouse">Warehouse</option><option value="staged">Staged</option><option value="maintenance">Maintenance</option></select></label></div>
+      </div>
+      <div style="overflow-x:auto"><table id="inv-table"><thead><tr><th>Piece</th><th>Category</th><th>Status</th><th>Cost</th><th>Rate/mo</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="tab-jobs" hidden>
+    <div class="card">
+      <h2>New staging job</h2>
+      <div class="two">
+        <div><label>Client name <input id="j-client" placeholder="The Hendersons"></label></div>
+        <div><label>Property address <input id="j-addr" placeholder="412 Maple Ave, Bloomington IN"></label></div>
+      </div>
+      <div class="two">
+        <div><label>Start date <input id="j-start" type="date"></label></div>
+        <div><label>End date <input id="j-end" type="date"></label></div>
+      </div>
+      <div class="two">
+        <div><label>Flat staging fee ($) <input id="j-fee" type="number" min="0" step="1" placeholder="1500"></label></div>
+        <div><label>Delivery fee ($) <input id="j-del" type="number" min="0" step="1" placeholder="250"></label></div>
+      </div>
+      <div><label>Pickup fee ($) <input id="j-pick" type="number" min="0" step="1" placeholder="250"></label></div>
+      <div style="margin-top:12px"><button class="btn" id="j-add">Create job</button></div>
+    </div>
+    <div id="jobs-list"></div>
+  </section>
+
+  <section id="tab-charts" hidden>
+    <div class="chartgrid">
+      <div class="chartcard"><h3>Inventory value by category</h3><div class="sub" id="c1-sub"></div><svg id="ch-donut" viewBox="0 0 300 165" role="img" aria-label="Inventory value by category"></svg><div class="legend" id="donut-legend"></div></div>
+      <div class="chartcard"><h3>Pieces by status</h3><div class="sub" id="c2-sub"></div><svg id="ch-bars" viewBox="0 0 300 240" role="img" aria-label="Pieces by status"></svg></div>
+      <div class="chartcard"><h3>Monthly revenue</h3><div class="sub">Last 6 months, fees + rental income (estimate)</div><svg id="ch-trend" viewBox="0 0 300 240" role="img" aria-label="Monthly revenue trend"></svg></div>
+      <div class="chartcard"><h3>Utilization</h3><div class="sub">Staged pieces vs total</div><svg id="ch-gauge" viewBox="0 0 300 240" role="img" aria-label="Utilization gauge"></svg></div>
+    </div>
+  </section>
+
+  <section id="tab-reports" hidden>
+    <div class="card">
+      <h2>Job sheet</h2>
+      <label>Job <select id="r-job"></select></label>
+      <div class="toolbar noprint" style="margin-top:12px">
+        <div><button class="btn" id="r-print-job">Print job sheet</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Inventory list</h2>
+      <p class="muted">Full register with costs, rates, and status.</p>
+      <div class="toolbar noprint"><div><button class="btn" id="r-print-inv">Print inventory list</button></div></div>
+    </div>
+    <div class="card">
+      <h2>Backup</h2>
+      <div class="toolbar noprint">
+        <div><button class="btn ghost" id="d-export">Export JSON</button></div>
+        <div><button class="btn ghost" id="d-csv">Export CSV</button></div>
+        <div><label>Import JSON <input type="file" id="d-import" accept="application/json"></label></div>
+      </div>
+      <p class="muted">Your data lives in this browser only. Export a backup before switching devices.</p>
+    </div>
+  </section>
+
+  <div id="print-area"></div>
+</main>
+<div class="cta"><div class="box">Like StageStock? <a href="https://glenerds.gumroad.com" target="_blank" rel="noopener">See more apps from Glenerds →</a></div></div>
+<footer><p><strong>StageStock</strong> by <a href="https://glenerds.gumroad.com">Glenerds</a> &mdash; runs entirely in your browser; nothing you enter is sent anywhere.</p></footer>
+<script>
+"use strict";
+/* ---------- utils ---------- */
+const $=id=>document.getElementById(id);
+const fmt$=n=>"$"+Math.round(n).toLocaleString("en-US");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const uid=()=>"id"+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const CATS=["Furniture","Decor","Art","Lighting","Rugs","Bedding","Kitchen","Outdoor"];
+const COLORS=["#b4552d","#2d7a6f","#7a5fb0","#c99a2d","#4f86c6","#c65f7a","#5fa04f","#8a6f4d"];
+
+/* ---------- sound ---------- */
+let audioCtx=null;
+function beep(freq,dur){ if(localStorage.getItem("stagestock.sound")==="off")return;
+  try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type="sine";o.frequency.value=freq;g.gain.value=.12;
+    o.connect(g);g.connect(audioCtx.destination);o.start();
+    g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+dur);o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+const sndOk=()=>{beep(660,.12);setTimeout(()=>beep(880,.14),110);};
+const sndDel=()=>beep(220,.2);
+
+/* ---------- theme ---------- */
+function effTheme(){const s=localStorage.getItem("stagestock.theme");return s||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;
+  const b=$("theme-toggle");const dark=t==="dark";
+  b.classList.toggle("on",dark);b.setAttribute("aria-pressed",dark);
+  b.title=dark?"Switch to light mode":"Switch to dark mode";}
+$("theme-toggle").addEventListener("click",()=>{const t=effTheme();localStorage.setItem("stagestock.theme",t==="dark"?"light":"dark");paintTheme();drawCharts();});
+
+/* ---------- sound toggle ---------- */
+function paintSound(){const on=localStorage.getItem("stagestock.sound")!=="off";const b=$("sound-toggle");
+  b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);b.title=on?"Mute sounds":"Unmute sounds";}
+$("sound-toggle").addEventListener("click",()=>{const on=localStorage.getItem("stagestock.sound")!=="off";
+  localStorage.setItem("stagestock.sound",on?"off":"on");paintSound();if(!on)sndOk();});
+
+/* ---------- data ---------- */
+let DB={pieces:[],jobs:[]};
+let sampleOn=false,sampleBackup=null;
+const SCHEMA_V=1;
+function save(){if(sampleOn)return;
+  try{localStorage.setItem("stagestock.data",JSON.stringify(DB));
+    localStorage.setItem("stagestock.schema",String(SCHEMA_V));}
+  catch(e){if(e&&e.name==="QuotaExceededError")alert("Browser storage is full — export a JSON backup now to keep your data safe.");}}
+function validDB(d){return d&&typeof d==="object"&&Array.isArray(d.pieces)&&Array.isArray(d.jobs);}
+function repair(){
+  const jobIds=new Set(DB.jobs.map(j=>j.id));
+  DB.pieces.forEach(p=>{
+    if(!["warehouse","staged","maintenance"].includes(p.status))p.status="warehouse";
+    if(p.status==="staged"&&(!p.jobId||!jobIds.has(p.jobId))){p.status="warehouse";p.jobId=null;}});
+  DB.jobs.forEach(j=>{
+    j.pieceIds=(Array.isArray(j.pieceIds)?j.pieceIds:[]).filter(id=>DB.pieces.some(p=>p.id===id));
+    if(j.rentalSnap==null)j.rentalSnap=0;if(j.pieceSnap==null)j.pieceSnap=0;});
+}
+function load(){try{const r=localStorage.getItem("stagestock.data");if(!r)return;
+    const sv=+(localStorage.getItem("stagestock.schema")||0);
+    if(sv>SCHEMA_V)return; /* data from a newer version — don't misread it */
+    const d=JSON.parse(r);if(validDB(d)){DB=d;repair();}}catch(e){}}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");
+  ["dash","inv","jobs","charts","reports"].forEach(t=>$("tab-"+t).hidden=t!==b.dataset.tab);
+  if(b.dataset.tab==="charts")drawCharts();
+  beep(520,.06);
+}));
+
+/* ---------- sample data ---------- */
+function sampleData(){
+  const P=(name,cat,cond,cost,rate,dims,status)=>({id:uid(),name,category:cat,condition:cond,cost,rate,dims,notes:"",status,jobId:null});
+  const pieces=[
+    P("Mid-century armchair","Furniture","Excellent",320,48,'32"W × 34"D × 30"H',"warehouse"),
+    P("Matching loveseat","Furniture","Good",540,72,'58"W × 34"D × 30"H',"warehouse"),
+    P("Oak coffee table","Furniture","Excellent",210,32,'48"W × 24"D × 18"H',"warehouse"),
+    P("Brass floor lamp","Lighting","Excellent",140,22,'12"W × 12"D × 64"H',"warehouse"),
+    P("Ceramic table lamp pair","Lighting","Good",90,15,"Pair, white glaze","warehouse"),
+    P("Wool area rug 8×10","Rugs","Good",380,55,'8′ × 10′',"warehouse"),
+    P("Jute runner","Rugs","Excellent",95,14,'2.5′ × 8′',"warehouse"),
+    P("Abstract canvas 36×48","Art","Excellent",260,38,'36"W × 48"H',"warehouse"),
+    P("Framed botanical set","Art","Good",120,18,"Set of 4","warehouse"),
+    P("Fiddle-leaf fig (faux)","Decor","Excellent",85,12,'48"H',"warehouse"),
+    P("Throw pillow set","Decor","Good",60,9,"6 pillows, linen","warehouse"),
+    P("Queen bed frame","Furniture","Excellent",450,65,'64"W × 88"L × 44"H',"warehouse"),
+    P("Linen duvet set","Bedding","Excellent",130,20,"Queen, oatmeal","warehouse"),
+    P("Nightstand pair","Furniture","Good",180,26,'22"W × 18"D × 26"H',"warehouse"),
+    P("Dining table + 4 chairs","Furniture","Good",620,85,'72"W × 36"D × 30"H',"warehouse"),
+    P("Bar cart","Decor","Excellent",150,22,'30"W × 18"D × 34"H',"warehouse"),
+    P("Floor mirror","Decor","Good",170,25,'30"W × 72"H',"warehouse"),
+    P("Pendant light","Lighting","Excellent",110,16,"Black metal shade","maintenance"),
+    P("Outdoor bistro set","Outdoor","Good",240,35,"Table + 2 chairs","warehouse"),
+    P("Stoneware dinnerware set","Kitchen","Excellent",140,20,"Service for 8","warehouse"),
+    P("Linen curtains","Decor","Good",75,11,"4 panels, ivory","warehouse"),
+    P("Accent chair — velvet","Furniture","Excellent",290,44,'28"W × 30"D × 32"H',"warehouse"),
+    P("Side table — marble","Furniture","Fair",95,14,'20"W × 20"D × 22"H',"warehouse"),
+    P("Tabletop sculpture","Art","Excellent",80,12,"Ceramic abstract","warehouse"),
+    P("Woven baskets (set)","Decor","Good",45,7,"Set of 3","warehouse"),
+  ];
+  const jobs=[];
+  const J=(client,addr,start,end,fee,del,pick,status)=>({id:uid(),client,address:addr,start,end,fee,delivery:del,pickup:pick,status,pieceIds:[]});
+  jobs.push(J("The Hendersons","412 Maple Ave, Bloomington IN","2026-09-15","2026-12-15",1500,250,250,"active"));
+  jobs.push(J("Priya Nair","88 Sycamore Ln, Ellettsville IN","2026-10-01","2026-11-30",1200,200,200,"active"));
+  jobs.push(J("Sold — Oak St listing","17 Oak St, Bloomington IN","2026-06-01","2026-08-31",1800,300,300,"done"));
+  DB={pieces,jobs};
+  // assign some pieces
+  const take=(job,n)=>{const avail=DB.pieces.filter(p=>p.status==="warehouse").slice(0,n);
+    avail.forEach(p=>{p.status="staged";p.jobId=job.id;job.pieceIds.push(p.id);});};
+  take(jobs[0],9);take(jobs[1],6);
+  jobs[2].pieceIds=[]; // done job, pieces returned
+}
+$("sample-toggle").addEventListener("click",()=>{
+  sampleOn=!sampleOn;const b=$("sample-toggle");
+  b.classList.toggle("on",sampleOn);b.setAttribute("aria-pressed",sampleOn);
+  $("sample-notice").hidden=!sampleOn;
+  if(sampleOn){sampleBackup=JSON.stringify(DB);sampleData();sndOk();}
+  else{let ok=false;
+    if(sampleBackup){try{const d=JSON.parse(sampleBackup);if(validDB(d)){DB=d;repair();ok=true;}}catch(e){}}
+    if(!ok)load(); /* localStorage still holds pre-sample data (save is skipped in sample mode) — never write sample over it */
+    sndDel();}
+  save();renderAll();
+});
+$("sample-off").addEventListener("click",()=>$("sample-toggle").click());
+
+/* ---------- dashboard ---------- */
+function jobTotal(j){const r=j.pieceIds.reduce((s,id)=>{const p=DB.pieces.find(x=>x.id===id);return s+(p?p.rate:0);},0);
+  return j.fee+r+j.delivery+j.pickup;}
+function renderDash(){
+  const act=DB.jobs.filter(j=>j.status==="active");
+  $("st-active").textContent=act.length;
+  const mrr=DB.pieces.filter(p=>p.status==="staged").reduce((s,p)=>s+p.rate,0);
+  $("st-mrr").textContent=fmt$(mrr);
+  $("st-value").textContent=fmt$(DB.pieces.reduce((s,p)=>s+p.cost,0));
+  $("st-util").textContent=DB.pieces.length?Math.round(100*DB.pieces.filter(p=>p.status==="staged").length/DB.pieces.length)+"%":"0%";
+  $("dash-jobs").innerHTML=act.length?act.map(j=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>${esc(j.client)}</strong><br><span class="muted">${esc(j.address)} · ${j.pieceIds.length} pieces · <span class="money">${fmt$(jobTotal(j))}</span></span></div>`).join(""):'<p class="muted">No active jobs.</p>';
+  const recent=DB.pieces.filter(p=>p.status==="warehouse").slice(-5).reverse();
+  $("dash-recent").innerHTML=recent.length?recent.map(p=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><strong>${esc(p.name)}</strong><br><span class="muted">${esc(p.category)} · ${fmt$(p.rate)}/mo</span></div>`).join(""):'<p class="muted">Nothing returned yet.</p>';
+}
+
+/* ---------- inventory ---------- */
+function fillCats(){const s=$("p-cat"),f=$("f-cat");s.innerHTML="";f.innerHTML='<option value="">All</option>';
+  CATS.forEach(c=>{s.add(new Option(c,c));f.add(new Option(c,c));});}
+$("p-add").addEventListener("click",()=>{
+  const name=$("p-name").value.trim();if(!name){alert("Give the piece a name.");return;}
+  DB.pieces.push({id:uid(),name,category:$("p-cat").value,condition:$("p-cond").value,
+    cost:Math.max(0,+$("p-cost").value||0),rate:Math.max(0,+$("p-rate").value||0),dims:$("p-dims").value.trim(),
+    notes:$("p-notes").value.trim(),status:$("p-status").value,jobId:null});
+  ["p-name","p-cost","p-rate","p-dims","p-notes"].forEach(i=>$(i).value="");
+  save();renderAll();sndOk();
+});
+["f-q","f-cat","f-status"].forEach(i=>$(i).addEventListener("input",renderInv));
+function renderInv(){
+  const q=$("f-q").value.toLowerCase(),c=$("f-cat").value,s=$("f-status").value;
+  const rows=DB.pieces.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.notes.toLowerCase().includes(q))&&(!c||p.category===c)&&(!s||p.status===s));
+  $("inv-table").querySelector("tbody").innerHTML=rows.map(p=>{
+    const job=p.jobId?(DB.jobs.find(j=>j.id===p.jobId)||{}).client:"";
+    return `<tr><td><strong>${esc(p.name)}</strong><br><span class="muted">${esc(p.condition)}${p.dims?" · "+esc(p.dims):""}${job?" · @ "+esc(job):""}</span></td>
+    <td>${esc(p.category)}</td><td><span class="pill ${p.status}">${p.status}</span></td>
+    <td class="money">${fmt$(p.cost)}</td><td class="money">${fmt$(p.rate)}/mo</td>
+    <td style="white-space:nowrap"><button class="btn small ghost" data-edit="${p.id}">Edit</button>
+    <button class="btn small ghost" data-del="${p.id}">Delete</button></td></tr>`;}).join("")
+    ||'<tr><td colspan="6" class="muted">No pieces match.</td></tr>';
+  $("inv-table").querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{
+    const p=DB.pieces.find(x=>x.id===b.dataset.del);
+    if(p.status==="staged"){alert("Return this piece from its job before deleting.");return;}
+    if(!confirm("Delete "+p.name+"?"))return;
+    DB.pieces=DB.pieces.filter(x=>x.id!==p.id);save();renderAll();sndDel();}));
+  $("inv-table").querySelectorAll("[data-edit]").forEach(b=>b.addEventListener("click",()=>{
+    const p=DB.pieces.find(x=>x.id===b.dataset.edit);
+    const rate=prompt("Monthly rental rate ($)",p.rate);if(rate===null)return;
+    const cost=prompt("Purchase cost ($)",p.cost);if(cost===null)return;
+    const st=prompt("Status (warehouse / staged / maintenance)",p.status);if(st===null)return;
+    if(!["warehouse","staged","maintenance"].includes(st)){alert("Invalid status.");return;}
+    if(st==="staged"&&p.status!=="staged"){alert("To stage a piece, assign it to a job from the Jobs tab.");return;}
+    if(p.status==="staged"&&st!=="staged"){alert("Return it from its job first (Jobs tab).");return;}
+    p.rate=Math.max(0,+rate||0);p.cost=Math.max(0,+cost||0);p.status=st;if(st!=="staged")p.jobId=null;
+    save();renderAll();sndOk();}));
+}
+
+/* ---------- jobs ---------- */
+$("j-add").addEventListener("click",()=>{
+  const client=$("j-client").value.trim();if(!client){alert("Client name is required.");return;}
+  DB.jobs.push({id:uid(),client,address:$("j-addr").value.trim(),start:$("j-start").value,end:$("j-end").value,
+    fee:Math.max(0,+$("j-fee").value||0),delivery:Math.max(0,+$("j-del").value||0),pickup:Math.max(0,+$("j-pick").value||0),status:"active",pieceIds:[]});
+  ["j-client","j-addr","j-start","j-end","j-fee","j-del","j-pick"].forEach(i=>$(i).value="");
+  save();renderAll();sndOk();
+});
+function renderJobs(){
+  const el=$("jobs-list");
+  el.innerHTML=DB.jobs.map(j=>{
+    const assigned=j.pieceIds.map(id=>DB.pieces.find(p=>p.id===id)).filter(Boolean);
+    const avail=DB.pieces.filter(p=>p.status==="warehouse");
+    const rateSum=assigned.reduce((s,p)=>s+p.rate,0);
+    const total=j.fee+rateSum+j.delivery+j.pickup;
+    return `<div class="card" data-job="${j.id}">
+      <div class="jobhead"><h2>${esc(j.client)} ${j.status!=="active"?'<span class="pill maintenance">done</span>':""}</h2>
+      <div>${j.status==="active"?`<button class="btn small ghost" data-finish="${j.id}">Mark done</button>`:""}
+      <button class="btn small ghost" data-jdel="${j.id}">Delete</button></div></div>
+      <p class="muted">${esc(j.address)}${j.start?" · "+esc(j.start):""}${j.end?" → "+esc(j.end):""}</p>
+      <div class="fees">
+        <div class="fee"><div class="v">${fmt$(j.fee)}</div><div class="l muted">Flat fee</div></div>
+        <div class="fee"><div class="v">${fmt$(rateSum)}</div><div class="l muted">Rental (${assigned.length} pieces)</div></div>
+        <div class="fee"><div class="v">${fmt$(j.delivery+j.pickup)}</div><div class="l muted">Delivery + pickup</div></div>
+        <div class="fee total"><div class="v">${fmt$(total)}</div><div class="l">Job total</div></div>
+      </div>
+      <h3 style="margin:16px 0 8px">Assigned pieces (${assigned.length})</h3>
+      ${assigned.length?'<table><tbody>'+assigned.map(p=>`<tr><td><strong>${esc(p.name)}</strong> <span class="muted">${esc(p.category)}</span></td><td class="money">${fmt$(p.rate)}/mo</td><td><button class="btn small ghost" data-return="${p.id}">Return</button></td></tr>`).join("")+"</tbody></table>":'<p class="muted">None assigned.</p>'}
+      ${j.status==="active"?`<h3 style="margin:16px 0 8px">Assign from warehouse</h3>
+      <div class="toolbar"><div><select id="as-${j.id}">${avail.map(p=>`<option value="${p.id}">${esc(p.name)} — ${fmt$(p.rate)}/mo</option>`).join("")}</select></div>
+      <div style="flex:0"><button class="btn" data-assign="${j.id}">Assign</button></div></div>
+      ${avail.length?"":'<p class="muted">Warehouse is empty.</p>'}`:""}
+    </div>`;}).join("")||'<div class="card"><p class="muted">No jobs yet.</p></div>';
+  el.querySelectorAll("[data-assign]").forEach(b=>b.addEventListener("click",()=>{
+    const j=DB.jobs.find(x=>x.id===b.dataset.assign);const sel=$("as-"+j.id);if(!sel||!sel.value)return;
+    const p=DB.pieces.find(x=>x.id===sel.value);
+    if(p.status!=="warehouse"){alert("That piece is no longer available.");renderAll();return;}
+    p.status="staged";p.jobId=j.id;j.pieceIds.push(p.id);save();renderAll();sndOk();}));
+  el.querySelectorAll("[data-return]").forEach(b=>b.addEventListener("click",()=>{
+    const p=DB.pieces.find(x=>x.id===b.dataset.return);const j=DB.jobs.find(x=>x.id===p.jobId);
+    if(j)j.pieceIds=j.pieceIds.filter(id=>id!==p.id);
+    p.status="warehouse";p.jobId=null;save();renderAll();sndOk();}));
+  el.querySelectorAll("[data-finish]").forEach(b=>b.addEventListener("click",()=>{
+    const j=DB.jobs.find(x=>x.id===b.dataset.finish);
+    if(!confirm("Mark "+j.client+" done and return all pieces?"))return;
+    j.rentalSnap=j.pieceIds.reduce((s,id)=>{const p=DB.pieces.find(x=>x.id===id);return s+(p?p.rate:0);},0);
+    j.pieceSnap=j.pieceIds.length;
+    j.pieceIds.forEach(id=>{const p=DB.pieces.find(x=>x.id===id);if(p){p.status="warehouse";p.jobId=null;}});
+    j.pieceIds=[];j.status="done";save();renderAll();sndOk();}));
+  el.querySelectorAll("[data-jdel]").forEach(b=>b.addEventListener("click",()=>{
+    const j=DB.jobs.find(x=>x.id===b.dataset.jdel);
+    if(j.pieceIds.length){alert("Return all pieces before deleting this job.");return;}
+    if(!confirm("Delete job "+j.client+"?"))return;
+    DB.jobs=DB.jobs.filter(x=>x.id!==j.id);save();renderAll();sndDel();}));
+}
+
+/* ---------- charts ---------- */
+const sel={donut:-1,bars:-1,trend:-1};
+function svgEl(n,attrs){const e=document.createElementNS("http://www.w3.org/2000/svg",n);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function clearSvg(s){while(s.firstChild)s.removeChild(s.firstChild);}
+function drawCharts(){
+  /* donut: inventory value by category */
+  const svg=$("ch-donut");clearSvg(svg);
+  const byCat={};DB.pieces.forEach(p=>byCat[p.category]=(byCat[p.category]||0)+p.cost);
+  const entries=Object.entries(byCat).filter(e=>e[1]>0);
+  $("c1-sub").textContent=entries.length?entries.length+" categories · "+fmt$(entries.reduce((s,e)=>s+e[1],0))+" total":"No inventory yet";
+  const cx=150,cy=88,r=62,ir=42,rawTotal=entries.reduce((s,e)=>s+e[1],0),total=rawTotal||1;let a=-Math.PI/2;
+  const leg=$("donut-legend");leg.innerHTML="";
+  entries.forEach((e,i)=>{
+    const frac=e[1]/total,ang=frac*Math.PI*2;
+    let d;
+    if(frac>=0.9999){ /* single category: identical arc endpoints are omitted per SVG spec */
+      d=`M${cx-r},${cy} A${r},${r} 0 1 1 ${cx+r},${cy} A${r},${r} 0 1 1 ${cx-r},${cy} L${cx-ir},${cy} A${ir},${ir} 0 1 0 ${cx+ir},${cy} A${ir},${ir} 0 1 0 ${cx-ir},${cy} Z`;
+    }else{
+      const large=ang>Math.PI?1:0;
+      const x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a),x2=cx+r*Math.cos(a+ang),y2=cy+r*Math.sin(a+ang);
+      const ix1=cx+ir*Math.cos(a),iy1=cy+ir*Math.sin(a),ix2=cx+ir*Math.cos(a+ang),iy2=cy+ir*Math.sin(a+ang);
+      d=`M${x1},${y1} A${r},${r} 0 ${large} 1 ${x2},${y2} L${ix2},${iy2} A${ir},${ir} 0 ${large} 0 ${ix1},${iy1} Z`;
+    }
+    const g=svgEl("g",{class:"slice"+(sel.donut===i?" selected":"")});
+    g.appendChild(svgEl("path",{d,fill:COLORS[i%COLORS.length]}));
+    if(sel.donut===i){const mid=a+ang/2;g.setAttribute("transform",`translate(${10*Math.cos(mid)},${10*Math.sin(mid)})`);}
+    g.addEventListener("click",()=>{sel.donut=sel.donut===i?-1:i;beep(520,.06);drawCharts();});
+    svg.appendChild(g);a+=ang;
+    const li=document.createElement("span");
+    li.innerHTML=`<i style="background:${COLORS[i%COLORS.length]}"></i>${esc(e[0])} · ${fmt$(e[1])}`;
+    li.style.cursor="pointer";li.style.fontWeight=sel.donut===i?"700":"400";
+    li.addEventListener("click",()=>{sel.donut=sel.donut===i?-1:i;beep(520,.06);drawCharts();});
+    leg.appendChild(li);
+  });
+  const ct=svgEl("text",{x:cx,y:cy-2,"text-anchor":"middle","font-size":"15","font-weight":"700",fill:"var(--text)","pointer-events":"none"});
+  const clabel=entries.length?fmt$(rawTotal):"—";
+  ct.textContent=clabel;
+  if(clabel.length>8){ct.setAttribute("textLength","70");ct.setAttribute("lengthAdjust","spacingAndGlyphs");}
+  svg.appendChild(ct);
+  const cl=svgEl("text",{x:cx,y:cy+18,"text-anchor":"middle","font-size":"15",fill:"var(--muted)","pointer-events":"none"});
+  cl.textContent="total";svg.appendChild(cl);
+
+  /* bars: pieces by status */
+  const bsvg=$("ch-bars");clearSvg(bsvg);
+  const sts=["warehouse","staged","maintenance"];
+  const counts=sts.map(s=>DB.pieces.filter(p=>p.status===s).length);
+  const mx=Math.max(1,...counts);
+  $("c2-sub").textContent=DB.pieces.length+" pieces total";
+  const bw=54,gap=(300-3*bw-40)/2;
+  sts.forEach((s,i)=>{
+    const h=counts[i]/mx*130,x=20+i*(bw+gap),y=170-h;
+    const rct=svgEl("rect",{x,y,width:bw,height:Math.max(h,2),rx:6,fill:COLORS[i%COLORS.length],class:"bar"+(sel.bars===i?" selected":"")});
+    if(sel.bars===i)rct.setAttribute("transform","translate(0,-8)");
+    const lb=svgEl("text",{x:x+bw/2,y:190,"text-anchor":"middle","font-size":"15",fill:"var(--muted)"});lb.textContent=s;
+    const vl=svgEl("text",{x:x+bw/2,y:y-8,"text-anchor":"middle","font-size":"15","font-weight":"700",fill:"var(--text)"});vl.textContent=counts[i];
+    const g=svgEl("g",{});g.appendChild(rct);g.appendChild(lb);g.appendChild(vl);
+    g.addEventListener("click",()=>{sel.bars=sel.bars===i?-1:i;beep(520,.06);drawCharts();});
+    bsvg.appendChild(g);
+  });
+
+  /* trend: monthly revenue last 6 months — fees amortized over actual job duration, rental prorated */
+  const tsvg=$("ch-trend");clearSvg(tsvg);
+  const months=[];const now=new Date();
+  for(let k=5;k>=0;k--){const d=new Date(now.getFullYear(),now.getMonth()-k,1);months.push({y:d.getFullYear(),m:d.getMonth(),label:d.toLocaleString("en-US",{month:"short"})});}
+  const rev=months.map(mo=>{
+    let r=0;
+    DB.jobs.forEach(j=>{
+      if(!j.start)return;
+      const s=new Date(j.start+"T12:00:00");
+      const e=j.end?new Date(j.end+"T12:00:00"):new Date(s.getTime()+30*864e5);
+      const first=new Date(mo.y,mo.m,1),last=new Date(mo.y,mo.m+1,0,23,59,59,999);
+      if(s>last||e<first||e<=s)return;
+      const frac=(Math.min(e,last)-Math.max(s,first))/(e-s);
+      r+=j.fee*frac;
+      const rate=j.status==="done"?(+j.rentalSnap||0):j.pieceIds.reduce((x,id)=>{const p=DB.pieces.find(q=>q.id===id);return x+(p?p.rate:0);},0);
+      r+=rate*frac;
+    });
+    return Math.round(r);
+  });
+  const tmx=Math.max(1,...rev);
+  const px=i=>60+i*((292-60)/5),py=v=>180-(v/tmx)*130;
+  [tmx,tmx/2,0].forEach(v=>{
+    const t=svgEl("text",{x:54,y:py(Math.round(v))+5,"text-anchor":"end","font-size":"15",fill:"var(--muted)"});
+    t.textContent=fmt$(Math.round(v));tsvg.appendChild(t);});
+  let d="";rev.forEach((v,i)=>d+=(i?"L":"M")+px(i)+","+py(v)+" ");
+  tsvg.appendChild(svgEl("path",{d,fill:"none",stroke:"var(--acc)","stroke-width":"3"}));
+  rev.forEach((v,i)=>{
+    const c=svgEl("circle",{cx:px(i),cy:py(v),r:sel.trend===i?8:5,fill:"var(--acc)",class:"dot"+(sel.trend===i?" selected":"")});
+    const t=svgEl("text",{x:px(i),y:202,"text-anchor":"middle","font-size":"15",fill:"var(--muted)"});t.textContent=months[i].label;
+    const anchor=i===0?"start":(i===rev.length-1?"end":"middle");
+    const lx=anchor==="start"?px(i)-4:(anchor==="end"?px(i)+4:px(i));
+    const vl=svgEl("text",{x:lx,y:py(v)-12,"text-anchor":anchor,"font-size":"15","font-weight":"700",fill:"var(--text)"});vl.textContent=fmt$(v);
+    const g=svgEl("g",{});g.appendChild(c);g.appendChild(t);g.appendChild(vl);
+    g.addEventListener("click",()=>{sel.trend=sel.trend===i?-1:i;beep(520,.06);drawCharts();});
+    tsvg.appendChild(g);
+  });
+
+  /* gauge: utilization */
+  const gsvg=$("ch-gauge");clearSvg(gsvg);
+  const tot=DB.pieces.length,stg=DB.pieces.filter(p=>p.status==="staged").length;
+  const frac=tot?stg/tot:0;
+  const gx=150,gy=150,gr=90;
+  const arc=(f0,f1)=>{const a0=Math.PI+f0*Math.PI,a1=Math.PI+f1*Math.PI;
+    return `M${gx+gr*Math.cos(a0)},${gy+gr*Math.sin(a0)} A${gr},${gr} 0 0 1 ${gx+gr*Math.cos(a1)},${gy+gr*Math.sin(a1)}`;};
+  gsvg.appendChild(svgEl("path",{d:arc(0,1),fill:"none",stroke:"var(--border)","stroke-width":"22","stroke-linecap":"round"}));
+  if(frac>0)gsvg.appendChild(svgEl("path",{d:arc(0,frac),fill:"none",stroke:"var(--acc)","stroke-width":"22","stroke-linecap":"round"}));
+  const na=Math.PI+frac*Math.PI;
+  const nx=gx+(gr-0)*Math.cos(na),ny=gy+(gr-0)*Math.sin(na);
+  gsvg.appendChild(svgEl("circle",{cx:gx,cy:gy,r:8,fill:"var(--text)"}));
+  gsvg.appendChild(svgEl("line",{x1:gx,y1:gy,x2:nx,y2:ny,stroke:"var(--text)","stroke-width":"4","stroke-linecap":"round"}));
+  /* clear text zone below the arc — graphics never enter */
+  const gt=svgEl("text",{x:gx,y:205,"text-anchor":"middle","font-size":"26","font-weight":"700",fill:"var(--text)"});
+  gt.textContent=Math.round(frac*100)+"%";gsvg.appendChild(gt);
+  const gl=svgEl("text",{x:gx,y:224,"text-anchor":"middle","font-size":"15",fill:"var(--muted)"});
+  gl.textContent=stg+" of "+tot+" pieces staged";gsvg.appendChild(gl);
+}
+
+/* ---------- reports / print ---------- */
+function printHTML(html){$("print-area").innerHTML=html;window.print();}
+$("r-print-job").addEventListener("click",()=>{
+  const j=DB.jobs.find(x=>x.id===$("r-job").value);if(!j){alert("Pick a job.");return;}
+  const rows=j.pieceIds.map(id=>DB.pieces.find(p=>p.id===id)).filter(Boolean);
+  const rateSum=rows.reduce((s,p)=>s+p.rate,0);
+  printHTML(`<h1>Job sheet — ${esc(j.client)}</h1><p>${esc(j.address)}${j.start?" · "+esc(j.start):""}${j.end?" → "+esc(j.end):""}</p>
+  <table><thead><tr><th>Piece</th><th>Category</th><th>Condition</th><th>Rate/mo</th></tr></thead><tbody>
+  ${rows.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.category)}</td><td>${esc(p.condition)}</td><td>${fmt$(p.rate)}</td></tr>`).join("")}
+  </tbody></table>
+  <p>Flat fee: ${fmt$(j.fee)}<br>Rental total: ${fmt$(rateSum)}<br>Delivery: ${fmt$(j.delivery)} · Pickup: ${fmt$(j.pickup)}<br><strong>Job total: ${fmt$(j.fee+rateSum+j.delivery+j.pickup)}</strong></p>
+  <p>Generated by StageStock.</p>`);
+});
+$("r-print-inv").addEventListener("click",()=>{
+  printHTML(`<h1>StageStock inventory list</h1>
+  <table><thead><tr><th>Piece</th><th>Category</th><th>Status</th><th>Cost</th><th>Rate/mo</th></tr></thead><tbody>
+  ${DB.pieces.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(p.category)}</td><td>${p.status}</td><td>${fmt$(p.cost)}</td><td>${fmt$(p.rate)}</td></tr>`).join("")}
+  </tbody></table><p>Total value: ${fmt$(DB.pieces.reduce((s,p)=>s+p.cost,0))}. Generated by StageStock.</p>`);
+});
+
+/* ---------- data I/O ---------- */
+$("d-export").addEventListener("click",()=>{
+  const b=new Blob([JSON.stringify(DB,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="stagestock-backup.json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);sndOk();});
+$("d-csv").addEventListener("click",()=>{
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const rows=[["name","category","condition","status","cost","rate","dims","notes"]];
+  DB.pieces.forEach(p=>rows.push([p.name,p.category,p.condition,p.status,p.cost,p.rate,p.dims,p.notes].map(q).join(",")));
+  const b=new Blob([rows.join("\n")],{type:"text/csv"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="stagestock-inventory.csv";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);sndOk();});
+function cleanPiece(p){p=p||{};return{
+  id:String(p.id||uid()),name:String(p.name||"Unnamed piece"),
+  category:String(p.category||"Furniture"),condition:String(p.condition||"Good"),
+  cost:Math.max(0,+p.cost||0),rate:Math.max(0,+p.rate||0),
+  dims:String(p.dims||""),notes:String(p.notes||""),
+  status:["warehouse","staged","maintenance"].includes(p.status)?p.status:"warehouse",
+  jobId:p.jobId==null?null:String(p.jobId)};}
+function cleanJob(j){j=j||{};return{
+  id:String(j.id||uid()),client:String(j.client||"Unnamed job"),address:String(j.address||""),
+  start:String(j.start||""),end:String(j.end||""),
+  fee:Math.max(0,+j.fee||0),delivery:Math.max(0,+j.delivery||0),pickup:Math.max(0,+j.pickup||0),
+  status:j.status==="done"?"done":"active",
+  pieceIds:Array.isArray(j.pieceIds)?j.pieceIds.map(String):[],
+  rentalSnap:Math.max(0,+j.rentalSnap||0),pieceSnap:Math.max(0,+j.pieceSnap||0)};}
+$("d-import").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!confirm("Import will replace all current data. Continue?")){e.target.value="";return;}
+  const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);
+    if(!validDB(d))throw new Error("file must contain pieces and jobs lists");
+    DB={pieces:d.pieces.map(cleanPiece),jobs:d.jobs.map(cleanJob)};
+    repair();save();renderAll();sndOk();alert("Import complete.");}catch(err){alert("Could not import: "+err.message);}};
+  r.readAsText(f);e.target.value="";});
+
+/* ---------- render all / init ---------- */
+function renderReports(){$("r-job").innerHTML=DB.jobs.map(j=>`<option value="${j.id}">${esc(j.client)} (${j.status})</option>`).join("");}
+function renderAll(){renderDash();renderInv();renderJobs();renderReports();
+  if(!$("tab-charts").hidden)drawCharts();}
+load();fillCats();paintTheme();paintSound();renderAll();
+</script>
+</body>
+</html>
