@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loyalty Points Expiry Tracker — Airline Miles &amp; Rewards Expiration Alerts</title>
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#23211c; --muted:#6f6a5e;
+  --line:#e3ded2; --acc:#b3541e; --acc-ink:#fff;
+  --ok:#2e7d46; --warn:#b3541e; --crit:#c02a2a; --watch:#8a6d1c; --notice:#3f6d9e; --safe:#2e7d46;
+  --chip:#efe9db; --shadow:0 1px 3px rgba(60,50,30,.10);
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#191712; --card:#221f18; --ink:#ece7d9; --muted:#a89f8a;
+  --line:#3a352a; --acc:#e08a3c; --acc-ink:#1c1410;
+  --ok:#5fb878; --warn:#e08a3c; --crit:#e06565; --watch:#d3ab3f; --notice:#7aa8d8; --safe:#5fb878;
+  --chip:#2e2a20; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input[type="date"]{min-height:44px}
+label{font-weight:600;font-size:15px;display:block;margin:10px 0 4px}
+/* header */
+.hdr-wrap{background:var(--bg);border-bottom:1px solid var(--line)}
+header{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand svg{width:34px;height:34px;flex:none}
+.brand-name{font-size:22px;font-weight:800;letter-spacing:.2px}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--shadow)}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn:active{transform:scale(.92);filter:brightness(.94)}
+.icon-btn.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.pill-btn{height:44px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 18px;font-weight:700;box-shadow:var(--shadow);text-decoration:none;display:inline-flex;align-items:center}
+.pill-btn:active{transform:scale(.95);filter:brightness(.95)}
+/* layout */
+main{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 18px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:var(--shadow)}
+.tabs button:active{transform:scale(.95)}
+.tabs button.active{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.tabpane{display:none}
+.tabpane.active{display:block}
+/* cards */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:860px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h3{margin:0 0 6px;font-size:15px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.bignum{font-size:34px;font-weight:800;line-height:1.1}
+.bignum small{font-size:15px;font-weight:600;color:var(--muted)}
+.sub{color:var(--muted);font-size:15px}
+/* buckets */
+.bucket{border-left:6px solid var(--bc,#999);padding:12px 14px;background:var(--card);border-radius:10px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:10px}
+.bucket h4{margin:0 0 4px;font-size:17px}
+.bucket .pts{font-weight:800;font-size:20px}
+.prow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:15px;flex-wrap:wrap}
+.prow:first-of-type{border-top:0}
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:700;background:var(--chip);color:var(--ink);white-space:nowrap}
+.tag.crit{background:#f6d9d9;color:#8f1f1f}[data-theme="dark"] .tag.crit{background:#4a2222;color:#f2b0b0}
+.tag.warn{background:#f7e6cf;color:#8a4a12}[data-theme="dark"] .tag.warn{background:#4a3418;color:#f0c48a}
+.tag.watch{background:#f3ead0;color:#6d5312}[data-theme="dark"] .tag.watch{background:#453a17;color:#e8cf7e}
+.tag.notice{background:#dbe7f5;color:#2c527e}[data-theme="dark"] .tag.notice{background:#22374e;color:#a9c9ec}
+.tag.safe{background:#d9ecdd;color:#1f5c32}[data-theme="dark"] .tag.safe{background:#1e3a26;color:#a4d8b2}
+.tag.never{background:var(--chip)}
+.rowbtns{display:flex;gap:6px;justify-content:flex-end}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:700;box-shadow:var(--shadow)}
+.btn:active{transform:scale(.96);filter:brightness(.95)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.danger{border-color:var(--crit);color:var(--crit)}
+.btn.small{padding:6px 10px;font-size:15px}
+/* modal */
+.mback{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow:auto}
+.mback.open{display:flex}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;max-width:520px;width:100%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.modal h2{margin:0 0 8px;font-size:21px}
+.mrow{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.radio-row{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+.radio-pill{border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:700;background:var(--card)}
+.radio-pill.sel{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+/* toast */
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-weight:700;display:none;z-index:80;max-width:90vw}
+#toast.show{display:block}
+/* notice banner */
+.notice{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#f7e6cf;color:#7a4413;border:1px solid #e3c48f;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px;font-weight:600;flex-wrap:wrap}
+[data-theme="dark"] .notice{background:#4a3418;color:#f0c48a;border-color:#6b4d24}
+/* charts */
+.chart-card{display:flex;flex-direction:column;min-height:340px}
+.chart-card h3{margin-bottom:2px}
+.chart-svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:15px}
+.legend button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:15px;font-weight:600}
+.legend button:active{transform:scale(.95)}
+.legend button.sel{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+/* footer */
+footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 16px 40px;text-align:center;color:var(--muted)}
+footer .cta{margin:14px 0}
+/* print */
+@media print{
+  .hdr-wrap,.tabs,footer,.noprint,.mback,#toast{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  main{max-width:100%}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<div class="hdr-wrap">
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="none" stroke="#b3541e" stroke-width="3.5"/><path d="M20 10v10l7 4" fill="none" stroke="#b3541e" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 3l4 4h-8z" fill="#b3541e"/><circle cx="20" cy="20" r="2.4" fill="#b3541e"/></svg>
+    <span class="brand-name">MileSentry</span>
+  </div>
+  <div class="hdr-btns">
+    <a class="pill-btn" href="https://glenerds.gumroad.com">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn on" aria-pressed="true" aria-label="Toggle sound" title="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6.5 9H3v6h3.5L11 19z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+  </div>
+</header>
+</div>
+<main>
+  <div id="sample-notice" class="notice" hidden><span><strong>Sample data mode</strong> — changes you make now won't be saved.</span><button class="btn small" id="sample-off">Exit sample mode</button></div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button data-tab="dash" class="active" role="tab">Dashboard</button>
+    <button data-tab="programs" role="tab">Programs</button>
+    <button data-tab="activity" role="tab">Activity</button>
+    <button data-tab="charts" role="tab">Charts</button>
+    <button data-tab="reports" role="tab">Reports</button>
+  </nav>
+
+  <section id="tab-dash" class="tabpane active" role="tabpanel">
+    <div class="grid g4" id="dash-cards"></div>
+    <div style="height:16px"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>What expires next</h3>
+        <div id="next-list"></div>
+      </div>
+      <div class="card">
+        <h3>Urgency buckets</h3>
+        <div id="bucket-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-programs" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="flex:1;min-width:180px"><label for="f-q">Search</label><input id="f-q" placeholder="program name or notes"></div>
+        <div style="min-width:150px"><label for="f-type">Type</label><select id="f-type"><option value="">All types</option><option>airline</option><option>hotel</option><option>card</option><option>other</option></select></div>
+        <div><button class="btn primary" id="p-add">Add program</button></div>
+      </div>
+    </div>
+    <div class="card"><div style="overflow-x:auto"><table id="prog-table" aria-label="Loyalty programs">
+      <thead><tr><th>Program</th><th class="num">Balance</th><th>Expiry rule</th><th class="num">Days left</th><th class="noprint"></th></tr></thead>
+      <tbody></tbody>
+    </table></div></div>
+  </section>
+
+  <section id="tab-activity" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="flex:2;min-width:180px"><label for="a-prog">Program</label><select id="a-prog"></select></div>
+        <div style="flex:1;min-width:140px"><label for="a-date">Date</label><input type="date" id="a-date"></div>
+        <div style="min-width:130px"><label for="a-kind">Kind</label><select id="a-kind"><option value="earn">Earn</option><option value="redeem">Redeem</option><option value="transfer">Transfer</option></select></div>
+        <div style="min-width:120px"><label for="a-amt">Points</label><input type="number" id="a-amt" min="0" value="1000"></div>
+        <div><button class="btn primary" id="a-add">Log activity</button></div>
+      </div>
+      <p class="sub" style="margin:10px 0 0">Logging activity resets the expiry clock for programs with inactivity-based rules.</p>
+    </div>
+    <div class="card"><h3>Recent activity</h3><div style="overflow-x:auto"><table id="act-table" aria-label="Activity history">
+      <thead><tr><th>Date</th><th>Program</th><th>Kind</th><th class="num">Points</th><th class="noprint"></th></tr></thead>
+      <tbody></tbody>
+    </table></div></div>
+  </section>
+
+  <section id="tab-charts" class="tabpane" role="tabpanel">
+    <div class="grid g2" id="charts-grid"></div>
+  </section>
+
+  <section id="tab-reports" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <h3>Data</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" id="exp-json">Export JSON</button>
+        <button class="btn" id="exp-csv">Export CSV</button>
+        <button class="btn" id="imp-json">Import JSON</button>
+        <button class="btn" id="print-report">Print points-at-risk report</button>
+      </div>
+      <input type="file" id="imp-file" accept="application/json,.json" class="sr" aria-label="Import JSON file">
+    </div>
+    <div class="card" id="print-area">
+      <h3>Points at risk — <span id="rep-date"></span></h3>
+      <div style="overflow-x:auto"><table id="rep-table" aria-label="Points at risk report">
+        <thead><tr><th>#</th><th>Program</th><th class="num">Balance</th><th>Expiry</th><th class="num">Days left</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <p class="sub" id="rep-foot"></p>
+    </div>
+  </section>
+</main>
+<footer>
+  <div><strong>MileSentry</strong> by Glenerds</div>
+  <div class="cta"><a class="pill-btn" href="https://glenerds.gumroad.com">More Apps</a></div>
+  <div class="sub">Your balances stay on this device. Nothing is uploaded anywhere.</div>
+</footer>
+<div class="mback" id="mback"><div class="modal" role="dialog" aria-modal="true" id="modal-box"></div></div>
+<div id="toast" role="status"></div>
+<script>
+"use strict";
+/* ---------- utils ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtN=n=>Math.round(n).toLocaleString("en-US");
+const uid=()=> "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function dayNum(dstr){const p=String(dstr||"").split("-");if(p.length<3)return NaN;const n=Date.UTC(+p[0],+p[1]-1,+p[2]);return isNaN(n)?NaN:Math.round(n/864e5);}
+function todayNum(){const n=new Date();return Math.round(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())/864e5);}
+function dateStr(dnum){const d=new Date(dnum*864e5);return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0");}
+function prettyDate(dstr){if(!dstr)return "—";const p=dstr.split("-");if(p.length<3)return dstr;const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return M[+p[1]-1]+" "+(+p[2])+", "+p[0];}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+
+/* ---------- sound ---------- */
+let AC=null;
+function beep(f,d){if(localStorage.getItem("milesentry.sound")==="off")return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+const sndOk=()=>beep(660,.12), sndDel=()=>beep(220,.18), sndWarn=()=>{beep(440,.1);setTimeout(()=>beep(330,.14),110);};
+
+/* ---------- theme ---------- */
+function effTheme(){const s=localStorage.getItem("milesentry.theme");return (s==="dark"||s==="light")?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");}
+$("theme-toggle").addEventListener("click",()=>{const t=effTheme();localStorage.setItem("milesentry.theme",t==="dark"?"light":"dark");paintTheme();drawCharts();sndOk();});
+function paintSound(){const on=localStorage.getItem("milesentry.sound")!=="off";const b=$("sound-toggle");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);}
+$("sound-toggle").addEventListener("click",()=>{const on=localStorage.getItem("milesentry.sound")!=="off";localStorage.setItem("milesentry.sound",on?"off":"on");paintSound();if(!on)sndOk();});
+
+/* ---------- store ---------- */
+const SCHEMA_V=1;
+let DB={programs:[],activities:[]};
+let sampleOn=false, sampleBackup=null;
+function save(){
+  if(sampleOn)return;
+  try{localStorage.setItem("milesentry.data",JSON.stringify(DB));localStorage.setItem("milesentry.schema",String(SCHEMA_V));}
+  catch(e){if(e&&e.name==="QuotaExceededError")toast("Browser storage is full — export a JSON backup now to keep your data safe.");}
+}
+function sanitizeProgram(p){
+  if(!p||typeof p!=="object")return null;
+  const name=String(p.name||"").trim().slice(0,80);if(!name)return null;
+  const type=["airline","hotel","card","other"].includes(p.type)?p.type:"other";
+  const balance=Math.max(0,Math.round(+p.balance||0));
+  const account=String(p.account||"").trim().slice(0,40);
+  const notes=String(p.notes||"").trim().slice(0,300);
+  const r=p.rule||{};let rule;
+  if(r.kind==="date"&&/^\d{4}-\d{2}-\d{2}$/.test(r.date||"")&&!isNaN(dayNum(r.date))){
+    rule={kind:"date",date:r.date};
+  }else if(r.kind==="inactivity"&&+r.months>0&&+r.months<=120){
+    const la=/^\d{4}-\d{2}-\d{2}$/.test(r.lastActivity||"")&&!isNaN(dayNum(r.lastActivity))?r.lastActivity:null;
+    rule={kind:"inactivity",months:Math.round(+r.months),lastActivity:la};
+  }else{rule={kind:"never"};}
+  return {id:String(p.id||uid()),name,type,account,balance,notes,rule};
+}
+function sanitizeActivity(a,progIds){
+  if(!a||typeof a!=="object")return null;
+  const programId=String(a.programId||"");if(!progIds.includes(programId))return null;
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(a.date||"")&&!isNaN(dayNum(a.date))?a.date:null;if(!date)return null;
+  const kind=["earn","redeem","transfer"].includes(a.kind)?a.kind:"earn";
+  const amount=Math.max(0,Math.round(+a.amount||0));
+  return {id:String(a.id||uid()),programId,date,kind,amount};
+}
+function load(){
+  let raw=null;
+  try{raw=localStorage.getItem("milesentry.data");}catch(e){raw=null;}
+  if(!raw){DB={programs:[],activities:[]};return;}
+  try{
+    const d=JSON.parse(raw);
+    if(!d||typeof d!=="object"||!Array.isArray(d.programs)||!Array.isArray(d.activities))throw new Error("bad shape");
+    const programs=d.programs.map(sanitizeProgram).filter(Boolean);
+    const ids=programs.map(p=>p.id);
+    const activities=d.activities.map(a=>sanitizeActivity(a,ids)).filter(Boolean);
+    DB={programs,activities};
+  }catch(e){DB={programs:[],activities:[]};toast("Saved data was unreadable — starting fresh.");}
+}
+
+/* ---------- expiry engine ---------- */
+function expiryOf(p){
+  const r=p.rule;
+  if(r.kind==="date")return r.date;
+  if(r.kind==="inactivity"){
+    if(!r.lastActivity)return null; // unknown
+    const base=dayNum(r.lastActivity);
+    // add months: compute from calendar
+    const d=new Date(base*864e5);let y=d.getUTCFullYear(),m=d.getUTCMonth()+r.months;
+    y+=Math.floor(m/12);m=m%12;
+    const dim=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+    const day=Math.min(d.getUTCDate(),dim);
+    return dateStr(Math.round(Date.UTC(y,m,day)/864e5));
+  }
+  return "never";
+}
+function daysLeft(p){
+  const e=expiryOf(p);
+  if(e==="never")return Infinity;
+  if(e===null)return null; // unknown
+  return dayNum(e)-todayNum();
+}
+function bucketOf(p){
+  const dl=daysLeft(p);
+  if(dl===Infinity)return "never";
+  if(dl===null)return "unknown";
+  if(dl<0)return "expired";
+  if(dl<=7)return "critical";
+  if(dl<=30)return "warning";
+  if(dl<=60)return "watch";
+  if(dl<=90)return "notice";
+  return "safe";
+}
+const BUCKETS=[
+  {k:"expired",label:"Expired",color:"#c02a2a"},
+  {k:"critical",label:"≤ 7 days",color:"#c02a2a"},
+  {k:"warning",label:"8–30 days",color:"#b3541e"},
+  {k:"watch",label:"31–60 days",color:"#8a6d1c"},
+  {k:"notice",label:"61–90 days",color:"#3f6d9e"},
+  {k:"safe",label:"90+ days",color:"#2e7d46"},
+  {k:"never",label:"Never expires",color:"#6f6a5e"},
+  {k:"unknown",label:"Unknown",color:"#6f6a5e"}
+];
+function ruleText(p){
+  const r=p.rule;
+  if(r.kind==="date")return "Fixed date: "+prettyDate(r.date);
+  if(r.kind==="inactivity")return r.months+" mo inactivity"+(r.lastActivity?" · last activity "+prettyDate(r.lastActivity):" · no activity logged");
+  return "Never expires";
+}
+function expiryText(p){
+  const e=expiryOf(p);
+  if(e==="never")return "—";
+  if(e===null)return "log activity";
+  return prettyDate(e);
+}
+function daysText(p){
+  const dl=daysLeft(p);
+  if(dl===Infinity)return "∞";
+  if(dl===null)return "?";
+  return dl<0?dl+" (overdue)":String(dl);
+}
+function atRisk(p){const dl=daysLeft(p);return dl!==Infinity&&dl!==null&&dl<=30;}
+
+/* ---------- sample data ---------- */
+function sampleData(){
+  const P=(name,type,account,balance,rule,notes)=>({id:uid(),name,type,account,balance,notes:notes||"",rule});
+  const D=n=>dateStr(todayNum()-n); // n days ago
+  const programs=[
+    P("Delta SkyMiles","airline","DL 8841023",84500,{kind:"inactivity",months:24,lastActivity:D(240)},""),
+    P("American AAdvantage","airline","AA 7X2K91",62300,{kind:"inactivity",months:24,lastActivity:D(707)},""),
+    P("United MileagePlus","airline","UA 5519002",41200,{kind:"date",date:dateStr(todayNum()+6)},""),
+    P("Marriott Bonvoy","hotel","MB 229144",95000,{kind:"inactivity",months:24,lastActivity:D(400)},""),
+    P("Hilton Honors","hotel","HH 88120045",120000,{kind:"inactivity",months:24,lastActivity:D(660)},""),
+    P("Chase Ultimate Rewards","card","",78400,{kind:"never"},""),
+    P("Amex Membership Rewards","card","",54900,{kind:"never"},""),
+    P("Southwest Rapid Rewards","airline","WN 332081",23700,{kind:"inactivity",months:24,lastActivity:D(729)},""),
+    P("World of Hyatt","hotel","HY 552190",31500,{kind:"date",date:dateStr(todayNum()+49)},""),
+    P("Alaska Mileage Plan","airline","AS 771204",18900,{kind:"inactivity",months:36,lastActivity:D(520)},"")
+  ];
+  const A=(pi,date,kind,amount,note)=>({id:uid(),programId:programs[pi].id,date,kind,amount,note:note||""});
+  const activities=[
+    A(0,D(240),"earn",12000,"Flight JFK–LAX"),
+    A(0,D(180),"redeem",25000,"Award night"),
+    A(1,D(707),"earn",8500,"Flight DFW–ORD"),
+    A(2,D(90),"earn",5000,"Dining"),
+    A(3,D(400),"earn",20000,"Hotel stay"),
+    A(4,D(660),"earn",15000,"Hotel stay"),
+    A(5,D(30),"earn",3200,"Grocery 3x"),
+    A(6,D(15),"earn",2100,"Dining 4x"),
+    A(7,D(729),"earn",4000,"Flight DEN–PHX"),
+    A(8,D(120),"redeem",15000,"Award night"),
+    A(9,D(520),"earn",6500,"Flight SEA–ANC"),
+    A(5,D(5),"transfer",10000,"To Hyatt")
+  ];
+  DB={programs,activities};
+}
+$("sample-toggle").addEventListener("click",()=>{
+  sampleOn=!sampleOn;const b=$("sample-toggle");
+  b.classList.toggle("on",sampleOn);b.setAttribute("aria-pressed",sampleOn);
+  $("sample-notice").hidden=!sampleOn;
+  if(sampleOn){try{sampleBackup=localStorage.getItem("milesentry.data");}catch(e){sampleBackup=null;}sampleData();}
+  else{
+    if(sampleBackup){try{localStorage.setItem("milesentry.data",sampleBackup);}catch(e){}}
+    else{try{localStorage.removeItem("milesentry.data");}catch(e){}}
+    sampleBackup=null;load();
+  }
+  renderAll();sndOk();toast(sampleOn?"Sample data loaded":"Sample data off — your data restored");
+});
+$("sample-off").addEventListener("click",()=>{if(sampleOn)$("sample-toggle").click();});
+
+/* ---------- dashboard ---------- */
+function sortedByUrgency(list){
+  const rank={expired:0,critical:1,warning:2,watch:3,notice:4,safe:5,unknown:6,never:7};
+  return list.slice().sort((a,b)=>{
+    const ra=rank[bucketOf(a)],rb=rank[bucketOf(b)];
+    if(ra!==rb)return ra-rb;
+    const da=daysLeft(a),db=daysLeft(b);
+    return (da===Infinity?1e9:da===null?1e8:da)-(db===Infinity?1e9:db===null?1e8:db);
+  });
+}
+function renderDash(){
+  const progs=DB.programs;
+  const totalPts=progs.reduce((s,p)=>s+p.balance,0);
+  const risk=progs.filter(atRisk);
+  const riskPts=risk.reduce((s,p)=>s+p.balance,0);
+  const exp=progs.filter(p=>bucketOf(p)==="expired").length;
+  const next=sortedByUrgency(progs.filter(p=>!["never","safe"].includes(bucketOf(p)))).slice(0,6);
+  $("dash-cards").innerHTML=
+    card("Total points tracked",'<div class="bignum">'+fmtN(totalPts)+'</div><div class="sub">'+progs.length+' programs</div>')+
+    card("Points at risk ≤ 30 days",'<div class="bignum" style="color:var(--crit)">'+fmtN(riskPts)+'</div><div class="sub">'+risk.length+' programs</div>')+
+    card("Expired programs",'<div class="bignum" style="color:var(--crit)">'+exp+'</div><div class="sub">act before more lapse</div>')+
+    card("Next expiry", next.length?'<div class="bignum" style="font-size:26px">'+esc(next[0].name)+'</div><div class="sub">'+fmtN(next[0].balance)+' pts · '+daysText(next[0])+' days left</div>':'<div class="sub">No upcoming expiries</div>');
+  $("next-list").innerHTML=next.length?next.map(p=>{
+    const b=bucketOf(p);
+    return '<div class="prow"><span><strong>'+esc(p.name)+'</strong><br><span class="sub">'+fmtN(p.balance)+' pts · expires '+esc(expiryText(p))+'</span></span><span class="tag '+b+'">'+daysText(p)+'d</span></div>';
+  }).join(""):'<p class="sub">Nothing expiring soon. Add programs to start tracking.</p>';
+  const counts={};BUCKETS.forEach(b=>counts[b.k]=0);let cpts={};BUCKETS.forEach(b=>cpts[b.k]=0);
+  progs.forEach(p=>{const b=bucketOf(p);counts[b]++;cpts[b]+=p.balance;});
+  $("bucket-list").innerHTML=BUCKETS.filter(b=>counts[b.k]>0).map(b=>
+    '<div class="bucket" style="--bc:'+b.color+'"><h4>'+b.label+'</h4><div class="pts">'+fmtN(cpts[b.k])+' pts <span class="sub">· '+counts[b.k]+' program'+(counts[b.k]>1?"s":"")+'</span></div></div>'
+  ).join("")||'<p class="sub">No programs yet.</p>';
+}
+function card(h,inner){return '<div class="card"><h3>'+h+'</h3>'+inner+'</div>';}
+
+/* ---------- programs tab ---------- */
+function renderPrograms(){
+  const q=$("f-q").value.toLowerCase(),t=$("f-type").value;
+  const rows=DB.programs.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.notes.toLowerCase().includes(q))&&(!t||p.type===t));
+  const tb=$("prog-table").querySelector("tbody");
+  tb.innerHTML=rows.map(p=>{
+    const b=bucketOf(p);
+    return '<tr><td><strong>'+esc(p.name)+'</strong><br><span class="sub">'+esc(p.type)+(p.account?' · '+esc(p.account):"")+'</span></td>'+
+    '<td class="num"><strong>'+fmtN(p.balance)+'</strong></td>'+
+    '<td><span class="sub">'+esc(ruleText(p))+'</span><br>expires '+esc(expiryText(p))+'</td>'+
+    '<td class="num"><span class="tag '+b+'">'+daysText(p)+'d</span></td>'+
+    '<td class="noprint"><div class="rowbtns"><button class="btn small" data-edit="'+p.id+'">Edit</button><button class="btn small danger" data-del="'+p.id+'">Delete</button></div></td></tr>';
+  }).join("")||'<tr><td colspan="5" class="sub">No programs match. Add your first program above.</td></tr>';
+  tb.querySelectorAll("[data-del]").forEach(x=>x.addEventListener("click",()=>{
+    const p=DB.programs.find(y=>y.id===x.dataset.del);
+    confirmDlg("Delete "+(p?p.name:"this program")+" and its activity history?",()=>{
+      DB.programs=DB.programs.filter(y=>y.id!==x.dataset.del);
+      DB.activities=DB.activities.filter(a=>a.programId!==x.dataset.del);
+      save();renderAll();sndDel();toast("Program deleted");
+    });
+  }));
+  tb.querySelectorAll("[data-edit]").forEach(x=>x.addEventListener("click",()=>programForm(DB.programs.find(p=>p.id===x.dataset.edit))));
+}
+["f-q","f-type"].forEach(i=>$(i).addEventListener("input",renderPrograms));
+$("p-add").addEventListener("click",()=>programForm(null));
+
+/* ---------- activity tab ---------- */
+function renderActivity(){
+  const sel=$("a-prog");
+  const cur=sel.value;
+  sel.innerHTML=DB.programs.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join("")||'<option value="">(add a program first)</option>';
+  if(DB.programs.some(p=>p.id===cur))sel.value=cur;
+  const acts=DB.activities.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
+  const tb=$("act-table").querySelector("tbody");
+  tb.innerHTML=acts.map(a=>{
+    const p=DB.programs.find(x=>x.id===a.programId);
+    return '<tr><td>'+prettyDate(a.date)+'</td><td>'+esc(p?p.name:"(deleted)")+'</td><td><span class="tag">'+esc(a.kind)+'</span></td><td class="num">'+(a.kind==="redeem"?"−":"+")+fmtN(a.amount)+'</td><td class="noprint"><div class="rowbtns"><button class="btn small danger" data-adel="'+a.id+'">Delete</button></div></td></tr>';
+  }).join("")||'<tr><td colspan="5" class="sub">No activity logged yet.</td></tr>';
+  tb.querySelectorAll("[data-adel]").forEach(x=>x.addEventListener("click",()=>confirmDlg("Delete this activity entry?",()=>{
+    DB.activities=DB.activities.filter(a=>a.id!==x.dataset.adel);save();renderAll();sndDel();toast("Activity deleted");
+  })));
+}
+$("a-add").addEventListener("click",()=>{
+  const pid=$("a-prog").value;
+  if(!pid){toast("Add a program first");return;}
+  const date=$("a-date").value||dateStr(todayNum());
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(dayNum(date))){toast("Pick a valid date");return;}
+  const kind=$("a-kind").value, amount=Math.max(0,Math.round(+$("a-amt").value||0));
+  DB.activities.push({id:uid(),programId:pid,date,kind,amount});
+  const p=DB.programs.find(x=>x.id===pid);
+  if(p&&p.rule.kind==="inactivity"){
+    if(!p.rule.lastActivity||dayNum(date)>dayNum(p.rule.lastActivity))p.rule.lastActivity=date;
+  }
+  if(kind==="earn")p.balance+=amount;else if(kind==="redeem")p.balance=Math.max(0,p.balance-amount);
+  save();renderAll();sndOk();toast("Activity logged — expiry clock reset");
+});
+
+/* ---------- charts ---------- */
+const PALETTE=["#b3541e","#3f6d9e","#2e7d46","#8a6d1c","#7a4f9e","#c02a2a","#1e7d7d","#9e5b3c","#4a6d8a","#6d8a3c"];
+function chartSel(){return chartSel._s||{};}
+function setSel(chart,i){const s=chartSel();s[chart]=(s[chart]===i?null:i);chartSel._s=s;drawCharts();sndOk();}
+function polar(cx,cy,r,a){return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function donutSeg(cx,cy,r,ir,a0,a1){
+  const large=(a1-a0)>Math.PI?1:0;
+  const [x0,y0]=polar(cx,cy,r,a0),[x1,y1]=polar(cx,cy,r,a1);
+  const [ix1,iy1]=polar(cx,cy,ir,a1),[ix0,iy0]=polar(cx,cy,ir,a0);
+  if(a1-a0>=Math.PI*2-0.001){ // full ring
+    return 'M'+(cx-r)+','+cy+' A'+r+','+r+' 0 1,0 '+(cx+r)+','+cy+' A'+r+','+r+' 0 1,0 '+(cx-r)+','+cy+' Z '+
+           'M'+(cx-ir)+','+cy+' A'+ir+','+ir+' 0 1,1 '+(cx+ir)+','+cy+' A'+ir+','+ir+' 0 1,1 '+(cx-ir)+','+cy+' Z';
+  }
+  return 'M'+x0.toFixed(1)+','+y0.toFixed(1)+' A'+r+','+r+' 0 '+large+',1 '+x1.toFixed(1)+','+y1.toFixed(1)+
+         ' L'+ix1.toFixed(1)+','+iy1.toFixed(1)+' A'+ir+','+ir+' 0 '+large+',0 '+ix0.toFixed(1)+','+iy0.toFixed(1)+' Z';
+}
+function donutChart(items,total,sel){
+  const W=340,H=300,cx=170,cy=140,r=105,ir=62;
+  let a=-Math.PI/2,paths="";
+  items.forEach((it,i)=>{
+    const frac=total>0?it.v/total:0;const a1=a+frac*Math.PI*2;
+    const mid=(a+a1)/2;const isSel=sel===i;
+    const dx=isSel?Math.cos(mid)*12:0, dy=isSel?Math.sin(mid)*12:0;
+    paths+='<path d="'+donutSeg(cx,cy,r,ir,a,a1)+'" fill="'+it.c+'" transform="translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')"'+(isSel?' stroke="#111" stroke-width="3"':"")+' data-seg="'+i+'" style="cursor:pointer"/>';
+    a=a1;
+  });
+  // center label in bounded box: hole diameter 124 minus 24 padding -> width <= 100
+  const t=fmtN(total);
+  const fs=t.length>7?20:t.length>5?26:32;
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Points by program">'+paths+
+    '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="15" fill="var(--muted)">total points</text>'+
+    '<text x="'+cx+'" y="'+(cy+22)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="var(--ink)"'+(t.length>7?' textLength="96" lengthAdjust="spacingAndGlyphs"':"")+'>'+t+'</text></svg>';
+}
+function hbarChart(items,sel){ // items: {label, v, c}
+  const W=340,rowH=34,top=10,H=top+items.length*rowH+10;
+  const max=Math.max(1,...items.map(i=>i.v));
+  let s="";
+  items.forEach((it,i)=>{
+    const y=top+i*rowH, w=Math.max(4,(it.v/max)*(W-165));
+    const isSel=sel===i;
+    const inside=w>=52;
+    const tx=inside?(165+w-8):(169+w);
+    const anchor=inside?"end":"start";
+    const tfill=inside?"#fff":"var(--muted)";
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      '<text x="0" y="'+(y+15)+'" font-size="15" fill="var(--ink)">'+esc(it.label).slice(0,18)+'</text>'+
+      '<rect x="165" y="'+y+'" width="'+w.toFixed(0)+'" height="20" rx="5" fill="'+it.c+'"'+(isSel?' stroke="#111" stroke-width="3" transform="translate(0 -4)"':"")+'/>'+
+      '<text x="'+tx.toFixed(0)+'" y="'+(y+16)+'" font-size="15" font-weight="'+(inside?"700":"400")+'" text-anchor="'+anchor+'" fill="'+tfill+'">'+it.txt+'</text></g>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Days remaining by program">'+s+'</svg>';
+}
+function vbarChart(items,sel){ // items: {label, v, c}
+  const W=340,H=300,base=250,max=Math.max(1,...items.map(i=>i.v));
+  const n=items.length,bw=Math.min(56,(W-20)/n-14);
+  let s="";
+  items.forEach((it,i)=>{
+    const x=10+i*((W-20)/n),h=Math.max(3,(it.v/max)*200),y=base-h;
+    const isSel=sel===i;
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      '<rect x="'+x.toFixed(0)+'" y="'+(isSel?y-6:y).toFixed(0)+'" width="'+bw.toFixed(0)+'" height="'+h.toFixed(0)+'" rx="5" fill="'+it.c+'"'+(isSel?' stroke="#111" stroke-width="3"':"")+'/>'+
+      '<text x="'+(x+bw/2).toFixed(0)+'" y="'+(base+22)+'" text-anchor="middle" font-size="15" fill="var(--muted)">'+esc(it.label)+'</text>'+
+      '<text x="'+(x+bw/2).toFixed(0)+'" y="'+(y-8).toFixed(0)+'" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">'+it.txt+'</text></g>';
+  });
+  // y axis
+  s+='<line x1="8" y1="50" x2="8" y2="'+base+'" stroke="var(--line)" stroke-width="2"/>';
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="At-risk points by bucket">'+s+'</svg>';
+}
+function actChart(items,sel){ // monthly net activity bars
+  const W=340,H=300,base=240,max=Math.max(1,...items.map(i=>Math.abs(i.v)));
+  const n=Math.max(1,items.length),bw=Math.min(40,(W-20)/n-10);
+  let s='<line x1="8" y1="'+base+'" x2="'+(W-8)+'" y2="'+base+'" stroke="var(--line)" stroke-width="2"/>';
+  items.forEach((it,i)=>{
+    const x=10+i*((W-20)/n),h=Math.max(3,(Math.abs(it.v)/max)*170);
+    const y=it.v>=0?base-h:base;const isSel=sel===i;
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      '<rect x="'+x.toFixed(0)+'" y="'+(isSel&&it.v>=0?y-6:y).toFixed(0)+'" width="'+bw.toFixed(0)+'" height="'+h.toFixed(0)+'" rx="4" fill="'+(it.v>=0?"#2e7d46":"#c02a2a")+'"'+(isSel?' stroke="#111" stroke-width="3"':"")+'/>'+
+      '<text x="'+(x+bw/2).toFixed(0)+'" y="'+(base+22)+'" text-anchor="middle" font-size="15" fill="var(--muted)">'+esc(it.label)+'</text></g>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Activity by month">'+s+'</svg>';
+}
+function legend(items,chart){
+  const s=chartSel()[chart];
+  return '<div class="legend">'+items.map((it,i)=>'<button data-leg="'+i+'" class="'+(s===i?"sel":"")+'"><span class="sw" style="background:'+it.c+'"></span>'+esc(it.label)+'</button>').join("")+'</div>';
+}
+function drawCharts(){
+  const sel=chartSel();
+  const progs=DB.programs.slice().sort((a,b)=>b.balance-a.balance);
+  const total=progs.reduce((s,p)=>s+p.balance,0);
+  const top=progs.slice(0,8).map((p,i)=>({label:p.name,v:p.balance,c:PALETTE[i%PALETTE.length]}));
+  if(progs.length>8){const rest=progs.slice(8).reduce((s,p)=>s+p.balance,0);top.push({label:"Other ("+(progs.length-8)+")",v:rest,c:"#999"});}
+  const daysItems=sortedByUrgency(progs).filter(p=>bucketOf(p)!=="never").slice(0,12).map(p=>{
+    const b=bucketOf(p),col=(BUCKETS.find(x=>x.k===b)||{}).color||"#999";
+    const dl=daysLeft(p);
+    return {label:p.name,v:dl===null?0:Math.max(0,dl),txt:daysText(p)+"d",c:col};
+  });
+  const riskItems=["expired","critical","warning","watch","notice","safe"].map(k=>{
+    const pts=progs.filter(p=>bucketOf(p)===k).reduce((s,p)=>s+p.balance,0);
+    const col=(BUCKETS.find(x=>x.k===k)||{}).color;
+    return {label:k==="expired"?"expired":k,v:pts,txt:pts>=1000?(pts/1000).toFixed(1)+"k":String(Math.round(pts)),c:col};
+  });
+  // activity per month, last 6 months
+  const months=[];const now=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth()-i,1));months.push({y:d.getUTCFullYear(),m:d.getUTCMonth(),label:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][d.getUTCMonth()]});}
+  const actItems=months.map(mo=>{
+    const net=DB.activities.filter(a=>{const p=a.date.split("-");return +p[0]===mo.y&&+p[1]-1===mo.m;})
+      .reduce((s,a)=>s+(a.kind==="redeem"?-a.amount:a.amount),0);
+    return {label:mo.label,v:net};
+  });
+  const empty='<p class="sub">Add programs to see charts.</p>';
+  $("charts-grid").innerHTML=
+    '<div class="card chart-card"><h3>Points by program</h3>'+(progs.length?donutChart(top,total,sel.donut)+legend(top,"donut"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Days remaining by program</h3>'+(daysItems.length?hbarChart(daysItems,sel.days)+legend(daysItems,"days"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Points by urgency bucket</h3>'+(progs.length?vbarChart(riskItems,sel.risk)+legend(riskItems,"risk"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Net activity by month</h3>'+(DB.activities.length?actChart(actItems,sel.act)+legend(actItems.map((a,i)=>({label:a.label,c:a.v>=0?"#2e7d46":"#c02a2a"})),"act"):empty)+'</div>';
+  // wire clicks
+  const grids=[["donut","donut"],["days","days"],["risk","risk"],["act","act"]];
+  $("charts-grid").querySelectorAll(".card").forEach((cardEl,ci)=>{
+    const key=grids[ci][1];
+    cardEl.querySelectorAll("[data-seg]").forEach(g=>g.addEventListener("click",ev=>{ev.stopPropagation();setSel(key,+g.dataset.seg);}));
+    cardEl.querySelectorAll("[data-leg]").forEach(b=>b.addEventListener("click",ev=>{ev.stopPropagation();setSel(key,+b.dataset.leg);}));
+  });
+}
+
+/* ---------- modal ---------- */
+function openModal(html){$("modal-box").innerHTML=html;$("mback").classList.add("open");}
+function closeModal(){$("mback").classList.remove("open");}
+$("mback").addEventListener("click",e=>{if(e.target===$("mback"))closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+function confirmDlg(msg,onYes){
+  openModal('<h2>Confirm</h2><p>'+esc(msg)+'</p><div class="mrow"><button class="btn" id="m-no">Cancel</button><button class="btn danger" id="m-yes">Delete</button></div>');
+  $("m-no").addEventListener("click",closeModal);
+  $("m-yes").addEventListener("click",()=>{closeModal();onYes();});
+}
+function programForm(p){
+  const isNew=!p;
+  p=p||{name:"",type:"airline",account:"",balance:0,notes:"",rule:{kind:"date",date:dateStr(todayNum()+90)}};
+  const rk=p.rule.kind;
+  openModal('<h2>'+(isNew?"Add program":"Edit program")+'</h2>'+
+    '<label for="pf-name">Program name</label><input id="pf-name" value="'+esc(p.name)+'" placeholder="Delta SkyMiles" maxlength="80">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div><label for="pf-type">Type</label><select id="pf-type">'+["airline","hotel","card","other"].map(t=>'<option'+(p.type===t?" selected":"")+'>'+t+'</option>').join("")+'</select></div>'+
+    '<div><label for="pf-bal">Balance (points)</label><input type="number" id="pf-bal" min="0" value="'+p.balance+'"></div></div>'+
+    '<label for="pf-acct">Account / member number (optional)</label><input id="pf-acct" value="'+esc(p.account)+'" maxlength="40">'+
+    '<label>Expiry rule</label><div class="radio-row" id="pf-kinds">'+
+    '<button class="radio-pill'+(rk==="date"?" sel":"")+'" data-k="date">Fixed date</button>'+
+    '<button class="radio-pill'+(rk==="inactivity"?" sel":"")+'" data-k="inactivity">Inactivity window</button>'+
+    '<button class="radio-pill'+(rk==="never"?" sel":"")+'" data-k="never">Never expires</button></div>'+
+    '<div id="pf-rule-date"'+(rk==="date"?"":" hidden")+'><label for="pf-date">Expiry date</label><input type="date" id="pf-date" value="'+(p.rule.date||dateStr(todayNum()+90))+'"></div>'+
+    '<div id="pf-rule-inact"'+(rk==="inactivity"?"":" hidden")+'>'+
+    '<label for="pf-months">Expires after how many months of inactivity?</label><input type="number" id="pf-months" min="1" max="120" value="'+(p.rule.months||24)+'">'+
+    '<label for="pf-last">Last qualifying activity (optional — log it under Activity)</label><input type="date" id="pf-last" value="'+(p.rule.lastActivity||"")+'"></div>'+
+    '<label for="pf-notes">Notes</label><input id="pf-notes" value="'+esc(p.notes)+'" maxlength="300">'+
+    '<div class="mrow"><button class="btn" id="pf-cancel">Cancel</button><button class="btn primary" id="pf-save">Save program</button></div>');
+  let kind=rk;
+  $("pf-kinds").querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click",()=>{
+    kind=b.dataset.k;
+    $("pf-kinds").querySelectorAll("[data-k]").forEach(x=>x.classList.toggle("sel",x===b));
+    $("pf-rule-date").hidden=kind!=="date";$("pf-rule-inact").hidden=kind!=="inactivity";
+  }));
+  $("pf-cancel").addEventListener("click",closeModal);
+  $("pf-save").addEventListener("click",()=>{
+    const name=$("pf-name").value.trim();
+    if(!name){toast("Give the program a name");return;}
+    const balance=Math.max(0,Math.round(+$("pf-bal").value||0));
+    let rule;
+    if(kind==="date"){
+      const d=$("pf-date").value;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||isNaN(dayNum(d))){toast("Pick a valid expiry date");return;}
+      rule={kind:"date",date:d};
+    }else if(kind==="inactivity"){
+      const m=Math.round(+$("pf-months").value||0);
+      if(m<1||m>120){toast("Months must be 1–120");return;}
+      const la=$("pf-last").value;
+      rule={kind:"inactivity",months:m,lastActivity:(/^\d{4}-\d{2}-\d{2}$/.test(la)&&!isNaN(dayNum(la)))?la:null};
+    }else{rule={kind:"never"};}
+    const rec={id:isNew?uid():p.id,name:name.slice(0,80),type:$("pf-type").value,
+      account:$("pf-acct").value.trim().slice(0,40),balance,notes:$("pf-notes").value.trim().slice(0,300),rule};
+    if(isNew)DB.programs.push(rec);else Object.assign(DB.programs.find(x=>x.id===p.id),rec);
+    save();closeModal();renderAll();sndOk();toast(isNew?"Program added":"Program saved");
+  });
+}
+
+/* ---------- reports ---------- */
+function renderReport(){
+  $("rep-date").textContent=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  const rows=sortedByUrgency(DB.programs);
+  $("rep-table").querySelector("tbody").innerHTML=rows.map((p,i)=>{
+    const b=bucketOf(p);
+    return '<tr><td>'+(i+1)+'</td><td><strong>'+esc(p.name)+'</strong><br><span class="sub">'+esc(p.type)+(p.account?' · '+esc(p.account):"")+'</span></td>'+
+    '<td class="num">'+fmtN(p.balance)+'</td><td>'+esc(expiryText(p))+'<br><span class="sub">'+esc(ruleText(p))+'</span></td>'+
+    '<td class="num">'+daysText(p)+'</td><td><span class="tag '+b+'">'+b+'</span></td></tr>';
+  }).join("")||'<tr><td colspan="6" class="sub">No programs yet.</td></tr>';
+  const risk=DB.programs.filter(atRisk).reduce((s,p)=>s+p.balance,0);
+  $("rep-foot").textContent=DB.programs.length?("Total across "+DB.programs.length+" programs: "+fmtN(DB.programs.reduce((s,p)=>s+p.balance,0))+" points · "+fmtN(risk)+" points at risk (≤ 30 days)."):"";
+}
+$("print-report").addEventListener("click",()=>{renderReport();window.print();});
+
+/* ---------- import / export ---------- */
+function download(name,content,type){
+  const b=new Blob([content],{type});const u=URL.createObjectURL(b);
+  const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},4000);
+}
+$("exp-json").addEventListener("click",()=>{download("milesentry-backup.json",JSON.stringify({app:"MileSentry",schema:SCHEMA_V,exported:dateStr(todayNum()),programs:DB.programs,activities:DB.activities},null,2),"application/json");sndOk();toast("JSON exported");});
+function csvQ(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';}
+$("exp-csv").addEventListener("click",()=>{
+  const head=["program","type","account","balance","rule","expiry","days_left"].map(csvQ).join(",");
+  const lines=DB.programs.map(p=>[p.name,p.type,p.account,p.balance,ruleText(p),expiryOf(p)==="never"?"never":(expiryOf(p)||"unknown"),daysText(p)].map(csvQ).join(","));
+  download("milesentry-programs.csv",head+"\n"+lines.join("\n"),"text/csv");sndOk();toast("CSV exported");
+});
+$("imp-json").addEventListener("click",()=>$("imp-file").click());
+$("imp-file").addEventListener("change",e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let d;try{d=JSON.parse(r.result);}catch(err){toast("Could not import: not valid JSON");return;}
+    if(!d||typeof d!=="object"||!Array.isArray(d.programs)||!Array.isArray(d.activities)){toast("Could not import: wrong file shape");return;}
+    const programs=d.programs.map(sanitizeProgram).filter(Boolean);
+    if(programs.length===0&&d.programs.length>0){toast("Could not import: no valid programs found");return;}
+    const ids=programs.map(p=>p.id);
+    const activities=d.activities.map(a=>sanitizeActivity(a,ids)).filter(Boolean);
+    confirmDlg("Import will replace all current data ("+programs.length+" programs, "+activities.length+" activities). Continue?",
+      ()=>{DB={programs,activities};save();renderAll();sndOk();toast("Import complete");});
+  };
+  r.readAsText(f);
+});
+
+/* ---------- tabs / init ---------- */
+function renderAll(){renderDash();renderPrograms();renderActivity();renderReport();drawCharts();}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");$("tab-"+b.dataset.tab).classList.add("active");
+  if(b.dataset.tab==="charts")drawCharts();
+  sndOk();
+}));
+paintTheme();paintSound();load();renderAll();
+</script>
+</body>
+</html>
