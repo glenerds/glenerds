@@ -560,9 +560,9 @@ function renderDash(){
     card("Evidence complete",'<div class="bignum">'+evAvg+'<small>%</small></div><div class="sub">avg across conditions</div>')+
     card("Next deadline",nextDl?'<div class="bignum" style="font-size:24px">'+esc(wordCut(nextDl.label,26))+'</div><div class="sub">'+prettyDate(nextDl.date)+' · '+daysUntil(nextDl.date)+' days</div>':'<div class="sub">No upcoming deadlines</div>');
   const cards=$("dash-cards").children;
-  cards[0].addEventListener("click",()=>{goTab("conditions");$("c-status").value="";$("c-q").value="";renderConditions();});
-  cards[1].addEventListener("click",()=>{goTab("conditions");$("c-status").value="filed";$("c-q").value="";renderConditions();});
-  cards[2].addEventListener("click",()=>goTab("conditions"));
+  cards[0].addEventListener("click",()=>{goTab("conditions");$("c-status").value="";$("c-q").value="";condSortEv=false;renderConditions();});
+  cards[1].addEventListener("click",()=>{goTab("conditions");$("c-status").value="filed";$("c-q").value="";condSortEv=false;renderConditions();});
+  cards[2].addEventListener("click",()=>{goTab("conditions");condSortEv=true;renderConditions();});
   cards[3].addEventListener("click",()=>goTab("claims"));
   $("dash-rating").innerHTML=comb?
     '<div class="bignum">'+comb.rounded+'<small>% combined</small></div><div class="sub">'+ratings.length+' rated conditions · raw '+comb.raw.toFixed(1)+'%</div>'+
@@ -591,9 +591,11 @@ function renderDash(){
 function statusTag(s){
   return s==="decided"?'<span class="tag ok">decided</span>':s==="pending decision"?'<span class="tag warn">pending decision</span>':s==="filed"?'<span class="tag notice">filed</span>':'<span class="tag">not filed</span>';
 }
+let condSortEv=false; // set by dashboard Evidence card: neediest evidence first
 function renderConditions(){
   const q=$("c-q").value.toLowerCase(),st=$("c-status").value;
   const rows=DB.conditions.filter(c=>(!q||c.name.toLowerCase().includes(q))&&(!st||c.status===st));
+  if(condSortEv)rows.sort((a,b)=>evPct(a)-evPct(b));
   const tb=$("cond-table").querySelector("tbody");
   tb.innerHTML=rows.map(c=>{
     const p=evPct(c);
@@ -615,7 +617,7 @@ function renderConditions(){
   tb.querySelectorAll("[data-cedit]").forEach(x=>x.addEventListener("click",()=>conditionForm(condById(x.dataset.cedit),false)));
   tb.querySelectorAll("[data-cview]").forEach(x=>x.addEventListener("click",()=>conditionForm(condById(x.dataset.cview),true)));
 }
-["c-q","c-status"].forEach(i=>$(i).addEventListener("input",renderConditions));
+["c-q","c-status"].forEach(i=>$(i).addEventListener("input",()=>{condSortEv=false;renderConditions();}));
 $("c-add").addEventListener("click",()=>conditionForm(null,false));
 function conditionForm(c,showEvidence){
   const isNew=!c;
