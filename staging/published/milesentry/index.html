@@ -95,6 +95,7 @@ th{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--mute
 #toast.show{display:block}
 /* notice banner */
 .notice{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#f7e6cf;color:#7a4413;border:1px solid #e3c48f;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px;font-weight:600;flex-wrap:wrap}
+.notice[hidden]{display:none}
 [data-theme="dark"] .notice{background:#4a3418;color:#f0c48a;border-color:#6b4d24}
 /* charts */
 .chart-card{display:flex;flex-direction:column;min-height:340px}
@@ -475,8 +476,16 @@ function renderActivity(){
     const p=DB.programs.find(x=>x.id===a.programId);
     return '<tr><td>'+prettyDate(a.date)+'</td><td>'+esc(p?p.name:"(deleted)")+'</td><td><span class="tag">'+esc(a.kind)+'</span></td><td class="num">'+(a.kind==="redeem"?"−":"+")+fmtN(a.amount)+'</td><td class="noprint"><div class="rowbtns"><button class="btn small danger" data-adel="'+a.id+'">Delete</button></div></td></tr>';
   }).join("")||'<tr><td colspan="5" class="sub">No activity logged yet.</td></tr>';
+function recalcLastActivity(){
+  DB.programs.forEach(p=>{
+    if(p.rule&&p.rule.kind==="inactivity"){
+      const ds=DB.activities.filter(a=>a.programId===p.id).map(a=>a.date).sort();
+      p.rule.lastActivity=ds.length?ds[ds.length-1]:null;
+    }
+  });
+}
   tb.querySelectorAll("[data-adel]").forEach(x=>x.addEventListener("click",()=>confirmDlg("Delete this activity entry?",()=>{
-    DB.activities=DB.activities.filter(a=>a.id!==x.dataset.adel);save();renderAll();sndDel();toast("Activity deleted");
+    DB.activities=DB.activities.filter(a=>a.id!==x.dataset.adel);recalcLastActivity();save();renderAll();sndDel();toast("Activity deleted");
   })));
 }
 $("a-add").addEventListener("click",()=>{
