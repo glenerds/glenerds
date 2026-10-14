@@ -109,6 +109,7 @@ footer{border-top:1px solid var(--line);margin-top:1.5rem}
 /* ---------- sample banner ---------- */
 .sample-banner{display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:color-mix(in srgb,var(--warn) 14%,var(--card));border:1px solid var(--warn);border-radius:var(--r);padding:.7rem 1rem;margin-bottom:1rem;font-size:15px}
 .sample-banner[hidden]{display:none!important}
+.sample-banner .btn{white-space:nowrap;flex-shrink:0}
 
 /* ---------- print ---------- */
 @media print{
@@ -358,7 +359,7 @@ const RARITIES=["common","uncommon","rare","mythic"];
 const CONDS=["NM","LP","MP","HP"];
 function defStore(){return{cards:[],decks:[],trades:[],wantlist:[],setSizes:{},prefs:{theme:null,sound:true}};}
 function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&typeof s==="object"){const d=defStore();return Object.assign(d,s,{prefs:Object.assign(d.prefs,s.prefs||{})});}}catch(e){}return defStore();}
-function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){alert("Could not save — browser storage is full. Photos take the most space; try removing some card photos.")}}
+function save(){if(sampleOn)return;try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){alert("Could not save — browser storage is full. Photos take the most space; try removing some card photos.")}}
 let S=load();
 let sampleOn=false, sampleBackup=null;
 
@@ -436,7 +437,7 @@ function sampleData(){
   ];
   return{cards,decks,trades,wantlist,setSizes:{"Modern Horizons 3":280,"Duskmourn: House of Horror":276,"Innistrad Remastered":384,"Outlaws of Thunder Junction":280},prefs:S.prefs};
 }
-function enterSample(){if(sampleOn)return;sampleBackup=JSON.stringify(S);S=sampleData();sampleOn=true;save();paintSample();renderAll();beep(520);}
+function enterSample(){if(sampleOn)return;sampleBackup=JSON.stringify(S);S=sampleData();sampleOn=true;paintSample();renderAll();beep(520);}
 function exitSample(){if(!sampleOn)return;try{S=JSON.parse(sampleBackup);}catch(e){S=defStore();}sampleBackup=null;sampleOn=false;save();paintSample();renderAll();beep(440);}
 
 /* ================= dashboard ================= */
@@ -578,8 +579,10 @@ function deckValue(deck){
 function parseDeckLines(raw){
   const out=[];
   for(const ln of String(raw||"").split("\n")){
-    const m=ln.trim().match(/^(\d+)\s*[x×]?\s+(.+)$/);
+    const t=ln.trim();if(!t)continue;
+    const m=t.match(/^(\d+)\s*[x×]?\s+(.+)$/);
     if(m)out.push({qty:parseInt(m[1]),name:m[2].trim()});
+    else out.push({qty:1,name:t});
   }
   return out;
 }
@@ -711,6 +714,7 @@ $("r-import").addEventListener("change",e=>{
       if(exitSampleGuard()===false)return;
       if(!confirm("Import this backup? Your current collection will be replaced."))return;
       if(sampleOn)exitSampleSilent();
+      d.cards=(d.cards||[]).filter(c=>c&&typeof c==="object").map(c=>({id:String(c.id||uid()),name:String(c.name||"Unnamed"),set:String(c.set||""),num:String(c.num||""),colors:Array.isArray(c.colors)?c.colors:[],rarity:String(c.rarity||"common"),cond:String(c.cond||"NM"),foil:!!c.foil,qty:Math.max(0,Math.floor(+c.qty||0)),paid:Math.max(0,+c.paid||0),value:Math.max(0,+c.value||0),notes:String(c.notes||""),photo:typeof c.photo==="string"&&c.photo.indexOf("data:image/")===0?c.photo:""}));
       S=Object.assign(defStore(),d,{prefs:Object.assign(defStore().prefs,d.prefs||{})});
       save();renderAll();beep(760);alert("Backup imported.");
     }catch(err){alert("Import failed: "+err.message);}
@@ -788,7 +792,7 @@ function drawDonut(id,segs,totalLabel,totalValue,selKey,fmt){
   let ly=H-14*segs.length-2;
   segs.forEach((g,i)=>{
     ctx.fillStyle=g.color;ctx.fillRect(8,ly-10,12,12);
-    ctx.fillStyle=cssVar("--muted");ctx.font="14px system-ui,sans-serif";
+    ctx.fillStyle=cssVar("--ink");ctx.font="14px system-ui,sans-serif";
     let lab=g.label+(sel===i?" ✓":"");
     ctx.fillText(lab,26,ly);ly+=18;
   });
@@ -821,7 +825,7 @@ function drawSetVal(){
     const y=4+i*rowH,bh=Math.min(22,rowH-10),by=y+(rowH-bh)/2,bw=Math.max(2,r[1]/max*barW);
     const isSel=sel===i;
     ctx.fillStyle=cssVar("--muted");ctx.textAlign="right";ctx.textBaseline="middle";
-    let lab=r[0];while(ctx.measureText(lab).width>labelW-8&&lab.length>4)lab=lab.slice(0,-2);
+    let lab=r[0];while(ctx.measureText(lab).width>labelW-18&&lab.length>4)lab=lab.slice(0,-2);
     if(lab!==r[0])lab+="…";ctx.fillText(lab,labelW-8,y+rowH/2);
     ctx.fillStyle=isSel?cssVar("--acc"):cssVar("--line");
     ctx.beginPath();ctx.roundRect(barX,by,bw,bh,5);ctx.fill();
@@ -874,7 +878,7 @@ function drawCharts(){
   drawDonut("ch-rarity",RARITIES.map(r=>({label:r,value:byR[r]||0,color:RCOL[r]})),"cards",S.cards.reduce((a,c)=>a+(+c.qty||0),0),"rarity",v=>Number(v).toLocaleString());
   let fv=0,nv=0;
   for(const c of S.cards){const v=(+c.qty||0)*(+c.value||0);if(c.foil)fv+=v;else nv+=v;}
-  drawDonut("ch-foil",[{label:"foil",value:fv,color:"#7c5cd6"},{label:"non-foil",value:nv,color:cssVar("--acc")}],"value",money(fv+nv),"foil",v=>money(v));
+  drawDonut("ch-foil",[{label:"foil",value:fv,color:"#7c5cd6"},{label:"non-foil",value:nv,color:cssVar("--acc")}],"value",fv+nv,"foil",v=>money(v));
   drawCond();
 }
 ["ch-setval","ch-rarity","ch-foil","ch-cond"].forEach(id=>{
