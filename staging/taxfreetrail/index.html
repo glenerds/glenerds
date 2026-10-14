@@ -356,7 +356,7 @@ function openReceiptForm(r){
       amount:Math.max(0,+$("rf-amount").value||0),category:$("rf-cat").value.trim(),
       photoNote:$("rf-note").value.trim(),hasPhoto:$("rf-photo").checked,reimbursed:$("rf-reimb").checked,
       account:$("rf-acct").value.trim()});
-    if(isNew)DB.receipts.push(rec);else Object.assign(recById(r.id),rec);
+    if(isNew)DB.receipts.push(rec);else{const ex=recById(r.id);if(ex)Object.assign(ex,rec);else DB.receipts.push(rec);}
     save();closeModal();renderAll();sndOk();toast(isNew?"Receipt added":"Receipt saved");
   });
 }
@@ -399,9 +399,8 @@ function openContribForm(c){
   $("cf-cancel").addEventListener("click",closeModal);
   $("cf-save").addEventListener("click",()=>{
     const rec=sanitizeContrib({id:isNew?uid():c.id,year:+$("cf-year").value,selfAmt:+$("cf-self").value,employerAmt:+$("cf-emp").value,limitAmt:+$("cf-lim").value});
+    if(DB.contributions.some(x=>x.year===rec.year&&x.id!==rec.id)){toast("That year already exists — edit it");return;}
     if(isNew){
-      if(DB.contributions.some(x=>x.year===rec.year)){toast("That year already exists — edit it");return;}
-      DB.contributions.push(rec);
     }else Object.assign(DB.contributions.find(x=>x.id===c.id),rec);
     save();closeModal();renderAll();sndOk();toast(isNew?"Year added":"Year saved");
   });
@@ -441,27 +440,35 @@ $("batch-done").addEventListener("click",()=>{
 });
 
 /* ---------- charts tab ---------- */
-let donutSel=null, barSelY=null, barSelC=null;
+let donutSel={cat:null,all:null}, barSelY=null, barSelC=null;
 const CATS=["#2e7d4f","#3b7ea1","#8a6fb8","#b97f1f","#b3402e","#5a7d5a","#7a5a3b","#4a6b8a","#966e9c","#a1556b"];
-function donutSVG(slices,total,label){
+function donutSVG(slices,total,label,key){
   const size=280,cx=size/2,cy=size/2,rad=118,inRad=70;
-  const cx0=cx,cy0=cy;
-  let ang=-Math.PI/2,paths="";
-  slices.forEach((s,i)=>{
-    const frac=total>0?s.v/total:1/slices.length;
-    const a2=ang+frac*Math.PI*2;
-    const big=(a2-ang)>Math.PI?1:0;
-    const x1=cx+rad*Math.cos(ang),y1=cy+rad*Math.sin(ang),x2=cx+rad*Math.cos(a2),y2=cy+rad*Math.sin(a2);
-    const xi2=cx+inRad*Math.cos(a2),yi2=cy+inRad*Math.sin(a2),xi1=cx+inRad*Math.cos(ang),yi1=cy+inRad*Math.sin(ang);
-    const sel=donutSel===i;
-    const dx=sel?10*Math.cos((ang+a2)/2):0, dy=sel?10*Math.sin((ang+a2)/2):0;
-    paths+='<path class="seg" data-seg="'+i+'" d="M '+(x1+dx)+' '+(y1+dy)+' A '+rad+' '+rad+' 0 '+big+' 1 '+(x2+dx)+' '+(y2+dy)+' L '+(xi2+dx)+' '+(yi2+dy)+' A '+inRad+' '+inRad+' 0 '+big+' 0 '+(xi1+dx)+' '+(yi1+dy)+' Z" fill="'+CATS[i%CATS.length]+'" stroke="'+(sel?"#111":"none")+'" stroke-width="'+(sel?3:0)+'"><title>'+esc(s.k)+' — '+money(s.v)+'</title></path>';
-    ang=a2;
-  });
-  const center=donutSel!=null&&slices[donutSel]
-    ? '<text pointer-events="none" x="'+cx0+'" y="'+cy0+'" text-anchor="middle" font-size="15" fill="var(--ink)" font-weight="700">'+esc(slices[donutSel].k)+'</text><text pointer-events="none" x="'+cx0+'" y="'+(cy0+22)+'" text-anchor="middle" font-size="19" fill="var(--acc)" font-weight="800">'+esc(money(slices[donutSel].v))+'</text>'
+  const cx0=cx,cy0=cy, sel=donutSel[key];
+  let paths="";
+  if(slices.length===1){
+    // full ring via stroked circle (a single SVG arc with identical endpoints draws nothing)
+    const s0=sel===0;
+    paths='<circle class="seg" data-seg="0" data-donut="'+key+'" cx="'+cx+'" cy="'+cy+'" r="'+((rad+inRad)/2)+'" fill="none" stroke="'+CATS[0]+'" stroke-width="'+(rad-inRad)+'"'+(s0?' style="stroke-width:'+(rad-inRad)+'px;outline:none" data-selslice="1"':"")+'><title>'+esc(slices[0].k)+' — '+money(slices[0].v)+'</title></circle>';
+    if(s0)paths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+((rad+inRad)/2)+'" fill="none" style="stroke:var(--acc-d);stroke-width:5" pointer-events="none"/>';
+  }else{
+    let ang=-Math.PI/2;
+    slices.forEach((s,i)=>{
+      const frac=total>0?s.v/total:1/slices.length;
+      const a2=ang+frac*Math.PI*2;
+      const big=(a2-ang)>Math.PI?1:0;
+      const x1=cx+rad*Math.cos(ang),y1=cy+rad*Math.sin(ang),x2=cx+rad*Math.cos(a2),y2=cy+rad*Math.sin(a2);
+      const xi2=cx+inRad*Math.cos(a2),yi2=cy+inRad*Math.sin(a2),xi1=cx+inRad*Math.cos(ang),yi1=cy+inRad*Math.sin(ang);
+      const isS=sel===i;
+      const dx=isS?10*Math.cos((ang+a2)/2):0, dy=isS?10*Math.sin((ang+a2)/2):0;
+      paths+='<path class="seg" data-seg="'+i+'" data-donut="'+key+'" d="M '+(x1+dx)+' '+(y1+dy)+' A '+rad+' '+rad+' 0 '+big+' 1 '+(x2+dx)+' '+(y2+dy)+' L '+(xi2+dx)+' '+(yi2+dy)+' A '+inRad+' '+inRad+' 0 '+big+' 0 '+(xi1+dx)+' '+(yi1+dy)+' Z" fill="'+CATS[i%CATS.length]+'"'+(isS?' style="stroke:var(--acc-d);stroke-width:3"':'')+'><title>'+esc(s.k)+' — '+money(s.v)+'</title></path>';
+      ang=a2;
+    });
+  }
+  const center=sel!=null&&slices[sel]
+    ? '<text pointer-events="none" x="'+cx0+'" y="'+cy0+'" text-anchor="middle" font-size="15" fill="var(--ink)" font-weight="700">'+esc(slices[sel].k)+'</text><text pointer-events="none" x="'+cx0+'" y="'+(cy0+22)+'" text-anchor="middle" font-size="19" fill="var(--acc)" font-weight="800">'+esc(money(slices[sel].v))+'</text>'
     : '<text pointer-events="none" x="'+cx0+'" y="'+cy0+'" text-anchor="middle" font-size="19" fill="var(--acc)" font-weight="800">'+esc(money(total))+'</text><text pointer-events="none" x="'+cx0+'" y="'+(cy0+22)+'" text-anchor="middle" font-size="14" fill="var(--muted)">'+esc(label)+'</text>';
-  const legend=slices.map((s,i)=>'<div class="hbar-row'+(donutSel===i?" sel":"")+'" data-seg="'+i+'" style="cursor:pointer"><span class="lbl"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+CATS[i%CATS.length]+';margin-right:6px"></span>'+esc(s.k)+'</span><span class="sub">'+money(s.v)+'</span></div>').join("");
+  const legend=slices.map((s,i)=>'<div class="hbar-row'+(sel===i?" sel":"")+'" data-seg="'+i+'" data-donut="'+key+'" style="cursor:pointer"><span class="lbl"><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+CATS[i%CATS.length]+';margin-right:6px"></span>'+esc(s.k)+'</span><span class="sub">'+money(s.v)+'</span></div>').join("");
   return '<svg class="chart-svg" viewBox="0 0 '+size+' '+size+'" role="img" aria-label="Spending donut chart">'+paths+center+'</svg><div style="margin-top:10px">'+legend+'</div>';
 }
 function drawCharts(){
@@ -478,8 +485,8 @@ function drawCharts(){
   // contributions bars
   const cc=DB.contributions.slice().sort((a,b)=>a.year-b.year);
   const maxC=Math.max(...cc.map(c=>Math.max(c.selfAmt+c.employerAmt,c.limitAmt,1)),1);
-  let html='<div class="chart-card"><h3>Unreimbursed spending by category</h3>'+(slices.length?donutSVG(slices,totU,"unreimbursed"):'<p class="sub">Nothing unreimbursed.</p>')+'</div>';
-  html+='<div class="chart-card"><h3>Reimbursed vs open</h3>'+donutSVG([{k:"Reimbursed",v:reimbTotal()},{k:"Open",v:totU}],reimbTotal()+totU,"all receipts")+'</div>';
+  let html='<div class="chart-card"><h3>Unreimbursed spending by category</h3>'+(slices.length?donutSVG(slices,totU,"unreimbursed","cat"):'<p class="sub">Nothing unreimbursed.</p>')+'</div>';
+  html+='<div class="chart-card"><h3>Reimbursed vs open</h3>'+donutSVG([{k:"Reimbursed",v:reimbTotal()},{k:"Open",v:totU}],reimbTotal()+totU,"all receipts","all")+'</div>';
   html+='<div class="chart-card"><h3>Receipts by year</h3>'+years.map((y,i)=>'<div class="hbar-row'+(barSelY===i?" sel":"")+'" data-bary="'+i+'"><span class="lbl">'+y+'</span><div class="hbar-track"><div class="hbar-fill" style="width:'+Math.round(byYear[y]/maxY*100)+'%">'+esc(money(byYear[y]))+'</div></div></div>').join("")+'</div>';
   html+='<div class="chart-card"><h3>Contributions vs limits</h3>'+(cc.length?cc.map((c,i)=>{
     const tot=c.selfAmt+c.employerAmt, w=Math.round(Math.max(tot,c.limitAmt)/maxC*100);
@@ -487,7 +494,8 @@ function drawCharts(){
   }).join(""):'<p class="sub">No contributions yet.</p>')+'</div>';
   grid.innerHTML=html;
   grid.querySelectorAll(".seg,[data-seg]").forEach(el=>el.addEventListener("click",()=>{
-    const i=+el.dataset.seg;donutSel=donutSel===i?null:i;drawCharts();sndOk();
+    const k=el.dataset.donut||"cat", i=+el.dataset.seg;
+    donutSel[k]=donutSel[k]===i?null:i;drawCharts();sndOk();
   }));
   grid.querySelectorAll("[data-bary]").forEach(el=>el.addEventListener("click",()=>{const i=+el.dataset.bary;barSelY=barSelY===i?null:i;drawCharts();sndOk();}));
   grid.querySelectorAll("[data-barc]").forEach(el=>el.addEventListener("click",()=>{const i=+el.dataset.barc;barSelC=barSelC===i?null:i;drawCharts();sndOk();}));
@@ -518,6 +526,7 @@ $("imp-file").addEventListener("change",e=>{
       const recs=(Array.isArray(d.receipts)?d.receipts:[]).map(sanitizeReceipt).filter(Boolean);
       const cons=(Array.isArray(d.contributions)?d.contributions:[]).map(sanitizeContrib).filter(Boolean);
       confirmDlg("Import "+recs.length+" receipts and "+cons.length+" contribution years? This replaces current data.",()=>{
+        if(sampleMode){sampleMode=false;sampleBackup=null;$("sample-banner").hidden=true;$("sample-toggle").classList.remove("on");}
         DB={receipts:recs,contributions:cons};batch.clear();save();renderAll();sndOk();toast("Import complete");
       });
     }catch(err){toast("That file couldn't be read");}
