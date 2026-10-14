@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VA Disability Claim Organizer — Track Conditions, Evidence, C&P Exams &amp; Rating Calculator</title>
+<style>
+:root{
+  --bg:#f4f3ee; --card:#ffffff; --ink:#22241f; --muted:#6b6a60;
+  --line:#e0dccd; --acc:#2f5496; --acc-ink:#fff;
+  --ok:#2e7d46; --warn:#b3541e; --crit:#c02a2a; --watch:#8a6d1c; --notice:#3f6d9e; --safe:#2e7d46;
+  --chip:#e9e6d8; --shadow:0 1px 3px rgba(40,45,60,.10);
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#14161a; --card:#1e2126; --ink:#ece9dd; --muted:#a39e8c;
+  --line:#353a42; --acc:#7aa0dd; --acc-ink:#10141c;
+  --ok:#5fb878; --warn:#e08a3c; --crit:#e06565; --watch:#d3ab3f; --notice:#7aa8d8; --safe:#5fb878;
+  --chip:#2a2e35; --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input[type="date"]{min-height:44px}
+textarea{min-height:90px;resize:vertical}
+label{font-weight:600;font-size:15px;display:block;margin:10px 0 4px}
+header{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hdr-wrap{background:var(--bg);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;margin-right:auto}
+.brand svg{width:34px;height:34px;flex:none}
+.brand-name{font-size:22px;font-weight:800;letter-spacing:.2px}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;justify-content:center;padding:0;box-shadow:var(--shadow)}
+.icon-btn svg{width:22px;height:22px}
+.icon-btn:active{transform:scale(.92);filter:brightness(.94)}
+.icon-btn.on{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.pill-btn{height:44px;border-radius:22px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:0 18px;font-weight:700;box-shadow:var(--shadow);text-decoration:none;display:inline-flex;align-items:center}
+.pill-btn:active{transform:scale(.95);filter:brightness(.95)}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 18px}
+@media(max-width:640px){.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}.tabs button{flex:0 0 auto}}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:10px 18px;font-weight:700;box-shadow:var(--shadow)}
+.tabs button:active{transform:scale(.95)}
+.tabs button.active{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.tabpane{display:none}
+.tabpane.active{display:block}
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:860px){.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h3{margin:0 0 6px;font-size:15px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.bignum{font-size:34px;font-weight:800;line-height:1.1}
+.bignum small{font-size:15px;font-weight:600;color:var(--muted)}
+.sub{color:var(--muted);font-size:15px}
+.bucket{border-left:6px solid var(--bc,#999);padding:12px 14px;background:var(--card);border-radius:10px;border-top:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:10px}
+.bucket h4{margin:0 0 4px;font-size:17px}
+.bucket .pts{font-weight:800;font-size:20px}
+.prow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);font-size:15px;flex-wrap:wrap}
+.prow:first-of-type{border-top:0}
+.clickable{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.card.clickable{transition:transform .08s ease,box-shadow .12s ease}
+.card.clickable:hover{box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.card.clickable:active{transform:scale(.985)}
+.prow.clickable,.bucket.clickable{border-radius:10px;transition:background .12s ease,transform .08s ease}
+.prow.clickable:hover{background:var(--hover,rgba(0,0,0,.045))}
+.prow.clickable:active{transform:scale(.99)}
+.bucket.clickable:hover{background:var(--hover,rgba(0,0,0,.045))}
+.bucket.clickable:active{transform:scale(.99)}
+.bucket.sel{outline:2px solid var(--bc,#999);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:14px;font-weight:700;background:var(--chip);color:var(--ink);white-space:nowrap}
+.tag.ok{background:#d9ecdd;color:#1f5c32}[data-theme="dark"] .tag.ok{background:#1e3a26;color:#a4d8b2}
+.tag.warn{background:#f7e6cf;color:#8a4a12}[data-theme="dark"] .tag.warn{background:#4a3418;color:#f0c48a}
+.tag.crit{background:#f6d9d9;color:#8f1f1f}[data-theme="dark"] .tag.crit{background:#4a2222;color:#f2b0b0}
+.tag.notice{background:#dbe7f5;color:#2c527e}[data-theme="dark"] .tag.notice{background:#22374e;color:#a9c9ec}
+.rowbtns{display:flex;gap:6px;justify-content:flex-end}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 14px;font-weight:700;box-shadow:var(--shadow)}
+.btn:active{transform:scale(.96);filter:brightness(.95)}
+.btn.primary{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.danger{border-color:var(--crit);color:var(--crit)}
+.btn.small{padding:6px 10px;font-size:15px}
+.mback{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow:auto}
+.mback.open{display:flex}
+.modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;max-width:560px;width:100%;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.25)}
+.modal h2{margin:0 0 8px;font-size:21px}
+.mrow{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.radio-row{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0}
+.radio-pill{border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:700;background:var(--card)}
+.radio-pill:active{transform:scale(.95)}
+.radio-pill.sel{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 20px;border-radius:12px;font-weight:700;display:none;z-index:80;max-width:90vw}
+#toast.show{display:block}
+.notice{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#f7e6cf;color:#7a4413;border:1px solid #e3c48f;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px;font-weight:600;flex-wrap:wrap}
+.notice[hidden]{display:none}
+[data-theme="dark"] .notice{background:#4a3418;color:#f0c48a;border-color:#6b4d24}
+.chart-card{display:flex;flex-direction:column;min-height:340px}
+.chart-card h3{margin-bottom:2px}
+.chart-svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:15px}
+.legend button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:15px;font-weight:600}
+.legend button:active{transform:scale(.95)}
+.legend button.sel{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+.check{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px dashed var(--line);font-size:15px}
+.check:first-of-type{border-top:0}
+.check input[type="checkbox"]{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--acc)}
+.check .done-t{text-decoration:line-through;color:var(--muted)}
+.disclaimer{border:2px solid var(--warn);border-radius:12px;padding:14px 16px;font-size:15px;background:var(--card);margin-bottom:14px}
+.disclaimer strong{color:var(--warn)}
+footer{border-top:1px solid var(--line);margin-top:30px;padding:26px 16px 40px;text-align:center;color:var(--muted)}
+footer .cta{margin:14px 0}
+@media print{
+  .hdr-wrap,.tabs,footer,.noprint,.mback,#toast,#sample-notice{display:none!important}
+  body{background:#fff;color:#000}
+  .card{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  main{max-width:100%}
+  .tabpane{display:none}.tabpane.printable{display:block}
+}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.calc-steps{background:var(--chip);border-radius:10px;padding:14px 16px;font-size:15px;margin-top:12px}
+.calc-steps ol{margin:8px 0;padding-left:22px}
+.calc-steps li{margin:4px 0}
+.evbar-row{display:flex;align-items:center;gap:10px}
+.statement-out{white-space:pre-wrap;background:var(--chip);border-radius:10px;padding:16px;font-size:15px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="hdr-wrap">
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3l13 5v10c0 8.5-5.6 14.6-13 19C12.6 32.6 7 26.5 7 18V8z" fill="none" stroke="#2f5496" stroke-width="3.2" stroke-linejoin="round"/><path d="M20 11l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6-4.5-4.2 6.1-.8z" fill="#2f5496"/></svg>
+    <span class="brand-name">HonorClaim</span>
+  </div>
+  <div class="hdr-btns">
+    <a class="pill-btn" href="https://glenerds.gumroad.com">More Apps</a>
+    <button id="sample-toggle" class="icon-btn" aria-pressed="false" aria-label="Try sample data" title="Try sample data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+    <button id="theme-toggle" class="icon-btn" aria-pressed="false" aria-label="Toggle dark mode" title="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5z"/></svg></button>
+    <button id="sound-toggle" class="icon-btn on" aria-pressed="true" aria-label="Toggle sound" title="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6.5 9H3v6h3.5L11 19z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+  </div>
+</header>
+</div>
+<main>
+  <div id="sample-notice" class="notice" hidden><span><strong>Sample data mode</strong> — changes you make now won't be saved.</span><button class="btn small" id="sample-off">Exit sample mode</button></div>
+  <div class="disclaimer"><strong>Read first:</strong> HonorClaim is a personal organizer for your own records. It is <strong>not legal advice</strong>, is not affiliated with the U.S. Department of Veterans Affairs, and cannot change how the VA decides a claim — claim decisions are made solely by the VA. For accredited help, contact a VA-accredited Veterans Service Organization (VSO), claims agent, or attorney. All data stays on this device.</div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button data-tab="dash" class="active" role="tab">Dashboard</button>
+    <button data-tab="conditions" role="tab">Conditions</button>
+    <button data-tab="timeline" role="tab">Timeline</button>
+    <button data-tab="exams" role="tab">C&amp;P Exams</button>
+    <button data-tab="claims" role="tab">Claims</button>
+    <button data-tab="calc" role="tab">Rating Calc</button>
+    <button data-tab="statements" role="tab">Statements</button>
+    <button data-tab="charts" role="tab">Charts</button>
+    <button data-tab="reports" role="tab">Reports</button>
+  </nav>
+
+  <section id="tab-dash" class="tabpane active" role="tabpanel">
+    <div class="grid g4" id="dash-cards"></div>
+    <div style="height:16px"></div>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Combined rating estimate</h3>
+        <div id="dash-rating"></div>
+      </div>
+      <div class="card">
+        <h3>Upcoming deadlines</h3>
+        <div id="dash-deadlines"></div>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="card">
+      <h3>Conditions needing evidence</h3>
+      <div id="dash-evidence"></div>
+    </div>
+  </section>
+
+  <section id="tab-conditions" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="flex:1;min-width:180px"><label for="c-q">Search</label><input id="c-q" placeholder="condition name"></div>
+        <div style="min-width:150px"><label for="c-status">Status</label><select id="c-status"><option value="">All statuses</option><option value="not filed">Not filed</option><option value="filed">Filed</option><option value="pending decision">Pending decision</option><option value="decided">Decided</option></select></div>
+        <div><button class="btn primary" id="c-add">Add condition</button></div>
+      </div>
+    </div>
+    <div class="card"><div style="overflow-x:auto"><table id="cond-table" aria-label="Conditions">
+      <thead><tr><th>Condition</th><th class="num">Rating</th><th>Evidence</th><th>Status</th><th class="noprint"></th></tr></thead>
+      <tbody></tbody>
+    </table></div></div>
+  </section>
+
+  <section id="tab-timeline" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="min-width:150px"><label for="t-date">Date</label><input type="date" id="t-date"></div>
+        <div style="flex:1;min-width:170px"><label for="t-cond">Condition</label><select id="t-cond"></select></div>
+        <div style="min-width:130px"><label for="t-sev">Severity (1–10)</label><input type="number" id="t-sev" min="1" max="10" value="5"></div>
+        <div style="flex:2;min-width:200px"><label for="t-notes">Notes</label><input id="t-notes" placeholder="what happened, treatment, flare-up…" maxlength="300"></div>
+        <div><button class="btn primary" id="t-add">Add entry</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:10px">
+        <div style="min-width:170px"><label for="t-filter">Show</label><select id="t-filter"><option value="">All conditions</option></select></div>
+      </div>
+      <div id="timeline-list"></div>
+    </div>
+  </section>
+
+  <section id="tab-exams" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="min-width:150px"><label for="e-date">Exam date</label><input type="date" id="e-date"></div>
+        <div style="flex:1;min-width:180px"><label for="e-fac">Facility</label><input id="e-fac" placeholder="VA medical center / contractor" maxlength="80"></div>
+        <div style="flex:1;min-width:150px"><label for="e-examiner">Examiner (optional)</label><input id="e-examiner" placeholder="name" maxlength="60"></div>
+        <div><button class="btn primary" id="e-add">Add exam</button></div>
+      </div>
+    </div>
+    <div id="exam-list" class="grid g2"></div>
+  </section>
+
+  <section id="tab-claims" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">
+        <div style="min-width:160px"><label for="cl-type">Type</label><select id="cl-type"><option>initial</option><option>increase</option><option>supplemental</option><option>HLR</option><option>appeal</option></select></div>
+        <div style="min-width:150px"><label for="cl-filed">Filed date</label><input type="date" id="cl-filed"></div>
+        <div style="flex:1;min-width:200px"><label for="cl-notes">Notes</label><input id="cl-notes" placeholder="claim number, what was filed…" maxlength="200"></div>
+        <div><button class="btn primary" id="cl-add">Add claim</button></div>
+      </div>
+    </div>
+    <div id="claim-list" class="grid g2"></div>
+  </section>
+
+  <section id="tab-calc" class="tabpane" role="tabpanel">
+    <div class="card">
+      <h3>VA combined rating calculator</h3>
+      <p class="sub">Enter individual disability ratings. The VA combines them with "whole person" math — each new rating applies to the remaining non-disabled percentage — then rounds to the nearest 10. This is an educational estimate; only the VA assigns your rating.</p>
+      <div id="calc-rows"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn" id="calc-add">Add rating</button>
+        <button class="btn" id="calc-conditions">Use my conditions</button>
+        <button class="btn" id="calc-clear">Clear</button>
+      </div>
+      <div style="margin-top:14px"><label style="display:flex;gap:10px;align-items:center;font-weight:600"><input type="checkbox" id="calc-bilat" style="width:22px;height:22px;accent-color:var(--acc)"> Include bilateral factor (estimate) — mark bilateral ratings with "B"</label></div>
+      <div class="calc-steps" id="calc-out"><div class="bignum">—</div><div class="sub">Add ratings to see the math.</div></div>
+    </div>
+  </section>
+
+  <section id="tab-statements" class="tabpane" role="tabpanel">
+    <div class="grid g2">
+      <div class="card">
+        <h3>Personal statement planner</h3>
+        <label for="st-name">Your name</label><input id="st-name" maxlength="60">
+        <label for="st-cond">Condition this statement is about</label><input id="st-cond" maxlength="80">
+        <label for="st-event">What happened during service?</label><textarea id="st-event" maxlength="1200" placeholder="Describe the event, injury, or onset…"></textarea>
+        <label for="st-then">Symptoms at the time</label><textarea id="st-then" maxlength="1200"></textarea>
+        <label for="st-now">How it affects you today (work, daily life, sleep…)</label><textarea id="st-now" maxlength="1200"></textarea>
+        <div class="mrow" style="justify-content:flex-start"><button class="btn primary" id="st-gen">Generate statement</button></div>
+      </div>
+      <div class="card">
+        <h3>Buddy / lay statement planner</h3>
+        <label for="bs-name">Statement writer's name</label><input id="bs-name" maxlength="60">
+        <label for="bs-rel">Relationship to you</label><input id="bs-rel" maxlength="60" placeholder="spouse, fellow service member, friend…">
+        <label for="bs-vet">Veteran's name</label><input id="bs-vet" maxlength="60">
+        <label for="bs-know">How do they know you / what did they observe?</label><textarea id="bs-know" maxlength="1200"></textarea>
+        <label for="bs-change">What changes have they seen since service?</label><textarea id="bs-change" maxlength="1200"></textarea>
+        <div class="mrow" style="justify-content:flex-start"><button class="btn primary" id="bs-gen">Generate statement</button></div>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="card" id="st-out-card" hidden>
+      <h3>Generated statement</h3>
+      <div class="statement-out" id="st-out"></div>
+      <div class="mrow" style="justify-content:flex-start">
+        <button class="btn" id="st-copy">Copy text</button>
+        <button class="btn" id="st-print">Print</button>
+        <button class="btn" id="st-save">Save to my statements</button>
+      </div>
+    </div>
+    <div style="height:16px"></div>
+    <div class="card">
+      <h3>Saved statements</h3>
+      <div id="st-saved"></div>
+    </div>
+  </section>
+
+  <section id="tab-charts" class="tabpane" role="tabpanel">
+    <div class="grid g2" id="charts-grid"></div>
+  </section>
+
+  <section id="tab-reports" class="tabpane" role="tabpanel">
+    <div class="card noprint" style="margin-bottom:14px">
+      <h3>Data &amp; contacts</h3>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn" id="exp-json">Export JSON</button>
+        <button class="btn" id="exp-csv">Export CSV</button>
+        <button class="btn" id="imp-json">Import JSON</button>
+        <button class="btn primary" id="print-packet">Print claim packet</button>
+        <button class="btn" id="exp-corrupt" style="display:none">Download unreadable-data copy</button>
+      </div>
+      <input type="file" id="imp-file" accept="application/json,.json" class="sr" aria-label="Import JSON file">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;border-top:1px solid var(--line);padding-top:12px">
+        <div style="flex:1;min-width:150px"><label for="ct-name">Contact name</label><input id="ct-name" maxlength="60" placeholder="VSO, attorney, regional office…"></div>
+        <div style="flex:1;min-width:130px"><label for="ct-role">Role</label><input id="ct-role" maxlength="40" placeholder="VSO / claims agent / attorney"></div>
+        <div style="flex:1;min-width:140px"><label for="ct-phone">Phone</label><input id="ct-phone" maxlength="30"></div>
+        <div><button class="btn" id="ct-add">Add contact</button></div>
+      </div>
+      <div id="ct-list" style="margin-top:10px"></div>
+    </div>
+    <div class="card printable" id="print-area">
+      <h3>Claim packet — <span id="rep-date"></span></h3>
+      <div id="rep-body"></div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div><strong>HonorClaim</strong> by Glenerds</div>
+  <div class="cta"><a class="pill-btn" href="https://glenerds.gumroad.com">More Apps</a></div>
+  <div class="sub">Organizer only — not legal advice, not affiliated with the VA. Your records stay on this device. Nothing is uploaded anywhere.</div>
+</footer>
+<div class="mback" id="mback"><div class="modal" role="dialog" aria-modal="true" id="modal-box"></div></div>
+<div id="toast" role="status"></div>
+<script>
+"use strict";
+/* ---------- utils ---------- */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=> "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function dayNum(dstr){const p=String(dstr||"").split("-");if(p.length<3)return NaN;const n=Date.UTC(+p[0],+p[1]-1,+p[2]);return isNaN(n)?NaN:Math.round(n/864e5);}
+function todayNum(){const n=new Date();return Math.round(Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())/864e5);}
+function dateStr(dnum){const d=new Date(dnum*864e5);return d.getUTCFullYear()+"-"+String(d.getUTCMonth()+1).padStart(2,"0")+"-"+String(d.getUTCDate()).padStart(2,"0");}
+function prettyDate(dstr){if(!dstr)return "—";const p=dstr.split("-");if(p.length<3)return dstr;const M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];return M[+p[1]-1]+" "+(+p[2])+", "+p[0];}
+function daysUntil(dstr){if(!dstr)return null;const n=dayNum(dstr);if(isNaN(n))return null;return n-todayNum();}
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),2600);}
+
+/* ---------- sound ---------- */
+let AC=null;
+function beep(f,d){if(localStorage.getItem("honorclaim.sound")==="off")return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(.0001,AC.currentTime+d);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+d);}catch(e){}}
+const sndOk=()=>beep(660,.12), sndDel=()=>beep(220,.18), sndWarn=()=>{beep(440,.1);setTimeout(()=>beep(330,.14),110);};
+
+/* ---------- theme ---------- */
+function effTheme(){const s=localStorage.getItem("honorclaim.theme");return (s==="dark"||s==="light")?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");}
+$("theme-toggle").addEventListener("click",()=>{const t=effTheme();localStorage.setItem("honorclaim.theme",t==="dark"?"light":"dark");paintTheme();drawCharts();sndOk();});
+function paintSound(){const on=localStorage.getItem("honorclaim.sound")!=="off";const b=$("sound-toggle");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);}
+$("sound-toggle").addEventListener("click",()=>{const on=localStorage.getItem("honorclaim.sound")!=="off";localStorage.setItem("honorclaim.sound",on?"off":"on");paintSound();if(!on)sndOk();});
+
+/* ---------- store ---------- */
+const SCHEMA_V=1;
+const EV_ITEMS=[
+  ["str","Service treatment records"],
+  ["diagnosis","Current diagnosis"],
+  ["nexus","Nexus letter / medical opinion"],
+  ["buddy","Buddy / lay statements"],
+  ["cpexam","C&P exam completed"],
+  ["personal","Personal statement"]
+];
+const SYSTEMS=["musculoskeletal","mental health","auditory","respiratory","neurological","cardiovascular","digestive","skin","other"];
+const STATUSES=["not filed","filed","pending decision","decided"];
+const CLAIM_TYPES=["initial","increase","supplemental","HLR","appeal"];
+const CLAIM_STAGES=["preparing","filed","evidence gathering","decision review","decided","appeal"];
+let DB={conditions:[],events:[],exams:[],claims:[],statements:[],contacts:[]};
+let sampleOn=false, sampleBackup=null;
+function save(){
+  if(sampleOn)return;
+  try{localStorage.setItem("honorclaim.data",JSON.stringify(DB));localStorage.setItem("honorclaim.schema",String(SCHEMA_V));}
+  catch(e){if(e&&e.name==="QuotaExceededError")toast("Browser storage is full — export a JSON backup now to keep your data safe.");}
+}
+function mkEvidence(src){
+  const e={};
+  EV_ITEMS.forEach(([k])=>{const s=(src||{})[k]||{};e[k]={done:!!s.done,notes:String(s.notes||"").slice(0,300)};});
+  return e;
+}
+function cleanId(v){return String(v||"").replace(/[^a-zA-Z0-9_-]/g,"").slice(0,48);}
+function sanitizeCondition(c){
+  if(!c||typeof c!=="object")return null;
+  const name=String(c.name||"").trim().slice(0,80);if(!name)return null;
+  const system=SYSTEMS.includes(c.system)?c.system:"other";
+  const onset=/^\d{4}-\d{2}-\d{2}$/.test(c.onset||"")&&!isNaN(dayNum(c.onset))?c.onset:"";
+  const status=STATUSES.includes(c.status)?c.status:"not filed";
+  const rating=Math.max(0,Math.min(100,Math.round(+c.rating||0)));
+  return {id:(cleanId(c.id)||uid()),name,system,onset,status,rating,evidence:mkEvidence(c.evidence)};
+}
+function sanitizeEvent(e,condIds){
+  if(!e||typeof e!=="object")return null;
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(e.date||"")&&!isNaN(dayNum(e.date))?e.date:null;if(!date)return null;
+  const condId=condIds.includes(e.condId)?e.condId:(condIds[0]||"");
+  const severity=Math.max(1,Math.min(10,Math.round(+e.severity||5)));
+  return {id:(cleanId(e.id)||uid()),date,condId,severity,notes:String(e.notes||"").slice(0,300)};
+}
+function sanitizeExam(x,condIds){
+  if(!x||typeof x!=="object")return null;
+  const date=/^\d{4}-\d{2}-\d{2}$/.test(x.date||"")&&!isNaN(dayNum(x.date))?x.date:null;if(!date)return null;
+  const condIdsF=Array.isArray(x.condIds)?x.condIds.filter(id=>condIds.includes(id)):[];
+  const chk=a=>Array.isArray(a)?a.map(i=>({label:String(i.label||"").slice(0,120),done:!!i.done})).filter(i=>i.label):[];
+  return {id:(cleanId(x.id)||uid()),date,facility:String(x.facility||"").slice(0,80),examiner:String(x.examiner||"").slice(0,60),condIds:condIdsF,prep:chk(x.prep),bring:chk(x.bring),notes:String(x.notes||"").slice(0,1000)};
+}
+function sanitizeClaim(c){
+  if(!c||typeof c!=="object")return null;
+  const type=CLAIM_TYPES.includes(c.type)?c.type:"initial";
+  const filed=/^\d{4}-\d{2}-\d{2}$/.test(c.filed||"")&&!isNaN(dayNum(c.filed))?c.filed:"";
+  const stage=CLAIM_STAGES.includes(c.stage)?c.stage:"preparing";
+  const dl=a=>Array.isArray(a)?a.map(d=>({label:String(d.label||"").slice(0,120),date:(/^\d{4}-\d{2}-\d{2}$/.test(d.date||"")&&!isNaN(dayNum(d.date)))?d.date:"",done:!!d.done})).filter(d=>d.label):[];
+  return {id:(cleanId(c.id)||uid()),type,filed,stage,deadlines:dl(c.deadlines),notes:String(c.notes||"").slice(0,500)};
+}
+function load(){
+  let raw=null,schemaV=1;
+  try{raw=localStorage.getItem("honorclaim.data");schemaV=parseInt(localStorage.getItem("honorclaim.schema")||"1",10)||1;}catch(e){raw=null;}
+  if(!raw){DB={conditions:[],events:[],exams:[],claims:[],statements:[],contacts:[]};return;}
+  try{
+    const d=JSON.parse(raw);
+    if(!d||typeof d!=="object")throw new Error("bad shape");
+    const conditions=(d.conditions||[]).map(sanitizeCondition).filter(Boolean);
+    const ids=conditions.map(c=>c.id);
+    DB={
+      conditions,
+      events:(d.events||[]).map(e=>sanitizeEvent(e,ids)).filter(Boolean),
+      exams:(d.exams||[]).map(x=>sanitizeExam(x,ids)).filter(Boolean),
+      claims:(d.claims||[]).map(sanitizeClaim).filter(Boolean),
+      statements:Array.isArray(d.statements)?d.statements.filter(s=>s&&s.text).map(s=>({id:(cleanId(s.id)||uid()),kind:s.kind==="buddy"?"buddy":"personal",title:String(s.title||"Statement").slice(0,80),text:String(s.text).slice(0,8000),created:String(s.created||"")})):[],
+      contacts:Array.isArray(d.contacts)?d.contacts.filter(c=>c&&c.name).map(c=>({id:(cleanId(c.id)||uid()),name:String(c.name).slice(0,60),role:String(c.role||"").slice(0,40),phone:String(c.phone||"").slice(0,30)})):[]
+    };
+  }catch(e){
+    DB={conditions:[],events:[],exams:[],claims:[],statements:[],contacts:[]};
+    if(raw){try{localStorage.setItem("honorclaim.corrupt-backup",raw);}catch(_){}}
+    toast("Saved data was unreadable — starting fresh. The unreadable copy was kept; export it from Reports if needed.");
+    setTimeout(()=>{if($("tab-reports"))toast("Tip: check Reports tab for the corrupt-data recovery download.");},2500);
+  }
+}
+
+/* ---------- VA combined-rating math ---------- */
+function combineRatings(ratings){
+  // ratings: array of % (0-100). VA "whole person" math, rounded to nearest 10.
+  let eff=0;
+  const steps=[];
+  ratings.slice().sort((a,b)=>b-a).forEach(r=>{
+    const before=eff;
+    eff=before+r*(100-before)/100;
+    steps.push({r,before,after:eff});
+  });
+  return {raw:eff,rounded:Math.round(eff/10)*10,steps};
+}
+/* ---------- sample data ---------- */
+const PREP_DEFAULTS=["Bring photo ID","Bring current medication list","Bring copies of buddy/lay statements","Write down symptoms with dates before you go","Arrive 15 minutes early","Describe your worst days, not your best — don't minimize symptoms"];
+function sampleData(){
+  const C=(name,system,onset,status,rating,evDone)=>({id:uid(),name,system,onset,status,rating,
+    evidence:Object.fromEntries(EV_ITEMS.map(([k])=>{const d=(evDone||{})[k];return [k,{done:!!(d&&d.done),notes:(d&&d.notes)||""}];}))});
+  const conds=[
+    C("PTSD","mental health","2019-03-14","filed",50,{str:{done:true},diagnosis:{done:true},nexus:{done:false},buddy:{done:true},cpexam:{done:true},personal:{done:true}}),
+    C("Tinnitus","auditory","2018-06-01","filed",10,{str:{done:true},diagnosis:{done:true},nexus:{done:false},buddy:{done:false},cpexam:{done:true},personal:{done:true}}),
+    C("Lumbar strain","musculoskeletal","2020-01-22","filed",20,{str:{done:true},diagnosis:{done:true},nexus:{done:true},buddy:{done:false},cpexam:{done:true},personal:{done:false}}),
+    C("Right knee limitation","musculoskeletal","2021-09-10","pending decision",0,{str:{done:true},diagnosis:{done:true},nexus:{done:false},buddy:{done:true},cpexam:{done:false},personal:{done:true}}),
+    C("Sleep apnea","respiratory","2022-04-05","not filed",0,{str:{done:false},diagnosis:{done:true},nexus:{done:false},buddy:{done:false},cpexam:{done:false},personal:{done:false}}),
+    C("Left shoulder strain","musculoskeletal","2017-11-30","decided",10,{str:{done:true},diagnosis:{done:true},nexus:{done:true},buddy:{done:true},cpexam:{done:true},personal:{done:true}})
+  ];
+  const D=n=>dateStr(todayNum()-n);
+  const E=(ci,date,severity,notes)=>({id:uid(),date,condId:conds[ci].id,severity,notes});
+  const events=[
+    E(0,D(210),8,"Nightmares 4–5x/week; started therapy at VA clinic"),
+    E(0,D(120),6,"Panic attack at work; prescribed prazosin"),
+    E(0,D(30),5,"Sleep improved slightly; still avoiding crowds"),
+    E(1,D(400),4,"Constant ringing noticed after range duty"),
+    E(1,D(60),5,"Ringing worse in right ear; audiology referral"),
+    E(2,D(300),7,"Back seized lifting groceries; urgent care visit"),
+    E(2,D(90),4,"Physical therapy 2x/week; some improvement"),
+    E(3,D(150),6,"Knee buckled on stairs; MRI ordered"),
+    E(3,D(20),5,"C&P exam scheduled for knee"),
+    E(4,D(200),7,"Snoring + daytime fatigue; sleep study ordered"),
+    E(4,D(45),6,"Diagnosed OSA; CPAP issued"),
+    E(5,D(500),5,"Shoulder pain during overhead work")
+  ];
+  const X=(date,facility,examiner,ci,prepDone,bringDone,notes)=>({id:uid(),date,facility,examiner,
+    condIds:ci.map(i=>conds[i].id),
+    prep:PREP_DEFAULTS.map((l,i)=>({label:l,done:i<prepDone})),
+    bring:["DD-214 copy","Medication list","Buddy statements","Symptom notes"].map((l,i)=>({label:l,done:i<bringDone})),
+    notes:notes||""});
+  const exams=[
+    X(dateStr(todayNum()+12),"VA Medical Center — Audiology","",[1],2,1,""),
+    X(D(75),"VES Contractor Clinic","Dr. Patel",[0,2],6,4,"Examiner reviewed records; exam took about 40 minutes.")
+  ];
+  const L=(label,off,done)=>({label,date:dateStr(todayNum()+off),done:!!done});
+  const claims=[
+    {id:uid(),type:"initial",filed:D(320),stage:"decision review",notes:"VA claim #123-45-6789 — PTSD, tinnitus, lumbar, shoulder",
+      deadlines:[L("Respond to VA development letter",18,false),L("Submit outstanding private treatment records",9,false)]},
+    {id:uid(),type:"increase",filed:D(60),stage:"evidence gathering",notes:"Knee increase — new MRI evidence",
+      deadlines:[L("C&P exam for right knee",20,false)]}
+  ];
+  const statements=[
+    {id:uid(),kind:"personal",title:"Personal statement — PTSD",created:D(100),
+      text:"My name is Alex Rivera. I am writing this statement in support of my claim for post-traumatic stress disorder.\n\nDuring my service, I experienced events that continue to affect me. I have nightmares several times a week and avoid crowded places.\n\nToday, my symptoms affect my work and family life. I have trouble sleeping and concentrating.\n\nI respectfully ask that the VA consider this statement along with my medical evidence.\n\nRespectfully,\nAlex Rivera"},
+    {id:uid(),kind:"buddy",title:"Buddy statement — Maria Rivera (spouse)",created:D(95),
+      text:"My name is Maria Rivera. I am the spouse of Alex Rivera and I am writing this statement based on my own observations.\n\nI have known Alex for 12 years. Since returning from service, I have observed frequent nightmares, irritability, and withdrawal from family activities.\n\nThese changes were not present before service. I share this so the VA has a complete picture.\n\nSincerely,\nMaria Rivera"}
+  ];
+  DB={conditions:conds,events,exams,claims,statements,contacts:[
+    {id:uid(),name:"County VSO Office",role:"VSO",phone:"(555) 014-2200"},
+    {id:uid(),name:"VA Regional Office",role:"regional office",phone:"1-800-827-1000"}
+  ]};
+}
+$("sample-toggle").addEventListener("click",()=>{
+  sampleOn=!sampleOn;const b=$("sample-toggle");
+  b.classList.toggle("on",sampleOn);b.setAttribute("aria-pressed",sampleOn);
+  $("sample-notice").hidden=!sampleOn;
+  if(sampleOn){try{sampleBackup=localStorage.getItem("honorclaim.data");}catch(e){sampleBackup=null;}sampleData();}
+  else{
+    if(sampleBackup){try{localStorage.setItem("honorclaim.data",sampleBackup);}catch(e){}}
+    else{try{localStorage.removeItem("honorclaim.data");}catch(e){}}
+    sampleBackup=null;load();
+  }
+  renderAll();sndOk();toast(sampleOn?"Sample data loaded":"Sample data off — your data restored");
+});
+$("sample-off").addEventListener("click",()=>{if(sampleOn)$("sample-toggle").click();});
+/* ---------- evidence helpers ---------- */
+function evPct(c){const vals=EV_ITEMS.map(([k])=>c.evidence[k]&&c.evidence[k].done);return Math.round(100*vals.filter(Boolean).length/vals.length);}
+function evDoneCount(c){return EV_ITEMS.filter(([k])=>c.evidence[k]&&c.evidence[k].done).length;}
+function condById(id){return DB.conditions.find(c=>c.id===id);}
+function goTab(name){
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("active",x.dataset.tab===name));
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.toggle("active",x.id==="tab-"+name));
+  if(name==="charts")drawCharts();
+  sndOk();
+}
+function card(h,inner){return '<div class="card clickable"><h3>'+h+'</h3>'+inner+'</div>';}
+function deadlineTag(days){
+  if(days===null)return '<span class="tag">no date</span>';
+  if(days<0)return '<span class="tag crit">'+days+'d overdue</span>';
+  if(days<=7)return '<span class="tag crit">'+days+'d</span>';
+  if(days<=30)return '<span class="tag warn">'+days+'d</span>';
+  return '<span class="tag ok">'+days+'d</span>';
+}
+function allDeadlines(){
+  const out=[];
+  DB.claims.forEach(cl=>cl.deadlines.forEach(d=>{
+    if(!d.done&&d.date)out.push({label:d.label+" — "+cl.type+" claim",date:d.date,src:"claim",ref:cl.id});
+  }));
+  DB.exams.forEach(x=>{
+    const du=daysUntil(x.date);
+    if(du!==null&&du>=0)out.push({label:"C&P exam — "+(x.facility||"scheduled"),date:x.date,src:"exam",ref:x.id});
+  });
+  return out.sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  const conds=DB.conditions;
+  const claimed=conds.filter(c=>c.status!=="not filed");
+  const evAvg=conds.length?Math.round(conds.reduce((s,c)=>s+evPct(c),0)/conds.length):0;
+  const dls=allDeadlines();
+  const nextDl=dls[0];
+  const ratings=conds.filter(c=>c.rating>0).map(c=>c.rating);
+  const comb=ratings.length?combineRatings(ratings):null;
+  $("dash-cards").innerHTML=
+    card("Total conditions",'<div class="bignum">'+conds.length+'</div><div class="sub">'+claimed.length+' claimed</div>')+
+    card("Conditions claimed",'<div class="bignum">'+claimed.length+'</div><div class="sub">'+conds.filter(c=>c.status==="decided").length+' decided</div>')+
+    card("Evidence complete",'<div class="bignum">'+evAvg+'<small>%</small></div><div class="sub">avg across conditions</div>')+
+    card("Next deadline",nextDl?'<div class="bignum" style="font-size:24px">'+esc(wordCut(nextDl.label,26))+'</div><div class="sub">'+prettyDate(nextDl.date)+' · '+daysUntil(nextDl.date)+' days</div>':'<div class="sub">No upcoming deadlines</div>');
+  const cards=$("dash-cards").children;
+  cards[0].addEventListener("click",()=>{goTab("conditions");$("c-status").value="";$("c-q").value="";condSortEv=false;renderConditions();});
+  cards[1].addEventListener("click",()=>{goTab("conditions");$("c-status").value="filed";$("c-q").value="";condSortEv=false;renderConditions();});
+  cards[2].addEventListener("click",()=>{goTab("conditions");condSortEv=true;renderConditions();});
+  cards[3].addEventListener("click",()=>goTab("claims"));
+  $("dash-rating").innerHTML=comb?
+    '<div class="bignum">'+comb.rounded+'<small>% combined</small></div><div class="sub">'+ratings.length+' rated conditions · raw '+comb.raw.toFixed(1)+'%</div>'+
+    '<div class="mrow" style="justify-content:flex-start;margin-top:10px"><button class="btn small" id="dash-calc">Open calculator</button></div>'
+    :'<p class="sub">No rated conditions yet — add ratings on the Conditions tab or use the calculator.</p>';
+  const dc=$("dash-calc");if(dc)dc.addEventListener("click",ev=>{ev.stopPropagation();goTab("calc");});
+  $("dash-rating").parentElement.classList.add("clickable");
+  $("dash-rating").parentElement.onclick=()=>goTab("calc");
+  $("dash-deadlines").innerHTML=dls.length?dls.slice(0,5).map(d=>
+    '<div class="prow clickable" data-src="'+d.src+'" data-ref="'+d.ref+'"><span><strong>'+esc(d.label)+'</strong><br><span class="sub">'+prettyDate(d.date)+'</span></span>'+deadlineTag(daysUntil(d.date))+'</div>'
+  ).join(""):'<p class="sub">No upcoming deadlines. Add them on the Claims tab.</p>';
+  $("dash-deadlines").querySelectorAll("[data-ref]").forEach(r=>r.addEventListener("click",()=>{
+    goTab(r.dataset.src==="exam"?"exams":"claims");
+    setTimeout(()=>{const el=document.querySelector('[data-card="'+r.dataset.ref+'"]');if(el){el.scrollIntoView({block:"center"});el.style.outline="2px solid var(--acc)";setTimeout(()=>el.style.outline="",1800);}},120);
+  }));
+  const needy=conds.map(c=>({c,p:evPct(c)})).filter(x=>x.p<100).sort((a,b)=>a.p-b.p).slice(0,6);
+  $("dash-evidence").innerHTML=needy.length?needy.map(x=>
+    '<div class="prow clickable" data-cid="'+x.c.id+'"><span><strong>'+esc(x.c.name)+'</strong><br><span class="sub">'+evDoneCount(x.c)+' of '+EV_ITEMS.length+' items done</span></span><span class="tag '+(x.p>=67?"ok":x.p>=34?"warn":"crit")+'">'+x.p+'%</span></div>'
+  ).join(""):'<p class="sub">'+(conds.length?"All evidence checklists complete.":"Add conditions to start tracking evidence.")+'</p>';
+  $("dash-evidence").querySelectorAll("[data-cid]").forEach(r=>r.addEventListener("click",()=>{
+    const c=condById(r.dataset.cid);if(c)conditionForm(c,true);
+  }));
+}
+
+/* ---------- conditions tab ---------- */
+function statusTag(s){
+  return s==="decided"?'<span class="tag ok">decided</span>':s==="pending decision"?'<span class="tag warn">pending decision</span>':s==="filed"?'<span class="tag notice">filed</span>':'<span class="tag">not filed</span>';
+}
+let condSortEv=false; // set by dashboard Evidence card: neediest evidence first
+function renderConditions(){
+  const q=$("c-q").value.toLowerCase(),st=$("c-status").value;
+  const rows=DB.conditions.filter(c=>(!q||c.name.toLowerCase().includes(q))&&(!st||c.status===st));
+  if(condSortEv)rows.sort((a,b)=>evPct(a)-evPct(b));
+  const tb=$("cond-table").querySelector("tbody");
+  tb.innerHTML=rows.map(c=>{
+    const p=evPct(c);
+    return '<tr><td><strong>'+esc(c.name)+'</strong><br><span class="sub">'+esc(c.system)+(c.onset?' · onset '+prettyDate(c.onset):"")+'</span></td>'+
+    '<td class="num"><strong>'+c.rating+'%</strong></td>'+
+    '<td><span class="tag '+(p===100?"ok":p>=50?"warn":"crit")+'">'+p+'%</span><br><span class="sub">'+evDoneCount(c)+'/'+EV_ITEMS.length+'</span></td>'+
+    '<td>'+statusTag(c.status)+'</td>'+
+    '<td class="noprint"><div class="rowbtns"><button class="btn small" data-cview="'+c.id+'">Evidence</button><button class="btn small" data-cedit="'+c.id+'">Edit</button><button class="btn small danger" data-cdel="'+c.id+'">Delete</button></div></td></tr>';
+  }).join("")||'<tr><td colspan="5" class="sub">No conditions yet. Add your first condition above.</td></tr>';
+  tb.querySelectorAll("[data-cdel]").forEach(x=>x.addEventListener("click",()=>{
+    const c=condById(x.dataset.cdel);
+    confirmDlg("Delete "+(c?c.name:"this condition")+" and its timeline entries?",()=>{
+      DB.conditions=DB.conditions.filter(y=>y.id!==x.dataset.cdel);
+      DB.events=DB.events.filter(e=>e.condId!==x.dataset.cdel);
+      DB.exams.forEach(ex=>ex.condIds=ex.condIds.filter(id=>id!==x.dataset.cdel));
+      save();renderAll();sndDel();toast("Condition deleted");
+    });
+  }));
+  tb.querySelectorAll("[data-cedit]").forEach(x=>x.addEventListener("click",()=>conditionForm(condById(x.dataset.cedit),false)));
+  tb.querySelectorAll("[data-cview]").forEach(x=>x.addEventListener("click",()=>conditionForm(condById(x.dataset.cview),true)));
+}
+["c-q","c-status"].forEach(i=>$(i).addEventListener("input",()=>{condSortEv=false;renderConditions();}));
+$("c-add").addEventListener("click",()=>conditionForm(null,false));
+function conditionForm(c,showEvidence){
+  const isNew=!c;
+  c=c||{name:"",system:"musculoskeletal",onset:"",status:"not filed",rating:0,evidence:mkEvidence()};
+  const evHtml=EV_ITEMS.map(([k,label])=>{
+    const it=c.evidence[k]||{done:false,notes:""};
+    return '<div class="check"><input type="checkbox" id="ev-'+k+'"'+(it.done?" checked":"")+' aria-label="'+esc(label)+'">'+
+      '<div style="flex:1"><label for="ev-'+k+'" style="margin:0;font-weight:700" class="'+(it.done?"done-t":"")+'">'+esc(label)+'</label>'+
+      '<input id="evn-'+k+'" placeholder="notes (optional)" value="'+esc(it.notes)+'" maxlength="300" style="margin-top:6px"></div></div>';
+  }).join("");
+  openModal('<h2>'+(isNew?"Add condition":esc(c.name))+'</h2>'+
+    '<div class="tabs" style="margin:0 0 6px"><button class="'+(showEvidence?"":"active")+'" id="ct-det">Details</button><button class="'+(showEvidence?"active":"")+'" id="ct-ev">Evidence checklist</button></div>'+
+    '<div id="ct-det-pane"'+(showEvidence?" hidden":"")+'>'+
+    '<label for="cf-name">Condition name</label><input id="cf-name" value="'+esc(c.name)+'" maxlength="80" placeholder="e.g. Lumbar strain">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div><label for="cf-sys">Body system</label><select id="cf-sys">'+SYSTEMS.map(s=>'<option'+(c.system===s?" selected":"")+'>'+s+'</option>').join("")+'</select></div>'+
+    '<div><label for="cf-onset">Onset date</label><input type="date" id="cf-onset" value="'+c.onset+'"></div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'+
+    '<div><label for="cf-status">Claim status</label><select id="cf-status">'+STATUSES.map(s=>'<option'+(c.status===s?" selected":"")+'>'+s+'</option>').join("")+'</select></div>'+
+    '<div><label for="cf-rating">Current rating %</label><input type="number" id="cf-rating" min="0" max="100" step="10" value="'+c.rating+'"></div></div></div>'+
+    '<div id="ct-ev-pane"'+(showEvidence?"":" hidden")+'>'+evHtml+'</div>'+
+    '<div class="mrow"><button class="btn" id="cf-cancel">Cancel</button><button class="btn primary" id="cf-save">Save</button></div>');
+  $("ct-det").addEventListener("click",()=>{$("ct-det").classList.add("active");$("ct-ev").classList.remove("active");$("ct-det-pane").hidden=false;$("ct-ev-pane").hidden=true;});
+  $("ct-ev").addEventListener("click",()=>{$("ct-ev").classList.add("active");$("ct-det").classList.remove("active");$("ct-ev-pane").hidden=false;$("ct-det-pane").hidden=true;});
+  $("cf-cancel").addEventListener("click",closeModal);
+  $("cf-save").addEventListener("click",()=>{
+    const name=$("cf-name").value.trim();
+    if(!name){toast("Give the condition a name");return;}
+    const ev={};
+    EV_ITEMS.forEach(([k])=>{ev[k]={done:$("ev-"+k).checked,notes:$("evn-"+k).value.trim().slice(0,300)};});
+    const rec={id:isNew?uid():c.id,name:name.slice(0,80),system:$("cf-sys").value,
+      onset:$("cf-onset").value,rating:Math.max(0,Math.min(100,Math.round(+$("cf-rating").value||0))),
+      status:$("cf-status").value,evidence:ev};
+    if(isNew)DB.conditions.push(rec);else Object.assign(condById(c.id),rec);
+    save();closeModal();renderAll();sndOk();toast(isNew?"Condition added":"Condition saved");
+  });
+}
+
+/* ---------- timeline tab ---------- */
+function renderTimeline(){
+  const sel=$("t-cond"),cur=sel.value;
+  sel.innerHTML=DB.conditions.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join("")||'<option value="">(add a condition first)</option>';
+  if(DB.conditions.some(c=>c.id===cur))sel.value=cur;
+  const fs=$("t-filter"),fc=fs.value;
+  fs.innerHTML='<option value="">All conditions</option>'+DB.conditions.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join("");
+  if(DB.conditions.some(c=>c.id===fc))fs.value=fc;
+  const f=fs.value;
+  const evs=DB.events.filter(e=>!f||e.condId===f).sort((a,b)=>b.date.localeCompare(a.date));
+  $("timeline-list").innerHTML=evs.map(e=>{
+    const c=condById(e.condId);
+    const sev=e.severity>=8?"crit":e.severity>=5?"warn":"ok";
+    return '<div class="prow"><span><strong>'+prettyDate(e.date)+'</strong> — '+esc(c?c.name:"(deleted)")+'<br><span class="sub">'+esc(e.notes||"—")+'</span></span><span style="display:flex;gap:8px;align-items:center"><span class="tag '+sev+'">severity '+e.severity+'/10</span><button class="btn small danger noprint" data-tdel="'+e.id+'">Delete</button></span></div>';
+  }).join("")||'<p class="sub">No timeline entries yet. Log symptoms, treatments, and flare-ups above.</p>';
+  $("timeline-list").querySelectorAll("[data-tdel]").forEach(x=>x.addEventListener("click",()=>confirmDlg("Delete this timeline entry?",()=>{
+    DB.events=DB.events.filter(e=>e.id!==x.dataset.tdel);save();renderAll();sndDel();toast("Entry deleted");
+  })));
+}
+$("t-filter").addEventListener("input",renderTimeline);
+$("t-add").addEventListener("click",()=>{
+  const condId=$("t-cond").value;
+  if(!condId){toast("Add a condition first");return;}
+  const date=$("t-date").value||dateStr(todayNum());
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(dayNum(date))){toast("Pick a valid date");return;}
+  const severity=Math.max(1,Math.min(10,Math.round(+$("t-sev").value||5)));
+  DB.events.push({id:uid(),date,condId,severity,notes:$("t-notes").value.trim().slice(0,300)});
+  $("t-notes").value="";
+  save();renderAll();sndOk();toast("Timeline entry added");
+});
+/* ---------- C&P exams tab ---------- */
+function renderExams(){
+  const list=DB.exams.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  $("exam-list").innerHTML=list.map(x=>{
+    const du=daysUntil(x.date);
+    const names=x.condIds.map(id=>{const c=condById(id);return c?c.name:"(deleted)";});
+    const prepDone=x.prep.filter(p=>p.done).length, bringDone=x.bring.filter(p=>p.done).length;
+    return '<div class="card" data-card="'+x.id+'"><h3>'+prettyDate(x.date)+' · '+deadlineTag(du)+'</h3>'+
+      '<div class="bignum" style="font-size:24px">'+esc(x.facility||"C&P exam")+'</div>'+
+      '<div class="sub">'+(x.examiner?"Examiner: "+esc(x.examiner)+"<br>":"")+'Conditions: '+esc(names.join(", ")||"—")+'</div>'+
+      '<div class="sub" style="margin-top:6px">Prep: '+prepDone+'/'+x.prep.length+' · To bring: '+bringDone+'/'+x.bring.length+'</div>'+
+      '<div class="mrow" style="justify-content:flex-start"><button class="btn small" data-xopen="'+x.id+'">Open exam file</button><button class="btn small danger" data-xdel="'+x.id+'">Delete</button></div></div>';
+  }).join("")||'<div class="card"><p class="sub">No exams scheduled. Add your C&P exams above to track prep and notes.</p></div>';
+  $("exam-list").querySelectorAll("[data-xdel]").forEach(b=>b.addEventListener("click",()=>confirmDlg("Delete this exam record?",()=>{
+    DB.exams=DB.exams.filter(x=>x.id!==b.dataset.xdel);save();renderAll();sndDel();toast("Exam deleted");
+  })));
+  $("exam-list").querySelectorAll("[data-xopen]").forEach(b=>b.addEventListener("click",()=>examForm(DB.exams.find(x=>x.id===b.dataset.xopen))));
+}
+$("e-add").addEventListener("click",()=>{
+  const date=$("e-date").value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(dayNum(date))){toast("Pick a valid exam date");return;}
+  DB.exams.push({id:uid(),date,facility:$("e-fac").value.trim().slice(0,80),examiner:$("e-examiner").value.trim().slice(0,60),condIds:[],
+    prep:PREP_DEFAULTS.map(l=>({label:l,done:false})),bring:["DD-214 copy","Medication list","Buddy statements","Symptom notes"].map(l=>({label:l,done:false})),notes:""});
+  $("e-fac").value="";$("e-examiner").value="";
+  save();renderAll();sndOk();toast("Exam added — open it to set conditions & prep");
+});
+function examForm(x){
+  const condOpts=DB.conditions.map(c=>'<label style="display:flex;gap:8px;align-items:center;font-weight:400;margin:4px 0"><input type="checkbox" data-xc="'+c.id+'"'+(x.condIds.includes(c.id)?" checked":"")+' style="width:20px;height:20px;accent-color:var(--acc)"> '+esc(c.name)+'</label>').join("");
+  const chk=(arr,pfx)=>arr.map((p,i)=>'<div class="check"><input type="checkbox" data-'+pfx+'="'+i+'"'+(p.done?" checked":"")+' aria-label="'+esc(p.label)+'"><div style="flex:1"><span class="'+(p.done?"done-t":"")+'">'+esc(p.label)+'</span></div></div>').join("");
+  openModal('<h2>C&P exam — '+prettyDate(x.date)+'</h2>'+
+    '<label for="xf-fac">Facility</label><input id="xf-fac" value="'+esc(x.facility)+'" maxlength="80">'+
+    '<label for="xf-examiner">Examiner</label><input id="xf-examiner" value="'+esc(x.examiner)+'" maxlength="60">'+
+    '<label>Conditions covered</label><div>'+(condOpts||'<span class="sub">Add conditions first.</span>')+'</div>'+
+    '<label>Exam prep checklist</label><div>'+chk(x.prep,"xp")+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><input id="xp-new" placeholder="add prep item…" maxlength="120" style="flex:1"><button class="btn small" id="xp-add">Add</button></div>'+
+    '<label>What to bring</label><div>'+chk(x.bring,"xb")+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:8px"><input id="xb-new" placeholder="add item…" maxlength="120" style="flex:1"><button class="btn small" id="xb-add">Add</button></div>'+
+    '<label for="xf-notes">Post-exam notes</label><textarea id="xf-notes" maxlength="1000" placeholder="What was asked, what you reported, how long it took…">'+esc(x.notes)+'</textarea>'+
+    '<div class="mrow"><button class="btn" id="xf-cancel">Cancel</button><button class="btn primary" id="xf-save">Save exam</button></div>');
+  $("xp-add").addEventListener("click",()=>{const v=$("xp-new").value.trim();if(v){x.prep.push({label:v.slice(0,120),done:false});examForm(x);}});
+  $("xb-add").addEventListener("click",()=>{const v=$("xb-new").value.trim();if(v){x.bring.push({label:v.slice(0,120),done:false});examForm(x);}});
+  $("xf-cancel").addEventListener("click",closeModal);
+  $("xf-save").addEventListener("click",()=>{
+    x.facility=$("xf-fac").value.trim().slice(0,80);
+    x.examiner=$("xf-examiner").value.trim().slice(0,60);
+    x.condIds=[...document.querySelectorAll("[data-xc]:checked")].map(el=>el.dataset.xc);
+    document.querySelectorAll("[data-xp]").forEach(el=>{x.prep[+el.dataset.xp].done=el.checked;});
+    document.querySelectorAll("[data-xb]").forEach(el=>{x.bring[+el.dataset.xb].done=el.checked;});
+    x.notes=$("xf-notes").value.trim().slice(0,1000);
+    save();closeModal();renderAll();sndOk();toast("Exam saved");
+  });
+}
+
+/* ---------- claims tab ---------- */
+function renderClaims(){
+  const list=DB.claims.slice().sort((a,b)=>(b.filed||"").localeCompare(a.filed||""));
+  $("claim-list").innerHTML=list.map(cl=>{
+    const dls=cl.deadlines.map((d,i)=>{
+      const du=daysUntil(d.date);
+      return '<div class="check"><input type="checkbox" data-dl="'+cl.id+':'+i+'"'+(d.done?" checked":"")+' aria-label="'+esc(d.label)+'">'+
+        '<div style="flex:1"><span class="'+(d.done?"done-t":"")+'"><strong>'+esc(d.label)+'</strong></span><br><span class="sub">'+(d.date?prettyDate(d.date):"no date")+'</span></div>'+
+        (d.done?"":deadlineTag(du))+'</div>';
+    }).join("");
+    return '<div class="card" data-card="'+cl.id+'"><h3>'+esc(cl.type)+' claim</h3>'+
+      '<div class="sub">Filed: '+(cl.filed?prettyDate(cl.filed):"—")+' · Stage: <strong>'+esc(cl.stage)+'</strong></div>'+
+      (cl.notes?'<div style="margin-top:6px">'+esc(cl.notes)+'</div>':"")+
+      '<div style="margin-top:10px"><strong>Deadlines</strong></div><div>'+(dls||'<p class="sub">No deadlines tracked.</p>')+'</div>'+
+      '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap"><input id="ndl-l-'+cl.id+'" placeholder="deadline label…" maxlength="120" style="flex:2;min-width:140px"><input type="date" id="ndl-d-'+cl.id+'" style="flex:1;min-width:130px"><button class="btn small" data-ndl="'+cl.id+'">Add</button></div>'+
+      '<div class="mrow" style="justify-content:flex-start"><button class="btn small" data-clstage="'+cl.id+'">Advance stage</button><button class="btn small danger" data-cldel="'+cl.id+'">Delete</button></div></div>';
+  }).join("")||'<div class="card"><p class="sub">No claims tracked yet. Add your initial claim, increase, supplemental, HLR, or appeal above.</p></div>';
+  $("claim-list").querySelectorAll("[data-dl]").forEach(cb=>cb.addEventListener("change",()=>{
+    const [cid,i]=cb.dataset.dl.split(":");
+    const cl=DB.claims.find(c=>c.id===cid);if(cl&&cl.deadlines[+i]){cl.deadlines[+i].done=cb.checked;save();renderAll();sndOk();}
+  }));
+  $("claim-list").querySelectorAll("[data-ndl]").forEach(b=>b.addEventListener("click",()=>{
+    const cl=DB.claims.find(c=>c.id===b.dataset.ndl);if(!cl)return;
+    const label=$("ndl-l-"+cl.id).value.trim();if(!label){toast("Label the deadline first");return;}
+    const date=$("ndl-d-"+cl.id).value;
+    if(date&&(!/^\d{4}-\d{2}-\d{2}$/.test(date)||isNaN(dayNum(date)))){toast("Pick a valid date");return;}
+    cl.deadlines.push({label:label.slice(0,120),date:date||"",done:false});
+    save();renderAll();sndOk();toast("Deadline added");
+  }));
+  $("claim-list").querySelectorAll("[data-clstage]").forEach(b=>b.addEventListener("click",()=>{
+    const cl=DB.claims.find(c=>c.id===b.dataset.clstage);if(!cl)return;
+    const i=CLAIM_STAGES.indexOf(cl.stage);
+    cl.stage=CLAIM_STAGES[Math.min(CLAIM_STAGES.length-1,i+1)];
+    save();renderAll();sndOk();toast("Stage: "+cl.stage);
+  }));
+  $("claim-list").querySelectorAll("[data-cldel]").forEach(b=>b.addEventListener("click",()=>confirmDlg("Delete this claim record?",()=>{
+    DB.claims=DB.claims.filter(c=>c.id!==b.dataset.cldel);save();renderAll();sndDel();toast("Claim deleted");
+  })));
+}
+$("cl-add").addEventListener("click",()=>{
+  const filed=$("cl-filed").value;
+  if(filed&&(!/^\d{4}-\d{2}-\d{2}$/.test(filed)||isNaN(dayNum(filed)))){toast("Pick a valid filed date");return;}
+  DB.claims.push({id:uid(),type:$("cl-type").value,filed:filed||"",stage:"preparing",deadlines:[],notes:$("cl-notes").value.trim().slice(0,500)});
+  $("cl-notes").value="";
+  save();renderAll();sndOk();toast("Claim added");
+});
+
+/* ---------- rating calculator tab ---------- */
+let calcRatings=[];
+function renderCalc(){
+  const wrap=$("calc-rows");
+  wrap.innerHTML=calcRatings.map((r,i)=>
+    '<div style="display:flex;gap:8px;align-items:center;margin-top:8px;max-width:420px">'+
+    '<input type="number" min="0" max="100" step="10" value="'+r.v+'" data-cr="'+i+'" aria-label="Rating '+(i+1)+'">'+
+    '<button class="btn small" data-bilat="'+i+'" aria-pressed="'+(!!r.bilat)+'" style="'+(r.bilat?"background:var(--acc);border-color:var(--acc);color:var(--acc-ink)":"")+'">B</button>'+
+    '<button class="btn small danger" data-crm="'+i+'">Remove</button></div>'
+  ).join("")||'<p class="sub">No ratings yet — add one, or pull in your conditions.</p>';
+  wrap.querySelectorAll("[data-cr]").forEach(inp=>inp.addEventListener("input",()=>{
+    calcRatings[+inp.dataset.cr].v=Math.max(0,Math.min(100,Math.round(+inp.value||0)));calcOut();
+  }));
+  wrap.querySelectorAll("[data-crm]").forEach(b=>b.addEventListener("click",()=>{calcRatings.splice(+b.dataset.crm,1);renderCalc();sndDel();}));
+  wrap.querySelectorAll("[data-bilat]").forEach(b=>b.addEventListener("click",()=>{
+    const r=calcRatings[+b.dataset.bilat];r.bilat=!r.bilat;renderCalc();sndOk();
+  }));
+  calcOut();
+}
+function calcOut(){
+  const useBilat=$("calc-bilat").checked;
+  const vals=calcRatings.map(r=>r.v).filter(v=>v>0);
+  const out=$("calc-out");
+  if(!vals.length){out.innerHTML='<div class="bignum">—</div><div class="sub">Add ratings to see the math.</div>';return;}
+  const sorted=vals.slice().sort((a,b)=>b-a);
+  let html='<div class="bignum" id="calc-big">…</div>';
+  html+='<ol>';
+  let eff=0;
+  const order=calcRatings.map((r,i)=>({v:r.v,bilat:!!r.bilat})).filter(r=>r.v>0).sort((a,b)=>b.v-a.v);
+  order.forEach(o=>{
+    const before=eff;
+    eff=before+o.v*(100-before)/100;
+    html+='<li>'+o.v+'% of the remaining '+(100-before).toFixed(1)+'% = +'+(o.v*(100-before)/100).toFixed(1)+'% → running total '+eff.toFixed(1)+'%'+(o.bilat&&useBilat?' (bilateral)':"")+'</li>';
+  });
+  let finalRaw=eff, note="";
+  if(useBilat){
+    const bilatVals=order.filter(o=>o.bilat).map(o=>o.v);
+    if(bilatVals.length>=2){
+      const b=combineRatings(bilatVals);
+      const bf=b.raw*0.10;
+      const restVals=order.filter(o=>!o.bilat).map(o=>o.v);
+      const c2=combineRatings([b.raw+bf].concat(restVals));
+      finalRaw=c2.raw;
+      note='<li>Bilateral factor (estimate): bilateral combined '+b.raw.toFixed(1)+'% × 10% = +'+bf.toFixed(1)+'% → '+c2.raw.toFixed(1)+'%</li>';
+    }else note='<li>Bilateral factor needs at least 2 ratings marked B — skipped.</li>';
+  }
+  const rounded=Math.round(Math.round(finalRaw*10)/10/10)*10;
+  html+=note+'</ol><div class="sub">Raw combined: <strong>'+finalRaw.toFixed(1)+'%</strong> → rounded to nearest 10: <strong>'+rounded+'%</strong>. Educational estimate only — the VA assigns the official rating.</div>';
+  out.innerHTML=html;
+  $("calc-big").textContent=rounded+"%";
+}
+$("calc-add").addEventListener("click",()=>{calcRatings.push({v:10,bilat:false});renderCalc();sndOk();});
+$("calc-conditions").addEventListener("click",()=>{
+  calcRatings=DB.conditions.filter(c=>c.rating>0).map(c=>({v:c.rating,bilat:false}));
+  if(!calcRatings.length)toast("No rated conditions yet");
+  renderCalc();sndOk();
+});
+$("calc-clear").addEventListener("click",()=>{calcRatings=[];renderCalc();sndDel();});
+$("calc-bilat").addEventListener("change",()=>{renderCalc();sndOk();});
+/* ---------- statements tab ---------- */
+let lastStatement="";
+function showStatement(title,text){
+  lastStatement=text;
+  $("st-out").textContent=text;
+  $("st-out-card").hidden=false;
+  $("st-out-card").scrollIntoView({block:"nearest"});
+  sndOk();
+}
+$("st-gen").addEventListener("click",()=>{
+  const name=$("st-name").value.trim()||"[Your name]";
+  const cond=$("st-cond").value.trim()||"[condition]";
+  const ev=$("st-event").value.trim(), th=$("st-then").value.trim(), nw=$("st-now").value.trim();
+  if(!ev&&!th&&!nw){toast("Answer at least one prompt first");return;}
+  const text="Personal Statement in Support of Claim\n\nMy name is "+name+". I am writing this statement in support of my claim for "+cond+".\n\n"+
+    (ev?"WHAT HAPPENED DURING SERVICE\n"+ev+"\n\n":"")+
+    (th?"SYMPTOMS AT THE TIME\n"+th+"\n\n":"")+
+    (nw?"HOW IT AFFECTS ME TODAY\n"+nw+"\n\n":"")+
+    "I respectfully ask that the VA consider this statement along with my medical evidence. I understand the VA alone decides my claim.\n\nRespectfully,\n"+name+"\n"+prettyDate(dateStr(todayNum()));
+  showStatement("Personal statement — "+cond,text);
+});
+$("bs-gen").addEventListener("click",()=>{
+  const w=$("bs-name").value.trim()||"[Writer's name]";
+  const rel=$("bs-rel").value.trim()||"[relationship]";
+  const vet=$("bs-vet").value.trim()||"[veteran's name]";
+  const kn=$("bs-know").value.trim(), ch=$("bs-change").value.trim();
+  if(!kn&&!ch){toast("Answer at least one prompt first");return;}
+  const text="Buddy / Lay Statement\n\nMy name is "+w+". I am the "+rel+" of "+vet+", and I write this from my own personal observations.\n\n"+
+    (kn?"WHAT I HAVE OBSERVED\n"+kn+"\n\n":"")+
+    (ch?"CHANGES I HAVE SEEN\n"+ch+"\n\n":"")+
+    "I share these observations so the VA has a complete picture. I understand the VA alone decides the claim.\n\nSincerely,\n"+w+"\n"+prettyDate(dateStr(todayNum()));
+  showStatement("Buddy statement — "+w,text);
+});
+$("st-copy").addEventListener("click",()=>{
+  if(!lastStatement)return;
+  const done=()=>toast("Statement copied");
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(lastStatement).then(done,()=>toast("Copy failed — select the text manually"));
+  else toast("Copy not available in this browser");
+});
+$("st-print").addEventListener("click",()=>{
+  if(!lastStatement)return;
+  const w=window.open("","_blank");
+  if(!w){toast("Popup blocked — allow popups to print");return;}
+  w.document.write("<html><head><title>Statement</title></head><body style='font:16px/1.7 system-ui;max-width:700px;margin:40px auto'><pre style='white-space:pre-wrap;font:inherit'>"+esc(lastStatement)+"</pre><p style='color:#666'>Generated with HonorClaim — personal organizer. Not legal advice; the VA alone decides claims.</p><scr"+"ipt>window.print()</scr"+"ipt></body></html>");
+  w.document.close();
+});
+$("st-save").addEventListener("click",()=>{
+  if(!lastStatement){toast("Generate a statement first");return;}
+  const kind=lastStatement.indexOf("Buddy / Lay Statement")===0?"buddy":"personal";
+  DB.statements.push({id:uid(),kind,title:(kind==="buddy"?"Buddy":"Personal")+" statement — "+prettyDate(dateStr(todayNum())),text:lastStatement.slice(0,8000),created:dateStr(todayNum())});
+  save();renderStatements();sndOk();toast("Statement saved");
+});
+function renderStatements(){
+  $("st-saved").innerHTML=DB.statements.map(s=>
+    '<div class="prow"><span><strong>'+esc(s.title)+'</strong><br><span class="sub">'+(s.kind==="buddy"?"buddy / lay":"personal")+(s.created?" · "+prettyDate(s.created):"")+'</span></span><span class="rowbtns noprint"><button class="btn small" data-sview="'+s.id+'">View</button><button class="btn small danger" data-sdel="'+s.id+'">Delete</button></span></div>'
+  ).join("")||'<p class="sub">No saved statements yet.</p>';
+  $("st-saved").querySelectorAll("[data-sdel]").forEach(b=>b.addEventListener("click",()=>confirmDlg("Delete this statement?",()=>{
+    DB.statements=DB.statements.filter(s=>s.id!==b.dataset.sdel);save();renderStatements();sndDel();toast("Statement deleted");
+  })));
+  $("st-saved").querySelectorAll("[data-sview]").forEach(b=>b.addEventListener("click",()=>{
+    const s=DB.statements.find(x=>x.id===b.dataset.sview);if(s)showStatement(s.title,s.text);
+  }));
+}
+
+function wordCut(t,n){t=String(t||"");if(t.length<=n)return t;const c=t.slice(0,n).replace(/\s+\S*$/,"");return (c||t.slice(0,n))+"…";}
+function wrapLabel(t,n){t=String(t||"");const words=t.split(" ");let a="",b="";for(const w of words){if((a+" "+w).trim().length<=n)a=(a+" "+w).trim();else b=(b+" "+w).trim();}return [a,b];}
+/* ---------- charts ---------- */
+const PALETTE=["#2f5496","#b3541e","#2e7d46","#8a6d1c","#7a4f9e","#c02a2a","#1e7d7d","#9e5b3c","#4a6d8a","#6d8a3c"];
+function chartSel(){return chartSel._s||{};}
+function setSel(chart,i){const s=chartSel();s[chart]=(s[chart]===i?null:i);chartSel._s=s;drawCharts();sndOk();}
+function polar(cx,cy,r,a){return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function donutSeg(cx,cy,r,ir,a0,a1){
+  const large=(a1-a0)>Math.PI?1:0;
+  const [x0,y0]=polar(cx,cy,r,a0),[x1,y1]=polar(cx,cy,r,a1);
+  const [ix1,iy1]=polar(cx,cy,ir,a1),[ix0,iy0]=polar(cx,cy,ir,a0);
+  if(a1-a0>=Math.PI*2-0.001){
+    return 'M'+(cx-r)+','+cy+' A'+r+','+r+' 0 1,0 '+(cx+r)+','+cy+' A'+r+','+r+' 0 1,0 '+(cx-r)+','+cy+' Z '+
+           'M'+(cx-ir)+','+cy+' A'+ir+','+ir+' 0 1,1 '+(cx+ir)+','+cy+' A'+ir+','+ir+' 0 1,1 '+(cx-ir)+','+cy+' Z';
+  }
+  return 'M'+x0.toFixed(1)+','+y0.toFixed(1)+' A'+r+','+r+' 0 '+large+',1 '+x1.toFixed(1)+','+y1.toFixed(1)+
+         ' L'+ix1.toFixed(1)+','+iy1.toFixed(1)+' A'+ir+','+ir+' 0 '+large+',0 '+ix0.toFixed(1)+','+iy0.toFixed(1)+' Z';
+}
+function donutChart(items,total,sel,label){
+  const W=340,H=300,cx=170,cy=140,r=105,ir=62;
+  let a=-Math.PI/2,paths="";
+  items.forEach((it,i)=>{
+    const frac=total>0?it.v/total:0;const a1=a+frac*Math.PI*2;
+    const mid=(a+a1)/2;const isSel=sel===i;
+    const dx=isSel?Math.cos(mid)*12:0, dy=isSel?Math.sin(mid)*12:0;
+    paths+='<path d="'+donutSeg(cx,cy,r,ir,a,a1)+'" fill="'+it.c+'" transform="translate('+dx.toFixed(1)+' '+dy.toFixed(1)+')"'+(isSel?' stroke="#111" stroke-width="3"':"")+' data-seg="'+i+'" style="cursor:pointer"/>';
+    a=a1;
+  });
+  // center label in bounded box: hole diameter 124 minus 24 padding -> width <= 100
+  const selIt=(sel!=null&&items[sel])?items[sel]:null;
+  const clabel=selIt?String(selIt.label).slice(0,22):label;
+  const t=selIt?selIt.txt:String(total);
+  const fs=t.length>7?20:t.length>5?26:32;
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(label)+'">'+paths+
+    '<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="15" fill="var(--muted)">'+esc(clabel)+'</text>'+
+    '<text x="'+cx+'" y="'+(cy+22)+'" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="var(--ink)"'+(t.length>7?' textLength="96" lengthAdjust="spacingAndGlyphs"':"")+'>'+esc(t)+'</text></svg>';
+}
+function hbarChart(items,sel,ariaLabel){ // items: {label, v, txt, c} — selection highlights in place, never moves the bar
+  const W=340,rowH=34,top=10,H=top+items.length*rowH+10;
+  const max=Math.max(1,...items.map(i=>i.v));
+  let s="";
+  items.forEach((it,i)=>{
+    const y=top+i*rowH, w=Math.max(4,(it.v/max)*(W-165));
+    const isSel=sel===i;
+    const inside=w>=52;
+    const tx=inside?(165+w-8):(169+w);
+    const anchor=inside?"end":"start";
+    const tfill=inside?"#fff":"var(--muted)";
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      (isSel?'<rect x="-8" y="'+(y-7)+'" width="'+(W-2)+'" height="34" rx="9" fill="var(--acc)" opacity="0.16"/>':"")+
+      '<text x="0" y="'+(y+8)+'" font-size="14" font-weight="'+(isSel?"700":"400")+'" fill="var(--ink)">'+esc(wrapLabel(it.label,16)[0]||"")+'</text>'+
+      '<text x="0" y="'+(y+23)+'" font-size="14" fill="var(--muted)">'+esc(wrapLabel(it.label,16)[1]||"")+'</text>'+
+      '<rect x="165" y="'+y+'" width="'+w.toFixed(0)+'" height="20" rx="5" fill="'+it.c+'"/>'+
+      '<text x="'+tx.toFixed(0)+'" y="'+(y+16)+'" font-size="15" font-weight="'+(isSel||inside?"700":"400")+'" text-anchor="'+anchor+'" fill="'+tfill+'">'+esc(it.txt)+'</text></g>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(ariaLabel)+'">'+s+'</svg>';
+}
+function vbarChart(items,sel,ariaLabel){ // selection: highlight band behind the bar, bar never moves
+  const W=340,H=300,base=250,max=Math.max(1,...items.map(i=>i.v));
+  const n=Math.max(1,items.length),bw=Math.min(56,(W-20)/n-14);
+  let s="";
+  items.forEach((it,i)=>{
+    const x=10+i*((W-20)/n),h=Math.max(3,(it.v/max)*200),y=base-h;
+    const isSel=sel===i;
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      (isSel?'<rect x="'+(x-6).toFixed(0)+'" y="42" width="'+(bw+12).toFixed(0)+'" height="216" rx="8" fill="var(--acc)" opacity="0.14"/>':"")+
+      '<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+bw.toFixed(0)+'" height="'+h.toFixed(0)+'" rx="5" fill="'+it.c+'"/>'+
+      '<text x="'+(x+bw/2).toFixed(0)+'" y="'+(base+22)+'" text-anchor="middle" font-size="15" fill="'+(isSel?"var(--ink)":"var(--muted)")+'" font-weight="'+(isSel?"700":"400")+'">'+esc(it.label)+'</text>'+
+      '<text x="'+(x+bw/2).toFixed(0)+'" y="'+(y-8).toFixed(0)+'" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)">'+esc(it.txt)+'</text></g>';
+  });
+  s+='<line x1="8" y1="50" x2="8" y2="'+base+'" stroke="var(--line)" stroke-width="2"/>';
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(ariaLabel)+'">'+s+'</svg>';
+}
+function sevLineChart(points,sel){ // points: {x(date), sev, label, note}
+  const W=340,H=300,padL=34,padB=34,padT=16,padR=10;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  if(!points.length)return "";
+  const n=points.length;
+  const X=i=>padL+(n===1?iw/2:i/(n-1)*iw);
+  const Y=s=>padT+ih-(s-1)/9*ih;
+  let s='<line x1="'+padL+'" y1="'+padT+'" x2="'+padL+'" y2="'+(H-padB)+'" stroke="var(--line)" stroke-width="2"/>';
+  s+='<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+(W-padR)+'" y2="'+(H-padB)+'" stroke="var(--line)" stroke-width="2"/>';
+  for(let g=1;g<=10;g+=3){s+='<text x="'+(padL-6)+'" y="'+(Y(g)+5)+'" text-anchor="end" font-size="13" fill="var(--muted)">'+g+'</text>';}
+  const pts=points.map((p,i)=>X(i).toFixed(1)+","+Y(p.sev).toFixed(1)).join(" ");
+  s+='<polyline points="'+pts+'" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
+  points.forEach((p,i)=>{
+    const isSel=sel===i;
+    s+='<g data-seg="'+i+'" style="cursor:pointer">'+
+      '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="16" fill="transparent"/>'+
+      (isSel?'<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="11" fill="var(--acc)" opacity="0.25"/>':"")+
+      '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.sev).toFixed(1)+'" r="'+(isSel?7:5)+'" fill="'+(isSel?"var(--acc)":"var(--card)")+'" stroke="var(--acc)" stroke-width="3"/>'+
+      (i%Math.ceil(n/6)===0?'<text x="'+X(i).toFixed(1)+'" y="'+(H-padB+18)+'" text-anchor="middle" font-size="12" fill="var(--muted)">'+esc(p.short)+'</text>':"")+
+      '</g>';
+  });
+  return '<svg class="chart-svg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Symptom severity over time">'+s+'</svg>';
+}
+function legend(items,chart){
+  const s=chartSel()[chart];
+  return '<div class="legend">'+items.map((it,i)=>'<button data-leg="'+i+'" class="'+(s===i?"sel":"")+'"><span class="sw" style="background:'+it.c+'"></span>'+esc(it.label)+'</button>').join("")+'</div>';
+}
+function drawCharts(){
+  const sel=chartSel();
+  const rated=DB.conditions.filter(c=>c.rating>0);
+  const totalR=rated.reduce((s,c)=>s+c.rating,0);
+  const donutItems=rated.map((c,i)=>({label:c.name,v:c.rating,txt:c.rating+"%",c:PALETTE[i%PALETTE.length]}));
+  const evItems=DB.conditions.map(c=>({label:c.name,v:evPct(c),txt:evPct(c)+"%",c:evPct(c)===100?"#2e7d46":evPct(c)>=50?"#b3541e":"#c02a2a"}));
+  const stageItems=CLAIM_STAGES.map(st=>({label:st,v:DB.claims.filter(c=>c.stage===st).length,txt:String(DB.claims.filter(c=>c.stage===st).length),c:"#2f5496"}));
+  const sevPts=DB.events.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(-24).map(e=>{
+    const c=condById(e.condId);
+    return {sev:e.severity,short:e.date.slice(5).replace("-","/"),label:prettyDate(e.date)+" — "+(c?c.name:"?"),note:e.notes};
+  });
+  const empty='<p class="sub">Add data to see charts.</p>';
+  const selSev=(sel.sev!=null&&sevPts[sel.sev])?sevPts[sel.sev]:null;
+  $("charts-grid").innerHTML=
+    '<div class="card chart-card"><h3>Rating distribution</h3>'+(donutItems.length?donutChart(donutItems,totalR,sel.donut,"total rating pts")+legend(donutItems,"donut"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Evidence completion by condition</h3>'+(evItems.length?hbarChart(evItems,sel.ev,"Evidence completion")+legend(evItems,"ev"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Claims by stage</h3>'+(DB.claims.length?vbarChart(stageItems,sel.stage,"Claims by stage")+legend(stageItems,"stage"):empty)+'</div>'+
+    '<div class="card chart-card"><h3>Symptom severity over time</h3>'+(sevPts.length?sevLineChart(sevPts,sel.sev)+(selSev?'<p style="margin:8px 0 0"><strong>'+esc(selSev.label)+'</strong> — severity '+selSev.sev+'/10<br><span class="sub">'+esc(selSev.note||"no notes")+'</span></p>':'<p class="sub" style="margin:8px 0 0">Select a point to see the entry.</p>'):empty)+'</div>';
+  const grids=[["donut","donut"],["ev","ev"],["stage","stage"],["sev","sev"]];
+  $("charts-grid").querySelectorAll(".card").forEach((cardEl,ci)=>{
+    const key=grids[ci][1];
+    cardEl.querySelectorAll("[data-seg]").forEach(g=>g.addEventListener("click",ev=>{ev.stopPropagation();setSel(key,+g.dataset.seg);}));
+    cardEl.querySelectorAll("[data-leg]").forEach(b=>b.addEventListener("click",ev=>{ev.stopPropagation();setSel(key,+b.dataset.leg);}));
+  });
+}
+/* ---------- reports ---------- */
+function renderReport(){
+  $("rep-date").textContent=new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  let h="";
+  h+="<h4>Conditions &amp; evidence</h4>";
+  h+=DB.conditions.length?'<table><thead><tr><th>#</th><th>Condition</th><th class="num">Rating</th><th>Status</th><th>Evidence</th></tr></thead><tbody>'+
+    DB.conditions.map((c,i)=>'<tr><td>'+(i+1)+'</td><td><strong>'+esc(c.name)+'</strong><br><span class="sub">'+esc(c.system)+(c.onset?' · onset '+prettyDate(c.onset):"")+'</span></td>'+
+    '<td class="num">'+c.rating+'%</td><td>'+esc(c.status)+'</td><td>'+evDoneCount(c)+'/'+EV_ITEMS.length+' ('+evPct(c)+'%)<br><span class="sub">'+EV_ITEMS.filter(([k])=>!(c.evidence[k]&&c.evidence[k].done)).map(([,l])=>esc(l)).join("; ")+'</span></td></tr>').join("")+'</tbody></table>':'<p class="sub">No conditions.</p>';
+  h+="<h4>Timeline</h4>";
+  const evs=DB.events.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  h+=evs.length?'<table><thead><tr><th>Date</th><th>Condition</th><th>Notes</th><th class="num">Severity</th></tr></thead><tbody>'+
+    evs.map(e=>{const c=condById(e.condId);return '<tr><td>'+prettyDate(e.date)+'</td><td>'+esc(c?c.name:"?")+'</td><td>'+esc(e.notes||"—")+'</td><td class="num">'+e.severity+'/10</td></tr>';}).join("")+'</tbody></table>':'<p class="sub">No timeline entries.</p>';
+  h+="<h4>C&amp;P exams</h4>";
+  h+=DB.exams.length?DB.exams.map(x=>'<p><strong>'+prettyDate(x.date)+'</strong> — '+esc(x.facility||"")+(x.examiner?' ('+esc(x.examiner)+')':"")+'<br><span class="sub">'+esc(x.condIds.map(id=>{const c=condById(id);return c?c.name:"?";}).join(", "))+(x.notes?'<br>Notes: '+esc(x.notes):"")+'</span></p>').join(""):'<p class="sub">No exams.</p>';
+  h+="<h4>Claims &amp; deadlines</h4>";
+  h+=DB.claims.length?DB.claims.map(cl=>'<p><strong>'+esc(cl.type)+' claim</strong> — filed '+(cl.filed?prettyDate(cl.filed):"—")+', stage: '+esc(cl.stage)+'<br><span class="sub">'+esc(cl.notes||"")+cl.deadlines.map(d=>'<br>• '+esc(d.label)+(d.date?' — '+prettyDate(d.date):"")+(d.done?" (done)":"")).join("")+'</span></p>').join(""):'<p class="sub">No claims.</p>';
+  h+="<h4>Statements</h4>";
+  h+=DB.statements.length?DB.statements.map(s=>'<p><strong>'+esc(s.title)+'</strong><br><span class="sub">'+esc(s.text.slice(0,400))+(s.text.length>400?"…":"")+'</span></p>').join(""):'<p class="sub">No saved statements.</p>';
+  const ratings=DB.conditions.filter(c=>c.rating>0).map(c=>c.rating);
+  const comb=ratings.length?combineRatings(ratings):null;
+  h+="<h4>Combined rating estimate</h4><p>"+(comb?comb.rounded+'% (raw '+comb.raw.toFixed(1)+'%) — educational estimate only; the VA assigns the official rating.':"No rated conditions.")+"</p>";
+  h+='<p class="sub">HonorClaim is a personal organizer — not legal advice, not affiliated with the VA. Claim decisions are made solely by the VA.</p>';
+  $("rep-body").innerHTML=h;
+}
+$("print-packet").addEventListener("click",()=>{
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.remove("printable"));
+  $("tab-reports").classList.add("printable");
+  renderReport();window.print();
+});
+
+/* ---------- contacts ---------- */
+function renderContacts(){
+  $("ct-list").innerHTML=DB.contacts.map(c=>
+    '<div class="prow"><span><strong>'+esc(c.name)+'</strong><br><span class="sub">'+esc(c.role||"")+(c.phone?' · '+esc(c.phone):"")+'</span></span><span class="noprint"><button class="btn small danger" data-ctdel="'+c.id+'">Delete</button></span></div>'
+  ).join("")||'<p class="sub">No contacts yet — add your VSO, claims agent, or attorney.</p>';
+  $("ct-list").querySelectorAll("[data-ctdel]").forEach(b=>b.addEventListener("click",()=>confirmDlg("Delete this contact?",()=>{
+    DB.contacts=DB.contacts.filter(c=>c.id!==b.dataset.ctdel);save();renderContacts();sndDel();toast("Contact deleted");
+  })));
+}
+$("ct-add").addEventListener("click",()=>{
+  const name=$("ct-name").value.trim();if(!name){toast("Give the contact a name");return;}
+  DB.contacts.push({id:uid(),name:name.slice(0,60),role:$("ct-role").value.trim().slice(0,40),phone:$("ct-phone").value.trim().slice(0,30)});
+  $("ct-name").value="";$("ct-role").value="";$("ct-phone").value="";
+  save();renderContacts();sndOk();toast("Contact added");
+});
+
+/* ---------- import / export ---------- */
+function download(name,content,type){
+  const b=new Blob([content],{type});const u=URL.createObjectURL(b);
+  const a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(u);a.remove();},4000);
+}
+$("exp-json").addEventListener("click",()=>{download("honorclaim-backup.json",JSON.stringify({app:"HonorClaim",schema:SCHEMA_V,exported:dateStr(todayNum()),conditions:DB.conditions,events:DB.events,exams:DB.exams,claims:DB.claims,statements:DB.statements,contacts:DB.contacts},null,2),"application/json");sndOk();toast("JSON exported");});
+function csvQ(v){return '"'+String(v==null?"":v).replace(/"/g,'""')+'"';}
+$("exp-csv").addEventListener("click",()=>{
+  const head=["condition","system","onset","status","rating_pct","evidence_pct","evidence_done","evidence_missing"].map(csvQ).join(",");
+  const lines=DB.conditions.map(c=>{const missing=EV_ITEMS.filter(([k])=>!(c.evidence[k]&&c.evidence[k].done)).map(([,l])=>l).join("; ");
+    return [c.name,c.system,c.onset,c.status,c.rating,evPct(c),evDoneCount(c)+"/"+EV_ITEMS.length,missing].map(csvQ).join(",");});
+  const ev2=["date","condition","severity","notes"].map(csvQ).join(",");
+  const evl=DB.events.map(e=>{const c=condById(e.condId);return [e.date,c?c.name:"",e.severity,e.notes].map(csvQ).join(",");});
+  download("honorclaim-export.csv",head+"\n"+lines.join("\n")+"\n\n"+ev2+"\n"+evl.join("\n"),"text/csv");sndOk();toast("CSV exported");
+});
+$("imp-json").addEventListener("click",()=>$("imp-file").click());
+try{if(localStorage.getItem("honorclaim.corrupt-backup"))$("exp-corrupt").style.display="";}catch(_){}
+$("exp-corrupt").addEventListener("click",()=>{let r="";try{r=localStorage.getItem("honorclaim.corrupt-backup")||"";}catch(_){}if(r){download("honorclaim-unreadable-copy.json",r,"application/json");sndOk();}else toast("No unreadable copy saved.");});
+$("imp-file").addEventListener("change",e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let d;try{d=JSON.parse(r.result);}catch(err){toast("Could not import: not valid JSON");return;}
+    if(!d||typeof d!=="object"){toast("Could not import: wrong file shape");return;}
+    const conditions=(d.conditions||[]).map(sanitizeCondition).filter(Boolean);
+    const ids=conditions.map(c=>c.id);
+    const db={
+      conditions,
+      events:(d.events||[]).map(x=>sanitizeEvent(x,ids)).filter(Boolean),
+      exams:(d.exams||[]).map(x=>sanitizeExam(x,ids)).filter(Boolean),
+      claims:(d.claims||[]).map(sanitizeClaim).filter(Boolean),
+      statements:Array.isArray(d.statements)?d.statements.filter(s=>s&&s.text).map(s=>({id:(cleanId(s.id)||uid()),kind:s.kind==="buddy"?"buddy":"personal",title:String(s.title||"Statement").slice(0,80),text:String(s.text).slice(0,8000),created:String(s.created||"")})):[],
+      contacts:Array.isArray(d.contacts)?d.contacts.filter(c=>c&&c.name).map(c=>({id:(cleanId(c.id)||uid()),name:String(c.name).slice(0,60),role:String(c.role||"").slice(0,40),phone:String(c.phone||"").slice(0,30)})):[]
+    };
+    if(conditions.length===0&&(d.conditions||[]).length>0){toast("Could not import: no valid conditions found");return;}
+    confirmDlg("Import will replace all current data ("+conditions.length+" conditions). Continue?",
+      ()=>{DB=db;save();renderAll();sndOk();toast("Import complete");});
+  };
+  r.readAsText(f);
+});
+
+/* ---------- modal ---------- */
+function openModal(html){$("modal-box").innerHTML=html;$("mback").classList.add("open");}
+function closeModal(){$("mback").classList.remove("open");}
+$("mback").addEventListener("click",e=>{if(e.target===$("mback"))closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+function confirmDlg(msg,onYes){
+  openModal('<h2>Confirm</h2><p>'+esc(msg)+'</p><div class="mrow"><button class="btn" id="m-no">Cancel</button><button class="btn danger" id="m-yes">Delete</button></div>');
+  $("m-no").addEventListener("click",closeModal);
+  $("m-yes").addEventListener("click",()=>{closeModal();onYes();});
+}
+
+/* ---------- tabs / init ---------- */
+function renderAll(){renderDash();renderConditions();renderTimeline();renderExams();renderClaims();renderStatements();renderContacts();renderReport();renderCalc();drawCharts();}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".tabpane").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active");$("tab-"+b.dataset.tab).classList.add("active");
+  if(b.dataset.tab==="charts")drawCharts();
+  sndOk();
+}));
+paintTheme();paintSound();load();renderAll();
+</script>
+</body>
+</html>
