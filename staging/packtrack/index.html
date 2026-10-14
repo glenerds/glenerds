@@ -355,18 +355,6 @@ footer{border-top:1px solid var(--line);margin-top:1.5rem}
 
 <script>
 "use strict";
-/* ================= store ================= */
-const LS="packtrack_v1";
-const COLORS=["Colorless","Darkness","Dragon","Fighting","Fire","Grass","Lightning","Metal","Psychic","Water","Fairy"];
-const CNAMES={};COLORS.forEach(c=>CNAMES[c]=c);
-const RARITIES=["common","uncommon","rare","double rare","illustration rare","special illustration rare","ultra rare","hyper rare","secret rare","promo"];
-const CONDS=["NM","LP","MP","HP"];
-function defStore(){return{cards:[],packs:[],trades:[],wantlist:[],setSizes:{},prefs:{theme:null,sound:true}};}
-function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&typeof s==="object"){const d=defStore();return Object.assign(d,s,{prefs:Object.assign(d.prefs,s.prefs||{})});}}catch(e){}return defStore();}
-function save(){if(sampleOn)return;try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){alert("Could not save — browser storage is full. Photos take the most space; try removing some card photos.")}}
-let S=load();
-let sampleOn=false, sampleBackup=null;
-
 /* ================= utils ================= */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -374,6 +362,26 @@ const money=n=>"$"+(Number(n)||0).toLocaleString("en-US",{minimumFractionDigits:
 const uid=()=> "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
 function beep(f){if(!S.prefs.sound)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f||520;g.gain.value=.06;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.18);o.stop(c.currentTime+.2);}catch(e){}}
+
+/* ================= store ================= */
+const LS="packtrack_v1";
+const COLORS=["Colorless","Darkness","Dragon","Fighting","Fire","Grass","Lightning","Metal","Psychic","Water","Fairy"];
+const CNAMES={};COLORS.forEach(c=>CNAMES[c]=c);
+const RARITIES=["common","uncommon","rare","double rare","illustration rare","special illustration rare","ultra rare","hyper rare","secret rare","promo"];
+const CONDS=["NM","LP","MP","HP"];
+function defStore(){return{cards:[],packs:[],trades:[],wantlist:[],setSizes:{},prefs:{theme:null,sound:true}};}
+function sanitizeStore(d){
+  const RSET={},TSET={},CSET={};RARITIES.forEach(r=>RSET[r]=1);COLORS.forEach(t=>TSET[t]=1);CONDS.forEach(c=>CSET[c]=1);
+  d.cards=(d.cards||[]).filter(c=>c&&typeof c==="object").map(c=>({id:String(c.id||uid()),name:String(c.name||"Unnamed"),set:String(c.set||""),num:String(c.num||""),colors:(Array.isArray(c.colors)?c.colors:[]).filter(t=>TSET[t]),rarity:RSET[c.rarity]?c.rarity:"common",cond:CSET[c.cond]?c.cond:"NM",foil:!!(c.foil||c.holo),qty:Math.max(0,Math.floor(+c.qty||0)),paid:Math.max(0,+c.paid||0),value:Math.max(0,+c.value||0),notes:String(c.notes||""),photo:typeof c.photo==="string"&&c.photo.indexOf("data:image/")===0?c.photo:""}));
+  d.packs=(d.packs||[]).filter(p=>p&&typeof p==="object").map(p=>({id:String(p.id||uid()),label:String(p.label||""),date:String(p.date||""),set:String(p.set||""),cost:Math.max(0,+p.cost||0),pulls:(Array.isArray(p.pulls)?p.pulls:[]).filter(l=>l&&typeof l==="object").map(l=>({qty:Math.max(1,Math.floor(+l.qty||1)),name:String(l.name||"Unnamed")})),notes:String(p.notes||"")}));
+  d.trades=(d.trades||[]).filter(t=>t&&typeof t==="object").map(t=>({id:String(t.id||uid()),date:String(t.date||""),partner:String(t.partner||""),gave:String(t.gave||""),received:String(t.received||t.got||""),cash:+t.cash||0,notes:String(t.notes||"")}));
+  d.wantlist=(d.wantlist||[]).filter(w=>w&&typeof w==="object").map(w=>({id:String(w.id||uid()),name:String(w.name||"Unnamed"),set:String(w.set||""),maxpri:Math.max(0,+w.maxpri||0),prio:["high","med","low"].includes(w.prio)?w.prio:"med",acquired:!!w.acquired}));
+  return d;
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&typeof s==="object"){const d=defStore();return sanitizeStore(Object.assign(d,s,{prefs:Object.assign(d.prefs,s.prefs||{})}));}}catch(e){}return defStore();}
+function save(){if(sampleOn)return;try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){alert("Could not save — browser storage is full. Photos take the most space; try removing some card photos.")}}
+let S=load();
+let sampleOn=false, sampleBackup=null;
 
 /* ================= theme / sound / sample ================= */
 function effTheme(){if(S.prefs.theme)return S.prefs.theme;return (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
@@ -429,9 +437,9 @@ function sampleData(){
       pulls:[{qty:2,name:"Pikachu ex"},{qty:1,name:"Zapdos ex"}],notes:"Birthday ETB"},
   ];
   const trades=[
-    {id:uid(),date:"2026-09-12",partner:"League night",gave:"2x Pikachu ex",got:"Mew ex + $5",cash:5,notes:"Even trade, both NM"},
-    {id:uid(),date:"2026-08-28",partner:"Marcus",gave:"Gengar ex",got:"Gardevoir ex",cash:0,notes:"Straight swap"},
-    {id:uid(),date:"2026-07-19",partner:"Card show dealer",gave:"Bulk commons (500)",got:"$25 store credit",cash:25,notes:"Bulk buyout .05 each"},
+    {id:uid(),date:"2026-09-12",partner:"League night",gave:"2x Pikachu ex",received:"Mew ex + $5",cash:5,notes:"Even trade, both NM"},
+    {id:uid(),date:"2026-08-28",partner:"Marcus",gave:"Gengar ex",received:"Gardevoir ex",cash:0,notes:"Straight swap"},
+    {id:uid(),date:"2026-07-19",partner:"Card show dealer",gave:"Bulk commons (500)",received:"$25 store credit",cash:25,notes:"Bulk buyout .05 each"},
   ];
   const wantlist=[
     {id:uid(),name:"Umbreon VMAX",set:"Evolving Skies",maxpri:400,prio:"high",acquired:false},
@@ -458,7 +466,7 @@ function renderDash(){
     ["Profit / loss",'<span class="'+(t.pl>=0?"pos":"neg")+'">'+money(t.pl)+"</span>","dash-cards","Value minus what you paid"],
     ["Missing photos",t.noPhoto,"dash-cards","Cards with no photo attached"],
     ["Copies owned",t.copies.toLocaleString(),"dash-cards","Across "+t.unique+" unique cards"],
-    ["Wantlist open",open,"dash-want","Tap to view wantlist"],
+    ["Wantlist open",open,"dash-want","Cards you're hunting"],
   ];
   $("dash-stats").innerHTML=stats.map(s=>'<button class="stat" data-go="'+s[2]+'"><div class="n">'+s[1]+'</div><div class="l">'+s[0]+'</div><div class="sub2 muted">'+s[3]+'</div></button>').join("");
   document.querySelectorAll("#dash-stats .stat").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.go==="dash-want"?"want":"cards")));
@@ -541,8 +549,8 @@ $("f-card").addEventListener("submit",e=>{
   const name=$("fc-name").value.trim(),set=$("fc-set").value.trim();
   if(!name||!set)return;
   const rec={name,set,num:$("fc-num").value.trim(),rarity:$("fc-rarity").value,cond:$("fc-cond").value,
-    foil:$("fc-foil").checked,qty:Math.max(1,parseInt($("fc-qty").value)||1),paid:+$("fc-paid").value||0,
-    value:+$("fc-value").value||0,notes:$("fc-notes").value.trim(),
+    foil:$("fc-foil").checked,qty:Math.max(1,parseInt($("fc-qty").value)||1),paid:Math.max(0,+$("fc-paid").value||0),
+    value:Math.max(0,+$("fc-value").value||0),notes:$("fc-notes").value.trim(),
     colors:[...$("fc-colors").querySelectorAll("input:checked")].map(i=>i.value),photo:cPhotoData};
   const id=$("f-card").dataset.editId;
   if(id){const i=S.cards.findIndex(x=>x.id===id);if(i>=0)S.cards[i]=Object.assign({id},rec);}
@@ -577,14 +585,14 @@ $("f-setsize").addEventListener("submit",e=>{
 
 /* ================= packs tab ================= */
 function packValue(pk){
-  let v=0;for(const l of pk.pulls){const c=S.cards.find(x=>x.name.toLowerCase()===l.name.toLowerCase());if(c)v+=l.qty*(+c.value||0);}
+  let v=0;for(const l of (pk.pulls||[])){const c=S.cards.find(x=>x.name.toLowerCase()===l.name.toLowerCase());if(c)v+=l.qty*(+c.value||0);}
   return v;
 }
 function parsePackLines(raw){
   const out=[];
   for(const ln of String(raw||"").split("\n")){
     const t=ln.trim();if(!t)continue;
-    const m=t.match(/^(\d+)\s*[x×]?\s+(.+)$/);
+    const m=t.match(/^(\d+)\s*[x×]\s*(.+)$/)||t.match(/^(\d+)\s+(.+)$/);
     if(m)out.push({qty:parseInt(m[1]),name:m[2].trim()});
     else out.push({qty:1,name:t});
   }
@@ -595,12 +603,12 @@ function renderPacks(){
   let spent=0,pullv=0;for(const p of ps){spent+=+p.cost||0;pullv+=packValue(p);}
   $("pack-stats").textContent=ps.length?ps.length+" packs ripped · "+money(spent)+" spent · est. pull value "+money(pullv):"No packs logged yet — rip one and log your hits.";
   $("pack-list").innerHTML=ps.map(p=>{
-    const tot=p.pulls.reduce((a,l)=>a+l.qty,0);
+    const tot=(p.pulls||[]).reduce((a,l)=>a+l.qty,0);
     const pv=packValue(p);
     return '<div class="card"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">'+
     "<div><h3>"+esc(p.label||"Pack rip")+"</h3><div class=\"muted\">"+esc(p.date||"—")+" · "+esc(p.set||"Unknown set")+" · "+tot+" pulls · cost "+money(p.cost)+" · est. pull value "+money(pv)+"</div></div>"+
     '<div class="btnrow" style="margin:0"><button class="btn" data-pack="'+p.id+'">Open / edit</button></div></div>'+
-    (p.pulls.length?'<div class="twrap"><table><tbody>'+p.pulls.slice(0,8).map(l=>"<tr><td>"+l.qty+"×</td><td>"+esc(l.name)+"</td></tr>").join("")+(p.pulls.length>8?'<tr><td colspan="2" class="muted">+'+(p.pulls.length-8)+" more…</td></tr>":"")+"</tbody></table></div>":"")+
+    ((p.pulls||[]).length?'<div class="twrap"><table><tbody>'+(p.pulls||[]).slice(0,8).map(l=>"<tr><td>"+l.qty+"×</td><td>"+esc(l.name)+"</td></tr>").join("")+((p.pulls||[]).length>8?'<tr><td colspan="2" class="muted">+'+(p.pulls.length-8)+" more…</td></tr>":"")+"</tbody></table></div>":"")+
     (p.notes?'<div class="muted">'+esc(p.notes)+"</div>":"")+"</div>";
   }).join("");
   document.querySelectorAll("[data-pack]").forEach(b=>b.addEventListener("click",()=>openPackDlg(b.dataset.pack)));
@@ -610,7 +618,7 @@ function openPackDlg(id){
   $("dlg-pack-title").textContent=p?"Edit pack":"Log pack";
   $("fp-label").value=p?(p.label||""):"";$("fp-date").value=p?(p.date||todayISO()):todayISO();
   $("fp-set").value=p?(p.set||""):"";$("fp-cost").value=p?(p.cost||0):0;
-  $("fp-pulls").value=p?p.pulls.map(l=>l.qty+" "+l.name).join("\n"):"";
+  $("fp-pulls").value=p?(p.pulls||[]).map(l=>l.qty+" "+l.name).join("\n"):"";
   $("fp-notes").value=p?(p.notes||""):"";
   $("fp-del").hidden=!p;$("f-pack").dataset.editId=id||"";
   $("dlg-pack").showModal();setTimeout(()=>$("fp-set").focus(),50);
@@ -709,11 +717,11 @@ function download(name,content,type){
 }
 $("r-csv").addEventListener("click",()=>{
   const q=s=>'"'+String(s??"").replace(/"/g,'""')+'"';
-  const rows=[["name","set","collector_number","colors","rarity","condition","foil","qty","paid_each","value_each","notes"].join(",")];
+  const rows=[["name","set","collector_number","colors","rarity","condition","holo","qty","paid_each","value_each","notes"].join(",")];
   for(const c of S.cards)rows.push([q(c.name),q(c.set),q(c.num),q((c.colors||[]).join("")),q(c.rarity),q(c.cond),c.foil?1:0,c.qty,c.paid,c.value,q(c.notes)].join(","));
-  download("binderbox-cards.csv",rows.join("\n"),"text/csv");beep(700);
+  download("packtrack-cards.csv",rows.join("\n"),"text/csv");beep(700);
 });
-$("r-json").addEventListener("click",()=>{download("binderbox-backup-"+todayISO()+".json",JSON.stringify(S,null,1),"application/json");beep(700);});
+$("r-json").addEventListener("click",()=>{download("packtrack-backup-"+todayISO()+".json",JSON.stringify(S,null,1),"application/json");beep(700);});
 $("r-import-btn").addEventListener("click",()=>$("r-import").click());
 $("r-import").addEventListener("change",e=>{
   const f=e.target.files[0];if(!f)return;
@@ -726,7 +734,7 @@ $("r-import").addEventListener("change",e=>{
       if(exitSampleGuard()===false)return;
       if(!confirm("Import this backup? Your current collection will be replaced."))return;
       if(sampleOn)exitSampleSilent();
-      d.cards=(d.cards||[]).filter(c=>c&&typeof c==="object").map(c=>({id:String(c.id||uid()),name:String(c.name||"Unnamed"),set:String(c.set||""),num:String(c.num||""),colors:Array.isArray(c.colors)?c.colors:[],rarity:String(c.rarity||"common"),cond:String(c.cond||"NM"),foil:!!c.foil,qty:Math.max(0,Math.floor(+c.qty||0)),paid:Math.max(0,+c.paid||0),value:Math.max(0,+c.value||0),notes:String(c.notes||""),photo:typeof c.photo==="string"&&c.photo.indexOf("data:image/")===0?c.photo:""}));
+      sanitizeStore(d);
       S=Object.assign(defStore(),d,{prefs:Object.assign(defStore().prefs,d.prefs||{})});
       save();renderAll();beep(760);alert("Backup imported.");
     }catch(err){alert("Import failed: "+err.message);}
@@ -777,7 +785,8 @@ function canvasPos(cv,e){const r=cv.getBoundingClientRect();return{x:e.clientX-r
 /* ---- donut ---- */
 function drawDonut(id,segs,totalLabel,totalValue,selKey,fmt){
   const s=setupCanvas(id);if(!s)return;const{cv,ctx,W,H}=s;
-  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-14,hr=R*0.58;
+  const lcols=segs.length>6?2:1,lrows=Math.ceil(segs.length/lcols),legendH=lrows*18+10;
+  const cx=W/2,cy=(H-legendH)/2,R=Math.min(W,(H-legendH))/2-14,hr=R*0.58;
   const total=segs.reduce((a,g)=>a+g.value,0);
   const sel=chartSel[selKey];
   let a=-Math.PI/2;
@@ -799,14 +808,14 @@ function drawDonut(id,segs,totalLabel,totalValue,selKey,fmt){
   const vtxt=fmt?fmt(val):String(val);
   const fs2=fitText(ctx,vtxt,box,20);
   ctx.fillText(vtxt,cx,cy+(fs2*0.75));
-  // legend
-  ctx.textAlign="left";ctx.textBaseline="alphabetic";
-  let ly=H-14*segs.length-2;
+  // legend (two columns when many segments)
+  ctx.textAlign="left";ctx.textBaseline="alphabetic";ctx.font="14px system-ui,sans-serif";
   segs.forEach((g,i)=>{
-    ctx.fillStyle=g.color;ctx.fillRect(8,ly-10,12,12);
-    ctx.fillStyle=cssVar("--ink");ctx.font="14px system-ui,sans-serif";
-    let lab=g.label+(sel===i?" ✓":"");
-    ctx.fillText(lab,26,ly);ly+=18;
+    const c=lcols===1?0:(i>=lrows?1:0),r=lcols===1?i:(i%lrows);
+    const lx=8+c*(W/2),ly=H-lrows*18-2+r*18;
+    ctx.fillStyle=g.color;ctx.fillRect(lx,ly-10,12,12);
+    ctx.fillStyle=cssVar("--ink");
+    ctx.fillText(g.label+(sel===i?" ✓":""),lx+18,ly);
   });
   cv._donut={cx,cy,R,hr,segs,selKey};
 }
