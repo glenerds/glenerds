@@ -24,6 +24,7 @@ header .hwrap{max-width:1100px;margin:0 auto;padding:14px 18px;display:flex;alig
 .hdr-btns button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s,background .15s}
 .hdr-btns button:active{transform:scale(.93)}
 .hdr-btns button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.hdr-btns button svg{width:22px;height:22px;display:block}
 .pill-btn{display:inline-flex;align-items:center;height:44px;padding:0 18px;border-radius:22px;background:var(--card);border:1px solid var(--line);color:var(--ink);text-decoration:none;font-weight:700;font-size:15px}
 .pill-btn:active{transform:scale(.96)}
 main{max-width:1100px;margin:0 auto;padding:0 18px 40px}
@@ -111,9 +112,9 @@ footer{border-top:1px solid var(--line);margin-top:30px;padding:20px 18px;max-wi
     </div>
     <a class="pill-btn" href="https://glenerds.gumroad.com">More Apps</a>
     <div class="hdr-btns">
-      <button id="sample-toggle" title="Try sample data" aria-label="Try sample data">🧪</button>
-      <button id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">🌙</button>
-      <button id="sound-toggle" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true" class="on">🔊</button>
+      <button id="sample-toggle" title="Try sample data" aria-label="Try sample data" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+      <button id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5z"/></svg></button>
+      <button id="sound-toggle" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6.5 9H3v6h3.5L11 19z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg></button>
     </div>
   </div>
 </header>
@@ -226,7 +227,7 @@ const sndOk=()=>beep(660,.12), sndDel=()=>beep(220,.18);
 
 /* ---------- theme ---------- */
 function effTheme(){const s=localStorage.getItem("taxfreetrail.theme");return (s==="dark"||s==="light")?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
-function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");b.textContent=t==="dark"?"☀️":"🌙";}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");}
 $("theme-toggle").addEventListener("click",()=>{const t=effTheme();localStorage.setItem("taxfreetrail.theme",t==="dark"?"light":"dark");paintTheme();drawCharts();sndOk();});
 function paintSound(){const on=localStorage.getItem("taxfreetrail.sound")!=="off";const b=$("sound-toggle");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);}
 $("sound-toggle").addEventListener("click",()=>{const on=localStorage.getItem("taxfreetrail.sound")!=="off";localStorage.setItem("taxfreetrail.sound",on?"off":"on");paintSound();if(!on)sndOk();});
