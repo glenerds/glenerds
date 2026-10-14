@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Food–Symptom Correlation Tracker — Find Your Trigger Foods, Offline Food Diary & Symptom Log</title>
+<style>
+:root{
+  --bg:#faf6ee; --card:#ffffff; --ink:#2c2318; --muted:#7c6c58;
+  --acc:#c2410c; --acc2:#4d7c0f; --acc-soft:#fdeede;
+  --line:#e9dfcd; --danger:#b91c1c; --warn:#b45309; --ok:#4d7c0f;
+  --shadow:0 1px 3px rgba(60,40,10,.10);
+}
+[data-theme="dark"]{
+  --bg:#1b1611; --card:#28211a; --ink:#f1e9da; --muted:#b6a68c;
+  --acc:#fb923c; --acc2:#a3e635; --acc-soft:#3a2a18;
+  --line:#463a2b; --danger:#f87171; --warn:#fbbf24; --ok:#a3e635;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1{font-size:22px;margin:0}
+h2{font-size:19px;margin:0 0 10px}
+h3{font-size:17px;margin:14px 0 8px}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.small{font-size:15px}
+/* ---------- header ---------- */
+.hdr{background:var(--bg);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+.hdr-in{max-width:1060px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px;margin-right:auto}
+.brand svg{width:30px;height:30px;flex:none}
+.hdr-btns{display:flex;gap:8px;align-items:center}
+.hdr-btns button,.pill{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+  background:var(--card);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;
+  transition:transform .08s,background .15s}
+.hdr-btns button:active,.pill:active{transform:scale(.92);filter:brightness(.94)}
+.hdr-btns button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.hdr-btns button svg{width:22px;height:22px}
+.pill{width:auto;height:44px;padding:0 16px;font-size:15px;font-weight:700;text-decoration:none;border-radius:22px;white-space:nowrap;flex:none}
+@media(max-width:480px){.pill{padding:0 10px}.brand{font-size:17px}.hdr-in{gap:6px;padding:10px 10px}}
+.pill:hover{background:var(--acc-soft)}
+/* ---------- layout ---------- */
+.wrap{max-width:1060px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;
+  padding:9px 15px;font-size:15px;font-weight:600;cursor:pointer}
+.tabs button:active{transform:scale(.95)}
+.tabs button[aria-selected="true"]{background:var(--acc);border-color:var(--acc);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin:0 0 14px;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr}}
+.stat{font-size:30px;font-weight:800;color:var(--acc)}
+.stat-lbl{font-size:15px;color:var(--muted)}
+.rowline{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rowline:last-child{border-bottom:0}
+.grow{flex:1;min-width:140px}
+/* ---------- forms ---------- */
+label.f{display:grid;gap:4px;font-size:15px;font-weight:600}
+input,select,textarea{font:16px/1.4 system-ui,sans-serif;color:var(--ink);background:var(--bg);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+input[type="range"]{padding:0;accent-color:var(--acc)}
+input[type="checkbox"]{width:auto}
+textarea{resize:vertical;min-height:56px}
+form.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;align-items:end;margin-bottom:6px}
+button.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:700;cursor:pointer}
+button.btn:active{transform:scale(.96);filter:brightness(.93)}
+button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 14px;font-size:15px;font-weight:600;cursor:pointer}
+button.ghost:active{transform:scale(.95)}
+button.danger{background:none;border:1px solid var(--danger);color:var(--danger);border-radius:10px;padding:8px 12px;font-size:15px;cursor:pointer}
+button.danger:active{transform:scale(.95)}
+.tag{display:inline-block;background:var(--acc-soft);color:var(--ink);border-radius:14px;padding:3px 11px;font-size:15px;margin:2px 4px 2px 0}
+.sev{display:inline-block;min-width:34px;text-align:center;font-weight:800;border-radius:8px;padding:2px 8px;color:#fff;font-size:15px}
+/* ---------- suspects ---------- */
+.suspect{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;background:var(--bg)}
+.suspect .lift{font-size:24px;font-weight:800;color:var(--acc)}
+.liftbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px}
+.liftbar i{display:block;height:100%;background:var(--acc);border-radius:4px}
+.statuspill{border-radius:14px;padding:4px 12px;font-size:15px;font-weight:700;border:1px solid var(--line);background:var(--card)}
+.statuspill.eliminated{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+.statuspill.testing{background:#fef3c7;color:#92400e;border-color:#fde68a}
+.statuspill.reintroduced{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+[data-theme="dark"] .statuspill.eliminated{background:#450a0a;color:#fca5a5}
+[data-theme="dark"] .statuspill.testing{background:#451a03;color:#fcd34d}
+[data-theme="dark"] .statuspill.reintroduced{background:#052e16;color:#86efac}
+/* ---------- charts ---------- */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.chart-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:var(--shadow);min-height:300px;display:flex;flex-direction:column}
+.chart-card h3{margin:0 0 6px;text-align:center;font-size:16px}
+.chart-card svg{width:100%;height:auto;flex:1}
+svg .bar{cursor:pointer}
+svg .slice{cursor:pointer}
+/* ---------- disclaimer ---------- */
+.disclaimer{border-left:4px solid var(--warn);background:var(--acc-soft);border-radius:0 12px 12px 0;padding:12px 16px;margin:0 0 14px;font-size:15px}
+/* ---------- bottom cta ---------- */
+.cta{margin:26px 0 10px;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px}
+/* ---------- print ---------- */
+#print-report{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  .hdr,.tabs,.no-print,.cta,.disclaimer-form{display:none!important}
+  #print-report{display:block!important}
+  .wrap{max-width:100%;padding:0}
+}
+/* ---------- misc ---------- */
+.hidden{display:none!important}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:15px}
+.kv dt{font-weight:700}.kv dd{margin:0}
+</style>
+</head>
+<body>
+<header class="hdr"><div class="hdr-in">
+  <div class="brand">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="#c2410c"/><circle cx="14" cy="14" r="6.5" fill="none" stroke="#fff" stroke-width="2.6"/><line x1="19" y1="19" x2="25" y2="25" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/><path d="M11 12c1.5-1.2 4-1.2 5.5.3" stroke="#ffd9a8" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>
+    <span>FoodClue</span>
+  </div>
+  <div class="hdr-btns">
+    <a class="pill" href="https://glenerds.gumroad.com" aria-label="More apps">More Apps</a>
+    <button id="btn-sample" title="Try sample data" aria-label="Try sample data" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L5.2 17a2.4 2.4 0 0 0 2.1 3.5h9.4a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 14h9"/></svg></button>
+    <button id="btn-theme" title="Dark mode" aria-label="Dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></button>
+    <button id="btn-sound" title="Sound" aria-label="Sound" aria-pressed="true" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></button>
+  </div>
+</div></header>
+
+<div class="wrap">
+  <div class="disclaimer" role="note"><b>Please read:</b> FoodClue shows patterns in <b>your</b> logs — it cannot diagnose intolerances, allergies, or conditions. Correlation is not causation. Always talk to your clinician or dietitian about food and symptom concerns.</div>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-tab="dash" aria-selected="true">Dashboard</button>
+    <button role="tab" data-tab="foods" aria-selected="false">Food Log</button>
+    <button role="tab" data-tab="symptoms" aria-selected="false">Symptom Log</button>
+    <button role="tab" data-tab="suspects" aria-selected="false">Suspects</button>
+    <button role="tab" data-tab="elim" aria-selected="false">Elimination</button>
+    <button role="tab" data-tab="charts" aria-selected="false">Charts</button>
+    <button role="tab" data-tab="report" aria-selected="false">Doctor Report</button>
+  </nav>
+
+  <section id="panel-dash" role="tabpanel"></section>
+  <section id="panel-foods" role="tabpanel" class="hidden"></section>
+  <section id="panel-symptoms" role="tabpanel" class="hidden"></section>
+  <section id="panel-suspects" role="tabpanel" class="hidden"></section>
+  <section id="panel-elim" role="tabpanel" class="hidden"></section>
+  <section id="panel-charts" role="tabpanel" class="hidden"></section>
+  <section id="panel-report" role="tabpanel" class="hidden"></section>
+
+  <div class="cta no-print">
+    <h2>More one-time offline tools</h2>
+    <p class="muted">Every app is a single file. No accounts, no subscriptions.</p>
+    <a class="pill" href="https://glenerds.gumroad.com" style="display:inline-flex">More Apps</a>
+  </div>
+</div>
+
+<div id="print-report"></div>
+<script>
+"use strict";
+/* ================= store ================= */
+const LS="foodclue.v1";
+const DEFAULT_SYMPTOMS=["Bloating","Abdominal pain","Headache","Fatigue","Nausea","Skin rash","Brain fog","Diarrhea"];
+function defStore(){return{foods:[],symptoms:[],elim:[],symptomList:DEFAULT_SYMPTOMS.slice(),
+  prefs:{theme:null,sound:true,windowHours:6}};}
+let S=defStore(), sampleOn=false, sampleBackup=null;
+function isObj(o){return o&&typeof o==="object"&&!Array.isArray(o);}
+function sanitizeStore(s){
+  const d=defStore(); const o=Object.assign(d,isObj(s)?s:{});
+  o.prefs=Object.assign(d.prefs,isObj(s&&s.prefs)?s.prefs:{});
+  if(o.prefs.theme!=="light"&&o.prefs.theme!=="dark")o.prefs.theme=null;
+  o.prefs.sound=o.prefs.sound!==false;
+  o.prefs.windowHours=(isFinite(Number(o.prefs.windowHours))&&Number(o.prefs.windowHours)>0)?Number(o.prefs.windowHours):6;
+  for(const k of["foods","symptoms","elim","symptomList"])if(!Array.isArray(o[k]))o[k]=[];
+  o.foods=o.foods.filter(f=>isObj(f)&&typeof f.id==="string").map(f=>({
+    id:f.id,dt:typeof f.dt==="string"?f.dt:"",meal:typeof f.meal==="string"?f.meal:"",
+    items:typeof f.items==="string"?f.items:"",
+    tokens:Array.isArray(f.tokens)?f.tokens.filter(t=>typeof t==="string"):[],
+    notes:typeof f.notes==="string"?f.notes:""}));
+  o.symptoms=o.symptoms.filter(g=>isObj(g)&&typeof g.id==="string").map(g=>({
+    id:g.id,dt:typeof g.dt==="string"?g.dt:"",
+    symptom:typeof g.symptom==="string"?g.symptom:"",
+    severity:(isFinite(Number(g.severity))?Math.max(1,Math.min(10,Math.round(Number(g.severity)))):5),
+    notes:typeof g.notes==="string"?g.notes:""}));
+  o.elim=o.elim.filter(e=>isObj(e)&&typeof e.id==="string").map(e=>({
+    id:e.id,food:typeof e.food==="string"?e.food:"",
+    status:["eliminated","testing","reintroduced"].includes(e.status)?e.status:"eliminated",
+    start:typeof e.start==="string"?e.start:"",end:typeof e.end==="string"?e.end:"",
+    notes:typeof e.notes==="string"?e.notes:""}));
+  o.symptomList=o.symptomList.filter(t=>typeof t==="string"&&t.trim()!=="");
+  if(!o.symptomList.length)o.symptomList=DEFAULT_SYMPTOMS.slice();
+  return o;
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(isObj(s))return sanitizeStore(s);}catch(e){}return defStore();}
+function save(){if(sampleOn)return;try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+function savePrefs(){try{const cur=JSON.parse(localStorage.getItem(LS));const o=isObj(cur)?cur:defStore();o.prefs=S.prefs;localStorage.setItem(LS,JSON.stringify(o));}catch(e){}}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function $(id){return document.getElementById(id);}
+/* ================= utils ================= */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function pad(n){return String(n).padStart(2,"0");}
+function fmtDT(iso){const d=new Date(iso);if(isNaN(d))return"";return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+" "+pad(d.getHours())+":"+pad(d.getMinutes());}
+function fmtD(iso){const d=new Date(iso);if(isNaN(d))return"";return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function nowLocal(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes());}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function dayKey(iso){return fmtD(iso);}
+const STOPWORDS=new Set(["with","and","the","fresh","side","grilled","baked","scrambled","small","large","cup","cups","hot","cold","ice"]);
+function tokenize(text){
+  const phrases=String(text||"").toLowerCase().split(/[,\n;]+/).map(t=>t.trim()
+    .replace(/[^a-z0-9 \-']/g,"").replace(/\s+/g," ").trim())
+    .filter(t=>t.length>1);
+  const out=[],seen=new Set();
+  const add=t=>{if(t&&!seen.has(t)){seen.add(t);out.push(t);}};
+  phrases.forEach(p=>{
+    add(p);
+    p.split(" ").forEach(w=>{if(w.length>3&&!STOPWORDS.has(w))add(w);});
+  });
+  return out;
+}
+function sevColor(s){if(s>=8)return"#b91c1c";if(s>=6)return"#c2410c";if(s>=4)return"#b45309";return"#4d7c0f";}
+/* ================= sound ================= */
+let AC=null;
+function tone(f,dur){if(!S.prefs.sound)return;try{
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type="sine";o.frequency.value=f;g.gain.value=0.06;
+  o.connect(g);g.connect(AC.destination);o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+dur);o.stop(AC.currentTime+dur);
+}catch(e){}}
+function sndOk(){tone(660,0.12);}function sndDel(){tone(330,0.15);}function sndTog(){tone(520,0.08);}
+/* ================= theme ================= */
+function applyTheme(){
+  const t=S.prefs.theme||(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  document.documentElement.setAttribute("data-theme",t);
+  const b=$("btn-theme");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark"?"true":"false");
+  const s=$("btn-sound");s.classList.toggle("on",!!S.prefs.sound);s.setAttribute("aria-pressed",S.prefs.sound?"true":"false");
+  const f=$("btn-sample");f.classList.toggle("on",sampleOn);f.setAttribute("aria-pressed",sampleOn?"true":"false");
+}
+/* ================= sample data ================= */
+function sampleData(){
+  let seed=20261014;
+  const rnd=()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff;};
+  const pick=a=>a[Math.floor(rnd()*a.length)];
+  const meals=[
+    {meal:"breakfast",items:["oatmeal, banana, honey","scrambled eggs, toast, orange juice","yogurt, granola, blueberries","wheat toast, peanut butter, apple"]},
+    {meal:"lunch",items:["chicken salad sandwich, chips","pasta with tomato sauce, garlic bread","rice bowl, grilled chicken, vegetables","turkey wrap, side salad"]},
+    {meal:"dinner",items:["grilled salmon, rice, broccoli","pizza, side salad","beef stir fry, noodles","baked potato, cheese, sour cream, salad"]},
+    {meal:"snack",items:["apple, almonds","crackers and cheese","banana","ice cream"]}
+  ];
+  const foods=[],symptoms=[];
+  const start=new Date();start.setDate(start.getDate()-21);start.setHours(8,0,0,0);
+  let fid=0,sid=0;
+  for(let d=0;d<21;d++){
+    for(const m of meals){
+      if(m.meal==="snack"&&rnd()<0.45)continue;
+      const dt=new Date(start.getTime()+d*864e5+(m.meal==="breakfast"?0:m.meal==="lunch"?4.5*36e5:m.meal==="dinner"?10*36e5:2.5*36e5)+Math.floor(rnd()*3)*36e5);
+      const items=pick(m.items);
+      foods.push({id:"sf"+(fid++),dt:dt.toISOString().slice(0,16),meal:m.meal,items:items,tokens:tokenize(items),notes:""});
+      const toks=tokenize(items).join(" ");
+      // trigger patterns: wheat/gluten items -> bloating; dairy -> abdominal pain
+      let trig=null;
+      if(/wheat|pasta|pizza|toast|bread|crackers|noodles|garlic bread/.test(toks)&&rnd()<0.78)trig={symptom:"Bloating",sev:5+Math.floor(rnd()*4)};
+      else if(/cheese|milk|yogurt|ice cream|sour cream/.test(toks)&&rnd()<0.55)trig={symptom:"Abdominal pain",sev:4+Math.floor(rnd()*4)};
+      else if(rnd()<0.10)trig={symptom:pick(["Headache","Fatigue","Nausea"]),sev:3+Math.floor(rnd()*4)};
+      if(trig){
+        const sdt=new Date(dt.getTime()+(1+Math.floor(rnd()*4))*36e5+Math.floor(rnd()*59)*6e4);
+        symptoms.push({id:"ss"+(sid++),dt:sdt.toISOString().slice(0,16),symptom:trig.symptom,severity:trig.sev,notes:""});
+      }
+    }
+  }
+  foods.sort((a,b)=>a.dt<b.dt?-1:1);symptoms.sort((a,b)=>a.dt<b.dt?-1:1);
+  return{foods:foods,symptoms:symptoms,
+    elim:[{id:"se1",food:"wheat",status:"eliminated",start:todayStr(),end:"",notes:"testing removal for 2 weeks"},
+          {id:"se2",food:"dairy",status:"testing",start:todayStr(),end:"",notes:""}],
+    symptomList:DEFAULT_SYMPTOMS.slice(),
+    prefs:{theme:S.prefs.theme,sound:S.prefs.sound,windowHours:6}};
+}
+function toggleSample(){
+  if(!sampleOn){sampleBackup=JSON.stringify(S);S=sanitizeStore(sampleData());sampleOn=true;}
+  else{S=sanitizeStore(JSON.parse(sampleBackup));sampleOn=false;sampleBackup=null;}
+  save();applyTheme();renderAll();sndTog();
+}
+/* ================= correlation engine ================= */
+function computeSuspects(){
+  const winMs=S.prefs.windowHours*36e5;
+  const meals=S.foods.slice().sort((a,b)=>a.dt<b.dt?-1:1);
+  const syms=S.symptoms.slice().sort((a,b)=>a.dt<b.dt?-1:1);
+  const tokens={};
+  meals.forEach(m=>m.tokens.forEach(t=>{tokens[t]=tokens[t]||[];tokens[t].push(m);}));
+  const totalMeals=meals.length;
+  const totalSyms=syms.length;
+  const baseline=totalMeals>0?totalSyms/totalMeals:0;
+  const out=[];
+  for(const t of Object.keys(tokens)){
+    const exps=tokens[t];
+    if(exps.length<3)continue;
+    let co=0,sevSum=0,sevN=0;
+    for(const m of exps){
+      const mt=new Date(m.dt).getTime();if(isNaN(mt))continue;
+      for(const s of syms){
+        const st=new Date(s.dt).getTime();if(isNaN(st))continue;
+        if(st>mt&&st-mt<=winMs){co++;sevSum+=s.severity;sevN++;break;}
+      }
+    }
+    const rate=co/exps.length;
+    const lift=baseline>0?rate/baseline:(co>0?99:0);
+    out.push({token:t,exposures:exps.length,co:co,rate:rate,lift:lift,
+      avgSev:sevN?sevSum/sevN:0});
+  }
+  out.sort((a,b)=>b.lift-a.lift||b.co-a.co);
+  return{list:out,baseline:baseline,totalMeals:totalMeals,totalSyms:totalSyms};
+}
+function suspectRead(r){
+  return "ate "+r.exposures+"x, symptoms followed "+r.co+"x";
+}
+/* ================= dashboard ================= */
+function renderDash(){
+  const el=$("panel-dash");
+  const recentFoods=S.foods.slice().sort((a,b)=>a.dt>b.dt?-1:1).slice(0,4);
+  const recentSyms=S.symptoms.slice().sort((a,b)=>a.dt>b.dt?-1:1).slice(0,4);
+  const sus=computeSuspects().list.slice(0,3);
+  const elimActive=S.elim.filter(e=>e.status==="eliminated").length;
+  let h='<div class="grid3">';
+  h+='<div class="card"><div class="stat">'+S.foods.length+'</div><div class="stat-lbl">meals logged</div></div>';
+  h+='<div class="card"><div class="stat">'+S.symptoms.length+'</div><div class="stat-lbl">symptom episodes</div></div>';
+  h+='<div class="card"><div class="stat">'+elimActive+'</div><div class="stat-lbl">foods eliminated</div></div>';
+  h+='</div><div class="grid2"><div class="card"><h2>Top suspects</h2>';
+  if(!sus.length)h+='<p class="muted">Log meals and symptoms to surface patterns. Foods need at least 3 logged meals to rank.</p>';
+  sus.forEach(r=>{h+='<div class="rowline"><span class="grow"><b>'+esc(r.token)+'</b><br><span class="muted small">'+esc(suspectRead(r))+'</span></span><span class="lift" style="font-weight:800;color:var(--acc)">'+r.lift.toFixed(1)+'x</span></div>';});
+  h+='</div><div class="card"><h2>Recent activity</h2>';
+  recentFoods.forEach(f=>{h+='<div class="rowline"><span class="grow"><b>'+esc(f.meal)+'</b> · '+esc(f.items.slice(0,60))+'<br><span class="muted small">'+esc(fmtDT(f.dt))+'</span></span></div>';});
+  recentSyms.forEach(s=>{h+='<div class="rowline"><span class="grow"><b>'+esc(s.symptom)+'</b><br><span class="muted small">'+esc(fmtDT(s.dt))+'</span></span><span class="sev" style="background:'+sevColor(s.severity)+'">'+s.severity+'</span></div>';});
+  if(!recentFoods.length&&!recentSyms.length)h+='<p class="muted">Nothing logged yet — add a meal on the Food Log tab.</p>';
+  h+='</div></div>';
+  el.innerHTML=h;
+}
+/* ================= food log ================= */
+function renderFoods(){
+  const el=$("panel-foods");
+  let h='<div class="card"><h2>Log a meal</h2><form class="add" id="form-food">'
+    +'<label class="f">Date & time<input type="datetime-local" name="dt" value="'+nowLocal()+'" required></label>'
+    +'<label class="f">Meal<select name="meal"><option>breakfast</option><option>lunch</option><option>dinner</option><option>snack</option></select></label>'
+    +'<label class="f" style="grid-column:1/-1">Foods eaten (comma-separated)<input name="items" required maxlength="300" placeholder="oatmeal, banana, honey"></label>'
+    +'<label class="f" style="grid-column:1/-1">Notes<input name="notes" maxlength="200" placeholder="optional"></label>'
+    +'<div><button class="btn" type="submit">Add meal</button></div></form></div>';
+  h+='<div class="card"><h2>Meals ('+S.foods.length+')</h2>';
+  const rows=S.foods.slice().sort((a,b)=>a.dt>b.dt?-1:1);
+  if(!rows.length)h+='<p class="muted">No meals logged yet.</p>';
+  rows.forEach(f=>{
+    h+='<div class="rowline"><span class="grow"><b>'+esc(f.meal)+'</b> · '+esc(fmtDT(f.dt))+'<br>'+esc(f.items)
+      +'<br>'+f.tokens.map(t=>'<span class="tag">'+esc(t)+'</span>').join("")
+      +(f.notes?'<br><span class="muted small">'+esc(f.notes)+'</span>':"")
+      +'</span><button class="danger" data-del-food="'+f.id+'">Delete</button></div>';
+  });
+  h+='</div>';
+  h+='<div class="card"><h2>Backup</h2><div class="toolbar">'
+    +'<button class="ghost" id="exp-food-csv">Export CSV</button>'
+    +'<button class="ghost" id="exp-food-json">Export JSON</button>'
+    +'<label class="ghost" style="cursor:pointer">Import JSON<input type="file" id="imp-food" accept=".json" class="hidden"></label>'
+    +'</div></div>';
+  el.innerHTML=h;
+  $("form-food").addEventListener("submit",e=>{
+    e.preventDefault();const f=new FormData(e.target);
+    const items=f.get("items").trim();if(!items)return;
+    S.foods.push({id:uid(),dt:f.get("dt")||nowLocal(),meal:f.get("meal"),items:items,
+      tokens:tokenize(items),notes:f.get("notes").trim()});
+    e.target.reset();e.target.dt.value=nowLocal();save();sndOk();renderAll();
+  });
+  el.querySelectorAll("[data-del-food]").forEach(b=>b.addEventListener("click",()=>{
+    S.foods=S.foods.filter(x=>x.id!==b.dataset.delFood);save();sndDel();renderAll();
+  }));
+  $("exp-food-csv").addEventListener("click",()=>{exportCSV("foods");sndTog();});
+  $("exp-food-json").addEventListener("click",()=>{exportJSON("foods");sndTog();});
+  $("imp-food").addEventListener("change",e=>{if(e.target.files[0])importJSON("foods",e.target.files[0]);e.target.value="";});
+}
+/* ================= symptom log ================= */
+function renderSymptoms(){
+  const el=$("panel-symptoms");
+  const opts=S.symptomList.map(s=>'<option>'+esc(s)+'</option>').join("");
+  let h='<div class="card"><h2>Log a symptom</h2><form class="add" id="form-sym">'
+    +'<label class="f">Date & time<input type="datetime-local" name="dt" value="'+nowLocal()+'" required></label>'
+    +'<label class="f">Symptom<select name="symptom">'+opts+'</select></label>'
+    +'<label class="f">Severity <span id="sev-val">5</span>/10<input type="range" name="severity" min="1" max="10" value="5" id="sev-range"></label>'
+    +'<label class="f" style="grid-column:1/-1">Notes<input name="notes" maxlength="200" placeholder="optional"></label>'
+    +'<div><button class="btn" type="submit">Add symptom</button></div></form></div>';
+  h+='<div class="card"><h2>Episodes ('+S.symptoms.length+')</h2>';
+  const rows=S.symptoms.slice().sort((a,b)=>a.dt>b.dt?-1:1);
+  if(!rows.length)h+='<p class="muted">No symptoms logged yet.</p>';
+  rows.forEach(s=>{
+    h+='<div class="rowline"><span class="sev" style="background:'+sevColor(s.severity)+'">'+s.severity+'</span>'
+      +'<span class="grow"><b>'+esc(s.symptom)+'</b> · '+esc(fmtDT(s.dt))
+      +(s.notes?'<br><span class="muted small">'+esc(s.notes)+'</span>':"")
+      +'</span><button class="danger" data-del-sym="'+s.id+'">Delete</button></div>';
+  });
+  h+='</div>';
+  h+='<div class="card"><h2>Symptom list</h2><p class="muted small">Add your own symptoms; they appear in the dropdown above.</p><form class="add" id="form-csym">'
+    +'<label class="f">New symptom<input name="name" required maxlength="40" placeholder="e.g. Joint pain"></label>'
+    +'<div><button class="btn" type="submit">Add</button></div></form><div>'
+    +S.symptomList.map(s=>'<span class="tag">'+esc(s)+'</span>').join("")+'</div></div>';
+  h+='<div class="card"><h2>Backup</h2><div class="toolbar">'
+    +'<button class="ghost" id="exp-sym-csv">Export CSV</button>'
+    +'<button class="ghost" id="exp-sym-json">Export JSON</button>'
+    +'<label class="ghost" style="cursor:pointer">Import JSON<input type="file" id="imp-sym" accept=".json" class="hidden"></label>'
+    +'</div></div>';
+  el.innerHTML=h;
+  $("sev-range").addEventListener("input",e=>{$("sev-val").textContent=e.target.value;});
+  $("form-sym").addEventListener("submit",e=>{
+    e.preventDefault();const f=new FormData(e.target);
+    S.symptoms.push({id:uid(),dt:f.get("dt")||nowLocal(),symptom:f.get("symptom"),
+      severity:Number(f.get("severity"))||5,notes:f.get("notes").trim()});
+    e.target.reset();e.target.dt.value=nowLocal();$("sev-val").textContent="5";save();sndOk();renderAll();
+  });
+  el.querySelectorAll("[data-del-sym]").forEach(b=>b.addEventListener("click",()=>{
+    S.symptoms=S.symptoms.filter(x=>x.id!==b.dataset.delSym);save();sndDel();renderAll();
+  }));
+  $("form-csym").addEventListener("submit",e=>{
+    e.preventDefault();const f=new FormData(e.target);const n=f.get("name").trim();
+    if(n&&!S.symptomList.includes(n)){S.symptomList.push(n);save();sndOk();renderAll();}
+  });
+  $("exp-sym-csv").addEventListener("click",()=>{exportCSV("symptoms");sndTog();});
+  $("exp-sym-json").addEventListener("click",()=>{exportJSON("symptoms");sndTog();});
+  $("imp-sym").addEventListener("change",e=>{if(e.target.files[0])importJSON("symptoms",e.target.files[0]);e.target.value="";});
+}
+/* ================= suspects ================= */
+function renderSuspects(){
+  const el=$("panel-suspects");
+  const r=computeSuspects();
+  let h='<div class="card"><h2>Suspect foods</h2>'
+    +'<p class="muted">For each food, we count symptom episodes within <b>'+S.prefs.windowHours+'h</b> after eating it, versus your overall symptom rate. '
+    +'Higher lift = stronger pattern. <b>This shows correlation in your logs, not a diagnosis.</b></p>'
+    +'<form class="add" id="form-win"><label class="f">Symptom window (hours)<input type="number" name="win" min="1" max="48" value="'+S.prefs.windowHours+'"></label>'
+    +'<div><button class="btn" type="submit">Update</button></div></form>'
+    +'<p class="muted small">'+r.totalMeals+' meals · '+r.totalSyms+' symptom episodes · baseline '+(r.baseline*100).toFixed(0)+'% of meals followed by symptoms</p></div>';
+  h+='<div class="card">';
+  if(!r.list.length)h+='<p class="muted">Not enough data yet — log at least 3 meals containing a food, plus symptoms, and patterns will appear here.</p>';
+  const maxLift=Math.max.apply(null,r.list.map(x=>x.lift).concat([1]));
+  r.list.forEach((x,i)=>{
+    h+='<div class="suspect"><div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">'
+      +'<b style="font-size:18px">'+esc(x.token)+'</b>'
+      +'<span class="lift">'+x.lift.toFixed(1)+'x</span>'
+      +'<span class="muted small grow" style="text-align:right">'+esc(suspectRead(x))+' · avg severity '+(x.avgSev?x.avgSev.toFixed(1):"—")+'</span></div>'
+      +'<div class="liftbar"><i style="width:'+Math.min(100,x.lift/maxLift*100).toFixed(0)+'%"></i></div>'
+      +'<div class="toolbar" style="margin:8px 0 0"><button class="ghost" data-elim="'+esc(x.token)+'">Track elimination</button></div></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+  $("form-win").addEventListener("submit",e=>{
+    e.preventDefault();const v=Number(new FormData(e.target).get("win"));
+    if(isFinite(v)&&v>=1&&v<=48){S.prefs.windowHours=v;save();sndOk();renderAll();}
+  });
+  el.querySelectorAll("[data-elim]").forEach(b=>b.addEventListener("click",()=>{
+    const t=b.dataset.elim;
+    if(!S.elim.some(e=>e.food.toLowerCase()===t.toLowerCase())){
+      S.elim.push({id:uid(),food:t,status:"eliminated",start:todayStr(),end:"",notes:""});
+      save();sndOk();
+    }
+    switchTab("elim");
+  }));
+}
+/* ================= elimination ================= */
+const ELIM_LABEL={eliminated:"Eliminated",testing:"Testing",reintroduced:"Reintroduced"};
+function renderElim(){
+  const el=$("panel-elim");
+  let h='<div class="card"><h2>Track elimination</h2>'
+    +'<p class="muted">Mark foods you are avoiding, testing, or have brought back. This is a personal tracking aid — not medical guidance.</p>'
+    +'<form class="add" id="form-elim">'
+    +'<label class="f">Food<input name="food" required maxlength="60" placeholder="e.g. wheat"></label>'
+    +'<label class="f">Status<select name="status"><option value="eliminated">Eliminated</option><option value="testing">Testing</option><option value="reintroduced">Reintroduced</option></select></label>'
+    +'<label class="f">Start date<input type="date" name="start" value="'+todayStr()+'"></label>'
+    +'<label class="f">Notes<input name="notes" maxlength="200"></label>'
+    +'<div><button class="btn" type="submit">Add</button></div></form></div>';
+  h+='<div class="card">';
+  if(!S.elim.length)h+='<p class="muted">No foods tracked yet.</p>';
+  S.elim.forEach(e=>{
+    h+='<div class="rowline"><span class="grow"><b>'+esc(e.food)+'</b>'
+      +'<br><span class="muted small">'+(e.start?esc(e.start):"")+(e.end?" → "+esc(e.end):"")+(e.notes?" · "+esc(e.notes):"")+'</span></span>'
+      +'<select data-estatus="'+e.id+'" class="statuspill '+e.status+'" aria-label="Status">'
+      +["eliminated","testing","reintroduced"].map(s=>'<option value="'+s+'"'+(s===e.status?" selected":"")+'>'+ELIM_LABEL[s]+'</option>').join("")
+      +'</select><button class="danger" data-del-elim="'+e.id+'">Delete</button></div>';
+  });
+  h+='</div>';
+  el.innerHTML=h;
+  $("form-elim").addEventListener("submit",e=>{
+    e.preventDefault();const f=new FormData(e.target);const n=f.get("food").trim().toLowerCase();
+    if(!n)return;
+    S.elim.push({id:uid(),food:n,status:f.get("status"),start:f.get("start")||todayStr(),end:"",notes:f.get("notes").trim()});
+    save();sndOk();renderAll();
+  });
+  el.querySelectorAll("[data-estatus]").forEach(s=>s.addEventListener("change",()=>{
+    const e=S.elim.find(x=>x.id===s.dataset.estatus);
+    if(e){e.status=s.value;if(s.value==="reintroduced"&&!e.end)e.end=todayStr();save();sndOk();renderAll();}
+  }));
+  el.querySelectorAll("[data-del-elim]").forEach(b=>b.addEventListener("click",()=>{
+    S.elim=S.elim.filter(x=>x.id!==b.dataset.delElim);save();sndDel();renderAll();
+  }));
+}
+/* ================= charts ================= */
+const chartSel={dayBar:-1,foodBar:-1,sevDot:-1,donut:-1};
+const PALETTE=["#c2410c","#4d7c0f","#0369a1","#9333ea","#b45309","#0d9488","#be123c","#1d4ed8"];
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function chartColors(){return PALETTE;}
+function polar(cx,cy,r,a){return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function donutSlice(cx,cy,R,r,a0,a1){
+  const large=(a1-a0)>Math.PI?1:0;
+  const [x0,y0]=polar(cx,cy,R,a0),[x1,y1]=polar(cx,cy,R,a1);
+  const [x2,y2]=polar(cx,cy,r,a1),[x3,y3]=polar(cx,cy,r,a0);
+  return "M"+x0.toFixed(1)+" "+y0.toFixed(1)+" A"+R+" "+R+" 0 "+large+" 1 "+x1.toFixed(1)+" "+y1.toFixed(1)
+    +" L"+x2.toFixed(1)+" "+y2.toFixed(1)+" A"+r+" "+r+" 0 "+large+" 0 "+x3.toFixed(1)+" "+y3.toFixed(1)+" Z";
+}
+function centerFont(txt){
+  const len=String(txt).length;
+  if(len<=4)return 26; if(len<=6)return 21; if(len<=8)return 17; return 14;
+}
+function donutSVG(id,segs,totalLbl){
+  const cx=110,cy=110,R=95,r=60,total=segs.reduce((s,x)=>s+x.value,0);
+  const cols=chartColors();const sel=chartSel[id];
+  let h='<svg viewBox="0 0 220 220" role="img" aria-label="'+esc(totalLbl)+'" style="max-width:320px;margin:0 auto;display:block">';
+  let a=-Math.PI/2;
+  segs.forEach((s,i)=>{
+    const frac=total>0?s.value/total:0;
+    const a1=a+frac*2*Math.PI, mid=(a+a1)/2;
+    const isSel=sel===i;
+    const pull=isSel?11:0;
+    const dx=(Math.cos(mid)*pull).toFixed(1),dy=(Math.sin(mid)*pull).toFixed(1);
+    const col=cols[i%cols.length];
+    h+='<path class="slice" data-donut="'+id+'" data-i="'+i+'" d="'+donutSlice(cx,cy,R,r,a,a1)
+      +'" fill="'+col+'" transform="translate('+dx+' '+dy+')"'
+      +(isSel?' stroke="'+cssVar('--ink')+'" stroke-width="3"':' stroke="var(--card)" stroke-width="1.5"')+'/>';
+    a=a1;
+  });
+  // center label: bounded box = hole (120) minus 12 = 108 units wide
+  const si=(sel>=0&&sel<segs.length)?sel:-1;
+  const name=si>=0?segs[si].label:totalLbl;
+  const val=si>=0?String(segs[si].value):String(total);
+  const fs=centerFont(val);
+  h+='<text pointer-events="none" x="110" y="104" text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="'+cssVar('--ink')+'">'+esc(val)+'</text>';
+  h+='<text pointer-events="none" x="110" y="126" text-anchor="middle" font-size="13" fill="'+cssVar('--muted')+'">'+esc(name.length>18?name.slice(0,17)+"…":name)+'</text>';
+  h+='</svg>';
+  // legend
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px">';
+  segs.forEach((s,i)=>{h+='<span class="tag" style="'+(sel===i?'outline:2px solid '+cssVar('--ink')+';':'')+'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+cols[i%cols.length]+'"></span> '+esc(s.label)+' ('+s.value+')</span>';});
+  h+='</div>';
+  return h;
+}
+function barsSVG(id,pairs,vertical){
+  // pairs: [{label, value}]
+  const W=340,H=220,padL=34,padB=44,padT=14;
+  const cols=chartColors();const sel=chartSel[id];
+  const max=Math.max.apply(null,pairs.map(p=>p.value).concat([1]));
+  const n=pairs.length;const bw=Math.min(46,(W-padL-8)/Math.max(1,n)-8);
+  let h='<svg viewBox="0 0 '+W+' '+H+'" role="img">';
+  h+='<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+W+'" y2="'+(H-padB)+'" stroke="'+cssVar('--line')+'"/>';
+  pairs.forEach((p,i)=>{
+    const bh=(H-padB-padT)*(p.value/max);
+    const x=padL+8+i*((W-padL-8)/n)+( (W-padL-8)/n - bw)/2;
+    const y=H-padB-bh;
+    const isSel=sel===i;
+    h+='<rect class="bar" data-bar="'+id+'" data-i="'+i+'" x="'+x.toFixed(1)+'" y="'+y.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+Math.max(2,bh).toFixed(1)+'" rx="4" fill="'+cols[i%cols.length]+'"'
+      +(isSel?' stroke="'+cssVar('--ink')+'" stroke-width="3"':'')+'/>';
+    h+='<text pointer-events="none" x="'+(x+bw/2).toFixed(1)+'" y="'+(y-6).toFixed(1)+'" text-anchor="middle" font-size="'+(isSel?14:12)+'" font-weight="'+(isSel?800:600)+'" fill="'+cssVar('--ink')+'">'+p.value+'</text>';
+    const step=Math.ceil(n/7);
+    if(i%step===0||i===n-1){
+      const lbl=p.label.length>8?p.label.slice(0,7)+"…":p.label;
+      h+='<text pointer-events="none" x="'+(x+bw/2).toFixed(1)+'" y="'+(H-padB+16).toFixed(1)+'" text-anchor="middle" font-size="11" fill="'+cssVar('--muted')+'">'+esc(lbl)+'</text>';
+    }
+  });
+  h+='</svg>';
+  return h;
+}
+function lineSVG(id,points){
+  // points: [{label, value}]
+  const W=340,H=220,padL=30,padR=10,padB=40,padT=14;
+  const sel=chartSel[id];
+  const max=Math.max.apply(null,points.map(p=>p.value).concat([10]));
+  const min=Math.min.apply(null,points.map(p=>p.value).concat([1]));
+  const X=i=>padL+(W-padL-padR)*(points.length>1?i/(points.length-1):0.5);
+  const Y=v=>padT+(H-padB-padT)*(1-(v-min)/Math.max(1,max-min));
+  let h='<svg viewBox="0 0 '+W+' '+H+'" role="img">';
+  h+='<line x1="'+padL+'" y1="'+(H-padB)+'" x2="'+W+'" y2="'+(H-padB)+'" stroke="'+cssVar('--line')+'"/>';
+  if(points.length){
+    h+='<polyline points="'+points.map((p,i)=>X(i).toFixed(1)+","+Y(p.value).toFixed(1)).join(" ")
+      +'" fill="none" stroke="'+cssVar('--acc')+'" stroke-width="2.5"/>';
+    points.forEach((p,i)=>{
+      const isSel=sel===i;
+      h+='<circle class="bar" data-bar="'+id+'" data-i="'+i+'" cx="'+X(i).toFixed(1)+'" cy="'+Y(p.value).toFixed(1)+'" r="'+(isSel?8:5)+'" fill="'+cssVar('--acc')+'"'
+        +(isSel?' stroke="'+cssVar('--ink')+'" stroke-width="3"':' stroke="var(--card)" stroke-width="2"')+'/>';
+      if(isSel)h+='<text pointer-events="none" x="'+X(i).toFixed(1)+'" y="'+(Y(p.value)-14).toFixed(1)+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+cssVar('--ink')+'">'+p.value+'</text>';
+      if(i%Math.ceil(points.length/8)===0||i===points.length-1)
+        h+='<text pointer-events="none" x="'+X(i).toFixed(1)+'" y="'+(H-padB+16).toFixed(1)+'" text-anchor="middle" font-size="10" fill="'+cssVar('--muted')+'">'+esc(p.label.slice(5))+'</text>';
+    });
+  }else h+='<text pointer-events="none" x="175" y="110" text-anchor="middle" font-size="14" fill="'+cssVar('--muted')+'">No data yet</text>';
+  h+='</svg>';
+  return h;
+}
+function renderCharts(){
+  const el=$("panel-charts");
+  // episodes by day (last 14 days with data)
+  const byDay={};
+  S.symptoms.forEach(s=>{const k=dayKey(s.dt);byDay[k]=(byDay[k]||0)+1;});
+  const dayPairs=Object.keys(byDay).sort().slice(-14).map(k=>({label:k.slice(5),value:byDay[k]}));
+  // top suspect foods
+  const sus=computeSuspects().list.slice(0,8).map(r=>({label:r.token,value:r.co}));
+  // severity trend: avg severity per day
+  const sevByDay={};
+  S.symptoms.forEach(s=>{const k=dayKey(s.dt);sevByDay[k]=sevByDay[k]||{sum:0,n:0};sevByDay[k].sum+=s.severity;sevByDay[k].n++;});
+  const sevPairs=Object.keys(sevByDay).sort().slice(-14).map(k=>({label:k,value:Math.round(sevByDay[k].sum/sevByDay[k].n*10)/10}));
+  // symptoms by type
+  const byType={};
+  S.symptoms.forEach(s=>{byType[s.symptom]=(byType[s.symptom]||0)+1;});
+  const typeSegs=Object.keys(byType).sort((a,b)=>byType[b]-byType[a]).map(k=>({label:k,value:byType[k]}));
+  let h='<div class="chart-grid">';
+  h+='<div class="chart-card"><h3>Symptom episodes by day</h3>'+(dayPairs.length?barsSVG("dayBar",dayPairs):'<p class="muted">No data yet</p>')+'</div>';
+  h+='<div class="chart-card"><h3>Top suspect foods</h3>'+(sus.length?barsSVG("foodBar",sus):'<p class="muted">No data yet</p>')+'</div>';
+  h+='<div class="chart-card"><h3>Avg severity trend</h3>'+lineSVG("sevDot",sevPairs)+'</div>';
+  h+='<div class="chart-card"><h3>Symptoms by type</h3>'+(typeSegs.length?donutSVG("donut",typeSegs,"episodes"):'<p class="muted">No data yet</p>')+'</div>';
+  h+='</div>';
+  el.innerHTML=h;
+  el.querySelectorAll("[data-bar]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.bar,i=Number(b.dataset.i);
+    chartSel[id]=chartSel[id]===i?-1:i;sndTog();renderCharts();
+  }));
+  el.querySelectorAll("[data-donut]").forEach(p=>p.addEventListener("click",()=>{
+    const id=p.dataset.donut,i=Number(p.dataset.i);
+    chartSel[id]=chartSel[id]===i?-1:i;sndTog();renderCharts();
+  }));
+}
+/* ================= doctor report ================= */
+function renderReport(){
+  const el=$("panel-report");
+  const sus=computeSuspects();
+  const top=sus.list.slice(0,5);
+  const dates=S.foods.concat(S.symptoms).map(x=>x.dt).filter(Boolean).sort();
+  const range=dates.length?fmtD(dates[0])+" → "+fmtD(dates[dates.length-1]):"—";
+  let h='<div class="card no-print"><h2>Doctor report</h2>'
+    +'<p class="muted">One-page summary for your clinician or dietitian. Patterns only — not a diagnosis.</p>'
+    +'<div class="toolbar"><button class="btn" id="btn-print">Print report</button></div></div>';
+  h+='<div class="card"><h2>Summary preview</h2><dl class="kv">'
+    +'<dt>Date range</dt><dd>'+esc(range)+'</dd>'
+    +'<dt>Meals logged</dt><dd>'+S.foods.length+'</dd>'
+    +'<dt>Symptom episodes</dt><dd>'+S.symptoms.length+'</dd>'
+    +'<dt>Foods eliminated</dt><dd>'+S.elim.filter(e=>e.status==="eliminated").map(e=>esc(e.food)).join(", ")+'</dd>'
+    +'</dl><h3>Top suspect foods</h3>';
+  if(!top.length)h+='<p class="muted">Not enough data yet.</p>';
+  top.forEach((r,i)=>{h+='<p><b>'+(i+1)+'. '+esc(r.token)+'</b> — '+esc(suspectRead(r))+', lift '+r.lift.toFixed(1)+'x</p>';});
+  h+='</div>';
+  el.innerHTML=h;
+  $("btn-print").addEventListener("click",()=>{buildPrintReport();window.print();});
+}
+function buildPrintReport(){
+  const sus=computeSuspects();
+  const top=sus.list.slice(0,8);
+  const dates=S.foods.concat(S.symptoms).map(x=>x.dt).filter(Boolean).sort();
+  const range=dates.length?fmtD(dates[0])+" → "+fmtD(dates[dates.length-1]):"—";
+  let h='<h1>FoodClue — Food & Symptom Summary</h1>'
+    +'<p><b>Date range:</b> '+esc(range)+' &nbsp; <b>Meals:</b> '+S.foods.length+' &nbsp; <b>Symptom episodes:</b> '+S.symptoms.length+'</p>'
+    +'<p><i>Patterns observed in personal logs. Correlation is not diagnosis — clinical interpretation required.</i></p>'
+    +'<h2>Top suspect foods</h2><table border="1" cellpadding="6" cellspacing="0"><tr><th>Food</th><th>Eaten</th><th>Symptoms followed</th><th>Lift</th></tr>';
+  top.forEach(r=>{h+='<tr><td>'+esc(r.token)+'</td><td>'+r.exposures+'</td><td>'+r.co+'</td><td>'+r.lift.toFixed(1)+'x</td></tr>';});
+  h+='</table><h2>Elimination tracking</h2><ul>';
+  S.elim.forEach(e=>{h+='<li>'+esc(e.food)+' — '+ELIM_LABEL[e.status]+(e.start?' (since '+esc(e.start)+')':'')+'</li>';});
+  h+='</ul><h2>Symptom episodes</h2><table border="1" cellpadding="6" cellspacing="0"><tr><th>Date</th><th>Symptom</th><th>Severity</th></tr>';
+  S.symptoms.slice().sort((a,b)=>a.dt>b.dt?-1:1).slice(0,40).forEach(s=>{
+    h+='<tr><td>'+esc(fmtDT(s.dt))+'</td><td>'+esc(s.symptom)+'</td><td>'+s.severity+'/10</td></tr>';});
+  h+='</table>';
+  $("print-report").innerHTML=h;
+}
+/* ================= export / import ================= */
+const SECTIONS={
+  foods:{fields:["dt","meal","items","notes"],req:["dt","items"]},
+  symptoms:{fields:["dt","symptom","severity","notes"],req:["dt","symptom"]},
+  elim:{fields:["food","status","start","end","notes"],req:["food"]}
+};
+function csvEsc(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+function download(name,text,type){
+  const b=new Blob([text],{type:type});const a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+}
+function exportCSV(sec){
+  const cfg=SECTIONS[sec];const rows=S[sec];
+  const head=cfg.fields.map(csvEsc).join(",");
+  const lines=rows.map(r=>cfg.fields.map(f=>{
+    if(f==="tokens")return"";return csvEsc(r[f]);
+  }).join(","));
+  download("foodclue-"+sec+"-"+todayStr()+".csv",head+"\n"+lines.join("\n"),"text/csv");
+}
+function exportJSON(sec){download("foodclue-"+sec+"-"+todayStr()+".json",JSON.stringify(S[sec],null,2),"application/json");}
+function validISODate(s){return typeof s==="string"&&/^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?$/.test(s)&&!isNaN(new Date(s).getTime());}
+function importJSON(sec,file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const arr=JSON.parse(rd.result);
+      if(!Array.isArray(arr))throw new Error("file must contain a JSON array");
+      if(arr.length>5000)throw new Error("file too large (max 5000 rows)");
+      const cfg=SECTIONS[sec];
+      const clean=arr.map((o,ix)=>{
+        if(!isObj(o))throw new Error("row "+(ix+1)+": not an object");
+        for(const r of cfg.req){
+          if(o[r]==null||String(o[r]).trim()==="")throw new Error("row "+(ix+1)+": missing "+r);
+        }
+        const n={id:uid()};
+        cfg.fields.forEach(f=>{n[f]=o[f]!=null?String(o[f]):"";});
+        n.notes=typeof o.notes==="string"?o.notes:"";
+        if(sec==="foods"){
+          if(typeof o.items!=="string"||typeof o.meal!=="string")throw new Error("row "+(ix+1)+": items/meal must be text");
+          if(!validISODate(n.dt))throw new Error("row "+(ix+1)+": bad date");
+          if(!["breakfast","lunch","dinner","snack"].includes(n.meal))throw new Error("row "+(ix+1)+": bad meal type");
+          n.tokens=tokenize(n.items);
+          if(!n.tokens.length)throw new Error("row "+(ix+1)+": no food tokens found");
+        }
+        if(sec==="symptoms"){
+          if(typeof o.symptom!=="string")throw new Error("row "+(ix+1)+": symptom must be text");
+          if(!validISODate(n.dt))throw new Error("row "+(ix+1)+": bad date");
+          const sv=Number(n.severity);
+          if(!isFinite(sv)||sv<1||sv>10)throw new Error("row "+(ix+1)+": severity must be 1–10");
+          n.severity=Math.round(sv);
+        }
+        if(sec==="elim"){
+          if(typeof o.food!=="string")throw new Error("row "+(ix+1)+": food must be text");
+          if(!["eliminated","testing","reintroduced"].includes(n.status))throw new Error("row "+(ix+1)+": bad status");
+        }
+        return n;
+      });
+      // only persist AFTER full validation passes
+      S[sec]=clean;save();sndOk();renderAll();
+      alert("Imported "+clean.length+" rows into "+sec+".");
+    }catch(e){alert("Import failed: "+e.message);}
+  };
+  rd.readAsText(file);
+}
+/* ================= tabs + init ================= */
+const PANELS=["dash","foods","symptoms","suspects","elim","charts","report"];
+function switchTab(name){
+  document.querySelectorAll('[role="tab"]').forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name?"true":"false"));
+  PANELS.forEach(p=>$("panel-"+p).classList.toggle("hidden",p!==name));
+  renderAll();sndTog();
+}
+function renderAll(){
+  for(const k in chartSel)chartSel[k]=-1;
+  renderDash();renderFoods();renderSymptoms();renderSuspects();renderElim();renderCharts();renderReport();
+}
+document.querySelectorAll('[role="tab"]').forEach(b=>b.addEventListener("click",()=>switchTab(b.dataset.tab)));
+$("btn-theme").addEventListener("click",()=>{
+  const cur=document.documentElement.getAttribute("data-theme");
+  S.prefs.theme=cur==="dark"?"light":"dark";savePrefs();applyTheme();renderCharts();sndTog();
+});
+$("btn-sound").addEventListener("click",()=>{S.prefs.sound=!S.prefs.sound;savePrefs();applyTheme();sndTog();});
+$("btn-sample").addEventListener("click",toggleSample);
+S=load();applyTheme();renderAll();
+</script>
+</body>
+</html>
