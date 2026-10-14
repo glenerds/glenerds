@@ -29,6 +29,7 @@ header .hwrap{max-width:1100px;margin:0 auto;padding:14px 18px;display:flex;alig
 main{max-width:1100px;margin:0 auto;padding:0 18px 40px}
 .notice{border:1.5px solid var(--warn);border-radius:12px;padding:12px 16px;margin:14px 0;background:var(--card);font-size:15px}
 .sample-banner{background:#fdf3e0;border:1.5px solid var(--warn);color:#6b4c12;border-radius:12px;padding:10px 16px;margin:14px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600}
+.sample-banner[hidden]{display:none!important}
 [data-theme="dark"] .sample-banner{background:#3a2f16;color:#f0d49a}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
 .tabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:20px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer}
@@ -312,6 +313,7 @@ function goTab(name){
 function openModal(html){$("modal-box").innerHTML=html;$("mback").classList.add("open");}
 function closeModal(){$("mback").classList.remove("open");}
 $("mback").addEventListener("click",e=>{if(e.target===$("mback"))closeModal();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("mback").classList.contains("open"))closeModal();});
 function confirmDlg(msg,onYes){
   openModal('<h2>Are you sure?</h2><p>'+esc(msg)+'</p><div class="mrow"><button class="btn" id="m-no">Cancel</button><button class="btn primary" id="m-yes">Yes</button></div>');
   $("m-no").addEventListener("click",closeModal);
@@ -324,7 +326,7 @@ function renderDash(){
   const cards=[
     {t:"UNREIMBURSED TOTAL",b:'<div class="bignum">'+money(unTot)+'</div><div class="sub">'+un.length+' receipts · your HSA owes you this</div>',go:()=>goTab("reimburse")},
     {t:"REIMBURSED TO DATE",b:'<div class="bignum">'+money(reimbTotal())+'</div><div class="sub">already claimed back</div>',go:()=>{goTab("receipts");$("r-filter").value="reimbursed";renderReceipts();}},
-    {t:"RECEIPTS LOGGED",b:'<div class="bignum">'+DB.receipts.length+'</div><div class="sub">'+miss.length+' missing photos</div>',go:()=>goTab("receipts")},
+    {t:"RECEIPTS LOGGED",b:'<div class="bignum">'+DB.receipts.length+'</div><div class="sub">'+miss.length+' missing photos</div>',go:()=>{goTab("receipts");$("r-filter").value="";$("r-q").value="";renderReceipts();}},
     {t:"MISSING PHOTOS",b:'<div class="bignum">'+miss.length+'</div><div class="sub">receipts with no photo saved</div>',go:()=>{goTab("receipts");$("r-filter").value="nophoto";renderReceipts();}}
   ];
   $("dash-cards").innerHTML=cards.map((c,i)=>'<div class="card clickable" data-card="'+i+'"><h3>'+c.t+'</h3>'+c.b+'</div>').join("");
@@ -371,10 +373,14 @@ function renderReceipts(){
     return true;
   }).sort((a,b)=>b.date.localeCompare(a.date));
   const tb=$("rec-table").querySelector("tbody");
-  tb.innerHTML=rows.map(r=>'<tr><td style="white-space:nowrap">'+prettyDate(r.date)+'</td><td><strong>'+esc(r.provider)+'</strong><br><span class="sub">'+esc(r.photoNote||(r.hasPhoto?"photo saved":""))+'</span></td>'+
+  tb.innerHTML=rows.map(r=>'<tr data-rrow="'+r.id+'" style="cursor:pointer"><td style="white-space:nowrap">'+prettyDate(r.date)+'</td><td><strong>'+esc(r.provider)+'</strong><br><span class="sub">'+esc(r.photoNote||(r.hasPhoto?"photo saved":""))+'</span></td>'+
     '<td class="num"><strong>'+money(r.amount)+'</strong></td><td>'+esc(r.category||"—")+'</td>'+
     '<td><span class="tag '+(r.reimbursed?"ok":"info")+'">'+(r.reimbursed?"reimbursed":"open")+'</span>'+(r.hasPhoto?"":' <span class="tag warn">no photo</span>')+'</td>'+
     '<td class="noprint"><div class="rowbtns"><button class="btn small" data-redit="'+r.id+'">Edit</button><button class="btn small danger" data-rdel="'+r.id+'">Delete</button></div></td></tr>').join("")||'<tr><td colspan="6" class="sub">No receipts match. Add your first receipt above.</td></tr>';
+  tb.querySelectorAll("[data-rrow]").forEach(tr=>tr.addEventListener("click",e=>{
+    if(e.target.closest("button"))return;
+    openReceiptForm(recById(tr.dataset.rrow));sndOk();
+  }));
   tb.querySelectorAll("[data-redit]").forEach(x=>x.addEventListener("click",()=>openReceiptForm(recById(x.dataset.redit))));
   tb.querySelectorAll("[data-rdel]").forEach(x=>x.addEventListener("click",()=>{
     const r=recById(x.dataset.rdel);
