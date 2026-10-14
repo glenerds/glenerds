@@ -403,9 +403,13 @@ function computeSettle(){
   return{net,moves};
 }
 function splitParts(c,fam){
-  if(c.split==="custom"&&c.shares&&c.shares.length){const tot=c.shares.reduce((s,x)=>s+Number(x.pct||0),0);if(tot>0)return c.shares.map(x=>({who:x.who,pct:Number(x.pct||0)/tot*100}));}
-  const members=(c.members&&c.members.length?c.members:fam);
-  return members.map(w=>({who:w,pct:100/members.length}));
+  if(c.split==="custom"&&Array.isArray(c.shares)&&c.shares.length){
+    const tot=c.shares.reduce((s,x)=>s+(isFinite(Number(x.pct))?Number(x.pct):0),0);
+    if(tot>0)return c.shares.map(x=>({who:String(x.who),pct:Number(x.pct)/tot*100}));
+  }
+  const members=(Array.isArray(c.members)&&c.members.length?c.members:fam);
+  const ms=(Array.isArray(members)&&members.length?members:["Family"]);
+  return ms.map(w=>({who:String(w),pct:100/ms.length}));
 }
 /* ================= medications ================= */
 function renderMeds(){
@@ -675,7 +679,20 @@ function importJSON(sec,file){
         for(const r of cfg.req)if(o[r]==null||o[r]==="")throw new Error("missing "+r);
         const n={id:uid()};cfg.fields.forEach(f=>{n[f]=o[f]!=null?o[f]:"";});
         if(sec==="tasks")n.done=!!o.done;
-        if(sec==="costs"){n.amount=Number(o.amount)||0;n.shares=o.shares||null;n.members=o.members||famList();}
+        if(sec==="costs"){
+          n.amount=Number(o.amount)||0;
+          if(o.shares==null){n.shares=null;}
+          else if(Array.isArray(o.shares)){
+            n.shares=o.shares
+              .filter(x=>x&&typeof x.who==="string"&&x.who.trim()!==""&&isFinite(Number(x.pct))&&Number(x.pct)>0)
+              .map(x=>({who:x.who.trim(),pct:Number(x.pct)}));
+            if(!n.shares.length)n.shares=null;
+          } else throw new Error("bad shares (must be an array)");
+          if(n.split==="custom"&&!n.shares)throw new Error("custom split needs a valid shares array");
+          if(o.members==null){n.members=famList();}
+          else if(Array.isArray(o.members)&&o.members.every(m=>typeof m==="string"&&m.trim()!=="")){n.members=o.members.map(m=>m.trim());}
+          else throw new Error("bad members (must be an array of names)");
+        }
         if(sec==="meds")n.perday=Number(o.perday)||1;
         return n;
       });
