@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aging Parent Care Organizer — Medication, Appointment & Family Care Coordination Tracker</title>
+<meta name="description" content="CareTogether: an offline family care organizer for aging parents. Track medications with refill flags, appointments, care visits, sibling task rota, and shared costs — all in one private file. No account, no subscription.">
+<style>
+:root{
+  --bg:#f6f1e8; --card:#fffdf7; --ink:#2c2620; --muted:#6e6355; --line:#e7dcc8;
+  --acc:#b3541e; --acc-ink:#ffffff; --acc-soft:#f3e2cd;
+  --good:#2e7d4f; --warn:#b3541e; --bad:#b3372f;
+  --shadow:0 2px 10px rgba(60,45,25,.08);
+  --r:14px;
+  color-scheme:light;
+}
+html[data-theme="dark"]{
+  --bg:#1b1712; --card:#25201a; --ink:#f1e8d8; --muted:#b3a48c; --line:#3e3427;
+  --acc:#e09a4f; --acc-ink:#241a10; --acc-soft:#3a2c1c;
+  --good:#6fbf8a; --warn:#e09a4f; --bad:#e07a6a;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh}
+.wrap{max-width:1080px;margin:0 auto;padding:0 1rem}
+/* ---------- header ---------- */
+header.site{padding:.9rem 0 .6rem}
+.hwrap{max-width:1080px;margin:0 auto;padding:0 1rem;display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.6rem;margin-right:auto}
+.brand svg{width:38px;height:38px;flex:none}
+.brand b{font-size:1.45rem;letter-spacing:.01em}
+.hdr-btns{display:flex;align-items:center;gap:.55rem}
+.hdr-btns button,.pill{height:44px;min-width:44px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 .7rem;box-shadow:var(--shadow);font-size:1rem}
+.hdr-btns button:active,.pill:active{transform:scale(.94);filter:brightness(.94)}
+.hdr-btns button svg{width:22px;height:22px;display:block}
+.hdr-btns button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.pill{text-decoration:none;font-weight:600}
+/* ---------- disclaimer ---------- */
+.disclaimer{margin:.4rem 0 1rem;padding:.7rem 1rem;border:1px solid var(--line);border-left:5px solid var(--warn);border-radius:10px;background:var(--card);font-size:15px}
+/* ---------- tabs ---------- */
+nav.tabs{display:flex;gap:.45rem;flex-wrap:wrap;margin:.4rem 0 1rem}
+nav.tabs button{height:44px;padding:0 .95rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer;font-size:1rem;font-weight:600;box-shadow:var(--shadow)}
+nav.tabs button:active{transform:scale(.95);filter:brightness(.95)}
+nav.tabs button[aria-selected="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.panel{display:none}
+.panel.active{display:block}
+/* ---------- cards / grids ---------- */
+.grid{display:grid;gap:1rem}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1.1rem 1.2rem;margin-bottom:1rem;overflow:hidden}
+.card h2{margin:0 0 .6rem;font-size:1.25rem}
+.card h3{margin:0 0 .5rem;font-size:1.1rem}
+.muted{color:var(--muted)}
+.detail{font-size:20px;font-weight:600}
+.big{font-size:1.9rem;font-weight:700}
+/* ---------- forms ---------- */
+form.add{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.6rem;margin-bottom:1rem;align-items:end}
+label.f{display:flex;flex-direction:column;gap:.25rem;font-size:15px;color:var(--muted)}
+input,select,textarea{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.65rem .7rem;font-size:1rem;min-height:44px;width:100%}
+textarea{min-height:70px;resize:vertical}
+button.btn{height:44px;padding:0 1.1rem;border:none;border-radius:10px;background:var(--acc);color:var(--acc-ink);font-size:1rem;font-weight:700;cursor:pointer}
+button.btn:active{transform:scale(.95);filter:brightness(.93)}
+button.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:var(--shadow)}
+button.danger{background:none;border:none;color:var(--bad);cursor:pointer;font-size:15px;padding:.4rem .6rem;min-height:44px}
+button.danger:active{transform:scale(.94)}
+.rowline{display:flex;align-items:center;gap:.7rem;padding:.55rem 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rowline:last-child{border-bottom:none}
+.rowline .grow{flex:1;min-width:160px}
+.tag{display:inline-block;font-size:15px;padding:.15rem .6rem;border-radius:999px;background:var(--acc-soft);color:var(--ink);font-weight:600}
+.tag.warn{background:#f6d9c2;color:#7a3a10}
+html[data-theme="dark"] .tag.warn{background:#4a2c16;color:#f0b98a}
+.tag.bad{background:#f3c9c4;color:#7c241d}
+html[data-theme="dark"] .tag.bad{background:#4a211c;color:#f0a49a}
+.tag.good{background:#cde8d6;color:#1e5c38}
+html[data-theme="dark"] .tag.good{background:#1e3a28;color:#9fdcb4}
+/* ---------- charts ---------- */
+.charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+@media (max-width:720px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1rem;display:flex;flex-direction:column;min-height:340px}
+.chart-card h3{margin:0 0 .3rem;font-size:1.1rem;text-align:center}
+.chart-card .selinfo{min-height:1.6em;text-align:center;font-size:15px;color:var(--muted)}
+.donut-wrap{position:relative;width:230px;height:230px;margin:.4rem auto}
+.donut-wrap svg{width:100%;height:100%;display:block}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:106px;height:106px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.donut-center .dc-name{font-size:15px;color:var(--muted);line-height:1.25;max-width:98px;overflow:hidden}
+.donut-center .dc-val{font-size:20px;font-weight:700;line-height:1.3}
+.donut-slice{cursor:pointer;transition:transform .18s ease}
+.donut-slice.sel{stroke:var(--ink);stroke-width:3}
+.bars{display:flex;flex-direction:column;gap:.45rem;margin-top:.5rem}
+.bar-row{display:flex;align-items:center;gap:.7rem;padding:.35rem .5rem;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.bar-row .blabel{width:110px;flex:none;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .btrack{flex:1;height:22px;background:var(--bg);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.bar-row .bfill{height:100%;background:var(--acc);border-radius:5px}
+.bar-row .bval{width:90px;flex:none;text-align:right;font-size:15px;font-weight:600}
+.bar-row.sel{border-color:var(--acc);background:var(--acc-soft);font-weight:700}
+.bar-row.sel .blabel{font-weight:700}
+/* ---------- ER sheet ---------- */
+#er-actions{display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.er-sheet{background:#fff;color:#1a1a1a;border:2px solid #333;border-radius:8px;padding:1.6rem;max-width:760px}
+html[data-theme="dark"] .er-sheet{background:#fff;color:#1a1a1a}
+.er-sheet h2{margin:0 0 .2rem;font-size:1.6rem}
+.er-sheet h3{margin:1.1rem 0 .4rem;font-size:1.15rem;border-bottom:2px solid #333;padding-bottom:.2rem}
+.er-sheet table{width:100%;border-collapse:collapse;font-size:15px}
+.er-sheet td,.er-sheet th{border:1px solid #999;padding:.4rem .6rem;text-align:left;vertical-align:top}
+/* ---------- footer / CTA ---------- */
+.cta-strip{margin:2.2rem 0 1rem;padding:1.4rem;text-align:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+footer.site{padding:1rem 0 2.5rem;text-align:center;color:var(--muted);font-size:15px}
+/* ---------- print: ER sheet only ---------- */
+@media print{
+  header.site,nav.tabs,.disclaimer,.cta-strip,footer.site,#er-actions,.no-print{display:none!important}
+  body{background:#fff}
+  .panel{display:none!important}
+  .panel.active#panel-er{display:block!important}
+  #panel-er .card{border:none;box-shadow:none;padding:0;background:none}
+  #panel-er .card>h2,#panel-er .card>p{display:none!important}
+  .er-sheet{border:none;max-width:100%}
+  .card{box-shadow:none}
+}
+@media (max-width:560px){
+  .brand b{font-size:1.2rem}
+  .donut-wrap{width:200px;height:200px}
+  .donut-center{width:88px;height:88px}
+  .donut-center .dc-name{max-width:80px}
+}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="hwrap">
+    <div class="brand">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="#b3541e"/><path d="M24 36c-7-5.2-11-9-11-13.4C13 18.6 16 16 19.2 16c2 0 3.7 1.1 4.8 2.8C25.1 17.1 26.8 16 28.8 16c3.2 0 6.2 2.6 6.2 6.6C35 27 31 30.8 24 36z" fill="#fffdf7"/><path d="M12 30c3 2.4 7.5 4 12 4s9-1.6 12-4" stroke="#fffdf7" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M15 34.5c2.6 1.6 5.8 2.5 9 2.5s6.4-.9 9-2.5" stroke="#fffdf7" stroke-width="2.2" fill="none" stroke-linecap="round" opacity=".75"/></svg>
+      <b>CareTogether</b>
+    </div>
+    <div class="hdr-btns">
+      <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="btn-sample" title="Try sample data" aria-label="Try sample data" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.3L4.7 17a2.4 2.4 0 0 0 2.1 3.6h10.4a2.4 2.4 0 0 0 2.1-3.6L14 8.3V3"/><path d="M7.5 14.5h9"/></svg></button>
+      <button id="btn-theme" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5z"/></svg></button>
+      <button id="btn-sound" class="on" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6.5 9H3v6h3.5L11 19V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.2 6a9 9 0 0 1 0 12"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="disclaimer"><b>Please read:</b> CareTogether is an organizer only — not medical, legal, or financial advice. Refill flags, totals, and schedules are informational. Always talk to your clinician or pharmacist about medications and care decisions.</div>
+
+  <nav class="tabs" role="tablist" aria-label="CareTogether sections">
+    <button role="tab" aria-selected="true" data-tab="dash">Dashboard</button>
+    <button role="tab" aria-selected="false" data-tab="meds">Medications</button>
+    <button role="tab" aria-selected="false" data-tab="appts">Appointments</button>
+    <button role="tab" aria-selected="false" data-tab="log">Care Log</button>
+    <button role="tab" aria-selected="false" data-tab="rota">Task Rota</button>
+    <button role="tab" aria-selected="false" data-tab="costs">Cost Ledger</button>
+    <button role="tab" aria-selected="false" data-tab="charts">Charts</button>
+    <button role="tab" aria-selected="false" data-tab="er" id="print-er-label">ER Sheet</button>
+  </nav>
+
+  <main>
+  <section class="panel active" id="panel-dash" role="tabpanel">
+    <div class="grid g2">
+      <div class="card"><h2>Care recipient</h2><div id="dash-profile"></div></div>
+      <div class="card"><h2>Refills due within 7 days</h2><div id="dash-refills"></div></div>
+      <div class="card"><h2>Appointments — next 7 days</h2><div id="dash-appts"></div></div>
+      <div class="card"><h2>Open tasks</h2><div id="dash-tasks"></div></div>
+      <div class="card"><h2>Who owes who</h2><div id="dash-owes"></div></div>
+      <div class="card"><h2>This month's care spending</h2><div id="dash-spend"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-meds" role="tabpanel">
+    <div class="card">
+      <h2>Medications</h2>
+      <p class="muted" style="font-size:15px;margin-top:-.4rem">A personal list for organizing — refill flags are reminders only, not medical advice.</p>
+      <form class="add" id="form-med">
+        <label class="f">Name<input name="name" required maxlength="60" placeholder="Lisinopril"></label>
+        <label class="f">Dose<input name="dose" maxlength="30" placeholder="10mg"></label>
+        <label class="f">Times per day<input name="perday" type="number" min="1" max="12" value="1"></label>
+        <label class="f">Taken at<input name="times" maxlength="60" placeholder="Morning"></label>
+        <label class="f">Prescriber<input name="prescriber" maxlength="60" placeholder="Dr. Patel"></label>
+        <label class="f">Pharmacy<input name="pharmacy" maxlength="60" placeholder="CVS Main St"></label>
+        <label class="f">Refill date<input name="refill" type="date"></label>
+        <label class="f">Notes<input name="notes" maxlength="120" placeholder=""></label>
+        <div><button class="btn" type="submit">Add medication</button></div>
+      </form>
+      <div id="med-list"></div>
+      <div class="no-print" style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="exp-meds-csv">Export CSV</button>
+        <button class="btn ghost" id="exp-meds-json">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON<input type="file" id="imp-meds" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-appts" role="tabpanel">
+    <div class="card">
+      <h2>Appointments</h2>
+      <form class="add" id="form-appt">
+        <label class="f">Date<input name="date" type="date" required></label>
+        <label class="f">Time<input name="time" type="time"></label>
+        <label class="f">Doctor / specialist<input name="who" required maxlength="60" placeholder="Dr. Patel — Cardiology"></label>
+        <label class="f">Location<input name="where" maxlength="80" placeholder="Bloomington Hospital"></label>
+        <label class="f">Purpose<input name="purpose" maxlength="120" placeholder="Follow-up"></label>
+        <label class="f">Notes<input name="notes" maxlength="140" placeholder=""></label>
+        <div><button class="btn" type="submit">Add appointment</button></div>
+      </form>
+      <div id="appt-list"></div>
+      <div class="no-print" style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="exp-appts-csv">Export CSV</button>
+        <button class="btn ghost" id="exp-appts-json">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON<input type="file" id="imp-appts" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-log" role="tabpanel">
+    <div class="card">
+      <h2>Care Log</h2>
+      <form class="add" id="form-log">
+        <label class="f">Date<input name="date" type="date" required></label>
+        <label class="f">Who visited<input name="who" required maxlength="40" placeholder="Dave"></label>
+        <label class="f">What was done<input name="what" required maxlength="120" placeholder="Grocery run, changed smoke alarm batteries"></label>
+        <label class="f">Notes<input name="notes" maxlength="160" placeholder=""></label>
+        <div><button class="btn" type="submit">Add entry</button></div>
+      </form>
+      <div id="log-list"></div>
+      <div class="no-print" style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="exp-log-csv">Export CSV</button>
+        <button class="btn ghost" id="exp-log-json">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON<input type="file" id="imp-log" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-rota" role="tabpanel">
+    <div class="card">
+      <h2>Task Rota</h2>
+      <form class="add" id="form-task">
+        <label class="f">Task<input name="title" required maxlength="80" placeholder="Pick up prescriptions"></label>
+        <label class="f">Assigned to<select name="who" id="task-who"></select></label>
+        <label class="f">Due date<input name="due" type="date"></label>
+        <label class="f">Notes<input name="notes" maxlength="120" placeholder=""></label>
+        <div><button class="btn" type="submit">Add task</button></div>
+      </form>
+      <div style="margin-bottom:.8rem"><label class="f" style="max-width:260px">Filter by person<select id="rota-filter"><option value="">Everyone</option></select></label></div>
+      <div id="task-list"></div>
+      <div class="no-print" style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="exp-tasks-csv">Export CSV</button>
+        <button class="btn ghost" id="exp-tasks-json">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON<input type="file" id="imp-tasks" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-costs" role="tabpanel">
+    <div class="card">
+      <h2>Cost Ledger</h2>
+      <p class="muted" style="font-size:15px;margin-top:-.4rem">Log shared care expenses. The settle-up table below shows who owes who — informational only, not financial advice.</p>
+      <form class="add" id="form-cost">
+        <label class="f">Expense<input name="title" required maxlength="80" placeholder="Copay — cardiology"></label>
+        <label class="f">Date<input name="date" type="date" required></label>
+        <label class="f">Amount ($)<input name="amount" type="number" min="0.01" step="0.01" required placeholder="35.00"></label>
+        <label class="f">Category<select name="cat"><option>Copay</option><option>Prescriptions</option><option>Groceries</option><option>Transport</option><option>Other</option></select></label>
+        <label class="f">Paid by<select name="payer" id="cost-payer"></select></label>
+        <label class="f">Split<select name="split"><option value="even">Even split</option><option value="custom">Custom shares</option></select></label>
+        <div><button class="btn" type="submit">Add expense</button></div>
+      </form>
+      <div id="cost-custom" style="display:none;margin-bottom:1rem"></div>
+      <div id="cost-list"></div>
+      <h3 style="margin-top:1.2rem">Settle up</h3>
+      <div id="cost-settle"></div>
+      <div class="no-print" style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+        <button class="btn ghost" id="exp-costs-csv">Export CSV</button>
+        <button class="btn ghost" id="exp-costs-json">Export JSON</button>
+        <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer">Import JSON<input type="file" id="imp-costs" accept="application/json" hidden></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-charts" role="tabpanel">
+    <div class="charts-grid">
+      <div class="chart-card" id="cc-cat"><h3>Spending by category</h3><div class="selinfo" data-sel></div><div class="donut-wrap" data-donut></div></div>
+      <div class="chart-card" id="cc-month"><h3>Spending by month</h3><div class="selinfo" data-sel></div><div class="bars" data-bars></div></div>
+      <div class="chart-card" id="cc-tasks"><h3>Tasks by person</h3><div class="selinfo" data-sel></div><div class="donut-wrap" data-donut></div></div>
+      <div class="chart-card" id="cc-meds"><h3>Medications by time of day</h3><div class="selinfo" data-sel></div><div class="donut-wrap" data-donut></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-er" role="tabpanel">
+    <div class="card">
+      <h2>Emergency Grab Sheet</h2>
+      <p class="muted" style="font-size:15px;margin-top:-.4rem">Print this page and keep it on the fridge. Printing shows only the sheet below.</p>
+      <div id="er-actions">
+        <button class="btn" id="btn-print">Print ER sheet</button>
+        <button class="btn ghost" id="btn-er-edit">Edit profile &amp; contacts</button>
+      </div>
+      <div id="er-form" style="display:none"></div>
+      <div class="er-sheet" id="er-sheet"></div>
+    </div>
+  </section>
+  </main>
+
+  <div class="cta-strip">
+    <div class="detail">More one-time offline tools</div>
+    <p class="muted" style="font-size:15px">Every app is a single file. No accounts, no subscriptions.</p>
+    <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">Browse all apps</a>
+  </div>
+
+  <footer class="site">
+    CareTogether keeps your family's care notes on this device only.<br>
+    An organizer — not medical, legal, or financial advice.
+  </footer>
+</div>
+<script>
+"use strict";
+/* ================= store ================= */
+const LS="caretogether.v1";
+function defStore(){return{profile:{name:"",dob:"",conditions:"",allergies:"",blood:"",doctor:"",doctorPhone:"",contacts:[]},family:[],meds:[],appts:[],log:[],tasks:[],costs:[],prefs:{theme:null,sound:true}};}
+let S=defStore(), sampleOn=false, sampleBackup=null;
+function sanitizeStore(s){
+  const d=defStore(); const o=Object.assign(d,s);
+  o.prefs=Object.assign(d.prefs,(s&&s.prefs)||{});
+  for(const k of["family","meds","appts","log","tasks","costs"]) if(!Array.isArray(o[k])) o[k]=[];
+  if(!o.profile||typeof o.profile!=="object") o.profile=defStore().profile;
+  if(!Array.isArray(o.profile.contacts)) o.profile.contacts=[];
+  return o;
+}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&typeof s==="object")return sanitizeStore(s);}catch(e){}return defStore();}
+function save(){if(sampleOn)return;try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
+S=load();
+/* ================= utils ================= */
+const $=id=>document.getElementById(id);
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function uid(){return "x"+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
+function money(n){return "$"+Number(n||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function money0(n){return "$"+Math.round(Number(n||0)).toLocaleString("en-US");}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function addDaysStr(base,n){const d=base?new Date(base+"T12:00:00"):new Date();d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function daysUntil(datestr){if(!datestr)return null;const t=todayStr();const a=new Date(t+"T12:00:00"),b=new Date(datestr+"T12:00:00");return Math.round((b-a)/86400000);}
+function fmtDate(ds){if(!ds)return"";const d=new Date(ds+"T12:00:00");return d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+function download(name,content,type){const b=new Blob([content],{type});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);}
+function csvEsc(v){v=String(v==null?"":v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}
+/* ================= sound ================= */
+let AC=null;
+function tone(f,dur){if(!S.prefs.sound)return;try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain();o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(0.08,AC.currentTime);g.gain.exponentialRampToValueAtTime(0.001,AC.currentTime+dur);o.connect(g);g.connect(AC.destination);o.start();o.stop(AC.currentTime+dur);}catch(e){}}
+function sndOk(){tone(660,.09);} function sndDel(){tone(220,.12);} function sndTog(){tone(520,.07);}
+/* ================= theme ================= */
+function effTheme(){if(S.prefs.theme)return S.prefs.theme;return (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
+function applyTheme(){const t=effTheme();document.documentElement.setAttribute("data-theme",t);const b=$("btn-theme");const on=t==="dark";b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);}
+$("btn-theme").addEventListener("click",()=>{S.prefs.theme=effTheme()==="dark"?"light":"dark";save();applyTheme();sndTog();});
+$("btn-sound").addEventListener("click",()=>{S.prefs.sound=!S.prefs.sound;save();const b=$("btn-sound");b.classList.toggle("on",S.prefs.sound);b.setAttribute("aria-pressed",S.prefs.sound);if(S.prefs.sound)sndTog();});
+/* ================= tabs ================= */
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll('nav.tabs button').forEach(x=>x.setAttribute("aria-selected","false"));
+  b.setAttribute("aria-selected","true");
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));
+  $("panel-"+b.dataset.tab).classList.add("active");
+  sndTog();
+  if(b.dataset.tab==="charts")renderCharts();
+}));
+/* ================= dashboard ================= */
+function refillFlag(m){
+  const d=daysUntil(m.refill);
+  if(d==null)return"";
+  if(d<0)return'<span class="tag bad">Overdue '+-d+'d</span>';
+  if(d<=7)return'<span class="tag warn">Due in '+d+'d</span>';
+  return'<span class="tag good">OK</span>';
+}
+function renderDash(){
+  const p=S.profile;
+  $("dash-profile").innerHTML=p.name?'<div class="detail">'+esc(p.name)+'</div><div class="muted">'+esc(p.dob?("Born "+p.dob):"")+'</div>':'<span class="muted">No profile yet — set it on the ER Sheet tab.</span>';
+  const due=S.meds.filter(m=>{const d=daysUntil(m.refill);return d!=null&&d<=7;}).sort((a,b)=>(a.refill||"")<(b.refill||"")?-1:1);
+  $("dash-refills").innerHTML=due.length?due.map(m=>'<div class="rowline"><span class="grow"><b>'+esc(m.name)+'</b> <span class="muted">'+esc(m.dose||"")+'</span><br><span class="muted" style="font-size:15px">Refill: '+esc(fmtDate(m.refill))+'</span></span>'+refillFlag(m)+'</div>').join(""):'<span class="muted">Nothing due within 7 days.</span>';
+  const t=todayStr(),soon=S.appts.filter(a=>{const d=daysUntil(a.date);return d!=null&&d>=0&&d<=7;}).sort((a,b)=>(a.date+a.time)<(b.date+b.time)?-1:1);
+  $("dash-appts").innerHTML=soon.length?soon.map(a=>'<div class="rowline"><span class="grow"><b>'+esc(fmtDate(a.date))+'</b> '+(a.time?esc(a.time):"")+'<br><span class="muted" style="font-size:15px">'+esc(a.who)+'</span></span></div>').join(""):'<span class="muted">None in the next 7 days.</span>';
+  const open=S.tasks.filter(x=>!x.done);
+  $("dash-tasks").innerHTML=open.length?'<div class="big">'+open.length+'</div><div class="muted">open — see the Task Rota tab</div>':'<span class="muted">All done.</span>';
+  const sett=computeSettle();
+  $("dash-owes").innerHTML=sett.moves.length
+    ? sett.moves.slice(0,4).map(m=>'<div class="rowline"><span class="grow"><b>'+esc(m.from)+'</b> owes <b>'+esc(m.to)+'</b></span><b>'+money(m.amt)+'</b></div>').join("")
+      +(sett.moves.length>4?'<div class="muted" style="font-size:15px">+'+(sett.moves.length-4)+' more on the Cost Ledger tab</div>':'')
+    : '<span class="muted">Everyone is settled up.</span>';
+  const mk=t.slice(0,7);const sum=S.costs.filter(c=>(c.date||"").slice(0,7)===mk).reduce((s,c)=>s+Number(c.amount||0),0);
+  $("dash-spend").innerHTML='<div class="big">'+money(sum)+'</div><div class="muted">so far this month</div>';
+}
+/* ================= settle-up math ================= */
+function famList(){return S.family.length?S.family.slice():["Family"];}
+function computeSettle(){
+  const fam=famList();const paid={},share={};fam.forEach(f=>{paid[f]=0;share[f]=0;});
+  S.costs.forEach(c=>{
+    const amt=Number(c.amount||0);if(!(amt>0))return;
+    if(paid[c.payer]==null){paid[c.payer]=0;share[c.payer]=0;}
+    paid[c.payer]+=amt;
+    const parts=splitParts(c,fam);
+    parts.forEach(pt=>{if(share[pt.who]==null){share[pt.who]=0;paid[pt.who]=paid[pt.who]||0;}share[pt.who]+=amt*pt.pct/100;});
+  });
+  const net={};Object.keys(paid).forEach(f=>net[f]=paid[f]-share[f]);
+  const debtors=Object.keys(net).filter(f=>net[f]<-0.005).map(f=>({who:f,amt:-net[f]})).sort((a,b)=>b.amt-a.amt);
+  const creditors=Object.keys(net).filter(f=>net[f]>0.005).map(f=>({who:f,amt:net[f]})).sort((a,b)=>b.amt-a.amt);
+  const moves=[];let i=0,j=0;
+  while(i<debtors.length&&j<creditors.length){const d=debtors[i],c=creditors[j];const m=Math.min(d.amt,c.amt);moves.push({from:d.who,to:c.who,amt:Math.round(m*100)/100});d.amt-=m;c.amt-=m;if(d.amt<0.005)i++;if(c.amt<0.005)j++;}
+  return{net,moves};
+}
+function splitParts(c,fam){
+  if(c.split==="custom"&&c.shares&&c.shares.length){const tot=c.shares.reduce((s,x)=>s+Number(x.pct||0),0);if(tot>0)return c.shares.map(x=>({who:x.who,pct:Number(x.pct||0)/tot*100}));}
+  const members=(c.members&&c.members.length?c.members:fam);
+  return members.map(w=>({who:w,pct:100/members.length}));
+}
+/* ================= medications ================= */
+function renderMeds(){
+  const el=$("med-list");
+  if(!S.meds.length){el.innerHTML='<span class="muted">No medications yet.</span>';return;}
+  const sorted=S.meds.slice().sort((a,b)=>{const da=daysUntil(a.refill),db=daysUntil(b.refill);return(da==null?9999:da)-(db==null?9999:db);});
+  el.innerHTML=sorted.map(m=>'<div class="rowline" data-id="'+m.id+'"><span class="grow"><b>'+esc(m.name)+'</b> <span class="muted">'+esc(m.dose||"")+'</span><br><span class="muted" style="font-size:15px">'+esc(m.perday?m.perday+"x/day":"")+(m.times?" · "+esc(m.times):"")+(m.prescriber?" · "+esc(m.prescriber):"")+(m.pharmacy?" · "+esc(m.pharmacy):"")+'</span>'+(m.notes?'<br><span style="font-size:15px">'+esc(m.notes)+'</span>':"")+'</span>'+refillFlag(m)+'<button class="danger" data-del="'+m.id+'">Delete</button></div>').join("");
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.meds=S.meds.filter(x=>x.id!==b.dataset.del);save();sndDel();renderMeds();renderDash();}));
+}
+$("form-med").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target);
+  S.meds.push({id:uid(),name:f.get("name").trim(),dose:f.get("dose").trim(),perday:Number(f.get("perday"))||1,times:f.get("times").trim(),prescriber:f.get("prescriber").trim(),pharmacy:f.get("pharmacy").trim(),refill:f.get("refill")||"",notes:f.get("notes").trim()});
+  e.target.reset();save();sndOk();renderMeds();renderDash();});
+/* ================= appointments ================= */
+function renderAppts(){
+  const el=$("appt-list");const t=todayStr();
+  const up=S.appts.filter(a=>a.date>=t).sort((a,b)=>(a.date+(a.time||""))<(b.date+(b.time||""))?-1:1);
+  const past=S.appts.filter(a=>a.date<t).sort((a,b)=>(a.date+(a.time||""))>(b.date+(b.time||""))?-1:1);
+  let h="";
+  if(up.length){h+='<h3>Upcoming</h3>'+up.map(a=>apptRow(a,true)).join("");}
+  if(past.length){h+='<h3>Past</h3>'+past.map(a=>apptRow(a,false)).join("");}
+  el.innerHTML=h||'<span class="muted">No appointments yet.</span>';
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.appts=S.appts.filter(x=>x.id!==b.dataset.del);save();sndDel();renderAppts();renderDash();}));
+}
+function apptRow(a,up){
+  const d=daysUntil(a.date);
+  const tag=up?(d===0?'<span class="tag warn">Today</span>':d===1?'<span class="tag warn">Tomorrow</span>':'<span class="tag">In '+d+'d</span>'):'<span class="tag">Past</span>';
+  return '<div class="rowline" data-id="'+a.id+'"><span class="grow"><b>'+esc(fmtDate(a.date))+'</b> '+(a.time?esc(a.time):"")+'<br><span style="font-size:15px">'+esc(a.who)+(a.where?" · "+esc(a.where):"")+(a.purpose?" · "+esc(a.purpose):"")+'</span>'+(a.notes?'<br><span class="muted" style="font-size:15px">'+esc(a.notes)+'</span>':"")+'</span>'+tag+'<button class="danger" data-del="'+a.id+'">Delete</button></div>';
+}
+$("form-appt").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target);
+  S.appts.push({id:uid(),date:f.get("date"),time:f.get("time")||"",who:f.get("who").trim(),where:f.get("where").trim(),purpose:f.get("purpose").trim(),notes:f.get("notes").trim()});
+  e.target.reset();save();sndOk();renderAppts();renderDash();});
+/* ================= care log ================= */
+function renderLog(){
+  const el=$("log-list");
+  const sorted=S.log.slice().sort((a,b)=>a.date<b.date?1:-1);
+  el.innerHTML=sorted.length?sorted.map(e=>'<div class="rowline" data-id="'+e.id+'"><span class="grow"><b>'+esc(fmtDate(e.date))+'</b> · '+esc(e.who)+'<br><span style="font-size:15px">'+esc(e.what)+'</span>'+(e.notes?'<br><span class="muted" style="font-size:15px">'+esc(e.notes)+'</span>':"")+'</span><button class="danger" data-del="'+e.id+'">Delete</button></div>').join(""):'<span class="muted">No care entries yet.</span>';
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.log=S.log.filter(x=>x.id!==b.dataset.del);save();sndDel();renderLog();}));
+}
+$("form-log").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target);
+  S.log.push({id:uid(),date:f.get("date"),who:f.get("who").trim(),what:f.get("what").trim(),notes:f.get("notes").trim()});
+  e.target.reset();save();sndOk();renderLog();});
+/* ================= task rota ================= */
+function renderRota(){
+  const fam=famList();
+  const sw=$("task-who");sw.innerHTML=fam.map(f=>'<option>'+esc(f)+'</option>').join("");
+  const flt=$("rota-filter");const cur=flt.value;
+  flt.innerHTML='<option value="">Everyone</option>'+fam.map(f=>'<option'+(f===cur?" selected":"")+'>'+esc(f)+'</option>').join("");
+  const f=flt.value;
+  const list=S.tasks.filter(x=>!f||x.who===f).sort((a,b)=>{if(a.done!==b.done)return a.done?1:-1;return(a.due||"9999")<(b.due||"9999")?-1:1;});
+  const el=$("task-list");
+  el.innerHTML=list.length?list.map(x=>{
+    const d=daysUntil(x.due);
+    const tag=x.done?'<span class="tag good">Done</span>':(d!=null&&d<0?'<span class="tag bad">Overdue</span>':(d!=null&&d<=3?'<span class="tag warn">Due '+fmtDate(x.due)+'</span>':(x.due?'<span class="tag">'+fmtDate(x.due)+'</span>':"")));
+    return '<div class="rowline" data-id="'+x.id+'"><button class="btn ghost" data-tog="'+x.id+'" style="min-width:44px" aria-label="Toggle done">'+(x.done?"✓":"○")+'</button><span class="grow" style="'+(x.done?"text-decoration:line-through;opacity:.65":"")+'"><b>'+esc(x.title)+'</b><br><span class="muted" style="font-size:15px">'+esc(x.who)+(x.notes?" · "+esc(x.notes):"")+'</span></span>'+tag+'<button class="danger" data-del="'+x.id+'">Delete</button></div>';
+  }).join(""):'<span class="muted">No tasks'+(f?" for "+esc(f):"")+' yet.</span>';
+  el.querySelectorAll("[data-tog]").forEach(b=>b.addEventListener("click",()=>{const x=S.tasks.find(t=>t.id===b.dataset.tog);if(x){x.done=!x.done;save();sndTog();renderRota();renderDash();}}));
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.tasks=S.tasks.filter(x=>x.id!==b.dataset.del);save();sndDel();renderRota();renderDash();}));
+}
+$("rota-filter").addEventListener("change",renderRota);
+$("form-task").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target);
+  S.tasks.push({id:uid(),title:f.get("title").trim(),who:f.get("who"),due:f.get("due")||"",notes:f.get("notes").trim(),done:false});
+  e.target.reset();save();sndOk();renderRota();renderDash();});
+/* ================= cost ledger ================= */
+function renderCosts(){
+  const fam=famList();
+  $("cost-payer").innerHTML=fam.map(f=>'<option>'+esc(f)+'</option>').join("");
+  const cc=$("cost-custom");
+  cc.innerHTML=fam.map(f=>'<label class="f" style="min-width:120px">'+esc(f)+' %<input type="number" min="0" max="100" value="'+(100/fam.length).toFixed(0)+'" data-share="'+esc(f)+'"></label>').join("");
+  const sorted=S.costs.slice().sort((a,b)=>a.date<b.date?1:-1);
+  const el=$("cost-list");
+  el.innerHTML=sorted.length?sorted.map(c=>'<div class="rowline" data-id="'+c.id+'"><span class="grow"><b>'+esc(c.title)+'</b> <span class="tag">'+esc(c.cat)+'</span><br><span class="muted" style="font-size:15px">'+esc(fmtDate(c.date))+' · paid by '+esc(c.payer)+' · '+(c.split==="custom"?"custom split":"even split")+'</span></span><b>'+money(c.amount)+'</b><button class="danger" data-del="'+c.id+'">Delete</button></div>').join(""):'<span class="muted">No expenses yet.</span>';
+  el.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.costs=S.costs.filter(x=>x.id!==b.dataset.del);save();sndDel();renderCosts();renderDash();}));
+  const sett=computeSettle();
+  const se=$("cost-settle");
+  se.innerHTML=sett.moves.length?sett.moves.map(m=>'<div class="rowline"><span class="grow"><b>'+esc(m.from)+'</b> pays <b>'+esc(m.to)+'</b></span><b>'+money(m.amt)+'</b></div>').join(""):'<span class="muted">Everyone is settled up.</span>';
+}
+document.querySelector('#form-cost select[name="split"]').addEventListener("change",e=>{$("cost-custom").style.display=e.target.value==="custom"?"grid":"none";});
+$("form-cost").addEventListener("submit",e=>{e.preventDefault();const f=new FormData(e.target);
+  const split=f.get("split");let shares=null;
+  if(split==="custom"){shares=[];document.querySelectorAll("#cost-custom [data-share]").forEach(inp=>{shares.push({who:inp.dataset.share,pct:Number(inp.value)||0});});}
+  S.costs.push({id:uid(),title:f.get("title").trim(),date:f.get("date"),amount:Number(f.get("amount")),cat:f.get("cat"),payer:f.get("payer"),split:split,shares:shares,members:famList()});
+  e.target.reset();$("cost-custom").style.display="none";save();sndOk();renderCosts();renderDash();});
+/* ================= ER sheet ================= */
+function renderER(){
+  const p=S.profile;
+  const medRows=S.meds.map(m=>'<tr><td>'+esc(m.name)+'</td><td>'+esc(m.dose||"")+'</td><td>'+esc(m.times||(m.perday?m.perday+"x/day":""))+'</td><td>'+esc(m.prescriber||"")+'</td></tr>').join("");
+  const cRows=p.contacts.map(c=>'<tr><td>'+esc(c.name)+'</td><td>'+esc(c.rel||"")+'</td><td>'+esc(c.phone)+'</td></tr>').join("");
+  $("er-sheet").innerHTML=
+    '<h2>Emergency Information — '+esc(p.name||"(name not set)")+'</h2>'+
+    '<div style="font-size:15px;color:#555">Prepared with CareTogether · '+esc(todayStr())+' · Keep on the fridge</div>'+
+    '<h3>Profile</h3><table>'+
+    '<tr><th style="width:32%">Date of birth</th><td>'+esc(p.dob||"—")+'</td></tr>'+
+    '<tr><th>Blood type</th><td>'+esc(p.blood||"—")+'</td></tr>'+
+    '<tr><th>Conditions</th><td>'+esc(p.conditions||"—")+'</td></tr>'+
+    '<tr><th>Allergies</th><td><b>'+esc(p.allergies||"None listed")+'</b></td></tr>'+
+    '<tr><th>Primary doctor</th><td>'+esc(p.doctor||"—")+(p.doctorPhone?" · "+esc(p.doctorPhone):"")+'</td></tr></table>'+
+    '<h3>Current medications</h3><table><tr><th>Name</th><th>Dose</th><th>Schedule</th><th>Prescriber</th></tr>'+(medRows||'<tr><td colspan="4">None listed</td></tr>')+'</table>'+
+    '<h3>Emergency contacts</h3><table><tr><th>Name</th><th>Relationship</th><th>Phone</th></tr>'+(cRows||'<tr><td colspan="3">None listed</td></tr>')+'</table>'+
+    '<div style="margin-top:1rem;font-size:14px;color:#555">CareTogether is an organizer only — not medical advice. In an emergency, call 911.</div>';
+}
+$("btn-print").addEventListener("click",()=>window.print());
+$("btn-er-edit").addEventListener("click",()=>{
+  const p=S.profile;const f=$("er-form");
+  if(f.style.display==="none"){
+    const cLines=p.contacts.map(c=>c.name+" | "+(c.rel||"")+" | "+c.phone).join("\n");
+    f.innerHTML='<form class="add" id="form-profile">'+
+      '<label class="f">Full name<input name="name" value="'+esc(p.name)+'" maxlength="60"></label>'+
+      '<label class="f">Date of birth<input name="dob" value="'+esc(p.dob)+'" placeholder="1948-03-12"></label>'+
+      '<label class="f">Blood type<input name="blood" value="'+esc(p.blood)+'" maxlength="8"></label>'+
+      '<label class="f">Primary doctor<input name="doctor" value="'+esc(p.doctor)+'" maxlength="60"></label>'+
+      '<label class="f">Doctor phone<input name="doctorPhone" value="'+esc(p.doctorPhone)+'" maxlength="30"></label>'+
+      '<label class="f">Family members (comma separated)<input name="family" value="'+esc(S.family.join(", "))+'" maxlength="200" placeholder="Dave, Lisa, Mark"></label>'+
+      '<label class="f" style="grid-column:1/-1">Conditions<textarea name="conditions" maxlength="400">'+esc(p.conditions)+'</textarea></label>'+
+      '<label class="f" style="grid-column:1/-1">Allergies<textarea name="allergies" maxlength="400">'+esc(p.allergies)+'</textarea></label>'+
+      '<label class="f" style="grid-column:1/-1">Emergency contacts — one per line: Name | Relationship | Phone<textarea name="contacts" rows="3">'+esc(cLines)+'</textarea></label>'+
+      '<div><button class="btn" type="submit">Save profile</button></div></form>';
+    f.style.display="block";
+    $("form-profile").addEventListener("submit",ev=>{ev.preventDefault();const fd=new FormData(ev.target);
+      p.name=fd.get("name").trim();p.dob=fd.get("dob").trim();p.blood=fd.get("blood").trim();
+      p.doctor=fd.get("doctor").trim();p.doctorPhone=fd.get("doctorPhone").trim();
+      p.conditions=fd.get("conditions").trim();p.allergies=fd.get("allergies").trim();
+      S.family=fd.get("family").split(",").map(s=>s.trim()).filter(Boolean);
+      p.contacts=fd.get("contacts").split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const parts=l.split("|").map(s=>s.trim());return{name:parts[0]||"",rel:parts[1]||"",phone:parts[2]||""};}).filter(c=>c.name);
+      f.style.display="none";save();sndOk();renderER();renderDash();renderRota();renderCosts();
+    });
+  } else f.style.display="none";
+});
+/* ================= charts ================= */
+const PALETTE=["#b3541e","#2e7d4f","#3a6ea5","#8e44ad","#c09a2e","#c2507a","#4aa3a2","#7a5c3e","#5a7d2e","#a53a3a"];
+function pal(i){return PALETTE[i%PALETTE.length];}
+function polar(cx,cy,r,ang){const a=(ang-90)*Math.PI/180;return[cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+function donutSlice(cx,cy,rO,rI,a0,a1){
+  const[x0,y0]=polar(cx,cy,rO,a0),[x1,y1]=polar(cx,cy,rO,a1);
+  const[x2,y2]=polar(cx,cy,rI,a1),[x3,y3]=polar(cx,cy,rI,a0);
+  const large=(a1-a0)>180?1:0;
+  return "M"+x0.toFixed(2)+" "+y0.toFixed(2)+" A"+rO+" "+rO+" 0 "+large+" 1 "+x1.toFixed(2)+" "+y1.toFixed(2)+" L"+x2.toFixed(2)+" "+y2.toFixed(2)+" A"+rI+" "+rI+" 0 "+large+" 0 "+x3.toFixed(2)+" "+y3.toFixed(2)+" Z";
+}
+function buildDonut(card,data,totalLabel,fmt){
+  const wrap=card.querySelector("[data-donut]"),info=card.querySelector("[data-sel]");
+  const total=data.reduce((s,d)=>s+d.value,0);
+  info.textContent="";
+  if(!data.length||total<=0){wrap.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;min-height:220px" class="muted">No data yet.</div>';return;}
+  const cx=115,cy=115,rO=100,rI=60;let ang=0;
+  let svg='<svg viewBox="0 0 230 230" role="img" aria-label="'+esc(totalLabel)+'">';
+  const slices=data.map((d,i)=>{
+    const frac=d.value/total;const a0=ang;ang+=frac*360;const a1=ang;
+    const mid=(a0+a1)/2;const[dx,dy]=polar(0,0,10,mid);
+    const p=donutSlice(cx,cy,rO,rI,a0,Math.max(a1-0.6,a0+0.5));
+    return {d,path:p,dx:dx.toFixed(1),dy:dy.toFixed(1),i};
+  });
+  svg+=slices.map(s=>'<g class="donut-slice" data-i="'+s.i+'" transform="translate(0,0)"><path d="'+s.path+'" fill="'+pal(s.i)+'" data-dx="'+s.dx+'" data-dy="'+s.dy+'"/></g>').join("");
+  svg+="</svg>";
+  const valStr=fmt(total);
+  wrap.innerHTML=svg+'<div class="donut-center"><div class="dc-name">'+esc(totalLabel)+'</div><div class="dc-val" style="'+(valStr.length>9?"font-size:16px":"")+'">'+esc(valStr)+'</div></div>';
+  wrap.querySelectorAll(".donut-slice").forEach(g=>{
+    g.addEventListener("click",()=>{
+      const was=g.classList.contains("sel");
+      wrap.querySelectorAll(".donut-slice").forEach(x=>{x.classList.remove("sel");x.setAttribute("transform","translate(0,0)");});
+      if(was){info.textContent="";wrap.querySelector(".donut-center").innerHTML='<div class="dc-name">'+esc(totalLabel)+'</div><div class="dc-val" style="'+(valStr.length>9?"font-size:16px":"")+'">'+esc(valStr)+'</div>';sndTog();return;}
+      const p=g.querySelector("path");
+      g.classList.add("sel");g.setAttribute("transform","translate("+p.dataset.dx+","+p.dataset.dy+")");
+      const d=data[Number(g.dataset.i)];const dv=fmt(d.value);
+      wrap.querySelector(".donut-center").innerHTML='<div class="dc-name">'+esc(d.label)+'</div><div class="dc-val" style="'+(dv.length>9?"font-size:16px":"")+'">'+esc(dv)+'</div>';
+      info.textContent=d.label+" — "+dv;sndTog();
+    });
+  });
+}
+function buildBars(card,data,fmt){
+  const el=card.querySelector("[data-bars]"),info=card.querySelector("[data-sel]");
+  info.textContent="";
+  if(!data.length){el.innerHTML='<span class="muted">No data yet.</span>';return;}
+  const max=Math.max.apply(null,data.map(d=>d.value).concat([1]));
+  el.innerHTML=data.map((d,i)=>'<div class="bar-row" data-i="'+i+'" role="button" tabindex="0"><span class="blabel">'+esc(d.label)+'</span><span class="btrack"><span class="bfill" style="width:'+(d.value/max*100).toFixed(1)+'%;background:'+pal(i)+'"></span></span><span class="bval">'+esc(fmt(d.value))+'</span></div>').join("");
+  el.querySelectorAll(".bar-row").forEach(r=>{
+    const act=()=>{
+      const was=r.classList.contains("sel");
+      el.querySelectorAll(".bar-row").forEach(x=>x.classList.remove("sel"));
+      if(was){info.textContent="";sndTog();return;}
+      r.classList.add("sel");const d=data[Number(r.dataset.i)];
+      info.textContent=d.label+" — "+fmt(d.value);sndTog();
+    };
+    r.addEventListener("click",act);
+    r.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();act();}});
+  });
+}
+function renderCharts(){
+  const byCat={};S.costs.forEach(c=>{byCat[c.cat]=(byCat[c.cat]||0)+Number(c.amount||0);});
+  buildDonut($("cc-cat"),Object.keys(byCat).map(k=>({label:k,value:byCat[k]})),"Total spent",money);
+  const byMon={};S.costs.forEach(c=>{const m=(c.date||"").slice(0,7);if(m)byMon[m]=(byMon[m]||0)+Number(c.amount||0);});
+  const mkeys=Object.keys(byMon).sort().slice(-8);
+  buildBars($("cc-month"),mkeys.map(k=>({label:k,value:byMon[k]})),money);
+  const byWho={};S.tasks.forEach(t=>{byWho[t.who]=(byWho[t.who]||0)+1;});
+  buildDonut($("cc-tasks"),Object.keys(byWho).map(k=>({label:k,value:byWho[k]})),"Total tasks",v=>String(v));
+  const byTime={};S.meds.forEach(m=>{const t=(m.times||"Unscheduled").split(/[,/]/)[0].trim()||"Unscheduled";byTime[t]=(byTime[t]||0)+1;});
+  buildDonut($("cc-meds"),Object.keys(byTime).map(k=>({label:k,value:byTime[k]})),"Medications",v=>String(v));
+}
+/* ================= sample data ================= */
+function sampleData(){
+  const d=defStore();
+  d.profile={name:"Margaret Ellis",dob:"1948-03-12",conditions:"Hypertension, Type 2 diabetes, mild arthritis",allergies:"Penicillin",blood:"O+",doctor:"Dr. Anita Patel",doctorPhone:"(812) 555-0147",contacts:[{name:"Dave Ellis",rel:"Son",phone:"(812) 555-0101"},{name:"Lisa Chen",rel:"Daughter",phone:"(812) 555-0102"}]};
+  d.family=["Dave","Lisa","Mark"];
+  d.meds=[
+    {id:uid(),name:"Lisinopril",dose:"10mg",perday:1,times:"Morning",prescriber:"Dr. Patel",pharmacy:"CVS Main St",refill:addDaysStr(null,4),notes:"For blood pressure"},
+    {id:uid(),name:"Metformin",dose:"500mg",perday:2,times:"Morning, Evening",prescriber:"Dr. Patel",pharmacy:"CVS Main St",refill:addDaysStr(null,12),notes:"With food"},
+    {id:uid(),name:"Atorvastatin",dose:"20mg",perday:1,times:"Evening",prescriber:"Dr. Patel",pharmacy:"CVS Main St",refill:addDaysStr(null,2),notes:""},
+    {id:uid(),name:"Vitamin D3",dose:"1000 IU",perday:1,times:"Morning",prescriber:"Dr. Patel",pharmacy:"",refill:addDaysStr(null,30),notes:""}
+  ];
+  d.appts=[
+    {id:uid(),date:addDaysStr(null,2),time:"10:30",who:"Dr. Patel — Cardiology",where:"Bloomington Hospital",purpose:"Blood pressure follow-up",notes:"Bring home BP log"},
+    {id:uid(),date:addDaysStr(null,6),time:"14:00",who:"Dr. Nguyen — Dentist",where:"Downtown Dental",purpose:"Cleaning",notes:""},
+    {id:uid(),date:addDaysStr(null,-5),time:"09:00",who:"Dr. Patel — Primary care",where:"Bloomington Hospital",purpose:"Quarterly checkup",notes:"A1C was 6.8"}
+  ];
+  d.log=[
+    {id:uid(),date:addDaysStr(null,-1),who:"Dave",what:"Grocery run and refilled pill organizer",notes:"Mom seemed in good spirits"},
+    {id:uid(),date:addDaysStr(null,-3),who:"Lisa",what:"Drove to cardiology appointment, picked up prescriptions",notes:""},
+    {id:uid(),date:addDaysStr(null,-6),who:"Mark",what:"Fixed bathroom grab bar, mowed lawn",notes:"Grab bar is secure now"}
+  ];
+  d.tasks=[
+    {id:uid(),title:"Pick up prescriptions",who:"Dave",due:addDaysStr(null,2),notes:"",done:false},
+    {id:uid(),title:"Schedule eye exam",who:"Lisa",due:addDaysStr(null,9),notes:"",done:false},
+    {id:uid(),title:"Install night lights in hallway",who:"Mark",due:addDaysStr(null,5),notes:"",done:false},
+    {id:uid(),title:"Refill pill organizer",who:"Dave",due:addDaysStr(null,-1),notes:"",done:true}
+  ];
+  d.costs=[
+    {id:uid(),title:"Copay — cardiology",date:addDaysStr(null,-2),amount:35,cat:"Copay",payer:"Dave",split:"even",shares:null,members:["Dave","Lisa","Mark"]},
+    {id:uid(),title:"Prescriptions — CVS",date:addDaysStr(null,-8),amount:48.6,cat:"Prescriptions",payer:"Lisa",split:"even",shares:null,members:["Dave","Lisa","Mark"]},
+    {id:uid(),title:"Groceries — weekly run",date:addDaysStr(null,-4),amount:86.23,cat:"Groceries",payer:"Dave",split:"custom",shares:[{who:"Dave",pct:50},{who:"Lisa",pct:25},{who:"Mark",pct:25}],members:["Dave","Lisa","Mark"]},
+    {id:uid(),title:"Gas — appointment drives",date:addDaysStr(null,-12),amount:42,cat:"Transport",payer:"Mark",split:"even",shares:null,members:["Dave","Lisa","Mark"]}
+  ];
+  return d;
+}
+$("btn-sample").addEventListener("click",()=>{
+  const b=$("btn-sample");
+  if(!sampleOn){
+    sampleBackup=JSON.parse(JSON.stringify(S));S=sampleData();sampleOn=true;
+    b.classList.add("on");b.setAttribute("aria-pressed","true");sndOk();
+  }else{
+    S=sampleBackup;sampleBackup=null;sampleOn=false;save();
+    b.classList.remove("on");b.setAttribute("aria-pressed","false");sndTog();
+  }
+  renderAll();
+});
+/* ================= CSV / JSON ================= */
+const SECTIONS={
+  meds:{fields:["name","dose","perday","times","prescriber","pharmacy","refill","notes"],req:["name"]},
+  appts:{fields:["date","time","who","where","purpose","notes"],req:["date","who"]},
+  log:{fields:["date","who","what","notes"],req:["date","who","what"]},
+  tasks:{fields:["title","who","due","notes","done"],req:["title"]},
+  costs:{fields:["title","date","amount","cat","payer","split"],req:["title","date","amount"]}
+};
+function exportCSV(sec){
+  const cfg=SECTIONS[sec];const rows=S[sec];
+  const head=cfg.fields.map(csvEsc).join(",");
+  const lines=rows.map(r=>cfg.fields.map(f=>csvEsc(r[f])).join(","));
+  download("caretogether-"+sec+"-"+todayStr()+".csv",head+"\n"+lines.join("\n"),"text/csv");
+}
+function exportJSON(sec){download("caretogether-"+sec+"-"+todayStr()+".json",JSON.stringify(S[sec],null,2),"application/json");}
+function importJSON(sec,file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const arr=JSON.parse(rd.result);
+      if(!Array.isArray(arr))throw new Error("not an array");
+      const cfg=SECTIONS[sec];
+      const clean=arr.map(o=>{
+        if(!o||typeof o!=="object")throw new Error("bad row");
+        for(const r of cfg.req)if(o[r]==null||o[r]==="")throw new Error("missing "+r);
+        const n={id:uid()};cfg.fields.forEach(f=>{n[f]=o[f]!=null?o[f]:"";});
+        if(sec==="tasks")n.done=!!o.done;
+        if(sec==="costs"){n.amount=Number(o.amount)||0;n.shares=o.shares||null;n.members=o.members||famList();}
+        if(sec==="meds")n.perday=Number(o.perday)||1;
+        return n;
+      });
+      S[sec]=clean;save();sndOk();renderAll();
+    }catch(e){alert("Import failed: "+e.message);}
+  };
+  rd.readAsText(file);
+}
+[["meds"],["appts"],["log"],["tasks"],["costs"]].forEach(([sec])=>{
+  $("exp-"+sec+"-csv").addEventListener("click",()=>{exportCSV(sec);sndTog();});
+  $("exp-"+sec+"-json").addEventListener("click",()=>{exportJSON(sec);sndTog();});
+  $("imp-"+sec).addEventListener("change",e=>{if(e.target.files[0])importJSON(sec,e.target.files[0]);e.target.value="";});
+});
+/* ================= init ================= */
+function renderAll(){renderDash();renderMeds();renderAppts();renderLog();renderRota();renderCosts();renderER();renderCharts();}
+applyTheme();
+(function(){const b=$("btn-sound");const on=!!S.prefs.sound;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);})();
+renderAll();
+</script>
+</body>
+</html>
