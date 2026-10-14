@@ -35,6 +35,13 @@ main{max-width:1100px;margin:0 auto;padding:0 18px 40px}
 .tabs button.active{background:var(--acc);color:#fff;border-color:var(--acc)}
 .tabs button:active{transform:scale(.96)}
 @media(max-width:640px){.tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch}.tabs button{flex:0 0 auto}}
+@media(max-width:560px){
+  header .hwrap{flex-wrap:wrap;row-gap:8px}
+  .brand{font-size:17px}
+  .logo-badge{width:28px;height:28px;flex-basis:28px}
+  .pill-btn{height:40px;padding:0 14px;font-size:14px}
+  .hdr-btns button{width:40px;height:40px}
+}
 section.tab{display:none}
 section.tab.active{display:block}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:14px 0}
@@ -44,12 +51,12 @@ section.tab.active{display:block}
 .card h3{margin:0 0 8px;font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .bignum{font-size:34px;font-weight:800;line-height:1.1}
 .bignum small{font-size:16px;font-weight:600;color:var(--muted)}
-.sub{color:var(--muted);font-size:14px}
+.sub{color:var(--muted);font-size:15px}
 .clickable{cursor:pointer}
 .prow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid transparent}
 .prow.clickable:hover{border-color:var(--line);background:var(--chip)}
 .prow .tag{flex:0 0 auto}
-.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font-size:15px;font-weight:700}
 .tag.ok{background:#e2f2e7;color:#1f5c39}[data-theme="dark"] .tag.ok{background:#1d3a28;color:#8fe0ae}
 .tag.warn{background:#fbf0d8;color:#7a5510}[data-theme="dark"] .tag.warn{background:#3a2f16;color:#f0d49a}
 .tag.crit{background:#f9e2dc;color:#8f2f1d}[data-theme="dark"] .tag.crit{background:#3d211b;color:#f0a894}
@@ -472,12 +479,12 @@ function drawCharts(){
   const cc=DB.contributions.slice().sort((a,b)=>a.year-b.year);
   const maxC=Math.max(...cc.map(c=>Math.max(c.selfAmt+c.employerAmt,c.limitAmt,1)),1);
   let html='<div class="chart-card"><h3>Unreimbursed spending by category</h3>'+(slices.length?donutSVG(slices,totU,"unreimbursed"):'<p class="sub">Nothing unreimbursed.</p>')+'</div>';
+  html+='<div class="chart-card"><h3>Reimbursed vs open</h3>'+donutSVG([{k:"Reimbursed",v:reimbTotal()},{k:"Open",v:totU}],reimbTotal()+totU,"all receipts")+'</div>';
   html+='<div class="chart-card"><h3>Receipts by year</h3>'+years.map((y,i)=>'<div class="hbar-row'+(barSelY===i?" sel":"")+'" data-bary="'+i+'"><span class="lbl">'+y+'</span><div class="hbar-track"><div class="hbar-fill" style="width:'+Math.round(byYear[y]/maxY*100)+'%">'+esc(money(byYear[y]))+'</div></div></div>').join("")+'</div>';
   html+='<div class="chart-card"><h3>Contributions vs limits</h3>'+(cc.length?cc.map((c,i)=>{
     const tot=c.selfAmt+c.employerAmt, w=Math.round(Math.max(tot,c.limitAmt)/maxC*100);
     return '<div class="hbar-row'+(barSelC===i?" sel":"")+'" data-barc="'+i+'"><span class="lbl">'+c.year+'</span><div class="hbar-track" style="position:relative"><div class="hbar-fill" style="width:'+Math.round(tot/maxC*100)+'%">&nbsp;</div>'+(c.limitAmt>0?'<div style="position:absolute;top:0;bottom:0;left:'+Math.round(c.limitAmt/maxC*100)+'%;width:3px;background:var(--crit)"></div>':"")+'</div><span class="sub" style="flex:0 0 150px">'+money(tot)+(c.limitAmt>0?" / "+money(c.limitAmt):"")+'</span></div>';
   }).join(""):'<p class="sub">No contributions yet.</p>')+'</div>';
-  html+='<div class="chart-card"><h3>Reimbursed vs open</h3>'+donutSVG([{k:"Reimbursed",v:reimbTotal()},{k:"Open",v:totU}],reimbTotal()+totU,"all receipts")+'</div>';
   grid.innerHTML=html;
   grid.querySelectorAll(".seg,[data-seg]").forEach(el=>el.addEventListener("click",()=>{
     const i=+el.dataset.seg;donutSel=donutSel===i?null:i;drawCharts();sndOk();
