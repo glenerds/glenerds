@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTG Collection Tracker — Offline Card Inventory, Deck & Trade Log</title>
+<meta name="description" content="BinderBox: offline Magic: The Gathering collection tracker. Card inventory with photos, set completion, deck lists, trade log, wantlist, value charts, printable insurance packet. No subscription, no account.">
+<style>
+:root{
+  --bg:#f4f1ea; --card:#ffffff; --ink:#23211c; --muted:#6d675c; --line:#e2dccf;
+  --acc:#2f7d4f; --acc-ink:#ffffff; --warn:#b3541e; --danger:#b3372f;
+  --foil1:#7c5cd6; --foil2:#3fa9f5;
+  --shadow:0 1px 3px rgba(35,33,28,.10);
+  --r:12px;
+}
+html[data-theme="dark"]{
+  --bg:#171512; --card:#221f1a; --ink:#ece7db; --muted:#a8a092; --line:#3a352c;
+  --acc:#57b87f; --acc-ink:#10231a; --warn:#e08a4e; --danger:#e06a5e;
+  --shadow:0 1px 4px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+h1{font-size:26px;margin:0} h2{font-size:21px;margin:0 0 .6rem} h3{font-size:18px;margin:0 0 .4rem}
+
+/* ---------- header ---------- */
+header{background:var(--bg);border-bottom:1px solid var(--line)}
+.hwrap{max-width:1060px;margin:0 auto;padding:.7rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--ink)}
+.brand svg{width:34px;height:34px;flex:none}
+.brand b{font-size:22px;letter-spacing:.01em}
+.hdr-btns{display:flex;align-items:center;gap:.55rem}
+.hdr-btns button,.pill{height:44px;min-width:44px;border:1px solid var(--line);background:var(--card);border-radius:10px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0 .7rem;box-shadow:var(--shadow)}
+.hdr-btns button:active,.pill:active{transform:scale(.94);filter:brightness(.94)}
+.hdr-btns button svg{width:22px;height:22px;display:block}
+.hdr-btns button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+.pill{text-decoration:none;color:var(--ink);font-weight:600;font-size:15px;white-space:nowrap}
+.pill.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+
+/* ---------- layout ---------- */
+main{max-width:1060px;margin:0 auto;padding:1rem}
+.tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.tabs button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.55rem 1rem;cursor:pointer;font-size:15px;box-shadow:var(--shadow)}
+.tabs button:active{transform:scale(.95)}
+.tabs button[aria-selected="true"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:700}
+.tabpane{display:none}
+.tabpane.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1rem;margin-bottom:1rem}
+.grid{display:grid;gap:1rem}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1rem;cursor:pointer;text-align:left;width:100%}
+.stat:active{transform:scale(.97)}
+.stat .n{font-size:30px;font-weight:800;line-height:1.1}
+.stat .l{font-size:15px;color:var(--muted);margin-top:.25rem}
+.stat .sub2{font-size:15px;margin-top:.2rem}
+.pos{color:var(--acc)} .neg{color:var(--danger)}
+
+/* ---------- tables ---------- */
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:.55rem .6rem;border-bottom:1px solid var(--line);vertical-align:middle}
+th{color:var(--muted);font-weight:600;font-size:15px;text-transform:uppercase;letter-spacing:.03em}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:color-mix(in srgb,var(--acc) 7%,transparent)}
+.thumb{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line);display:block}
+.nothumb{width:44px;height:44px;border-radius:8px;border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:15px}
+.toolbar{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem}
+.toolbar input[type="search"],.toolbar select{border:1px solid var(--line);border-radius:10px;background:var(--card);padding:.6rem .8rem;font-size:15px}
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:.65rem 1.1rem;cursor:pointer;font-size:15px;box-shadow:var(--shadow)}
+.btn:active{transform:scale(.95);filter:brightness(.94)}
+.btn.primary{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:700}
+.btn.danger{background:var(--danger);color:#fff;border-color:var(--danger)}
+.btnrow{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+.tag{display:inline-block;font-size:15px;border:1px solid var(--line);border-radius:999px;padding:.1rem .6rem;margin:.1rem .15rem;background:var(--bg)}
+.tag.foil{background:linear-gradient(120deg,var(--foil1),var(--foil2));color:#fff;border:none}
+.pbar{height:12px;border-radius:999px;background:var(--line);overflow:hidden;min-width:120px}
+.pbar>i{display:block;height:100%;background:var(--acc);border-radius:999px}
+.muted{color:var(--muted);font-size:15px}
+
+/* ---------- dialogs ---------- */
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:1.2rem;max-width:560px;width:calc(100vw - 2rem);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+dialog h2{margin-bottom:.8rem}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.fgrid .full{grid-column:1/-1}
+label.f{display:block;font-size:15px}
+label.f>span{display:block;color:var(--muted);margin-bottom:.25rem;font-size:15px}
+label.f input,label.f select,label.f textarea{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--bg);padding:.6rem .7rem;font-size:15px}
+label.f textarea{min-height:120px;font-family:ui-monospace,monospace}
+.chkrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);border-radius:10px;padding:.45rem .7rem;cursor:pointer;font-size:15px;background:var(--bg)}
+.chk input{width:20px;height:20px;accent-color:var(--acc)}
+.photo-prev{max-width:120px;border-radius:10px;border:1px solid var(--line);display:block;margin-top:.4rem}
+
+/* ---------- charts ---------- */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1rem;height:360px;display:flex;flex-direction:column}
+.chart-card h3{margin-bottom:.4rem}
+.chart-card canvas{flex:1;width:100%;min-height:0;cursor:pointer}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line);margin-top:1.5rem}
+.fwrap{max-width:1060px;margin:0 auto;padding:1.2rem 1rem;font-size:15px;color:var(--muted)}
+.cta{display:flex;align-items:center;justify-content:space-between;gap:1rem;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;box-shadow:var(--shadow);margin-bottom:1rem;flex-wrap:wrap}
+.cta b{font-size:17px;color:var(--ink)}
+.disclaimer{font-size:15px}
+
+/* ---------- sample banner ---------- */
+.sample-banner{display:flex;align-items:center;justify-content:space-between;gap:.8rem;background:color-mix(in srgb,var(--warn) 14%,var(--card));border:1px solid var(--warn);border-radius:var(--r);padding:.7rem 1rem;margin-bottom:1rem;font-size:15px}
+.sample-banner[hidden]{display:none!important}
+
+/* ---------- print ---------- */
+@media print{
+  header,.tabs,footer,.toolbar,.btnrow,.no-print,.sample-banner{display:none!important}
+  body{background:#fff;color:#000;font-size:12pt}
+  .card{box-shadow:none;border:1px solid #999;break-inside:avoid}
+  main{max-width:none}
+  .tabpane{display:none!important}
+  #pane-reports{display:block!important}
+}
+@media (max-width:700px){
+  .g2,.g3,.g4,.chart-grid{grid-template-columns:1fr}
+  .chart-card{height:320px}
+  .fgrid{grid-template-columns:1fr}
+  .hwrap{padding:.6rem .8rem}
+  main{padding:.8rem}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <a class="brand" href="#" id="brand-home" aria-label="BinderBox home">
+      <svg viewBox="0 0 34 34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="7" y="3" width="21" height="28" rx="3.5" fill="var(--acc)" stroke="var(--acc)" opacity="0.92"/>
+        <rect x="7" y="3" width="21" height="28" rx="3.5"/>
+        <line x1="12.5" y1="3" x2="12.5" y2="31"/>
+        <circle cx="12.5" cy="9" r="1.6" fill="var(--card)" stroke="none"/>
+        <circle cx="12.5" cy="17" r="1.6" fill="var(--card)" stroke="none"/>
+        <circle cx="12.5" cy="25" r="1.6" fill="var(--card)" stroke="none"/>
+        <rect x="16" y="8" width="9" height="12.5" rx="1.5" fill="var(--card)" stroke="none"/>
+        <path d="M18.2 12.2l1.4 1.4 2.6-2.8" stroke="var(--acc)" stroke-width="1.8"/>
+      </svg>
+      <b>BinderBox</b>
+    </a>
+    <div class="hdr-btns">
+      <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="sample-toggle" title="Try sample data" aria-label="Try sample data" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5h5"/><path d="M10.5 2.5v6l-5.6 9.2A1.7 1.7 0 0 0 6.4 20.5h11.2a1.7 1.7 0 0 0 1.5-2.8l-5.6-9.2v-6"/><circle cx="11" cy="14.8" r="1.2"/><circle cx="14" cy="16.8" r=".85"/><circle cx="10" cy="17.8" r=".6"/></svg></button>
+      <button id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.5A8 8 0 0 1 10.5 4 8 8 0 1 0 20 13.5z"/></svg></button>
+      <button id="sound-toggle" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5L6.5 9H3v6h3.5L11 19z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="sample-banner" id="sample-banner" hidden>
+    <span><b>Sample data is on.</b> Your collection is safely stored — turn the flask off to get it back.</span>
+    <button class="btn" id="sample-off">Exit sample mode</button>
+  </div>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-tab="dash" aria-selected="true">Dashboard</button>
+    <button role="tab" data-tab="cards" aria-selected="false">Cards</button>
+    <button role="tab" data-tab="sets" aria-selected="false">Sets</button>
+    <button role="tab" data-tab="decks" aria-selected="false">Decks</button>
+    <button role="tab" data-tab="trades" aria-selected="false">Trades</button>
+    <button role="tab" data-tab="want" aria-selected="false">Wantlist</button>
+    <button role="tab" data-tab="charts" aria-selected="false">Charts</button>
+    <button role="tab" data-tab="reports" aria-selected="false">Reports</button>
+  </nav>
+
+  <section class="tabpane active" id="pane-dash" role="tabpanel"><div class="grid g4" id="dash-stats"></div>
+    <div class="card"><h2>Top sets by value</h2><div id="dash-topsets" class="muted">No cards yet — add some on the Cards tab, or try the sample data flask.</div></div>
+  </section>
+
+  <section class="tabpane" id="pane-cards" role="tabpanel">
+    <div class="card">
+      <div class="toolbar">
+        <input type="search" id="c-search" placeholder="Search card name…" aria-label="Search card name">
+        <select id="c-fset" aria-label="Filter by set"><option value="">All sets</option></select>
+        <select id="c-ffoil" aria-label="Filter by foil"><option value="">Foil &amp; non-foil</option><option value="1">Foil only</option><option value="0">Non-foil only</option></select>
+        <select id="c-fcond" aria-label="Filter by condition"><option value="">Any condition</option><option>NM</option><option>LP</option><option>MP</option><option>HP</option></select>
+        <button class="btn primary" id="c-add">Add card</button>
+      </div>
+      <div class="twrap"><table aria-label="Card collection">
+        <thead><tr><th></th><th>Name</th><th>Set</th><th>#</th><th>Rarity</th><th>Cond</th><th>Qty</th><th>Paid</th><th>Value</th></tr></thead>
+        <tbody id="c-rows"></tbody>
+      </table></div>
+      <p class="muted" id="c-count"></p>
+    </div>
+  </section>
+
+  <section class="tabpane" id="pane-sets" role="tabpanel"><div id="set-list"></div></section>
+
+  <section class="tabpane" id="pane-decks" role="tabpanel">
+    <div class="card"><button class="btn primary" id="d-add">New deck</button><div id="deck-list" style="margin-top:1rem"></div></div>
+  </section>
+
+  <section class="tabpane" id="pane-trades" role="tabpanel">
+    <div class="card">
+      <div class="btnrow" style="margin:0 0 1rem"><button class="btn primary" id="t-add">Log trade</button></div>
+      <div id="trade-totals" class="muted" style="margin-bottom:.8rem"></div>
+      <div class="twrap"><table aria-label="Trade log">
+        <thead><tr><th>Date</th><th>Partner</th><th>Gave</th><th>Received</th><th>Cash</th><th>Notes</th><th></th></tr></thead>
+        <tbody id="t-rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section class="tabpane" id="pane-want" role="tabpanel">
+    <div class="card">
+      <div class="btnrow" style="margin:0 0 1rem"><button class="btn primary" id="w-add">Add want</button></div>
+      <div class="twrap"><table aria-label="Wantlist">
+        <thead><tr><th>Priority</th><th>Card</th><th>Set</th><th>Max price</th><th>Acquired</th><th></th></tr></thead>
+        <tbody id="w-rows"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section class="tabpane" id="pane-charts" role="tabpanel">
+    <div class="chart-grid">
+      <div class="chart-card"><h3>Collection value by set</h3><canvas id="ch-setval" aria-label="Bar chart of collection value by set"></canvas></div>
+      <div class="chart-card"><h3>Cards by rarity</h3><canvas id="ch-rarity" aria-label="Donut chart of card copies by rarity"></canvas></div>
+      <div class="chart-card"><h3>Foil vs non-foil value</h3><canvas id="ch-foil" aria-label="Donut chart of foil versus non-foil value"></canvas></div>
+      <div class="chart-card"><h3>Copies by condition</h3><canvas id="ch-cond" aria-label="Bar chart of card copies by condition"></canvas></div>
+    </div>
+  </section>
+
+  <section class="tabpane" id="pane-reports" role="tabpanel">
+    <div class="card">
+      <h2>Reports &amp; backup</h2>
+      <div class="btnrow">
+        <button class="btn" id="r-print">Print insurance packet</button>
+        <button class="btn" id="r-csv">Export cards CSV</button>
+        <button class="btn" id="r-json">Export JSON backup</button>
+        <button class="btn" id="r-import-btn">Import JSON backup</button>
+        <input type="file" id="r-import" accept="application/json,.json" hidden>
+      </div>
+      <p class="muted">Your data lives only in this browser. Export a JSON backup regularly and keep a copy somewhere safe — clearing browser data without a backup loses your collection. Card photos are stored on this device only and don't sync between devices.</p>
+      <div id="print-area"></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="fwrap">
+    <div class="cta">
+      <div><b>Like BinderBox?</b><br><span class="muted">More one-file offline apps on Gumroad — no subscriptions, ever.</span></div>
+      <a class="pill" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+    </div>
+    <p class="disclaimer">BinderBox is a personal collection organizer and is not affiliated with Wizards of the Coast. Magic: The Gathering is a trademark of Wizards of the Coast LLC. Card values you enter are your own records, not appraisals — this app never promises investment returns.</p>
+  </div>
+</footer>
+
+<dialog id="dlg-card" aria-labelledby="dlg-card-title">
+  <h2 id="dlg-card-title">Add card</h2>
+  <form method="dialog" id="f-card">
+    <div class="fgrid">
+      <label class="f"><span>Card name *</span><input id="fc-name" required maxlength="120"></label>
+      <label class="f"><span>Set *</span><input id="fc-set" required maxlength="80" list="set-datalist"><datalist id="set-datalist"></datalist></label>
+      <label class="f"><span>Collector number</span><input id="fc-num" maxlength="12"></label>
+      <label class="f"><span>Rarity</span><select id="fc-rarity"><option>common</option><option>uncommon</option><option>rare</option><option>mythic</option></select></label>
+      <label class="f"><span>Condition</span><select id="fc-cond"><option>NM</option><option>LP</option><option>MP</option><option>HP</option></select></label>
+      <label class="f"><span>Quantity</span><input id="fc-qty" type="number" min="1" step="1" value="1"></label>
+      <label class="f"><span>Price paid (per card $)</span><input id="fc-paid" type="number" min="0" step="0.01" value="0"></label>
+      <label class="f"><span>Current value (per card $)</span><input id="fc-value" type="number" min="0" step="0.01" value="0"></label>
+      <div class="f full"><span class="muted">Colors</span><div class="chkrow" id="fc-colors"></div></div>
+      <div class="f full"><div class="chkrow">
+        <label class="chk"><input type="checkbox" id="fc-foil"> Foil</label>
+      </div></div>
+      <label class="f full"><span>Notes</span><input id="fc-notes" maxlength="200"></label>
+      <div class="f full"><span class="muted">Photo (optional — stored on this device only)</span>
+        <input type="file" id="fc-photo" accept="image/*" aria-label="Attach a photo of this card">
+        <img class="photo-prev" id="fc-prev" alt="" hidden>
+        <div class="btnrow"><button type="button" class="btn" id="fc-photo-rm" hidden>Remove photo</button></div>
+      </div>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" id="fc-save" value="default">Save card</button>
+      <button class="btn" id="fc-cancel" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn danger" id="fc-del" value="cancel" formnovalidate hidden>Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-deck" aria-labelledby="dlg-deck-title">
+  <h2 id="dlg-deck-title">New deck</h2>
+  <form method="dialog" id="f-deck">
+    <div class="fgrid">
+      <label class="f"><span>Deck name *</span><input id="fd-name" required maxlength="80"></label>
+      <label class="f"><span>Format</span><input id="fd-format" maxlength="40" placeholder="e.g. Commander"></label>
+      <label class="f full"><span>Deck list — one per line: QTY Card Name</span><textarea id="fd-lines" placeholder="4 Lightning Bolt&#10;2 Ragavan, Nimble Pilferer"></textarea></label>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" value="default">Save deck</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn danger" id="fd-del" value="cancel" formnovalidate hidden>Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-trade" aria-labelledby="dlg-trade-title">
+  <h2 id="dlg-trade-title">Log trade</h2>
+  <form method="dialog" id="f-trade">
+    <div class="fgrid">
+      <label class="f"><span>Date</span><input id="ft-date" type="date"></label>
+      <label class="f"><span>Partner</span><input id="ft-partner" maxlength="80"></label>
+      <label class="f full"><span>Gave</span><input id="ft-gave" maxlength="200"></label>
+      <label class="f full"><span>Received</span><input id="ft-got" maxlength="200"></label>
+      <label class="f"><span>Cash (+/- $)</span><input id="ft-cash" type="number" step="0.01" value="0"></label>
+      <label class="f full"><span>Notes</span><input id="ft-notes" maxlength="200"></label>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" value="default">Save trade</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn danger" id="ft-del" value="cancel" formnovalidate hidden>Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-want" aria-labelledby="dlg-want-title">
+  <h2 id="dlg-want-title">Add want</h2>
+  <form method="dialog" id="f-want">
+    <div class="fgrid">
+      <label class="f"><span>Card name *</span><input id="fw-name" required maxlength="120"></label>
+      <label class="f"><span>Set</span><input id="fw-set" maxlength="80"></label>
+      <label class="f"><span>Max price willing to pay ($)</span><input id="fw-max" type="number" min="0" step="0.01" value="0"></label>
+      <label class="f"><span>Priority</span><select id="fw-prio"><option>high</option><option>med</option><option>low</option></select></label>
+    </div>
+    <div class="btnrow">
+      <button class="btn primary" value="default">Save</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+      <button class="btn danger" id="fw-del" value="cancel" formnovalidate hidden>Delete</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlg-setsize" aria-labelledby="dlg-setsize-title">
+  <h2 id="dlg-setsize-title">Set size</h2>
+  <form method="dialog" id="f-setsize">
+    <p class="muted" id="setsize-label"></p>
+    <label class="f"><span>Total unique cards in the set (for completion %)</span><input id="fs-size" type="number" min="1" step="1"></label>
+    <div class="btnrow">
+      <button class="btn primary" value="default">Save</button>
+      <button class="btn" value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+"use strict";
+/* ================= store ================= */
+const LS="binderbox_v1";
+const COLORS=["W","U","B","R","G","C"];
+const CNAMES={W:"White",U:"Blue",B:"Black",R:"Red",G:"Green",C:"Colorless"};
+const RARITIES=["common","uncommon","rare","mythic"];
+const CONDS=["NM","LP","MP","HP"];
+function defStore(){return{cards:[],decks:[],trades:[],wantlist:[],setSizes:{},prefs:{theme:null,sound:true}};}
+function load(){try{const s=JSON.parse(localStorage.getItem(LS));if(s&&typeof s==="object"){const d=defStore();return Object.assign(d,s,{prefs:Object.assign(d.prefs,s.prefs||{})});}}catch(e){}return defStore();}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){alert("Could not save — browser storage is full. Photos take the most space; try removing some card photos.")}}
+let S=load();
+let sampleOn=false, sampleBackup=null;
+
+/* ================= utils ================= */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>"$"+(Number(n)||0).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+const uid=()=> "id"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const todayISO=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+function beep(f){if(!S.prefs.sound)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.value=f||520;g.gain.value=.06;o.connect(g);g.connect(c.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.18);o.stop(c.currentTime+.2);}catch(e){}}
+
+/* ================= theme / sound / sample ================= */
+function effTheme(){if(S.prefs.theme)return S.prefs.theme;return (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches)?"dark":"light";}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");}
+function paintSound(){const b=$("sound-toggle");b.classList.toggle("on",!!S.prefs.sound);b.setAttribute("aria-pressed",!!S.prefs.sound);}
+function paintSample(){const b=$("sample-toggle");b.classList.toggle("on",sampleOn);b.setAttribute("aria-pressed",sampleOn);$("sample-banner").hidden=!sampleOn;}
+$("theme-toggle").addEventListener("click",()=>{S.prefs.theme=effTheme()==="dark"?"light":"dark";save();paintTheme();drawCharts();beep(660);});
+$("sound-toggle").addEventListener("click",()=>{S.prefs.sound=!S.prefs.sound;save();paintSound();beep(660);});
+$("sample-toggle").addEventListener("click",()=>{sampleOn?exitSample():enterSample();});
+$("sample-off").addEventListener("click",exitSample);
+$("brand-home").addEventListener("click",e=>{e.preventDefault();goTab("dash");});
+
+/* ================= tabs ================= */
+function goTab(name){document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===name?"true":"false"));document.querySelectorAll(".tabpane").forEach(p=>p.classList.toggle("active",p.id==="pane-"+name));if(name==="charts")requestAnimationFrame(drawCharts);beep(440);}
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.tab)));
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll("dialog[open]").forEach(d=>d.close());});
+
+/* ================= sample data ================= */
+function sampleData(){
+  const C=(name,set,num,rarity,cond,foil,qty,paid,value,colors,notes)=>({id:uid(),name,set,num:num||"",rarity,cond,foil:!!foil,qty,paid,value,colors:colors||[],notes:notes||"",photo:""});
+  const cards=[
+    C("Ragavan, Nimble Pilferer","Modern Horizons 3","0128","mythic","NM",true,2,48,62,["R"],""),
+    C("Nadu, Winged Wisdom","Modern Horizons 3","0195","mythic","NM",false,1,22,28,["G","U"],""),
+    C("Orcish Bowmasters","Modern Horizons 3","0102","rare","LP",false,4,30,44,["B"],""),
+    C("Esper Sentinel","Modern Horizons 3","0012","rare","NM",false,3,18,26,["W"],""),
+    C("Flare of Denial","Modern Horizons 3","0054","rare","NM",false,2,8,11,["U"],""),
+    C("Tamiyo, Inquisitive Student","Modern Horizons 3","0071","mythic","NM",false,1,15,19,["U"],""),
+    C("Overlord of the Hauntwoods","Duskmourn: House of Horror","0187","mythic","NM",false,1,20,25,["G"],""),
+    C("Valgavoth, Terror Eater","Duskmourn: House of Horror","0156","mythic","NM",true,1,24,30,["B","R"],""),
+    C("Fear of Missing Out","Duskmourn: House of Horror","0132","rare","NM",false,4,12,18,["R"],""),
+    C("Abhorrent Oculus","Duskmourn: House of Horror","0048","rare","LP",false,2,3,4,["U"],""),
+    C("Leyline of Resonance","Duskmourn: House of Horror","0141","rare","NM",false,1,7,9,["R"],""),
+    C("Meathook Massacre II","Duskmourn: House of Horror","0094","mythic","NM",false,1,18,22,["B"],""),
+    C("Snapcaster Mage","Innistrad Remastered","0062","mythic","LP",false,2,35,45,["U"],""),
+    C("Cavern of Souls","Innistrad Remastered","0271","mythic","NM",false,1,30,38,["C"],"land"),
+    C("Griselbrand","Innistrad Remastered","0108","mythic","MP",false,1,9,12,["B"],""),
+    C("Huntmaster of the Fells","Innistrad Remastered","0183","mythic","NM",false,1,6,8,["R","G"],""),
+    C("Blood Artist","Innistrad Remastered","0091","uncommon","NM",false,4,1.5,3,["B"],""),
+    C("Champion of the Parish","Innistrad Remastered","0016","rare","NM",false,4,1,2,["W"],""),
+    C("Slickshot Show-Off","Outlaws of Thunder Junction","0138","mythic","NM",false,3,12,18,["R"],""),
+    C("Aven Interrupter","Outlaws of Thunder Junction","0011","rare","NM",true,2,10,15,["W"],""),
+    C("Oko, the Ringleader","Outlaws of Thunder Junction","0204","mythic","NM",false,1,9,12,["G","U"],""),
+    C("Jace Reawakened","Outlaws of Thunder Junction","0059","mythic","NM",false,1,6,8,["U"],""),
+    C("Vaultborn Tyrant","Outlaws of Thunder Junction","0211","mythic","NM",false,1,20,25,["G"],""),
+    C("Rumbleweed","Outlaws of Thunder Junction","0176","uncommon","NM",false,4,0.5,1,["G"],""),
+  ];
+  const decks=[
+    {id:uid(),name:"Mono-Red Aggro",format:"Modern",lines:[
+      {qty:4,name:"Ragavan, Nimble Pilferer"},{qty:4,name:"Orcish Bowmasters"},{qty:4,name:"Fear of Missing Out"},
+      {qty:4,name:"Slickshot Show-Off"},{qty:3,name:"Aven Interrupter"},{qty:20,name:"Mountain"}]},
+    {id:uid(),name:"Esper Blink",format:"Pioneer",lines:[
+      {qty:4,name:"Esper Sentinel"},{qty:2,name:"Snapcaster Mage"},{qty:4,name:"Blood Artist"},
+      {qty:4,name:"Champion of the Parish"},{qty:1,name:"Cavern of Souls"}]},
+  ];
+  const trades=[
+    {id:uid(),date:"2026-09-12",partner:"LGS — Friday Night",gave:"2x Orcish Bowmasters",got:"Nadu, Winged Wisdom + $10",cash:10,notes:"Even trade, both NM"},
+    {id:uid(),date:"2026-08-28",partner:"Marcus",gave:"Meathook Massacre II",got:"Valgavoth, Terror Eater",cash:0,notes:"Straight swap"},
+    {id:uid(),date:"2026-07-19",partner:"Card show dealer",gave:"Assorted bulk rares (40)",got:"$60 store credit",cash:60,notes:"Bulk buyout .15 each"},
+  ];
+  const wantlist=[
+    {id:uid(),name:"The One Ring",set:"The Lord of the Rings",maxpri:70,prio:"high",acquired:false},
+    {id:uid(),name:"Misty Rainforest",set:"Modern Horizons 2",maxpri:35,prio:"high",acquired:false},
+    {id:uid(),name:"Rhystic Study",set:"Wilds of Eldraine",maxpri:25,prio:"med",acquired:false},
+    {id:uid(),name:"Smothering Tithe",set:"Ravnica Allegiance",maxpri:30,prio:"low",acquired:false},
+  ];
+  return{cards,decks,trades,wantlist,setSizes:{"Modern Horizons 3":280,"Duskmourn: House of Horror":276,"Innistrad Remastered":384,"Outlaws of Thunder Junction":280},prefs:S.prefs};
+}
+function enterSample(){if(sampleOn)return;sampleBackup=JSON.stringify(S);S=sampleData();sampleOn=true;save();paintSample();renderAll();beep(520);}
+function exitSample(){if(!sampleOn)return;try{S=JSON.parse(sampleBackup);}catch(e){S=defStore();}sampleBackup=null;sampleOn=false;save();paintSample();renderAll();beep(440);}
+
+/* ================= dashboard ================= */
+function totals(){
+  const t={unique:S.cards.length,copies:0,value:0,paid:0,noPhoto:0};
+  for(const c of S.cards){const q=+c.qty||0;t.copies+=q;t.value+=q*(+c.value||0);t.paid+=q*(+c.paid||0);if(!c.photo)t.noPhoto++;}
+  t.pl=t.value-t.paid;return t;
+}
+function renderDash(){
+  const t=totals(), open=S.wantlist.filter(w=>!w.acquired).length;
+  const stats=[
+    ["Unique cards",t.unique,"dash-cards","Total copies: "+t.copies.toLocaleString()],
+    ["Collection value",money(t.value),"dash-cards","Total paid: "+money(t.paid)],
+    ["Profit / loss",'<span class="'+(t.pl>=0?"pos":"neg")+'">'+money(t.pl)+"</span>","dash-cards","Value minus what you paid"],
+    ["Missing photos",t.noPhoto,"dash-cards","Cards with no photo attached"],
+    ["Copies owned",t.copies.toLocaleString(),"dash-cards","Across "+t.unique+" unique cards"],
+    ["Wantlist open",open,"dash-want","Tap to view wantlist"],
+  ];
+  $("dash-stats").innerHTML=stats.map(s=>'<button class="stat" data-go="'+s[2]+'"><div class="n">'+s[1]+'</div><div class="l">'+s[0]+'</div><div class="sub2 muted">'+s[3]+'</div></button>').join("");
+  document.querySelectorAll("#dash-stats .stat").forEach(b=>b.addEventListener("click",()=>goTab(b.dataset.go==="dash-want"?"want":"cards")));
+  const bySet={};
+  for(const c of S.cards){bySet[c.set]=bySet[c.set]||{n:0,v:0};bySet[c.set].n++;bySet[c.set].v+=(+c.qty||0)*(+c.value||0);}
+  const top=Object.entries(bySet).sort((a,b)=>b[1].v-a[1].v).slice(0,5);
+  $("dash-topsets").innerHTML=top.length?top.map(([s,d])=>'<div style="display:flex;justify-content:space-between;gap:1rem;padding:.3rem 0;border-bottom:1px solid var(--line)"><span>'+esc(s)+'</span><b>'+money(d.v)+'</b></div>').join(""):"No cards yet — add some on the Cards tab, or try the sample data flask.";
+}
+
+/* ================= cards tab ================= */
+let cPhotoData=""; // staging for dialog photo
+function setOptions(){
+  const sets=[...new Set(S.cards.map(c=>c.set).filter(Boolean))].sort();
+  const cur=$("c-fset").value;
+  $("c-fset").innerHTML='<option value="">All sets</option>'+sets.map(s=>'<option>'+esc(s)+"</option>").join("");
+  if(sets.includes(cur))$("c-fset").value=cur;
+  $("set-datalist").innerHTML=sets.map(s=>"<option value=\""+esc(s)+"\">").join("");
+}
+function filteredCards(){
+  const q=$("c-search").value.trim().toLowerCase(),fs=$("c-fset").value,ff=$("c-ffoil").value,fc=$("c-fcond").value;
+  return S.cards.filter(c=>
+    (!q||c.name.toLowerCase().includes(q))&&
+    (!fs||c.set===fs)&&
+    (ff===""||String(c.foil?1:0)===ff)&&
+    (!fc||c.cond===fc)
+  ).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function renderCards(){
+  setOptions();
+  const rows=filteredCards();
+  $("c-rows").innerHTML=rows.map(c=>"<tr data-id=\""+c.id+"\">"+
+    "<td>"+(c.photo?'<img class="thumb" src="'+c.photo+'" alt="">':'<span class="nothumb">—</span>')+"</td>"+
+    "<td><b>"+esc(c.name)+"</b>"+(c.foil?' <span class="tag foil">foil</span>':"")+(c.notes?'<div class="muted">'+esc(c.notes)+"</div>":"")+"</td>"+
+    "<td>"+esc(c.set)+"</td><td>"+esc(c.num||"—")+"</td><td>"+esc(c.rarity)+"</td><td>"+esc(c.cond)+"</td>"+
+    "<td>"+(+c.qty||0)+"</td><td>"+money(c.paid)+"</td><td><b>"+money(c.value)+"</b></td></tr>").join("");
+  $("c-count").textContent=rows.length+" of "+S.cards.length+" cards shown";
+  document.querySelectorAll("#c-rows tr").forEach(tr=>tr.addEventListener("click",()=>openCardDlg(tr.dataset.id)));
+}
+["c-search","c-fset","c-ffoil","c-fcond"].forEach(id=>$(id).addEventListener("input",renderCards));
+
+function buildColorChks(sel){
+  $("fc-colors").innerHTML=COLORS.map(c=>'<label class="chk"><input type="checkbox" value="'+c+'"'+(sel.includes(c)?" checked":"")+"> "+CNAMES[c]+"</label>").join("");
+}
+function openCardDlg(id){
+  const c=id?S.cards.find(x=>x.id===id):null;
+  $("dlg-card-title").textContent=c?"Edit card":"Add card";
+  $("fc-name").value=c?c.name:"";$("fc-set").value=c?c.set:"";$("fc-num").value=c?(c.num||""):"";
+  $("fc-rarity").value=c?c.rarity:"common";$("fc-cond").value=c?c.cond:"NM";
+  $("fc-qty").value=c?c.qty:1;$("fc-paid").value=c?c.paid:0;$("fc-value").value=c?c.value:0;
+  $("fc-notes").value=c?(c.notes||""):"";$("fc-foil").checked=c?!!c.foil:false;
+  buildColorChks((c&&c.colors)||[]);cPhotoData=c?(c.photo||""):"";paintPhotoPrev();
+  $("fc-del").hidden=!c;$("f-card").dataset.editId=id||"";
+  $("dlg-card").showModal();setTimeout(()=>$("fc-name").focus(),50);
+}
+function paintPhotoPrev(){
+  const p=$("fc-prev");p.hidden=!cPhotoData;if(cPhotoData)p.src=cPhotoData;
+  $("fc-photo-rm").hidden=!cPhotoData;$("fc-photo").value="";
+}
+$("fc-photo").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const img=new Image(),url=URL.createObjectURL(f);
+  img.onload=()=>{URL.revokeObjectURL(url);
+    const max=640,sc=Math.min(1,max/Math.max(img.width,img.height));
+    const cv=document.createElement("canvas");cv.width=Math.round(img.width*sc);cv.height=Math.round(img.height*sc);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    cPhotoData=cv.toDataURL("image/jpeg",0.7);paintPhotoPrev();beep(700);
+  };
+  img.onerror=()=>alert("Could not read that image file.");
+  img.src=url;
+});
+$("fc-photo-rm").addEventListener("click",()=>{cPhotoData="";paintPhotoPrev();});
+$("c-add").addEventListener("click",()=>openCardDlg(null));
+$("fc-del").addEventListener("click",()=>{
+  const id=$("f-card").dataset.editId;if(!id)return;
+  const c=S.cards.find(x=>x.id===id);
+  if(confirm('Delete "'+(c?c.name:"this card")+'" from your collection?')){S.cards=S.cards.filter(x=>x.id!==id);save();renderAll();beep(300);}
+});
+$("f-card").addEventListener("submit",e=>{
+  if(e.submitter&&e.submitter.value==="cancel")return;
+  const name=$("fc-name").value.trim(),set=$("fc-set").value.trim();
+  if(!name||!set)return;
+  const rec={name,set,num:$("fc-num").value.trim(),rarity:$("fc-rarity").value,cond:$("fc-cond").value,
+    foil:$("fc-foil").checked,qty:Math.max(1,parseInt($("fc-qty").value)||1),paid:+$("fc-paid").value||0,
+    value:+$("fc-value").value||0,notes:$("fc-notes").value.trim(),
+    colors:[...$("fc-colors").querySelectorAll("input:checked")].map(i=>i.value),photo:cPhotoData};
+  const id=$("f-card").dataset.editId;
+  if(id){const i=S.cards.findIndex(x=>x.id===id);if(i>=0)S.cards[i]=Object.assign({id},rec);}
+  else S.cards.push(Object.assign({id:uid()},rec));
+  save();renderAll();beep(760);
+});
+
+/* ================= sets tab ================= */
+let setSizeEdit=null;
+function renderSets(){
+  const bySet={};
+  for(const c of S.cards){const s=c.set||"(no set)";bySet[s]=bySet[s]||{cards:new Set(),copies:0,value:0};bySet[s].cards.add(c.name.toLowerCase());bySet[s].copies+=+c.qty||0;bySet[s].value+=(+c.qty||0)*(+c.value||0);}
+  const names=Object.keys(bySet).sort();
+  $("set-list").innerHTML=names.length?names.map(s=>{
+    const d=bySet[s],size=+S.setSizes[s]||0,pct=size?Math.min(100,Math.round(d.cards.size/size*100)):null;
+    return '<div class="card"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">'+
+    "<div><h3>"+esc(s)+"</h3><div class=\"muted\">"+d.cards.size+" unique · "+d.copies+(d.copies===1?" copy":" copies")+" · "+money(d.value)+"</div></div>"+
+    '<div style="min-width:200px;flex:1;max-width:340px">'+(pct===null?'<span class="muted">Set size not set</span>':'<div class="pbar" role="progressbar" aria-valuenow="'+pct+'" aria-valuemin="0" aria-valuemax="100"><i style="width:'+pct+'%"></i></div><div class="muted">'+pct+"% complete"+(size?" ("+d.cards.size+" of "+size+")":"")+"</div>")+"</div>"+
+    '<button class="btn" data-setsize="'+esc(s)+'">'+(size?"Edit set size":"Set size")+"</button></div></div>";
+  }).join(""):'<div class="card"><p class="muted">No sets yet — add cards first.</p></div>';
+  document.querySelectorAll("[data-setsize]").forEach(b=>b.addEventListener("click",()=>{
+    setSizeEdit=b.dataset.setsize;$("setsize-label").textContent="How many unique cards are in "+setSizeEdit+"?";
+    $("fs-size").value=S.setSizes[setSizeEdit]||"";$("dlg-setsize").showModal();
+  }));
+}
+$("f-setsize").addEventListener("submit",e=>{
+  if(e.submitter&&e.submitter.value==="cancel")return;
+  const v=parseInt($("fs-size").value);
+  if(setSizeEdit&&v>0)S.setSizes[setSizeEdit]=v;
+  save();renderAll();beep(760);
+});
+
+/* ================= decks tab ================= */
+function deckValue(deck){
+  let v=0;for(const l of deck.lines){const c=S.cards.find(x=>x.name.toLowerCase()===l.name.toLowerCase());if(c)v+=l.qty*(+c.value||0);}
+  return v;
+}
+function parseDeckLines(raw){
+  const out=[];
+  for(const ln of String(raw||"").split("\n")){
+    const m=ln.trim().match(/^(\d+)\s*[x×]?\s+(.+)$/);
+    if(m)out.push({qty:parseInt(m[1]),name:m[2].trim()});
+  }
+  return out;
+}
+function renderDecks(){
+  $("deck-list").innerHTML=S.decks.length?S.decks.map(d=>{
+    const tot=d.lines.reduce((a,l)=>a+l.qty,0);
+    return '<div class="card"><div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center">'+
+    "<div><h3>"+esc(d.name)+"</h3><div class=\"muted\">"+esc(d.format||"No format")+" · "+tot+" cards · est. value "+money(deckValue(d))+"</div></div>"+
+    '<div class="btnrow" style="margin:0"><button class="btn" data-deck="'+d.id+'">Open / edit</button></div></div>'+
+    '<div class="twrap"><table><tbody>'+d.lines.slice(0,8).map(l=>"<tr><td>"+l.qty+"×</td><td>"+esc(l.name)+"</td></tr>").join("")+(d.lines.length>8?'<tr><td colspan="2" class="muted">+'+(d.lines.length-8)+" more…</td></tr>":"")+"</tbody></table></div></div>";
+  }).join(""):'<p class="muted">No decks yet.</p>';
+  document.querySelectorAll("[data-deck]").forEach(b=>b.addEventListener("click",()=>openDeckDlg(b.dataset.deck)));
+}
+function openDeckDlg(id){
+  const d=id?S.decks.find(x=>x.id===id):null;
+  $("dlg-deck-title").textContent=d?"Edit deck":"New deck";
+  $("fd-name").value=d?d.name:"";$("fd-format").value=d?(d.format||""):"";
+  $("fd-lines").value=d?d.lines.map(l=>l.qty+" "+l.name).join("\n"):"";
+  $("fd-del").hidden=!d;$("f-deck").dataset.editId=id||"";
+  $("dlg-deck").showModal();setTimeout(()=>$("fd-name").focus(),50);
+}
+$("d-add").addEventListener("click",()=>openDeckDlg(null));
+$("fd-del").addEventListener("click",()=>{
+  const id=$("f-deck").dataset.editId;if(!id)return;
+  if(confirm("Delete this deck?")){S.decks=S.decks.filter(x=>x.id!==id);save();renderAll();beep(300);}
+});
+$("f-deck").addEventListener("submit",e=>{
+  if(e.submitter&&e.submitter.value==="cancel")return;
+  const name=$("fd-name").value.trim();if(!name)return;
+  const rec={name,format:$("fd-format").value.trim(),lines:parseDeckLines($("fd-lines").value)};
+  const id=$("f-deck").dataset.editId;
+  if(id){const i=S.decks.findIndex(x=>x.id===id);if(i>=0)S.decks[i]=Object.assign({id},rec);}
+  else S.decks.push(Object.assign({id:uid()},rec));
+  save();renderAll();beep(760);
+});
+
+/* ================= trades tab ================= */
+function renderTrades(){
+  const ts=[...S.trades].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  let cash=0;for(const t of S.trades)cash+=+t.cash||0;
+  $("trade-totals").textContent=S.trades.length?S.trades.length+" trades logged · net cash "+money(cash):"No trades logged yet.";
+  $("t-rows").innerHTML=ts.map(t=>"<tr>"+
+    "<td>"+esc(t.date||"—")+"</td><td>"+esc(t.partner||"—")+"</td><td>"+esc(t.gave||"—")+"</td><td>"+esc(t.received||"—")+"</td>"+
+    "<td class=\""+((+t.cash||0)>=0?"pos":"neg")+"\">"+money(t.cash)+"</td><td>"+esc(t.notes||"")+"</td>"+
+    '<td><button class="btn" data-trade="'+t.id+'">Edit</button></td></tr>').join("");
+  document.querySelectorAll("[data-trade]").forEach(b=>b.addEventListener("click",()=>openTradeDlg(b.dataset.trade)));
+}
+function openTradeDlg(id){
+  const t=id?S.trades.find(x=>x.id===id):null;
+  $("dlg-trade-title").textContent=t?"Edit trade":"Log trade";
+  $("ft-date").value=t?(t.date||todayISO()):todayISO();$("ft-partner").value=t?(t.partner||""):"";
+  $("ft-gave").value=t?(t.gave||""):"";$("ft-got").value=t?(t.received||""):"";
+  $("ft-cash").value=t?(t.cash||0):0;$("ft-notes").value=t?(t.notes||""):"";
+  $("ft-del").hidden=!t;$("f-trade").dataset.editId=id||"";
+  $("dlg-trade").showModal();
+}
+$("t-add").addEventListener("click",()=>openTradeDlg(null));
+$("ft-del").addEventListener("click",()=>{
+  const id=$("f-trade").dataset.editId;if(!id)return;
+  if(confirm("Delete this trade?")){S.trades=S.trades.filter(x=>x.id!==id);save();renderAll();beep(300);}
+});
+$("f-trade").addEventListener("submit",e=>{
+  if(e.submitter&&e.submitter.value==="cancel")return;
+  const rec={date:$("ft-date").value||todayISO(),partner:$("ft-partner").value.trim(),gave:$("ft-gave").value.trim(),
+    received:$("ft-got").value.trim(),cash:+$("ft-cash").value||0,notes:$("ft-notes").value.trim()};
+  const id=$("f-trade").dataset.editId;
+  if(id){const i=S.trades.findIndex(x=>x.id===id);if(i>=0)S.trades[i]=Object.assign({id},rec);}
+  else S.trades.push(Object.assign({id:uid()},rec));
+  save();renderAll();beep(760);
+});
+
+/* ================= wantlist tab ================= */
+const PRIO={high:0,med:1,low:2};
+function renderWant(){
+  const ws=[...S.wantlist].sort((a,b)=>(PRIO[a.prio]??1)-(PRIO[b.prio]??1)||a.name.localeCompare(b.name));
+  $("w-rows").innerHTML=ws.map(w=>"<tr>"+
+    '<td><span class="tag">'+esc(w.prio)+"</span></td><td><b>"+esc(w.name)+"</b></td><td>"+esc(w.set||"—")+"</td><td>"+money(w.maxpri)+"</td>"+
+    "<td>"+(w.acquired?'<span class="tag">acquired</span>':'<span class="muted">open</span>')+"</td>"+
+    '<td style="white-space:nowrap"><button class="btn" data-want="'+w.id+'">Edit</button> <button class="btn" data-wantgot="'+w.id+'">'+(w.acquired?"Reopen":"Got it")+"</button></td></tr>").join("")||'<tr><td colspan="6" class="muted">Wantlist is empty.</td></tr>';
+  document.querySelectorAll("[data-want]").forEach(b=>b.addEventListener("click",()=>openWantDlg(b.dataset.want)));
+  document.querySelectorAll("[data-wantgot]").forEach(b=>b.addEventListener("click",()=>{
+    const w=S.wantlist.find(x=>x.id===b.dataset.wantgot);if(w){w.acquired=!w.acquired;save();renderAll();beep(700);}
+  }));
+}
+function openWantDlg(id){
+  const w=id?S.wantlist.find(x=>x.id===id):null;
+  $("dlg-want-title").textContent=w?"Edit want":"Add want";
+  $("fw-name").value=w?w.name:"";$("fw-set").value=w?(w.set||""):"";
+  $("fw-max").value=w?(w.maxpri||0):0;$("fw-prio").value=w?w.prio:"med";
+  $("fw-del").hidden=!w;$("f-want").dataset.editId=id||"";
+  $("dlg-want").showModal();setTimeout(()=>$("fw-name").focus(),50);
+}
+$("w-add").addEventListener("click",()=>openWantDlg(null));
+$("fw-del").addEventListener("click",()=>{
+  const id=$("f-want").dataset.editId;if(!id)return;
+  if(confirm("Remove from wantlist?")){S.wantlist=S.wantlist.filter(x=>x.id!==id);save();renderAll();beep(300);}
+});
+$("f-want").addEventListener("submit",e=>{
+  if(e.submitter&&e.submitter.value==="cancel")return;
+  const name=$("fw-name").value.trim();if(!name)return;
+  const rec={name,set:$("fw-set").value.trim(),maxpri:+$("fw-max").value||0,prio:$("fw-prio").value,acquired:false};
+  const id=$("f-want").dataset.editId;
+  if(id){const i=S.wantlist.findIndex(x=>x.id===id);if(i>=0){rec.acquired=S.wantlist[i].acquired;S.wantlist[i]=Object.assign({id},rec);}}
+  else S.wantlist.push(Object.assign({id:uid()},rec));
+  save();renderAll();beep(760);
+});
+
+/* ================= reports ================= */
+function download(name,content,type){
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+}
+$("r-csv").addEventListener("click",()=>{
+  const q=s=>'"'+String(s??"").replace(/"/g,'""')+'"';
+  const rows=[["name","set","collector_number","colors","rarity","condition","foil","qty","paid_each","value_each","notes"].join(",")];
+  for(const c of S.cards)rows.push([q(c.name),q(c.set),q(c.num),q((c.colors||[]).join("")),q(c.rarity),q(c.cond),c.foil?1:0,c.qty,c.paid,c.value,q(c.notes)].join(","));
+  download("binderbox-cards.csv",rows.join("\n"),"text/csv");beep(700);
+});
+$("r-json").addEventListener("click",()=>{download("binderbox-backup-"+todayISO()+".json",JSON.stringify(S,null,1),"application/json");beep(700);});
+$("r-import-btn").addEventListener("click",()=>$("r-import").click());
+$("r-import").addEventListener("change",e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      if(!d||typeof d!=="object"||!Array.isArray(d.cards)||!Array.isArray(d.decks)||!Array.isArray(d.trades)||!Array.isArray(d.wantlist))
+        throw new Error("not a BinderBox backup (missing cards/decks/trades/wantlist arrays)");
+      if(exitSampleGuard()===false)return;
+      if(!confirm("Import this backup? Your current collection will be replaced."))return;
+      if(sampleOn)exitSampleSilent();
+      S=Object.assign(defStore(),d,{prefs:Object.assign(defStore().prefs,d.prefs||{})});
+      save();renderAll();beep(760);alert("Backup imported.");
+    }catch(err){alert("Import failed: "+err.message);}
+    e.target.value="";
+  };
+  r.readAsText(f);
+});
+function exitSampleGuard(){return true;}
+function exitSampleSilent(){try{S=JSON.parse(sampleBackup);}catch(e){S=defStore();}sampleBackup=null;sampleOn=false;paintSample();}
+$("r-print").addEventListener("click",()=>{
+  const bySet={};
+  for(const c of S.cards){const s=c.set||"(no set)";(bySet[s]=bySet[s]||[]).push(c);}
+  let tot=0;
+  let html='<h2>BinderBox — Collection Insurance Packet</h2><p class="muted">Printed '+todayISO()+'</p>';
+  for(const s of Object.keys(bySet).sort()){
+    html+="<h3>"+esc(s)+"</h3>"+'<div class="twrap"><table><thead><tr><th>Card</th><th>#</th><th>Rarity</th><th>Cond</th><th>Foil</th><th>Qty</th><th>Value ea.</th><th>Total</th></tr></thead><tbody>';
+    for(const c of bySet[s].sort((a,b)=>a.name.localeCompare(b.name))){
+      const t=(+c.qty||0)*(+c.value||0);tot+=t;
+      html+="<tr><td>"+esc(c.name)+"</td><td>"+esc(c.num||"—")+"</td><td>"+esc(c.rarity)+"</td><td>"+esc(c.cond)+"</td><td>"+(c.foil?"yes":"no")+"</td><td>"+c.qty+"</td><td>"+money(c.value)+"</td><td>"+money(t)+"</td></tr>";
+    }
+    html+="</tbody></table></div>";
+  }
+  html+="<h3>Total insured value: "+money(tot)+"</h3><p class=\"muted\">BinderBox is a personal collection organizer, not affiliated with Wizards of the Coast. Values are the owner's own records, not appraisals.</p>";
+  $("print-area").innerHTML=html;
+  window.print();beep(700);
+});
+
+/* ================= charts ================= */
+const chartSel={setval:null,rarity:null,foil:null,cond:null};
+function cssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function setupCanvas(id){
+  const cv=$(id),r=cv.getBoundingClientRect();
+  if(r.width<10||r.height<10)return null;
+  const dpr=window.devicePixelRatio||1;
+  cv.width=Math.round(r.width*dpr);cv.height=Math.round(r.height*dpr);
+  const ctx=cv.getContext("2d");ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,r.width,r.height);
+  return{cv,ctx,W:r.width,H:r.height};
+}
+function selStroke(ctx){ctx.strokeStyle=cssVar("--ink");ctx.lineWidth=3;}
+function fitText(ctx,text,maxW,base){
+  let s=base;ctx.font="700 "+s+"px system-ui,sans-serif";
+  while(ctx.measureText(text).width>maxW&&s>9){s--;ctx.font="700 "+s+"px system-ui,sans-serif";}
+  return s;
+}
+function canvasPos(cv,e){const r=cv.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+
+/* ---- donut ---- */
+function drawDonut(id,segs,totalLabel,totalValue,selKey,fmt){
+  const s=setupCanvas(id);if(!s)return;const{cv,ctx,W,H}=s;
+  const cx=W/2,cy=H/2,R=Math.min(W,H)/2-14,hr=R*0.58;
+  const total=segs.reduce((a,g)=>a+g.value,0);
+  const sel=chartSel[selKey];
+  let a=-Math.PI/2;
+  segs.forEach((g,i)=>{
+    const frac=total?g.value/total:0,a0=a,a1=a+frac*Math.PI*2;a=a1;
+    const mid=(a0+a1)/2,off=(sel===i)?13:0,ox=Math.cos(mid)*off,oy=Math.sin(mid)*off;
+    ctx.beginPath();
+    const gap=frac>0?0.03:0;
+    ctx.arc(cx+ox,cy+oy,R,a0+gap,a1-gap);
+    ctx.arc(cx+ox,cy+oy,hr,a1-gap,a0+gap,true);
+    ctx.closePath();ctx.fillStyle=g.color;ctx.fill();
+    if(sel===i){selStroke(ctx);ctx.stroke();}
+  });
+  // center label in bounded box: hole diameter minus 24 padding
+  const box=hr*2-24,label=sel!=null?segs[sel].label:totalLabel,val=sel!=null?segs[sel].value:totalValue;
+  ctx.fillStyle=cssVar("--ink");ctx.textAlign="center";ctx.textBaseline="middle";
+  const fs1=fitText(ctx,label,box,17);
+  ctx.fillText(label,cx,cy-(fs1*0.75));
+  const vtxt=fmt?fmt(val):String(val);
+  const fs2=fitText(ctx,vtxt,box,20);
+  ctx.fillText(vtxt,cx,cy+(fs2*0.75));
+  // legend
+  ctx.textAlign="left";ctx.textBaseline="alphabetic";
+  let ly=H-14*segs.length-2;
+  segs.forEach((g,i)=>{
+    ctx.fillStyle=g.color;ctx.fillRect(8,ly-10,12,12);
+    ctx.fillStyle=cssVar("--muted");ctx.font="14px system-ui,sans-serif";
+    let lab=g.label+(sel===i?" ✓":"");
+    ctx.fillText(lab,26,ly);ly+=18;
+  });
+  cv._donut={cx,cy,R,hr,segs,selKey};
+}
+function donutClick(e){
+  const cv=e.currentTarget,d=cv._donut;if(!d)return;
+  const p=canvasPos(cv,e),dx=p.x-d.cx,dy=p.y-d.cy,dist=Math.hypot(dx,dy);
+  if(dist<d.R&&dist>d.hr-6){
+    let ang=Math.atan2(dy,dx);if(ang<-Math.PI/2)ang+=Math.PI*2;
+    const total=d.segs.reduce((a,g)=>a+g.value,0);let a=-Math.PI/2,hit=null;
+    d.segs.forEach((g,i)=>{const f=total?g.value/total:0;if(ang>=a&&ang<a+f*Math.PI*2)hit=i;a+=f*Math.PI*2;});
+    chartSel[d.selKey]=chartSel[d.selKey]===hit?null:hit;
+  }else chartSel[d.selKey]=null;
+  drawCharts();beep(560);
+}
+
+/* ---- horizontal bars: value by set ---- */
+function drawSetVal(){
+  const s=setupCanvas("ch-setval");if(!s)return;const{cv,ctx,W,H}=s;
+  const bySet={};
+  for(const c of S.cards){bySet[c.set]= (bySet[c.set]||0)+(+c.qty||0)*(+c.value||0);}
+  const rows=Object.entries(bySet).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const sel=chartSel.setval;
+  ctx.font="14px system-ui,sans-serif";
+  const labelW=Math.min(175,W*0.40),valW=76,rowH=(H-8)/Math.max(rows.length,1),barX=labelW+8,barW=W-barX-valW-8;
+  const max=rows.length?rows[0][1]:1;
+  cv._bars=[];
+  rows.forEach((r,i)=>{
+    const y=4+i*rowH,bh=Math.min(22,rowH-10),by=y+(rowH-bh)/2,bw=Math.max(2,r[1]/max*barW);
+    const isSel=sel===i;
+    ctx.fillStyle=cssVar("--muted");ctx.textAlign="right";ctx.textBaseline="middle";
+    let lab=r[0];while(ctx.measureText(lab).width>labelW-8&&lab.length>4)lab=lab.slice(0,-2);
+    if(lab!==r[0])lab+="…";ctx.fillText(lab,labelW-8,y+rowH/2);
+    ctx.fillStyle=isSel?cssVar("--acc"):cssVar("--line");
+    ctx.beginPath();ctx.roundRect(barX,by,bw,bh,5);ctx.fill();
+    if(isSel){selStroke(ctx);ctx.stroke();}
+    ctx.fillStyle=cssVar("--ink");ctx.textAlign="left";ctx.font=(isSel?"700 ":"")+"14px system-ui,sans-serif";
+    ctx.fillText(money(r[1]),barX+bw+8,y+rowH/2);ctx.font="14px system-ui,sans-serif";
+    cv._bars.push({x:barX,y:by,w:Math.max(bw,barW),h:bh,i});
+  });
+  if(!rows.length){ctx.fillStyle=cssVar("--muted");ctx.textAlign="center";ctx.fillText("No data yet",W/2,H/2);}
+  cv._barkey="setval";
+}
+/* ---- vertical bars: copies by condition ---- */
+function drawCond(){
+  const s=setupCanvas("ch-cond");if(!s)return;const{cv,ctx,W,H}=s;
+  const counts={NM:0,LP:0,MP:0,HP:0};
+  for(const c of S.cards)counts[c.cond]=(counts[c.cond]||0)+(+c.qty||0);
+  const rows=CONDS.map(k=>[k,counts[k]||0]);
+  const sel=chartSel.cond,max=Math.max(1,...rows.map(r=>r[1]));
+  const padL=8,padB=30,padT=26,axisW=W-padL-8,axisH=H-padB-padT,bw=Math.min(64,(axisW/rows.length)*0.55);
+  cv._bars=[];
+  ctx.textAlign="center";ctx.textBaseline="alphabetic";
+  rows.forEach((r,i)=>{
+    const cxp=padL+axisW*(i+0.5)/rows.length,bh=r[1]/max*axisH,x=cxp-bw/2,y=padT+axisH-bh;
+    const isSel=sel===i;
+    ctx.fillStyle=isSel?cssVar("--acc"):cssVar("--line");
+    ctx.beginPath();ctx.roundRect(x,y,bw,Math.max(bh,2),5);ctx.fill();
+    if(isSel){selStroke(ctx);ctx.stroke();}
+    ctx.fillStyle=cssVar("--ink");ctx.font=(isSel?"700 ":"")+"14px system-ui,sans-serif";
+    ctx.fillText(String(r[1]),cxp,y-6);ctx.font="14px system-ui,sans-serif";
+    ctx.fillStyle=cssVar("--muted");ctx.fillText(r[0],cxp,padT+axisH+20);
+    cv._bars.push({x:x-8,y:padT,w:bw+16,h:axisH,i});
+  });
+  cv._barkey="cond";
+}
+function barClick(e){
+  const cv=e.currentTarget;if(!cv._bars)return;
+  const p=canvasPos(cv,e);
+  let hit=null;
+  for(const b of cv._bars)if(p.x>=b.x&&p.x<=b.x+b.w&&p.y>=b.y&&p.y<=b.y+b.h){hit=b.i;break;}
+  const k=cv._barkey;chartSel[k]=chartSel[k]===hit?null:hit;
+  drawCharts();beep(560);
+}
+
+const RCOL={common:"#8a8f98",uncommon:"#a8bfd4",rare:"#d4a017",mythic:"#e25822"};
+function drawCharts(){
+  if(!$("pane-charts").classList.contains("active"))return;
+  drawSetVal();
+  const byR={common:0,uncommon:0,rare:0,mythic:0};
+  for(const c of S.cards)byR[c.rarity]=(byR[c.rarity]||0)+(+c.qty||0);
+  drawDonut("ch-rarity",RARITIES.map(r=>({label:r,value:byR[r]||0,color:RCOL[r]})),"cards",S.cards.reduce((a,c)=>a+(+c.qty||0),0),"rarity",v=>Number(v).toLocaleString());
+  let fv=0,nv=0;
+  for(const c of S.cards){const v=(+c.qty||0)*(+c.value||0);if(c.foil)fv+=v;else nv+=v;}
+  drawDonut("ch-foil",[{label:"foil",value:fv,color:"#7c5cd6"},{label:"non-foil",value:nv,color:cssVar("--acc")}],"value",money(fv+nv),"foil",v=>money(v));
+  drawCond();
+}
+["ch-setval","ch-rarity","ch-foil","ch-cond"].forEach(id=>{
+  $(id).addEventListener("click",e=>{if(e.currentTarget._donut)donutClick(e);else barClick(e);});
+});
+
+/* ================= boot ================= */
+function renderAll(){renderDash();renderCards();renderSets();renderDecks();renderTrades();renderWant();drawCharts();}
+paintTheme();paintSound();paintSample();renderAll();
+</script>
+</body>
+</html>
