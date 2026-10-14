@@ -225,7 +225,7 @@ const sndOk=()=>beep(660,.12), sndDel=()=>beep(220,.18);
 
 /* ---------- theme ---------- */
 function effTheme(){const s=localStorage.getItem("taxfreetrail.theme");return (s==="dark"||s==="light")?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");}
-function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");}
+function paintTheme(){const t=effTheme();document.documentElement.dataset.theme=t;const b=$("theme-toggle");b.classList.toggle("on",t==="dark");b.setAttribute("aria-pressed",t==="dark");b.textContent=t==="dark"?"☀️":"🌙";}
 $("theme-toggle").addEventListener("click",()=>{const t=effTheme();localStorage.setItem("taxfreetrail.theme",t==="dark"?"light":"dark");paintTheme();drawCharts();sndOk();});
 function paintSound(){const on=localStorage.getItem("taxfreetrail.sound")!=="off";const b=$("sound-toggle");b.classList.toggle("on",on);b.setAttribute("aria-pressed",on);}
 $("sound-toggle").addEventListener("click",()=>{const on=localStorage.getItem("taxfreetrail.sound")!=="off";localStorage.setItem("taxfreetrail.sound",on?"off":"on");paintSound();if(!on)sndOk();});
@@ -534,8 +534,9 @@ $("imp-file").addEventListener("change",e=>{
   rd.readAsText(f);e.target.value="";
 });
 $("print-packet").addEventListener("click",()=>{renderReport();sndOk();setTimeout(()=>window.print(),200);});
+function localToday(){const n=new Date();return n.getFullYear()+"-"+String(n.getMonth()+1).padStart(2,"0")+"-"+String(n.getDate()).padStart(2,"0");}
 function renderReport(){
-  $("rep-date").textContent=prettyDate(dateStr(todayNum()));
+  $("rep-date").textContent=prettyDate(localToday());
   const un=unreimbursed().sort((a,b)=>a.date.localeCompare(b.date));
   const b='<p><strong>Total receipts:</strong> '+DB.receipts.length+' · <strong>Unreimbursed total:</strong> '+money(unreimbTotal())+' · <strong>Reimbursed to date:</strong> '+money(reimbTotal())+'</p>'+
   '<table><thead><tr><th>Date</th><th>Provider</th><th class="num">Amount</th><th>Category</th><th>Photo</th><th>Status</th></tr></thead><tbody>'+
