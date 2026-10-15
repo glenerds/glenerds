@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commission Tracker for Freelance Artists — Pipeline, Deposits, Deadlines &amp; Client Manager</title>
+<meta name="description" content="CommissionCanvas: offline commission pipeline manager for freelance artists. Track commissions from inquiry to paid, manage deposits and balances, hit deadlines, organize clients, and see revenue charts. Your data never leaves your device.">
+<style>
+:root{
+  --bg:#faf7f2; --card:#ffffff; --ink:#2b2620; --muted:#6f655a;
+  --line:#e8e0d4; --acc:#c2410c; --acc-soft:#fdeede;
+  --good:#15803d; --warn:#b45309; --bad:#b91c1c;
+  --shadow:0 2px 10px rgba(60,40,20,.08);
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#171310; --card:#221c17; --ink:#f0e9dd; --muted:#b3a693;
+  --line:#3a3129; --acc:#fb923c; --acc-soft:#3a2417;
+  --good:#4ade80; --warn:#fbbf24; --bad:#f87171;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{font-size:16px;}
+body{background:var(--bg); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,sans-serif; line-height:1.5; min-height:100vh;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit; font-size:16px;}
+
+/* ---------- header ---------- */
+.hdr{border-bottom:1px solid var(--line); background:var(--bg);}
+.hdr-inner{max-width:1100px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; gap:12px;}
+.brand{display:flex; align-items:center; gap:10px; font-size:20px; font-weight:700; margin-right:auto;}
+.brand svg{width:34px; height:34px; flex:none;}
+.hdr-btns{display:flex; align-items:center; gap:8px;}
+.hdr-btns button{width:44px; height:44px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--ink); display:flex; align-items:center; justify-content:center; transition:transform .08s, background .15s;}
+.hdr-btns button:active{transform:scale(.92); filter:brightness(.94);}
+.hdr-btns button.on{background:var(--acc); color:#fff; border-color:var(--acc);}
+.hdr-btns button svg{width:22px; height:22px;}
+.more-apps{height:44px; padding:0 18px; border-radius:22px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px; text-decoration:none; transition:transform .08s;}
+.more-apps:active{transform:scale(.95);}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1100px; margin:0 auto; padding:20px;}
+.tabs{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
+.tab{padding:10px 20px; border-radius:12px; border:1px solid var(--line); background:var(--card); color:var(--muted); font-size:16px; font-weight:600;}
+.tab.active{background:var(--acc); color:#fff; border-color:var(--acc);}
+.tab:active{transform:scale(.96);}
+.panel{display:none;}
+.panel.active{display:block; animation:fade .2s;}
+@keyframes fade{from{opacity:0} to{opacity:1}}
+
+.cards{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:20px;}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);}
+.card .lbl{font-size:15px; color:var(--muted); font-weight:600; margin-bottom:4px;}
+.card .big{font-size:30px; font-weight:700;}
+.card .sub{font-size:15px; color:var(--muted); margin-top:4px;}
+.big.good{color:var(--good);} .big.warn{color:var(--warn);} .big.bad{color:var(--bad);} .big.acc{color:var(--acc);}
+
+.section-title{font-size:20px; font-weight:700; margin:24px 0 12px;}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px;}
+.btn{padding:10px 18px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); font-size:16px; font-weight:600;}
+.btn:active{transform:scale(.96);}
+.btn.primary{background:var(--acc); color:#fff; border-color:var(--acc);}
+.btn.danger{color:var(--bad); border-color:var(--bad);}
+.btn.small{padding:7px 12px; font-size:15px;}
+input[type=text],input[type=number],input[type=date],input[type=email],input[type=tel],select,textarea{background:var(--card); color:var(--ink); border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:16px; width:100%;}
+textarea{min-height:80px; resize:vertical;}
+label.fl{display:block; font-size:15px; font-weight:600; color:var(--muted); margin-bottom:4px;}
+.fgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;}
+
+/* ---------- pipeline board ---------- */
+.pipe{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:20px;}
+.pstage{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px; min-height:120px;}
+.pstage h4{font-size:15px; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;}
+.pstage .cnt{background:var(--acc-soft); color:var(--acc); border-radius:12px; padding:1px 10px; font-size:15px; font-weight:700;}
+.pcard{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:8px; font-size:15px; cursor:pointer;}
+.pcard:active{transform:scale(.97);}
+.pcard .t{font-weight:600;}
+.pcard .m{color:var(--muted); font-size:15px;}
+.pcard .due{font-weight:700;}
+.pcard .due.soon{color:var(--warn);} .pcard .due.over{color:var(--bad);}
+
+/* ---------- tables ---------- */
+.tbl-wrap{overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow);}
+table{width:100%; border-collapse:collapse; font-size:16px;}
+th,td{padding:12px 14px; text-align:left; border-bottom:1px solid var(--line);}
+th{color:var(--muted); font-size:15px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;}
+tr:last-child td{border-bottom:none;}
+tr.selrow td{background:var(--acc-soft);}
+.status{display:inline-block; padding:3px 12px; border-radius:20px; font-size:15px; font-weight:600;}
+.st-inquiry{background:#e0e7ff; color:#3730a3;} [data-theme="dark"] .st-inquiry{background:#312e81; color:#c7d2fe;}
+.st-quoted{background:#fef3c7; color:#92400e;} [data-theme="dark"] .st-quoted{background:#78350f; color:#fde68a;}
+.st-deposit{background:#ffedd5; color:#9a3412;} [data-theme="dark"] .st-deposit{background:#7c2d12; color:#fed7aa;}
+.st-progress{background:#dbeafe; color:#1e40af;} [data-theme="dark"] .st-progress{background:#1e3a8a; color:#bfdbfe;}
+.st-review{background:#f3e8ff; color:#6b21a8;} [data-theme="dark"] .st-review{background:#581c87; color:#e9d5ff;}
+.st-delivered{background:#d1fae5; color:#065f46;} [data-theme="dark"] .st-delivered{background:#064e3b; color:#a7f3d0;}
+.st-paid{background:#dcfce7; color:#166534;} [data-theme="dark"] .st-paid{background:#14532d; color:#bbf7d0;}
+.st-cancelled{background:#f3f4f6; color:#6b7280;} [data-theme="dark"] .st-cancelled{background:#374151; color:#d1d5db;}
+
+/* ---------- charts ---------- */
+.chart-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px;}
+.chart-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); display:flex; flex-direction:column;}
+.chart-card h3{font-size:17px; margin-bottom:10px;}
+.chart-card .cwrap{flex:1; display:flex; align-items:center; justify-content:center; min-height:260px;}
+canvas{max-width:100%;}
+.legend{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; font-size:15px;}
+.legend span{display:flex; align-items:center; gap:6px;}
+.sw{width:14px; height:14px; border-radius:4px; display:inline-block;}
+
+/* ---------- modal ---------- */
+.mback{position:fixed; inset:0; background:rgba(0,0,0,.5); display:none; align-items:flex-start; justify-content:center; padding:30px 16px; z-index:50; overflow-y:auto;}
+.mback.open{display:flex;}
+.modal{background:var(--card); border-radius:16px; padding:24px; width:100%; max-width:560px; box-shadow:0 10px 40px rgba(0,0,0,.3);}
+.modal h2{font-size:22px; margin-bottom:16px;}
+.mrow{display:flex; gap:10px; justify-content:flex-end; margin-top:16px;}
+
+/* ---------- misc ---------- */
+.empty{text-align:center; color:var(--muted); padding:40px 20px; font-size:16px;}
+.cta-strip{margin:30px 0 10px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:22px; text-align:center; box-shadow:var(--shadow);}
+.cta-strip h3{font-size:19px; margin-bottom:10px;}
+.note{font-size:15px; color:var(--muted);}
+.kbd-hint{font-size:15px; color:var(--muted); margin-top:8px;}
+.toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:var(--bg); padding:12px 24px; border-radius:12px; font-size:16px; font-weight:600; transition:transform .25s; z-index:99;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+@media (max-width:640px){
+  .hdr-inner{flex-wrap:wrap; row-gap:8px;}
+  .brand{font-size:18px;}
+  .more-apps{height:40px; padding:0 14px; font-size:14px; white-space:nowrap;}
+  .hdr-btns{margin-left:auto;}
+  .hdr-btns button{width:40px; height:40px;}
+}
+@media print{
+  .hdr,.tabs,.row.btns,.cta-strip,.mback,.toast,.no-print{display:none !important;}
+  body{background:#fff; color:#000;}
+  .card,.tbl-wrap{box-shadow:none; border:1px solid #ccc;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <div class="brand">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="4" y="4" width="32" height="32" rx="7" fill="#c2410c"/><path d="M12 28 L20 10 L28 28" stroke="#fff" stroke-width="3.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="20" cy="23" r="2.4" fill="#ffd9a8"/><path d="M14 31 h12" stroke="#ffd9a8" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span>CommissionCanvas</span>
+    </div>
+    <div class="hdr-btns">
+      <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener">More Apps</a>
+      <button id="btnSample" title="Try sample data" aria-label="Toggle sample data" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.5L4.5 18a2.4 2.4 0 0 0 2.1 3.5h10.8a2.4 2.4 0 0 0 2.1-3.5L14 8.5V3"/><path d="M7.5 14h9"/></svg>
+      </button>
+      <button id="btnTheme" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+      <button id="btnSound" title="Toggle sound" aria-label="Toggle sound" aria-pressed="true" class="on">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="dash" role="tab">Dashboard</button>
+    <button class="tab" data-tab="comms" role="tab">Commissions</button>
+    <button class="tab" data-tab="clients" role="tab">Clients</button>
+    <button class="tab" data-tab="charts" role="tab">Charts</button>
+    <button class="tab" data-tab="backup" role="tab">Backup</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section class="panel active" id="p-dash">
+    <div class="cards" id="dashCards"></div>
+    <h3 class="section-title">Pipeline</h3>
+    <div class="pipe" id="pipeBoard"></div>
+    <h3 class="section-title">Upcoming Deadlines</h3>
+    <div class="tbl-wrap"><table id="dueTable">
+      <thead><tr><th>Commission</th><th>Client</th><th>Deadline</th><th>Status</th><th>Balance Due</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <!-- COMMISSIONS -->
+  <section class="panel" id="p-comms">
+    <div class="row btns">
+      <button class="btn primary" id="btnAddComm">+ New Commission</button>
+      <select id="fltStatus" style="max-width:220px" aria-label="Filter by status">
+        <option value="">All statuses</option>
+      </select>
+      <input type="text" id="fltSearch" placeholder="Search title or client…" style="max-width:260px" aria-label="Search commissions">
+    </div>
+    <div class="tbl-wrap"><table id="commTable">
+      <thead><tr><th>Title</th><th>Client</th><th>Status</th><th>Deadline</th><th>Price</th><th>Deposit</th><th>Balance</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <!-- CLIENTS -->
+  <section class="panel" id="p-clients">
+    <div class="row btns">
+      <button class="btn primary" id="btnAddClient">+ New Client</button>
+      <input type="text" id="fltClient" placeholder="Search clients…" style="max-width:260px" aria-label="Search clients">
+    </div>
+    <div class="tbl-wrap"><table id="clientTable">
+      <thead><tr><th>Name</th><th>Contact</th><th>Active Commissions</th><th>Total Spent</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <!-- CHARTS -->
+  <section class="panel" id="p-charts">
+    <div class="chart-grid" id="chartGrid">
+      <div class="chart-card"><h3>Revenue by Month (paid)</h3><div class="cwrap"><canvas id="chRev" width="420" height="280"></canvas></div><div class="legend" id="lgRev"></div></div>
+      <div class="chart-card"><h3>Commissions by Status</h3><div class="cwrap"><canvas id="chStatus" width="300" height="280"></canvas></div><div class="legend" id="lgStatus"></div></div>
+      <div class="chart-card"><h3>Revenue by Client (top 8)</h3><div class="cwrap"><canvas id="chClient" width="420" height="280"></canvas></div><div class="legend" id="lgClient"></div></div>
+      <div class="chart-card"><h3>Outstanding Balances</h3><div class="cwrap"><canvas id="chOwed" width="420" height="280"></canvas></div><div class="legend" id="lgOwed"></div></div>
+    </div>
+  </section>
+
+  <!-- BACKUP -->
+  <section class="panel" id="p-backup">
+    <div class="cards">
+      <div class="card">
+        <div class="lbl">Export backup (JSON)</div>
+        <p class="note" style="margin-bottom:10px">Full copy of every commission and client. Keep it somewhere safe.</p>
+        <button class="btn primary" id="btnExpJson">Download JSON</button>
+      </div>
+      <div class="card">
+        <div class="lbl">Export commissions (CSV)</div>
+        <p class="note" style="margin-bottom:10px">Spreadsheet-friendly list of all commissions.</p>
+        <button class="btn" id="btnExpCsv">Download CSV</button>
+      </div>
+      <div class="card">
+        <div class="lbl">Import backup (JSON)</div>
+        <p class="note" style="margin-bottom:10px">Restores a previous backup. Replaces everything currently here.</p>
+        <input type="file" id="fileImp" accept=".json,application/json" class="no-print" style="margin-bottom:10px">
+        <button class="btn" id="btnImp">Import</button>
+      </div>
+      <div class="card">
+        <div class="lbl">Print</div>
+        <p class="note" style="margin-bottom:10px">Print the current commissions list as a work sheet.</p>
+        <button class="btn" id="btnPrint">Print List</button>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px">
+      <div class="lbl">Your data</div>
+      <p class="note">Everything lives in this browser on this device only. Nothing is uploaded anywhere. Clearing browser data will erase it — export a JSON backup regularly.</p>
+    </div>
+  </section>
+
+  <div class="cta-strip">
+    <h3>More tools from Glenerds</h3>
+    <p class="note" style="margin-bottom:12px">Offline-first apps for freelancers, makers, and small business.</p>
+    <a class="more-apps" href="https://glenerds.gumroad.com" target="_blank" rel="noopener" style="display:inline-flex">More Apps</a>
+  </div>
+</div>
+
+<!-- COMMISSION MODAL -->
+<div class="mback" id="mComm"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mCommT">
+  <h2 id="mCommT">New Commission</h2>
+  <div class="fgrid">
+    <div><label class="fl" for="cTitle">Title</label><input type="text" id="cTitle" placeholder="e.g. Character portrait"></div>
+    <div><label class="fl" for="cClient">Client</label><select id="cClient"></select></div>
+  </div>
+  <div class="fgrid">
+    <div><label class="fl" for="cMedium">Medium / type</label><input type="text" id="cMedium" placeholder="e.g. Digital, oil on canvas"></div>
+    <div><label class="fl" for="cStatus">Status</label><select id="cStatus"></select></div>
+  </div>
+  <div class="fgrid">
+    <div><label class="fl" for="cPrice">Total price ($)</label><input type="number" id="cPrice" min="0" step="0.01" placeholder="0.00"></div>
+    <div><label class="fl" for="cDeposit">Deposit received ($)</label><input type="number" id="cDeposit" min="0" step="0.01" placeholder="0.00"></div>
+  </div>
+  <div class="fgrid">
+    <div><label class="fl" for="cDeadline">Deadline</label><input type="date" id="cDeadline"></div>
+    <div><label class="fl" for="cPriority">Priority</label><select id="cPriority">
+      <option value="normal">Normal</option><option value="high">High</option><option value="rush">Rush</option>
+    </select></div>
+  </div>
+  <div><label class="fl" for="cNotes">Notes</label><textarea id="cNotes" placeholder="Specs, references, revision policy…"></textarea></div>
+  <div class="mrow">
+    <button class="btn" id="cCancel">Cancel</button>
+    <button class="btn danger" id="cDelete" style="display:none">Delete</button>
+    <button class="btn primary" id="cSave">Save</button>
+  </div>
+</div></div>
+
+<!-- CLIENT MODAL -->
+<div class="mback" id="mClient"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mClientT">
+  <h2 id="mClientT">New Client</h2>
+  <div class="fgrid">
+    <div><label class="fl" for="clName">Name</label><input type="text" id="clName" placeholder="Client name"></div>
+    <div><label class="fl" for="clEmail">Email</label><input type="email" id="clEmail" placeholder="you@example.com"></div>
+  </div>
+  <div class="fgrid">
+    <div><label class="fl" for="clPhone">Phone</label><input type="tel" id="clPhone" placeholder="Optional"></div>
+    <div><label class="fl" for="clSrc">Where they found you</label><input type="text" id="clSrc" placeholder="e.g. Instagram, Etsy, referral"></div>
+  </div>
+  <div><label class="fl" for="clNotes">Notes</label><textarea id="clNotes" placeholder="Preferences, timezone, communication style…"></textarea></div>
+  <div class="mrow">
+    <button class="btn" id="clCancel">Cancel</button>
+    <button class="btn danger" id="clDelete" style="display:none">Delete</button>
+    <button class="btn primary" id="clSave">Save</button>
+  </div>
+</div></div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* ================= CommissionCanvas — offline commission pipeline manager ================= */
+const LS_KEY = "commissioncanvas_v1";
+const STATUSES = [
+  ["inquiry","Inquiry"],["quoted","Quoted"],["deposit","Deposit Paid"],
+  ["progress","In Progress"],["review","In Review"],["delivered","Delivered"],
+  ["paid","Paid"],["cancelled","Cancelled"]
+];
+const ACTIVE = s => !["paid","cancelled"].includes(s);
+
+let S = null;           // state
+let sampleOn = false, sampleBackup = null;
+let editingComm = null, editingClient = null;
+let selStatusSeg = null, selRevBar = null, selClientBar = null, selOwedBar = null;
+
+/* ---------- utils ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => "$" + (Math.round((+n || 0) * 100) / 100).toFixed(2);
+const uid = p => p + "_" + Date.now().toString(36) + Math.floor(Math.random()*1e6).toString(36);
+const todayStr = () => { const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+const parseD = s => { if(!s) return null; const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); };
+const daysUntil = s => { const d = parseD(s); if(!d) return null; const t = new Date(); t.setHours(0,0,0,0); return Math.round((d - t)/864e5); };
+const fmtD = s => { const d = parseD(s); return d ? d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}) : "—"; };
+const stName = s => (STATUSES.find(x=>x[0]===s)||[s,s])[1];
+
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2200); }
+
+/* ---------- sound ---------- */
+let AC=null;
+function beep(f){ if(S.settings.sound!=="on") return; try{
+  AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+  const o=AC.createOscillator(), g=AC.createGain();
+  o.type="sine"; o.frequency.value=f||520; g.gain.value=.06;
+  o.connect(g); g.connect(AC.destination); o.start();
+  g.gain.exponentialRampToValueAtTime(.0001, AC.currentTime+.18); o.stop(AC.currentTime+.2);
+}catch(e){} }
+
+/* ---------- state ---------- */
+function blankState(){ return {commissions:[], clients:[], seq:{c:1,k:1}, settings:{theme:null, sound:"on"}}; }
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(S)); }catch(e){ toast("Couldn't save — browser storage is full"); } }
+function load(){
+  try{ const raw = localStorage.getItem(LS_KEY); if(raw){ S = JSON.parse(raw); if(!S.commissions||!S.clients||!S.settings) throw 0; return; } }catch(e){}
+  S = blankState();
+}
+const clientById = id => S.clients.find(c=>c.id===id);
+const commClient = c => clientById(c.clientId);
+const balance = c => Math.round(((+c.price||0) - (+c.deposit||0))*100)/100;
+
+/* ---------- sample data ---------- */
+function makeSample(){
+  const st = blankState();
+  const cn=[["Maya R.","maya.r@example.com","Instagram"],["Jon P.","jon.p@example.com","Etsy"],["Priya S.","priya.s@example.com","Referral"],["Tom W.","tom.w@example.com","Twitter/X"]];
+  const cmap={};
+  cn.forEach((c,i)=>{ const id="k_s"+i; cmap[c[0]]=id; st.clients.push({id, name:c[0], email:c[1], phone:"", src:c[2], notes:""}); });
+  const t=new Date();
+  const dstr = off => { const d=new Date(t); d.setDate(d.getDate()+off); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+  const rows=[
+    ["Elven ranger portrait","Maya R.","Digital painting",220,110,"progress",5,"high","Full-body, forest background, 2 revisions included."],
+    ["Wedding couple illustration","Jon P.","Watercolor",350,350,"paid",-20,"normal","Delivered + paid in full. Sent thank-you print."],
+    ["D&D party of four","Priya S.","Digital painting",480,150,"deposit",12,"high","Lineart approved; waiting on color palette sign-off."],
+    ["Pet portrait — corgi","Tom W.","Oil on canvas 8x10",180,0,"quoted",9,"normal","Quoted; client deciding between sizes."],
+    ["Book cover art","Maya R.","Digital painting",600,200,"review",3,"rush","Cover + spine; publisher review round 2."],
+    ["Twitch emote set (6)","Jon P.","Pixel/digital",120,120,"delivered",-4,"normal","Delivered; balance invoiced, awaiting payment."],
+    ["Family picnic scene","Priya S.","Watercolor",300,0,"inquiry",21,"normal","Inquiry — sent pricing sheet, no reply yet."]
+  ];
+  rows.forEach((r,i)=> st.commissions.push({
+    id:"c_s"+i, title:r[0], clientId:cmap[r[1]], medium:r[2],
+    price:r[3], deposit:r[4], status:r[5], deadline:dstr(r[6]),
+    priority:r[7], notes:r[8], createdAt:dstr(-30+i*3)
+  }));
+  st.seq={c:100,k:100};
+  return st;
+}
+
+/* ---------- theme / sound ---------- */
+function applyTheme(){
+  const pref = S.settings.theme; // null = follow OS
+  const dark = pref==="dark" || (pref===null && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme", dark?"dark":"light");
+  $("btnTheme").classList.toggle("on", dark);
+  $("btnTheme").setAttribute("aria-pressed", dark);
+}
+function applySound(){
+  const on = S.settings.sound==="on";
+  $("btnSound").classList.toggle("on", on);
+  $("btnSound").setAttribute("aria-pressed", on);
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{
+  beep(440);
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  b.classList.add("active"); $("p-"+b.dataset.tab).classList.add("active");
+  if(b.dataset.tab==="charts") drawCharts();
+}));
+
+/* ---------- commissions ---------- */
+function fillStatusSelect(sel, val){
+  sel.innerHTML = STATUSES.map(s=>`<option value="${s[0]}" ${s[0]===val?"selected":""}>${s[1]}</option>`).join("");
+}
+function renderComms(){
+  const fs=$("fltStatus"), q=$("fltSearch").value.trim().toLowerCase();
+  if(!fs.options.length || fs.options[0].value!=="") { /* keep */ }
+  const cur = fs.value;
+  fs.innerHTML = `<option value="">All statuses</option>` + STATUSES.map(s=>`<option value="${s[0]}" ${s[0]===cur?"selected":""}>${s[1]}</option>`).join("");
+  let list = S.commissions.slice().sort((a,b)=>(a.deadline||"9999")<(b.deadline||"9999")?-1:1);
+  if(cur) list = list.filter(c=>c.status===cur);
+  if(q) list = list.filter(c=>c.title.toLowerCase().includes(q) || ((commClient(c)||{}).name||"").toLowerCase().includes(q));
+  const tb = $("commTable").querySelector("tbody");
+  tb.innerHTML = list.map(c=>{
+    const b = balance(c);
+    return `<tr><td><strong>${esc(c.title)}</strong><div class="note">${esc(c.medium||"")}${c.priority!=="normal"?` · <span style="color:var(--${c.priority==="rush"?"bad":"warn"});font-weight:700">${esc(c.priority.toUpperCase())}</span>`:""}</div></td>
+    <td>${esc((commClient(c)||{}).name||"—")}</td>
+    <td><span class="status st-${c.status}">${stName(c.status)}</span></td>
+    <td>${fmtD(c.deadline)}</td><td>${money(c.price)}</td><td>${money(c.deposit)}</td>
+    <td style="font-weight:700;color:${b>0?"var(--warn)":"var(--muted)"}">${money(Math.max(0,b))}</td>
+    <td class="no-print"><button class="btn small" data-edit="${c.id}">Edit</button></td></tr>`;
+  }).join("") || `<tr><td colspan="8" class="empty">No commissions yet. Click “+ New Commission” to add your first.</td></tr>`;
+  tb.querySelectorAll("[data-edit]").forEach(btn=>btn.addEventListener("click",()=>{ beep(520); openComm(btn.dataset.edit); }));
+}
+$("fltStatus").addEventListener("change", renderComms);
+$("fltSearch").addEventListener("input", renderComms);
+
+function openComm(id){
+  editingComm = id ? S.commissions.find(c=>c.id===id) : null;
+  $("mCommT").textContent = editingComm ? "Edit Commission" : "New Commission";
+  $("cClient").innerHTML = S.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("") || `<option value="">(add a client first)</option>`;
+  fillStatusSelect($("cStatus"), editingComm?editingComm.status:"inquiry");
+  const c = editingComm || {};
+  $("cTitle").value=c.title||""; $("cClient").value=c.clientId||($("cClient").options[0]?$("cClient").options[0].value:"");
+  $("cMedium").value=c.medium||""; $("cPrice").value=c.price??""; $("cDeposit").value=c.deposit??"";
+  $("cDeadline").value=c.deadline||""; $("cPriority").value=c.priority||"normal"; $("cNotes").value=c.notes||"";
+  $("cDelete").style.display = editingComm?"":"none";
+  $("mComm").classList.add("open");
+}
+$("btnAddComm").addEventListener("click",()=>{ beep(520); openComm(null); });
+$("cCancel").addEventListener("click",()=>$("mComm").classList.remove("open"));
+$("cSave").addEventListener("click",()=>{
+  const title=$("cTitle").value.trim();
+  if(!title){ toast("Give the commission a title"); return; }
+  const price=Math.round((+$("cPrice").value||0)*100)/100, dep=Math.round((+$("cDeposit").value||0)*100)/100;
+  if(dep>price){ toast("Deposit can't exceed the price"); return; }
+  const data={ title, clientId:$("cClient").value||null, medium:$("cMedium").value.trim(),
+    status:$("cStatus").value, price, deposit:dep, deadline:$("cDeadline").value||null,
+    priority:$("cPriority").value, notes:$("cNotes").value.trim() };
+  if(editingComm){ Object.assign(editingComm, data); toast("Commission updated"); }
+  else { S.commissions.push(Object.assign({id:uid("c"), createdAt:todayStr()}, data)); toast("Commission added"); }
+  beep(660); save(); $("mComm").classList.remove("open"); renderAll();
+});
+$("cDelete").addEventListener("click",()=>{
+  if(!editingComm) return;
+  if(!confirm(`Delete "${editingComm.title}"? This can't be undone.`)) return;
+  S.commissions = S.commissions.filter(c=>c.id!==editingComm.id);
+  save(); $("mComm").classList.remove("open"); toast("Deleted"); beep(330); renderAll();
+});
+
+/* ---------- clients ---------- */
+function renderClients(){
+  const q=$("fltClient").value.trim().toLowerCase();
+  let list=S.clients.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  if(q) list=list.filter(c=>c.name.toLowerCase().includes(q));
+  const tb=$("clientTable").querySelector("tbody");
+  tb.innerHTML=list.map(c=>{
+    const comms=S.commissions.filter(x=>x.clientId===c.id);
+    const act=comms.filter(x=>ACTIVE(x.status)).length;
+    const spent=comms.filter(x=>x.status==="paid").reduce((a,x)=>a+(+x.price||0),0);
+    const contact=[c.email,c.phone].filter(Boolean).join(" · ")||"—";
+    return `<tr><td><strong>${esc(c.name)}</strong>${c.src?`<div class="note">via ${esc(c.src)}</div>`:""}</td>
+    <td>${esc(contact)}</td><td>${act}</td><td>${money(spent)}</td>
+    <td class="no-print"><button class="btn small" data-cledit="${c.id}">Edit</button></td></tr>`;
+  }).join("")||`<tr><td colspan="5" class="empty">No clients yet. Click “+ New Client”.</td></tr>`;
+  tb.querySelectorAll("[data-cledit]").forEach(b=>b.addEventListener("click",()=>{ beep(520); openClient(b.dataset.cledit); }));
+}
+$("fltClient").addEventListener("input", renderClients);
+
+function openClient(id){
+  editingClient = id ? S.clients.find(c=>c.id===id) : null;
+  $("mClientT").textContent = editingClient?"Edit Client":"New Client";
+  const c=editingClient||{};
+  $("clName").value=c.name||""; $("clEmail").value=c.email||""; $("clPhone").value=c.phone||""; $("clSrc").value=c.src||""; $("clNotes").value=c.notes||"";
+  $("clDelete").style.display=editingClient?"":"none";
+  $("mClient").classList.add("open");
+}
+$("btnAddClient").addEventListener("click",()=>{ beep(520); openClient(null); });
+$("clCancel").addEventListener("click",()=>$("mClient").classList.remove("open"));
+$("clSave").addEventListener("click",()=>{
+  const name=$("clName").value.trim();
+  if(!name){ toast("Client needs a name"); return; }
+  const data={name, email:$("clEmail").value.trim(), phone:$("clPhone").value.trim(), src:$("clSrc").value.trim(), notes:$("clNotes").value.trim()};
+  if(editingClient){ Object.assign(editingClient,data); toast("Client updated"); }
+  else { S.clients.push(Object.assign({id:uid("k"), createdAt:todayStr()}, data)); toast("Client added"); }
+  beep(660); save(); $("mClient").classList.remove("open"); renderAll();
+});
+$("clDelete").addEventListener("click",()=>{
+  if(!editingClient) return;
+  const n=S.commissions.filter(c=>c.clientId===editingClient.id).length;
+  if(!confirm(`Delete "${editingClient.name}"?${n?` ${n} commission(s) will become unassigned.`:""} This can't be undone.`)) return;
+  S.commissions.forEach(c=>{ if(c.clientId===editingClient.id) c.clientId=null; });
+  S.clients=S.clients.filter(c=>c.id!==editingClient.id);
+  save(); $("mClient").classList.remove("open"); toast("Deleted"); beep(330); renderAll();
+});
+
+/* ---------- charts ---------- */
+const PALETTE=["#c2410c","#0ea5e9","#8b5cf6","#10b981","#f59e0b","#ec4899","#6366f1","#14b8a6","#f97316","#84cc16"];
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function setupCanvas(cv){
+  const dpr=window.devicePixelRatio||1, r=cv.getBoundingClientRect();
+  const w=Math.max(280,r.width||420), h=280;
+  cv.width=w*dpr; cv.height=h*dpr; cv.style.width=w+"px"; cv.style.height=h+"px";
+  const x=cv.getContext("2d"); x.scale(dpr,dpr); return [x,w,h];
+}
+function drawBar(cv, labels, values, fmt, selected, onPick, legendEl){
+  const [x,W,H]=setupCanvas(cv); const ink=css("--ink"), mut=css("--muted"), line=css("--line");
+  x.clearRect(0,0,W,H);
+  if(!labels.length){ x.fillStyle=mut; x.font="16px sans-serif"; x.textAlign="center"; x.fillText("No data yet",W/2,H/2); if(legendEl)legendEl.innerHTML=""; cv._bars=null; return; }
+  const padL=64,padB=44,padT=14,padR=10, cw=W-padL-padR, ch=H-padB-padT;
+  const max=Math.max(...values,1);
+  const bw=Math.min(54, cw/labels.length*0.62);
+  x.font="13px sans-serif";
+  // gridlines
+  x.strokeStyle=line; x.fillStyle=mut; x.textAlign="right";
+  for(let g=0; g<=4; g++){ const v=max*g/4, y=padT+ch-(v/max)*ch;
+    x.beginPath(); x.moveTo(padL,y); x.lineTo(W-padR,y); x.stroke();
+    x.fillText(fmt(v), padL-8, y+4); }
+  const bars=[];
+  labels.forEach((lb,i)=>{
+    const bh=(values[i]/max)*ch, bx=padL+(i+0.5)*(cw/labels.length)-bw/2, by=padT+ch-bh;
+    x.fillStyle = selected===i ? "#fbbf24" : PALETTE[i%PALETTE.length];
+    x.strokeStyle = selected===i ? css("--ink") : "transparent"; x.lineWidth=2.5;
+    x.beginPath();
+    if(x.roundRect) x.roundRect(bx,by,bw,bh,[6,6,0,0]); else x.rect(bx,by,bw,bh);
+    x.fill(); x.stroke();
+    x.fillStyle=mut; x.textAlign="center";
+    const short = lb.length>10? lb.slice(0,9)+"…" : lb;
+    x.fillText(short, bx+bw/2, H-26);
+    x.fillStyle=ink; x.font="bold 13px sans-serif";
+    x.fillText(fmt(values[i]), bx+bw/2, by-6); x.font="13px sans-serif";
+    bars.push({x:bx,y:by,w:bw,h:bh,i});
+  });
+  cv._bars=bars;
+  cv.onclick=e=>{ const r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top;
+    const hit=(cv._bars||[]).find(b=>mx>=b.x&&mx<=b.x+b.w&&my>=b.y-24&&my<=b.y+b.h);
+    onPick(hit?hit.i:null); beep(hit?600:440); };
+  if(legendEl) legendEl.innerHTML = selected!==null&&selected!==undefined
+    ? `<span><span class="sw" style="background:#fbbf24"></span><strong>${esc(labels[selected])}:</strong>&nbsp;${esc(fmt(values[selected]))} (click again to release)</span>` : "";
+}
+function drawDonut(cv, labels, values, legendEl){
+  const [x,W,H]=setupCanvas(cv); const ink=css("--ink"), mut=css("--muted");
+  x.clearRect(0,0,W,H);
+  const total=values.reduce((a,b)=>a+b,0);
+  if(!total){ x.fillStyle=mut; x.font="16px sans-serif"; x.textAlign="center"; x.fillText("No data yet",W/2,H/2); if(legendEl)legendEl.innerHTML=""; cv._segs=null; return; }
+  const cx=W/2, cy=H/2, R=Math.min(W,H)/2-16, r=R*0.62;
+  let a=-Math.PI/2; const segs=[];
+  labels.forEach((lb,i)=>{
+    const frac=values[i]/total, a0=a, a1=a+frac*Math.PI*2; a=a1;
+    const pull = selStatusSeg===i ? 10 : 0;
+    const mx=Math.cos((a0+a1)/2)*pull, my=Math.sin((a0+a1)/2)*pull;
+    x.beginPath(); x.arc(cx+mx,cy+my,R,a0,a1); x.arc(cx+mx,cy+my,r,a1,a0,true); x.closePath();
+    x.fillStyle=PALETTE[i%PALETTE.length]; x.fill();
+    if(selStatusSeg===i){ x.strokeStyle=ink; x.lineWidth=3; x.stroke(); }
+    segs.push({a0,a1,i});
+  });
+  // center label in bounded box
+  const box=r*2-24, label = selStatusSeg!==null ? labels[selStatusSeg] : "Total", val = selStatusSeg!==null ? values[selStatusSeg] : total;
+  x.fillStyle=ink; x.textAlign="center";
+  let fs=20; x.font=`bold ${fs}px sans-serif`;
+  while(x.measureText(label).width>box && fs>11){ fs--; x.font=`bold ${fs}px sans-serif`; }
+  x.fillText(label, cx, cy-6);
+  x.font="16px sans-serif"; x.fillStyle=mut;
+  x.fillText(selStatusSeg!==null? String(val) : total+" commissions", cx, cy+18);
+  cv._segs=segs; cv._cx=cx; cv._cy=cy; cv._R=R;
+  cv.onclick=e=>{ const rect=cv.getBoundingClientRect(), mx=e.clientX-rect.left-cv._cx, my=e.clientY-rect.top-cv._cy;
+    const d=Math.sqrt(mx*mx+my*my);
+    if(d< r*0.62){ selStatusSeg=null; }
+    else { let ang=Math.atan2(my,mx); if(ang<-Math.PI/2) ang+=Math.PI*2;
+      const hit=(cv._segs||[]).find(s=>ang>=s.a0&&ang<=s.a1);
+      selStatusSeg = hit ? (selStatusSeg===hit.i?null:hit.i) : null; }
+    beep(selStatusSeg!==null?600:440); drawCharts(); };
+  if(legendEl) legendEl.innerHTML = labels.map((lb,i)=>
+    `<span><span class="sw" style="background:${PALETTE[i%PALETTE.length]}"></span>${esc(lb)} (${values[i]})</span>`).join("");
+}
+function monthKey(dstr){ return dstr? dstr.slice(0,7) : null; }
+function monthName(k){ const [y,m]=k.split("-").map(Number); return new Date(y,m-1,1).toLocaleDateString(undefined,{month:"short",year:"2-digit"}); }
+function drawCharts(){
+  // revenue by month (paid commissions, by created month — use paid month approx via createdAt)
+  const rev={};
+  S.commissions.filter(c=>c.status==="paid").forEach(c=>{ const k=monthKey(c.createdAt)||monthKey(todayStr()); rev[k]=(rev[k]||0)+(+c.price||0); });
+  const rkeys=Object.keys(rev).sort().slice(-8);
+  drawBar($("chRev"), rkeys.map(monthName), rkeys.map(k=>Math.round(rev[k]*100)/100), money, selRevBar,
+    i=>{ selRevBar = selRevBar===i?null:i; drawCharts(); }, $("lgRev"));
+  // status donut
+  const order=["inquiry","quoted","deposit","progress","review","delivered","paid","cancelled"];
+  const counts=order.map(s=>S.commissions.filter(c=>c.status===s).length);
+  const nz=order.filter((s,i)=>counts[i]>0);
+  drawDonut($("chStatus"), nz.map(stName), nz.map(s=>S.commissions.filter(c=>c.status===s).length), $("lgStatus"));
+  // revenue by client
+  const byClient={};
+  S.commissions.filter(c=>c.status==="paid").forEach(c=>{ const n=(commClient(c)||{}).name||"Unknown"; byClient[n]=(byClient[n]||0)+(+c.price||0); });
+  const ck=Object.keys(byClient).sort((a,b)=>byClient[b]-byClient[a]).slice(0,8);
+  drawBar($("chClient"), ck, ck.map(k=>Math.round(byClient[k]*100)/100), money, selClientBar,
+    i=>{ selClientBar = selClientBar===i?null:i; drawCharts(); }, $("lgClient"));
+  // outstanding balances
+  const owed=S.commissions.filter(c=>ACTIVE(c.status)&&balance(c)>0)
+    .sort((a,b)=>balance(b)-balance(a)).slice(0,8);
+  drawBar($("chOwed"), owed.map(c=>c.title), owed.map(c=>Math.round(balance(c)*100)/100), money, selOwedBar,
+    i=>{ selOwedBar = selOwedBar===i?null:i; drawCharts(); }, $("lgOwed"));
+}
+
+/* ---------- backup ---------- */
+function download(name, text, type){
+  const b=new Blob([text],{type}); const u=URL.createObjectURL(b);
+  const a=document.createElement("a"); a.href=u; a.download=name; a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),2000);
+}
+$("btnExpJson").addEventListener("click",()=>{ download("commissioncanvas-backup.json", JSON.stringify(S,null,2), "application/json"); toast("Backup downloaded"); beep(660); });
+$("btnExpCsv").addEventListener("click",()=>{
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  const rows=[["Title","Client","Medium","Status","Price","Deposit","Balance","Deadline","Priority","Notes"].join(",")];
+  S.commissions.forEach(c=>rows.push([q(c.title),q((commClient(c)||{}).name||""),q(c.medium||""),q(stName(c.status)),c.price,c.deposit,balance(c),c.deadline||"",c.priority,q(c.notes||"")].join(",")));
+  download("commissioncanvas-commissions.csv", rows.join("\n"), "text/csv"); toast("CSV downloaded"); beep(660);
+});
+$("btnImp").addEventListener("click",()=>{
+  const f=$("fileImp").files[0]; if(!f){ toast("Choose a backup file first"); return; }
+  const r=new FileReader();
+  r.onload=()=>{ try{
+    const d=JSON.parse(r.result);
+    if(!Array.isArray(d.commissions)||!Array.isArray(d.clients)||!d.settings) throw new Error("bad shape");
+    for(const c of d.commissions){ if(typeof c.title!=="string"||typeof c.status!=="string") throw new Error("bad commission"); if(c.deadline && !/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/.test(c.deadline)) throw new Error("bad date"); }
+    for(const k of d.clients){ if(typeof k.name!=="string") throw new Error("bad client"); }
+    const cids = new Set(d.clients.map(k=>k.id));
+    d.commissions.forEach(c=>{ if(c.clientId && !cids.has(c.clientId)) c.clientId=null; });
+    if(!confirm("Replace everything with this backup? This can't be undone.")) return;
+    S=d; if(S.settings.theme===undefined) S.settings.theme=null;
+    save(); applyTheme(); applySound(); renderAll(); toast("Backup restored"); beep(660);
+  }catch(e){ toast("That file isn't a valid backup"); } };
+  r.readAsText(f);
+});
+$("btnPrint").addEventListener("click",()=>window.print());
+
+/* ---------- header buttons ---------- */
+$("btnTheme").addEventListener("click",()=>{
+  const dark=document.documentElement.getAttribute("data-theme")==="dark";
+  S.settings.theme = dark ? "light" : "dark";
+  save(); applyTheme(); beep(520); drawCharts();
+});
+$("btnSound").addEventListener("click",()=>{
+  S.settings.sound = S.settings.sound==="on" ? "off" : "on";
+  save(); applySound(); beep(660); toast(S.settings.sound==="on"?"Sound on":"Sound off");
+});
+$("btnSample").addEventListener("click",()=>{
+  if(!sampleOn){ sampleBackup=JSON.stringify(S); S=makeSample(); S.settings=JSON.parse(sampleBackup).settings; sampleOn=true;
+    $("btnSample").classList.add("on"); $("btnSample").setAttribute("aria-pressed","true"); toast("Sample data on"); }
+  else { const keepSettings=S.settings; S=JSON.parse(sampleBackup); S.settings=keepSettings; sampleOn=false; sampleBackup=null;
+    $("btnSample").classList.remove("on"); $("btnSample").setAttribute("aria-pressed","false"); toast("Your data restored"); }
+  beep(660); save(); applyTheme(); applySound(); renderAll();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(S.settings.theme===null) applyTheme(); });
+
+/* ---------- modal dismiss ---------- */
+document.querySelectorAll(".mback").forEach(m=>m.addEventListener("click",e=>{ if(e.target===m) m.classList.remove("open"); }));
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") document.querySelectorAll(".mback.open").forEach(m=>m.classList.remove("open")); });
+
+/* ---------- init ---------- */
+function renderAll(){ renderDash(); renderComms(); renderClients(); if($("p-charts").classList.contains("active")) drawCharts(); }
+load(); applyTheme(); applySound(); renderAll();
+
+/* ---------- dashboard ---------- */
+function renderDash(){
+  const act = S.commissions.filter(c=>ACTIVE(c.status));
+  const paid = S.commissions.filter(c=>c.status==="paid");
+  const revTotal = Math.round(paid.reduce((a,c)=>a+(+c.price||0),0)*100)/100;
+  const owed = Math.round(act.reduce((a,c)=>a+Math.max(0,balance(c)),0)*100)/100;
+  const now = new Date(); now.setHours(0,0,0,0);
+  const overdue = act.filter(c=>{const d=parseD(c.deadline); return d && d<now;}).length;
+  const dueSoon = act.filter(c=>{const n=daysUntil(c.deadline); return n!==null && n>=0 && n<=7;}).length;
+
+  $("dashCards").innerHTML = `
+    <div class="card"><div class="lbl">Active commissions</div><div class="big acc">${act.length}</div><div class="sub">across the pipeline</div></div>
+    <div class="card"><div class="lbl">Revenue collected</div><div class="big good">${money(revTotal)}</div><div class="sub">${paid.length} paid in full</div></div>
+    <div class="card"><div class="lbl">Outstanding balances</div><div class="big ${owed>0?"warn":""}">${money(owed)}</div><div class="sub">yet to be paid</div></div>
+    <div class="card"><div class="lbl">Deadlines</div><div class="big ${overdue>0?"bad":dueSoon>0?"warn":""}">${overdue+dueSoon}</div><div class="sub">${overdue} overdue · ${dueSoon} due within 7 days</div></div>`;
+
+  // pipeline board
+  const order=["inquiry","quoted","deposit","progress","review","delivered"];
+  $("pipeBoard").innerHTML = order.map(s=>{
+    const list = S.commissions.filter(c=>c.status===s);
+    return `<div class="pstage"><h4>${stName(s)}<span class="cnt">${list.length}</span></h4>` +
+      (list.slice(0,4).map(c=>{
+        const n=daysUntil(c.deadline); const cls=n===null?"":n<0?"over":n<=7?"soon":"";
+        return `<div class="pcard" data-id="${c.id}"><div class="t">${esc(c.title)}</div><div class="m">${esc((commClient(c)||{}).name||"—")}</div>${c.deadline?`<div class="due ${cls}">${fmtD(c.deadline)}</div>`:""}</div>`;
+      }).join("") || `<div class="m" style="color:var(--muted);font-size:15px">—</div>`) +
+      (list.length>4?`<div class="m" style="color:var(--muted);font-size:15px">+${list.length-4} more</div>`:"") + `</div>`;
+  }).join("");
+  document.querySelectorAll(".pcard").forEach(el=>el.addEventListener("click",()=>{ beep(520); openComm(el.dataset.id); }));
+
+  // due table
+  const rows = act.filter(c=>c.deadline).sort((a,b)=>a.deadline<b.deadline?-1:1).slice(0,8);
+  const tb = $("dueTable").querySelector("tbody");
+  tb.innerHTML = rows.map(c=>{
+    const n=daysUntil(c.deadline); const cls=n<0?"bad":n<=7?"warn":"";
+    return `<tr><td><strong>${esc(c.title)}</strong></td><td>${esc((commClient(c)||{}).name||"—")}</td>
+      <td class="${cls}" style="font-weight:700">${fmtD(c.deadline)}${n<0?" (overdue)":n===0?" (today)":""}</td>
+      <td><span class="status st-${c.status}">${stName(c.status)}</span></td>
+      <td>${money(Math.max(0,balance(c)))}</td></tr>`;
+  }).join("") || `<tr><td colspan="5" class="empty">No upcoming deadlines. Add a commission to get started.</td></tr>`;
+}
+</script>
+</body>
+</html>
