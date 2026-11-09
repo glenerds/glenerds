@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Offline Wikipedia on USB: How to Read Wikipedia Without Internet</title>
+<meta name="description" content="How offline Wikipedia works: Kiwix puts millions of Wikipedia articles on one USB flash drive — no internet, no subscription. Compare the Mini, full-text and picture editions, their sizes, setup steps, and a ready-made 16GB drive.">
+<link rel="canonical" href="https://glenerds.github.io/glenerds/guides/offline-wikipedia-usb/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Glenerds">
+<meta property="og:title" content="Offline Wikipedia on USB: How to Read Wikipedia Without Internet">
+<meta property="og:description" content="Millions of Wikipedia articles on one 16GB flash drive, readable with no internet at all. How Kiwix works, which edition fits which drive, and how to set it up.">
+<meta property="og:url" content="https://glenerds.github.io/glenerds/guides/offline-wikipedia-usb/">
+<meta property="og:image" content="https://glenerds.github.io/glenerds/guides/offline-wikipedia-usb/img/article-apollo.jpg">
+<script>
+(function(){try{var t=localStorage.getItem('glenerds-theme');if(t){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();
+</script>
+<link rel="stylesheet" href="../../style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Offline Wikipedia on USB: How to Read Wikipedia Without Internet",
+  "description": "How offline Wikipedia works with Kiwix: editions, sizes, setup, and who it is for.",
+  "author": {"@type": "Organization", "name": "Glenerds"},
+  "publisher": {"@type": "Organization", "name": "Glenerds"},
+  "datePublished": "2026-11-09",
+  "dateModified": "2026-11-09",
+  "mainEntityOfPage": "https://glenerds.github.io/glenerds/guides/offline-wikipedia-usb/",
+  "image": "https://glenerds.github.io/glenerds/guides/offline-wikipedia-usb/img/article-apollo.jpg"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type": "Question", "name": "Can you download all of Wikipedia?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Wikipedia's content is freely licensed, and the Kiwix project packages it into single downloadable files (ZIM format). The complete English Wikipedia with pictures is roughly 119 GB, the full text without pictures is about 49 GB, and the compact Mini edition — every article's introduction and essential content — is about 14 GB and fits on a 16GB USB flash drive."}},
+    {"@type": "Question", "name": "Does Kiwix need an internet connection?", "acceptedAnswer": {"@type": "Answer", "text": "No. Kiwix is an offline reader. Once the reader and a content file are on your computer or USB drive, searching and reading work with no connection at all — on a plane, off-grid, or during an outage. You only need the internet if you want to download a newer snapshot or a bigger edition later."}},
+    {"@type": "Question", "name": "How big is Wikipedia?", "acceptedAnswer": {"@type": "Answer", "text": "English Wikipedia passed 7.2 million articles in 2026, with over 5 billion words of text. As a downloadable Kiwix file, the size depends on the edition: about 14 GB for the Mini edition, about 49 GB for full text without pictures, and about 119 GB for the complete edition with pictures."}},
+    {"@type": "Question", "name": "What size USB drive do I need for offline Wikipedia?", "acceptedAnswer": {"@type": "Answer", "text": "A 16GB drive holds the Mini edition with room to spare. The full-text no-pictures edition needs a 64GB drive, and the complete edition with pictures needs a 128GB drive. The same Kiwix reader opens every edition, so you can start small and move up."}},
+    {"@type": "Question", "name": "Is offline Wikipedia legal?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Wikipedia's article text is published under the Creative Commons CC BY-SA license, which allows copying and redistribution with attribution, and the Kiwix reader is open-source software under the GPL. Offline copies are an officially supported use — Kiwix is the offline reader the Wikimedia community points to."}},
+    {"@type": "Question", "name": "Does the offline copy update itself?", "acceptedAnswer": {"@type": "Answer", "text": "No. An offline copy is a fixed snapshot — the drive described here carries the September 2026 snapshot. It never changes on its own, which is part of the point: it works exactly the same with no network. When you have a connection, you can download a newer snapshot free from the Kiwix library and open it in the same reader."}}
+  ]
+}
+</script>
+</head><body>
+<header class="site"><div class="wrap">
+<a class="brand" href="../../index.html">Glenerds</a>
+<nav class="main">
+<a href="../../index.html">Home</a>
+<a href="../index.html">Guides</a>
+<a href="https://glenerds.gumroad.com">Store</a>
+</nav></div></header>
+<div class="wrap">
+<main>
+<p class="breadcrumb"><a href="../../index.html">Home</a> &rsaquo; <a href="../index.html">Guides</a> &rsaquo; Offline Wikipedia on USB</p>
+
+<h1>Offline Wikipedia on a USB Drive: How to Read Wikipedia With No Internet at All</h1>
+<p class="small">By Glenerds &middot; Published November 9, 2026 &middot; A complete guide to Kiwix, the editions, the sizes, and the setup</p>
+
+<div class="prose">
+<p><strong>The short answer:</strong> yes, you can carry Wikipedia in your pocket and read it with no internet connection, no account, and no subscription. A free, open-source reader called <strong>Kiwix</strong> opens a single compressed file — a snapshot of the encyclopedia — and lets you search and browse it exactly like the website. Put that file on a USB flash drive and any computer it plugs into has an encyclopedia on board, whether it's at an off-grid cabin, on a boat, in a classroom with no Wi-Fi, or sitting in an emergency kit.</p>
+
+<p>This guide covers everything people usually ask before doing it: how offline Wikipedia works, how big Wikipedia actually is, which of the three editions fits which drive, what the compact Mini edition does and doesn't include, how to use it day to day, and the honest choice between downloading it yourself and buying a drive that's already made. Every screenshot below is the real reader running the real content.</p>
+</div>
+
+<div class="pricebox">Ready-made 16GB drive, reader included: $19.94</div>
+<p><a class="btn" href="https://www.amazon.com/dp/B0HPN6X5NG">See the offline Wikipedia USB on Amazon</a></p>
+
+<section class="block prose">
+<h2 class="sec">How offline Wikipedia works: Kiwix and ZIM files</h2>
+<p>Two pieces make this possible.</p>
+<p><strong>The content file.</strong> Wikipedia's articles are published under a free license (Creative Commons CC BY-SA), which means anyone may copy and redistribute them with attribution. The Kiwix project takes advantage of that: it compresses a snapshot of the whole encyclopedia into one file in the open <strong>ZIM format</strong> — articles, links, and a full-text search index packed together. One file is the entire book.</p>
+<p><strong>The reader.</strong> Kiwix is a free, open-source program (GPL license) built to open ZIM files. It looks and behaves like a small web browser dedicated to one huge book: a search box with suggestions, tabs, bookmarks, reading lists, an article table of contents, and text zoom. It is the offline reader the Wikimedia community itself recommends, and it runs on Windows, Mac, and Linux — the same content file opens in every version, and in the Kiwix phone apps too.</p>
+<p>Nothing about it phones home. Once the reader and the content file are on the drive, you can disconnect the machine entirely and everything keeps working, because there is nothing left to fetch.</p>
+</section>
+
+<figure class="shots">
+<div><img src="img/article-apollo.jpg" alt="Reading a Wikipedia article offline in the Kiwix reader — the Apollo program article with no internet connection" loading="lazy"><figcaption>The real Kiwix reader, open on an article — running entirely offline.</figcaption></div>
+<div><img src="img/search.jpg" alt="Full-text search in offline Wikipedia — Kiwix search results and suggestions without internet" loading="lazy"><figcaption>Full-text search with suggestions, indexed on the drive itself.</figcaption></div>
+</figure>
+
+<section class="block prose">
+<h2 class="sec">How big is Wikipedia? The three editions, compared</h2>
+<p>English Wikipedia passed <strong>7.2 million articles</strong> in 2026 — over 5 billion words. How much drive space that takes depends entirely on how much of each article you keep, and Kiwix publishes three standard editions of it:</p>
+<div class="toolbox">
+<table>
+<tr><th>Edition</th><th>What's in it</th><th>File size</th><th>Drive you need</th></tr>
+<tr><td><strong>Mini</strong></td><td>Every article's introduction and essential content — the compact edition, made to fit a small drive</td><td>About 14 GB (September 2026 snapshot)</td><td>16GB</td></tr>
+<tr><td><strong>Full text, no pictures</strong></td><td>Complete article text, images removed</td><td>About 49 GB</td><td>64GB</td></tr>
+<tr><td><strong>Complete, with pictures</strong></td><td>The full encyclopedia, text and images, closest to the live site</td><td>About 119 GB</td><td>128GB</td></tr>
+</table>
+</div>
+<p>The ready-made drive this guide is built around carries the <strong>Mini edition on a 16GB stick</strong>. That choice is deliberate: Mini keeps the part of each article people actually look up — what something is, the key facts, the summary — for all 7.2 million topics, in a drive small and cheap enough to live in a glove box or a go-bag. And nothing is locked in: the larger editions are free downloads from the Kiwix library, and this same reader opens them the day you have a connection and a bigger drive.</p>
+</section>
+
+<section class="block prose">
+<h2 class="sec">What the Mini edition does — and honestly, what it doesn't</h2>
+<p>Mini is a <em>compact</em> edition, and it's better to say plainly what that means than to oversell it.</p>
+<ul class="feat">
+<li><strong>It covers every topic.</strong> All of English Wikipedia's articles are present — you can look up anything you'd look up online.</li>
+<li><strong>Each article is trimmed to its introduction and essential content.</strong> For a lookup — a date, a place, what a thing is, how a process works in outline — that's the part you came for.</li>
+<li><strong>Search is full and fast.</strong> The search index covers the whole file, with suggestions as you type, entirely on the drive.</li>
+<li><strong>It is not the deep archive.</strong> Long articles' later sections, exhaustive reference lists, and the full image library live in the bigger editions. If your use is serious research on one narrow subject, plan on the 49 GB full-text edition instead — or download it later, free, into this same reader.</li>
+<li><strong>It is a fixed snapshot.</strong> This drive carries September 2026's Wikipedia. It will never silently change, update, or break — and it will never be newer than that date until you choose to download a fresher snapshot.</li>
+</ul>
+</section>
+
+<figure class="shots">
+<div><img src="img/article-toc.jpg" alt="Article table of contents in the Kiwix offline Wikipedia reader" loading="lazy"><figcaption>Articles keep their structure, with a table of contents for long entries.</figcaption></div>
+<div><img src="img/local-server.jpg" alt="Kiwix local server sharing offline Wikipedia over a home network to phones and other computers" loading="lazy"><figcaption>The built-in local server can share the encyclopedia to other devices on your own network.</figcaption></div>
+</figure>
+
+<section class="block prose">
+<h2 class="sec">Who actually uses Wikipedia offline?</h2>
+<p>The searches that lead people here cluster into a handful of real situations:</p>
+<ul class="feat">
+<li><strong>Off-grid and rural homes.</strong> Cabins, farms, and homesteads where the connection is slow, metered, or absent. A reference library that doesn't care.</li>
+<li><strong>Emergency preparedness.</strong> When the power and the networks go down together, so does every cloud service. An encyclopedia in the emergency kit works on any laptop with a battery — medicine, water, repairs, food preservation, first aid context.</li>
+<li><strong>Boats, RVs, and planes.</strong> Anywhere a signal is expensive or nonexistent, a pocket encyclopedia settles questions and fills long stretches.</li>
+<li><strong>Classrooms without internet.</strong> Schools with no connection, locked-down networks, or a no-open-internet policy for students still get a real research tool — one fixed, known snapshot of content.</li>
+<li><strong>Workshops and garages.</strong> The spare PC that never got networked still gets a reference shelf for specs, conversions, materials, and how-things-work lookups.</li>
+<li><strong>Privacy.</strong> Offline reading tracks nothing. No account, no history leaving the machine, no feed deciding what you see next.</li>
+</ul>
+</section>
+
+<section class="block prose">
+<h2 class="sec">Using the drive, step by step</h2>
+<p>There is no installation ritual and nothing to activate:</p>
+<ul class="feat">
+<li><strong>1. Plug the USB drive into any USB port.</strong> The reader and the encyclopedia file are both on it.</li>
+<li><strong>2. Open the Kiwix reader from the drive.</strong> By default the drive ships with the Windows reader. On a Mac or Linux machine, either ask for your system's reader before ordering, or download it free from the Kiwix website — the content file is identical for every system.</li>
+<li><strong>3. Search or browse.</strong> Type in the search box and pick from the suggestions, follow links between articles, open several in tabs — it works the way the website does.</li>
+<li><strong>4. Make it yours.</strong> Bookmark pages, build reading lists, jump through long articles with the table of contents, zoom the text.</li>
+<li><strong>5. Optional: share it around the house.</strong> The reader's built-in local server can serve the encyclopedia over your own home network, so phones and other computers browse it too — still with no internet involved.</li>
+</ul>
+</section>
+
+<section class="block prose">
+<h2 class="sec">Make your own, or buy the drive ready-made?</h2>
+<p>Both routes are legitimate, and this page would rather be honest about the free one than hide it.</p>
+<p><strong>Do it yourself:</strong> the Kiwix reader costs nothing at kiwix.org, and the content files cost nothing from the Kiwix library. What you're spending is time and attention: finding the right edition among hundreds of library files, downloading about 14 GB without the transfer breaking, choosing a drive, and confirming the file opens and searches correctly on your machine. Plenty of people enjoy exactly that kind of project.</p>
+<p><strong>Buy it ready:</strong> the drive below is that same Mini edition and that same reader, already downloaded, loaded, and verified on a 16GB stick — plug it in and read. You're paying for the drive and the done-for-you part, not for the content, which is free to everyone.</p>
+<div class="pricebox">Kiwix Offline Wikipedia USB — 16GB — $19.94</div>
+<p><a class="btn" href="https://www.amazon.com/dp/B0HPN6X5NG">Get the ready-made drive on Amazon</a></p>
+<p class="small">Ships with the Windows reader by default; message the seller before ordering for the Mac or Linux reader instead. September 2026 Mini snapshot, about 14 GB, on a 16GB flash drive.</p>
+</section>
+
+<section class="block prose">
+<h2 class="sec">Honest limits, before you decide</h2>
+<ul class="feat">
+<li>Links inside articles that point <em>outside</em> Wikipedia — source websites, references — need a connection, like any offline copy.</li>
+<li>The snapshot doesn't update itself. News-sensitive topics reflect September 2026, not today.</li>
+<li>Mini is the compact edition (introductions and essentials). The full-text and complete editions exist, are free to download later, and open in this same reader.</li>
+<li>Supplied by an independent seller for convenience; not affiliated with or endorsed by the Kiwix project or the Wikimedia Foundation.</li>
+</ul>
+</section>
+
+<section class="block">
+<h2 class="sec">Offline Wikipedia questions, answered</h2>
+<dl class="faq">
+<dt>Can you download all of Wikipedia?</dt>
+<dd>Yes. Wikipedia's content is freely licensed, and the Kiwix project packages it into single downloadable files (ZIM format). The complete English Wikipedia with pictures is roughly 119 GB, the full text without pictures is about 49 GB, and the compact Mini edition — every article's introduction and essential content — is about 14 GB and fits on a 16GB USB flash drive.</dd>
+<dt>Does Kiwix need an internet connection?</dt>
+<dd>No. Kiwix is an offline reader. Once the reader and a content file are on your computer or USB drive, searching and reading work with no connection at all — on a plane, off-grid, or during an outage. You only need the internet if you want to download a newer snapshot or a bigger edition later.</dd>
+<dt>How big is Wikipedia?</dt>
+<dd>English Wikipedia passed 7.2 million articles in 2026, with over 5 billion words of text. As a downloadable Kiwix file, the size depends on the edition: about 14 GB for the Mini edition, about 49 GB for full text without pictures, and about 119 GB for the complete edition with pictures.</dd>
+<dt>What size USB drive do I need for offline Wikipedia?</dt>
+<dd>A 16GB drive holds the Mini edition with room to spare. The full-text no-pictures edition needs a 64GB drive, and the complete edition with pictures needs a 128GB drive. The same Kiwix reader opens every edition, so you can start small and move up.</dd>
+<dt>Is offline Wikipedia legal?</dt>
+<dd>Yes. Wikipedia's article text is published under the Creative Commons CC BY-SA license, which allows copying and redistribution with attribution, and the Kiwix reader is open-source software under the GPL. Offline copies are an officially supported use — Kiwix is the offline reader the Wikimedia community points to.</dd>
+<dt>Does the offline copy update itself?</dt>
+<dd>No. An offline copy is a fixed snapshot — the drive described here carries the September 2026 snapshot. It never changes on its own, which is part of the point: it works exactly the same with no network. When you have a connection, you can download a newer snapshot free from the Kiwix library and open it in the same reader.</dd>
+</dl>
+</section>
+
+<div class="pricebox">The encyclopedia, in your pocket, for $19.94</div>
+<p><a class="btn" href="https://www.amazon.com/dp/B0HPN6X5NG">See the Kiwix Offline Wikipedia USB on Amazon</a></p>
+
+</main>
+<footer class="site">
+<p>Wikipedia article text is written by Wikipedia contributors and licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>; the Kiwix reader is open-source software under the GPL. This guide and the drive it describes are supplied by Glenerds, an independent seller, and are not affiliated with or endorsed by the Kiwix project or the Wikimedia Foundation.</p>
+<p><a href="../../index.html">Glenerds home</a> &middot; <a href="../index.html">More guides</a> &middot; <a href="https://glenerds.gumroad.com">Glenerds store</a></p>
+</footer>
+</div>
+</body>
+</html>
